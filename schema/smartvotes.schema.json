@@ -1,34 +1,43 @@
 {
     "$schema": "http://json-schema.org/draft-06/schema#",
     "definitions": {
-        "SetRulesSmartvotesCommand": {
-            "items": {
-                "$ref": "#/definitions/SmartvotesRule"
-            },
-            "type": "array"
-        },
-        "SmartvotesCommand": {
-            "description": "Commands definitions:",
-            "type": "object"
-        },
-        "SmartvotesCustomJSON": {
-            "description": "These are the interfaces for smartvotes custom_json commands formatting.\nSuch formatted commands are then sent or received to/from steem blockchain.\nNOTICE: Smartvotes interfaces are under early development. They may change over time.",
+        "smartvotes_command_send_votes": {
             "properties": {
-                "command": {
-                    "$ref": "#/definitions/SmartvotesCommand"
-                },
-                "smartvotes_command_type": {
+                "name": {
+                    "enum": [
+                        "send_votes"
+                    ],
                     "type": "string"
+                },
+                "votes": {
+                    "$ref": "#/definitions/smartvotes_vote_list"
                 }
             },
             "required": [
-                "command",
-                "smartvotes_command_type"
+                "name",
+                "votes"
             ],
             "type": "object"
         },
-        "SmartvotesRule": {
-            "description": "Rules definitions:",
+        "smartvotes_command_set_rules": {
+            "properties": {
+                "name": {
+                    "enum": [
+                        "set_rules"
+                    ],
+                    "type": "string"
+                },
+                "rules": {
+                    "$ref": "#/definitions/smartvotes_rule_list"
+                }
+            },
+            "required": [
+                "name",
+                "rules"
+            ],
+            "type": "object"
+        },
+        "smartvotes_rule": {
             "properties": {
                 "total_weight": {
                     "type": "number"
@@ -46,7 +55,72 @@
                 "voter"
             ],
             "type": "object"
+        },
+        "smartvotes_rule_list": {
+            "items": {
+                "$ref": "#/definitions/smartvotes_rule"
+            },
+            "type": "array"
+        },
+        "smartvotes_vote": {
+            "properties": {
+                "delegator": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/smartvotes_vote_type"
+                },
+                "votingpower": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "delegator",
+                "slug",
+                "type",
+                "votingpower"
+            ],
+            "type": "object"
+        },
+        "smartvotes_vote_list": {
+            "items": {
+                "$ref": "#/definitions/smartvotes_vote"
+            },
+            "type": "array"
+        },
+        "smartvotes_vote_type": {
+            "enum": [
+                "flag",
+                "vote"
+            ],
+            "type": "string"
         }
-    }
+    },
+    "properties": {
+        "command": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/smartvotes_command_set_rules"
+                },
+                {
+                    "$ref": "#/definitions/smartvotes_command_send_votes"
+                }
+            ]
+        },
+        "type": {
+            "enum": [
+                "smartvote"
+            ],
+            "type": "string"
+        }
+    },
+    "required": [
+        "command",
+        "type"
+    ],
+    "type": "object"
 }
 
