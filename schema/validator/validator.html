@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Steem smartvotes JSON vaidator</title>
+
+    <style type="text/css">
+        /* Thanks to http://bettermotherfuckingwebsite.com/ */
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #444;
+            padding: 0 10px
+        }
+
+        h1, h2, h3 {
+            line-height: 1.2
+        }
+
+        #json-input {
+            width: 95%;
+            height: 300px;
+            border: 2px solid #ddd;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #validate-button {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 50%;
+            margin: 0 auto;
+            background: blue;
+            display: block;
+        }
+
+        #validator-output {
+            border: 2px solid #444444;
+            padding: 1rem;
+            font-family: monospace;
+        }
+
+        .valid { color: #3cb371; }
+        .invalid { color: red; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Steem smartvotes JSON validator</h1>
+    <p>Paste your operation JSON to validate against Smartvotes schema.</p>
+</header>
+<textarea id="json-input">
+
+</textarea>
+<br />
+<div>
+    <button id="validate-button">validate</button>
+</div>
+
+<br />
+<br />
+
+<p id="validator-output">
+    Waiting for validation...
+</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.4.0/ajv.min.js"
+        integrity="sha256-ykl+PeppOBRoq5tfKLiAqOJMhwjege2xF6FYUCk3l1o=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    function validate(input) {
+        console.log(input);
+        console.log("Validating...");
+        if(input.length < 1) {
+            console.error("Validation error: empty input");
+            return "<h2 class='invalid'>Empty input</h2>";
+        }
+
+        var Ajv = require('ajv');
+        var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
+        var validate = ajv.compile(schema);
+        var valid = validate(data);
+        if (!valid) console.log(validate.errors);
+    }
+
+    $(document).ready(function() {
+        $.getJSON("test.json", function(json) {
+            console.log(json); // this will show the info it in firebug console
+        });
+
+        $("#validate-button").on('click', function() {
+            $("#validator-output").html(validate($("#json-input").text().trim()));
+        });
+    });
+</script>
+</body>
+</html>
