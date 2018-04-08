@@ -50,7 +50,7 @@ If you have read preceding paragraphs, you see, that the voter is a most importa
 
 ### Blockchain transactions
 
-For safe and reliable communication smartvotes simply put all operations on Steem blockchain. It is done using **custom_json** operation. Syntax and allowed operations are defined in **/schema** dir. Definitions are written in Typescript and then converted into json-schema. Detailed instructions about conversion and contribution to smartvotes schema can be found in [/schema/INSTRUCTIONS.md](schema/INSTRUCTIONS.md).
+For safe and reliable communication smartvotes simply put all operations on Steem blockchain. It is done using **custom_json** operation. Syntax and allowed operations are defined in **/schema** dir. Definitions are written in Typescript and then converted into json-schema. Detailed instructions about conversion and contribution to the Smartvotes schema can be found in [/schema/INSTRUCTIONS.md](schema/INSTRUCTIONS.md).
 
 ## Contribution
 
