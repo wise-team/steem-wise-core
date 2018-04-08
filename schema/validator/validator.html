@@ -53,9 +53,7 @@
     <h1>Steem smartvotes JSON validator</h1>
     <p>Paste your operation JSON to validate against Smartvotes schema.</p>
 </header>
-<textarea id="json-input">
-
-</textarea>
+<textarea id="json-input">{}</textarea>
 <br />
 <div>
     <button id="validate-button">validate</button>
@@ -74,28 +72,66 @@
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 
 <script type="text/javascript">
+    window.validationSchema = undefined;
+
+    function isValidJson(input) {
+        try {
+            JSON.parse(input);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
     function validate(input) {
         console.log(input);
         console.log("Validating...");
         if(input.length < 1) {
-            console.error("Validation error: empty input");
+            console.error("Error: empty input");
             return "<h2 class='invalid'>Empty input</h2>";
         }
 
-        var Ajv = require('ajv');
+        if(typeof window.validationSchema == 'undefined') {
+            console.error("Could not load validation schema");
+            return "<h2 class='invalid'>Could not load validation schema</h2>";
+        }
+
+        if(!isValidJson(input)) {
+            console.error("JSON syntax is invalid");
+            return "<h2 class='invalid'>JSON syntax is invalid</h2>";
+        }
+
         var ajv = new Ajv();
-        var validate = ajv.compile(schema);
-        var valid = validate(data);
-        if (!valid) console.log(validate.errors);
+
+        /*
+         * typescript-json-schema does not support draft-07. Fortunately dratf-07 is backwards compatible with draft-06,
+         * so we can use an alias here.
+         */
+        ajv._refs['http://json-schema.org/draft-06/schema'] = 'http://json-schema.org/draft-07/schema';
+
+        var validate = ajv.compile(window.validationSchema);
+        console.log(validate);
+        var valid = validate(JSON.parse(input));
+        if (valid) {
+            console.log("Validation: passed");
+            return "<h2 class='valid'>Validation: passed</h2>";
+        }
+        else {
+            console.error("Validation: failed");
+            console.error(validate.errors);
+            return "<h2 class='invalid'>Validation: failed</h2><pre>"+JSON.stringify(validate.errors, null, 2)+"</pre>";
+        }
     }
 
     $(document).ready(function() {
         $.getJSON("../smartvotes.schema.json", function(json) {
+            window.validationSchema = json;
+            console.log("Schema loaded");
             console.log(json);
         });
 
         $("#validate-button").on('click', function() {
-            $("#validator-output").html(validate($("#json-input").text().trim()));
+            $("#validator-output").html(validate($("#json-input").val().trim()));
         });
     });
 </script>
