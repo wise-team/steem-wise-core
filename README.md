@@ -70,6 +70,9 @@ I would like to thank [@noisy](https://steemit.com/@noisy) ([github.com/noisy](h
 I also send many thanks to the authors of vendor dependencies of the project. You are the ones, who made the development of this tool so joyful and smooth. Many thanks to the contributors of:
 
  - [steem](https://github.com/steemit/steem)
+ - [json-schema](http://json-schema.org/)
+ - [typescript](https://github.com/Microsoft/TypeScript)
+ - [typescript-json-schema](https://github.com/YousefED/typescript-json-schema)
 
 There are separate thanks in each project's README.
 
