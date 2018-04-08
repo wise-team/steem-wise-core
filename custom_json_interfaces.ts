@@ -17,7 +17,7 @@ interface SmartvotesCommand {
 
 }
 
-interface SmartvotesCommand_setRules {
+interface SmartvotesCommand_setRules extends SmartvotesCommand {
    [index: number]: SmartvotesRule
 }
 
