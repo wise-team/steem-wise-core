@@ -83,15 +83,15 @@
         }
 
         var Ajv = require('ajv');
-        var ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
+        var ajv = new Ajv();
         var validate = ajv.compile(schema);
         var valid = validate(data);
         if (!valid) console.log(validate.errors);
     }
 
     $(document).ready(function() {
-        $.getJSON("test.json", function(json) {
-            console.log(json); // this will show the info it in firebug console
+        $.getJSON("../smartvotes.schema.json", function(json) {
+            console.log(json);
         });
 
         $("#validate-button").on('click', function() {
