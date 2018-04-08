@@ -1,0 +1,52 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "definitions": {
+        "SetRulesSmartvotesCommand": {
+            "items": {
+                "$ref": "#/definitions/SmartvotesRule"
+            },
+            "type": "array"
+        },
+        "SmartvotesCommand": {
+            "description": "Commands definitions:",
+            "type": "object"
+        },
+        "SmartvotesCustomJSON": {
+            "description": "These are the interfaces for smartvotes custom_json commands formatting.\nSuch formatted commands are then sent or received to/from steem blockchain.\nNOTICE: Smartvotes interfaces are under early development. They may change over time.",
+            "properties": {
+                "command": {
+                    "$ref": "#/definitions/SmartvotesCommand"
+                },
+                "smartvotes_command_type": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "command",
+                "smartvotes_command_type"
+            ],
+            "type": "object"
+        },
+        "SmartvotesRule": {
+            "description": "Rules definitions:",
+            "properties": {
+                "total_weight": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "voter": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "total_weight",
+                "type",
+                "voter"
+            ],
+            "type": "object"
+        }
+    }
+}
+

@@ -3,3 +3,7 @@
 
 # Intelij IDEA IDEs
 /.idea/
+
+## Node
+
+/schema/node_modules

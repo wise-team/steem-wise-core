@@ -48,7 +48,11 @@ If you have read preceding paragraphs, you see, that the voter is a most importa
 - a **delegator** — a person who allows someone to use his/her vote by specific criteria.
 - a **voter** — a person who votes on behalf of a delegator
 
+### Blockchain transactions
 
+For safe and reliable communication smartvotes simply put all operations on Steem blockchain. It is done using **custom_json** operation. Syntax and allowed operations are defined in **/schema** dir. Definitions are written in Typescript and then converted into json-schema. Detailed instructions about conversion and contribution to smartvotes schema can be found in [/schema/INSTRUCTIONS.md](schema/INSTRUCTIONS.md).
+
+## Contribution
 
 
 ## More resources on voting in Steem
