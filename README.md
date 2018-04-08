@@ -9,7 +9,7 @@ Currently, there are two tools available:
 
 
 
-##What will smartvotes do for the community?
+## What will smartvotes do for the community?
 
 An ultimate cure for cancer was the biggest holy grail of medicine for decades. However time has shown, that instead of ultimate cure, there are many potent, but narrow-targeted drugs. So are counter-abuse mechanisms in Steem network. 
 
@@ -32,6 +32,15 @@ Smartvotes can also boost your voting earnings: If you delegate your votes to a 
 
 
 
+## What will smartvotes do for you (if you are a voter)?
+
+If you have read preceding paragraphs, you see, that the voter is a most important part of this ecosystem. You may think — what will be my profit if I become a voter? In fact, it will not only boost your prestige & significance in the community, but also allows you to earn money for beeing an early curator (you have to remember about early voter penalty for the first 30 minutes). Benefits of using smartvotes as voter:
+
+- Prestige & significance — power makes you noticable. You can use it to build your personal brand and gain followers. You can became a tag curator if many people delegates you a smartvote.
+- First curator reward — you can vote with your vote first & then vote as a delegator (which often will be a whale, or a big group of minnow delegators). This makes your wote more rewarded.
+
+
+
 ## Details
 
 ### Name convention
@@ -39,6 +48,14 @@ Smartvotes can also boost your voting earnings: If you delegate your votes to a 
 - a **delegator** — a person who allows someone to use his/her vote by specific criteria.
 - a **voter** — a person who votes on behalf of a delegator
 
+
+
+
+## More resources on voting in Steem
+
+- [steemit.com/steem/@dantheman/curation-rewards-and-voting-incentive](https://steemit.com/steem/@dantheman/curation-rewards-and-voting-incentive)
+- [steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards](https://steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards)
+- [steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters](https://steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters)
 
 
 
