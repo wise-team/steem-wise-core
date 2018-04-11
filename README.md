@@ -10,9 +10,8 @@ Currently, there are two tools available:
 Links to github-pages hosted online tools can be found here: [jblew.github.io/steem-smartvotes-core/](http://jblew.github.io/steem-smartvotes-core/). Online tools:
 
 - [Voter page](https://jblew.github.io/steem-smartvotes-voter-page)
+- [JSON operation API DOCS](https://jblew.github.io/steem-smartvotes-core/schema/docs/index.html)
 - [JSON operation Validator](https://jblew.github.io/steem-smartvotes-core/schema/validator/validator.html)
-
-
 
 ## What will smartvotes do for the community?
 
