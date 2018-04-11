@@ -1,4 +1,4 @@
-import * as schema from "../schema/transaction.schema";
+import * as schema from "../schema/operation.schema";
 export declare class SteemSmartvotes {
     private username;
     private postingWif;

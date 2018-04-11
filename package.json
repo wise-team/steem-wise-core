@@ -21,6 +21,7 @@
     "@types/node": "^9.4.6",
     "ts-node": "^5.0.0",
     "tslint": "^5.9.1",
+    "typedoc": "^0.11.1",
     "typescript": "^2.7.2",
     "typescript-json-schema": "^0.22.0"
   },
@@ -31,7 +32,9 @@
     "watch-ts": "tsc -w",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "debug": "npm run build && npm run watch-debug",
-    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_transaction\""
+    "build-schema": "npm run convert-schema-to-json && npm run build-schema-docs",
+    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\"",
+    "build-schema-docs": "typedoc --out schema/docs --mode file --readme schema/README.md --name \"Steem Smartvotes operation schema\" schema/"
   },
   "repository": {
     "type": "git",
