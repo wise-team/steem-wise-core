@@ -7,7 +7,9 @@ For better readability and easier maintenance schemas are written in Typescript.
 Besides of typescript definitions — JSON-schema definition is also required because it is more portable & easier to apply. Though it is needed to convert typescript into JSON-schema. In order to perform the conversion, please use the following script:
 
 ```bash
-$ ./convert-schema-to-json.sh
+$ npm run convert-schema-to-json
 ```
+
+Schema conversion also occures when you run ```npm build```.
 
 Thank you. Converted "smartvotes.schema.json" should be included in commit.

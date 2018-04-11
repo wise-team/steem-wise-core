@@ -21,15 +21,17 @@
     "@types/node": "^9.4.6",
     "ts-node": "^5.0.0",
     "tslint": "^5.9.1",
-    "typescript": "^2.7.2"
+    "typescript": "^2.7.2",
+    "typescript-json-schema": "^0.22.0"
   },
   "scripts": {
-    "build": "npm run build-ts && npm run tslint",
+    "build": "npm run build-ts && npm run tslint && npm run convert-schema-to-json",
     "test": "jest --forceExit --coverage --verbose",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "debug": "npm run build && npm run watch-debug"
+    "debug": "npm run build && npm run watch-debug",
+    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_transaction\""
   },
   "repository": {
     "type": "git",
