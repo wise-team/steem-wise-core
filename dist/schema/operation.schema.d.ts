@@ -1,0 +1,26 @@
+import { smartvotes_ruleset } from "./rules.schema";
+import { smartvotes_vote } from "./votes.schema";
+/**
+ * General type for every smartvotes operation.
+ */
+export interface smartvotes_operation {
+    /**
+     * If an custom_operation on steem blockchain has a parameter "type" with value "smartvotes"
+     * it is going to be parsed as a smartvotes operation.
+     */
+    type: "smartvote";
+    /**
+     * This is a smartvotes command. There are two types of commands: set_rules and send_votes.
+     */
+    command: smartvotes_command_set_rules | smartvotes_command_send_votes;
+}
+export interface smartvotes_command_set_rules {
+    name: "set_rules";
+    rulesets: smartvotes_ruleset[];
+}
+export interface smartvotes_command_send_votes {
+    name: "send_votes";
+    votes: smartvotes_vote[];
+}
+export { smartvotes_ruleset, smartvotes_rule, smartvotes_rule_authors, smartvotes_rule_tags, smartvotes_rule_time_window } from "./rules.schema";
+export { smartvotes_vote, smartvotes_vote_type, smartvotes_vote_weight } from "./votes.schema";

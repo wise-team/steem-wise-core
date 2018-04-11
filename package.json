@@ -1,0 +1,55 @@
+{
+  "name": "steem-smartvotes",
+  "version": "0.1.0",
+  "description": "Node/web library for Smartvotes: a vote delegation system for STEEM blockchain",
+  "main": "dist/steem-smartvotes.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "engines": {
+    "node": ">=9.11"
+  },
+  "dependencies": {
+    "@types/jest": "^22.2.2",
+    "chai": "^4.1.2",
+    "commander": "^2.15.1",
+    "jest": "^22.4.3",
+    "steem": "^0.7.1",
+    "ts-jest": "^22.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^9.4.6",
+    "ts-node": "^5.0.0",
+    "tslint": "^5.9.1",
+    "typedoc": "^0.11.1",
+    "typescript": "^2.7.2",
+    "typescript-json-schema": "^0.22.0"
+  },
+  "scripts": {
+    "build": "npm run build-ts && npm run tslint && npm run convert-schema-to-json",
+    "test": "jest --forceExit --coverage --verbose",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "debug": "npm run build && npm run watch-debug",
+    "build-schema": "npm run convert-schema-to-json && npm run build-schema-docs",
+    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\"",
+    "build-schema-docs": "typedoc --out schema/docs --mode file --readme schema/README.md --name \"Steem Smartvotes operation schema\" schema/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jblew/steem-smartvotes-core.git"
+  },
+  "keywords": [
+    "steem",
+    "blockchain",
+    "smartvotes",
+    "cli"
+  ],
+  "author": "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Jblew/steem-smartvotes-core/issues"
+  },
+  "homepage": "https://github.com/Jblew/steem-smartvotes-core#readme"
+}

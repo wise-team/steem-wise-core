@@ -10,7 +10,10 @@
                     "type": "string"
                 },
                 "votes": {
-                    "$ref": "#/definitions/smartvotes_vote_list"
+                    "items": {
+                        "$ref": "#/definitions/smartvotes_vote"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -27,40 +30,130 @@
                     ],
                     "type": "string"
                 },
-                "rules": {
-                    "$ref": "#/definitions/smartvotes_rule_list"
+                "rulesets": {
+                    "items": {
+                        "$ref": "#/definitions/smartvotes_ruleset"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
                 "name",
-                "rules"
+                "rulesets"
             ],
             "type": "object"
         },
-        "smartvotes_rule": {
+        "smartvotes_rule_authors": {
             "properties": {
-                "total_weight": {
+                "authors": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "mode": {
+                    "enum": [
+                        "allow",
+                        "deny"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "enum": [
+                        "authors"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "authors",
+                "mode",
+                "type"
+            ],
+            "type": "object"
+        },
+        "smartvotes_rule_tags": {
+            "properties": {
+                "mode": {
+                    "enum": [
+                        "allow",
+                        "deny"
+                    ],
+                    "type": "string"
+                },
+                "tags": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "type": {
+                    "enum": [
+                        "tags"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "mode",
+                "tags",
+                "type"
+            ],
+            "type": "object"
+        },
+        "smartvotes_rule_time_window": {
+            "properties": {
+                "older_than": {
                     "type": "number"
                 },
                 "type": {
+                    "enum": [
+                        "time_window"
+                    ],
                     "type": "string"
+                },
+                "younger_than": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "older_than",
+                "type",
+                "younger_than"
+            ],
+            "type": "object"
+        },
+        "smartvotes_ruleset": {
+            "properties": {
+                "rules": {
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/smartvotes_rule_tags"
+                            },
+                            {
+                                "$ref": "#/definitions/smartvotes_rule_authors"
+                            },
+                            {
+                                "$ref": "#/definitions/smartvotes_rule_time_window"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "total_weight": {
+                    "type": "number"
                 },
                 "voter": {
                     "type": "string"
                 }
             },
             "required": [
+                "rules",
                 "total_weight",
-                "type",
                 "voter"
             ],
             "type": "object"
-        },
-        "smartvotes_rule_list": {
-            "items": {
-                "$ref": "#/definitions/smartvotes_rule"
-            },
-            "type": "array"
         },
         "smartvotes_vote": {
             "properties": {
@@ -73,7 +166,7 @@
                 "type": {
                     "$ref": "#/definitions/smartvotes_vote_type"
                 },
-                "votingpower": {
+                "weight": {
                     "type": "number"
                 }
             },
@@ -81,15 +174,9 @@
                 "delegator",
                 "slug",
                 "type",
-                "votingpower"
+                "weight"
             ],
             "type": "object"
-        },
-        "smartvotes_vote_list": {
-            "items": {
-                "$ref": "#/definitions/smartvotes_vote"
-            },
-            "type": "array"
         },
         "smartvotes_vote_type": {
             "enum": [
@@ -99,6 +186,7 @@
             "type": "string"
         }
     },
+    "description": "General type for every smartvotes operation.",
     "properties": {
         "command": {
             "anyOf": [
@@ -108,9 +196,11 @@
                 {
                     "$ref": "#/definitions/smartvotes_command_send_votes"
                 }
-            ]
+            ],
+            "description": "This is a smartvotes command. There are two types of commands: set_rules and send_votes."
         },
         "type": {
+            "description": "If an custom_operation on steem blockchain has a parameter \"type\" with value \"smartvotes\"\nit is going to be parsed as a smartvotes operation.",
             "enum": [
                 "smartvote"
             ],
