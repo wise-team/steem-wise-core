@@ -10,16 +10,17 @@
     "node": ">=9.11"
   },
   "dependencies": {
-    "@types/jest": "^22.2.2",
-    "chai": "^4.1.2",
+    "ajv": "^6.4.0",
     "commander": "^2.15.1",
-    "jest": "^22.4.3",
-    "steem": "^0.7.1",
-    "ts-jest": "^22.4.2"
+    "steem": "^0.7.1"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.2",
+    "@types/mocha": "^5.0.0",
     "@types/node": "^9.4.6",
-    "ts-node": "^5.0.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.0.5",
+    "ts-node": "^5.0.1",
     "tslint": "^5.9.1",
     "typedoc": "^0.11.1",
     "typescript": "^2.7.2",
@@ -27,7 +28,7 @@
   },
   "scripts": {
     "build": "npm run build-ts && npm run tslint && npm run convert-schema-to-json",
-    "test": "jest --forceExit --coverage --verbose",
+    "test": "mocha -r ts-node/register test/**/*.spec.ts",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
@@ -39,24 +40,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Jblew/steem-smartvotes-core.git"
-  },
-  "jest": {
-    "globals": {
-      "ts-jest": {
-        "tsConfigFile": "tsconfig.json"
-      }
-    },
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "./node_modules/ts-jest/preprocessor.js"
-    },
-    "testMatch": [
-      "**/test/**/*.test.(ts|js)"
-    ],
-    "testEnvironment": "node"
   },
   "keywords": [
     "steem",
