@@ -1,0 +1,216 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "definitions": {
+        "smartvotes_command_send_votes": {
+            "properties": {
+                "name": {
+                    "enum": [
+                        "send_votes"
+                    ],
+                    "type": "string"
+                },
+                "votes": {
+                    "items": {
+                        "$ref": "#/definitions/smartvotes_vote"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "votes"
+            ],
+            "type": "object"
+        },
+        "smartvotes_command_set_rules": {
+            "properties": {
+                "name": {
+                    "enum": [
+                        "set_rules"
+                    ],
+                    "type": "string"
+                },
+                "rulesets": {
+                    "items": {
+                        "$ref": "#/definitions/smartvotes_ruleset"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "rulesets"
+            ],
+            "type": "object"
+        },
+        "smartvotes_rule_authors": {
+            "properties": {
+                "authors": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "mode": {
+                    "enum": [
+                        "allow",
+                        "deny"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "enum": [
+                        "authors"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "authors",
+                "mode",
+                "type"
+            ],
+            "type": "object"
+        },
+        "smartvotes_rule_tags": {
+            "properties": {
+                "mode": {
+                    "enum": [
+                        "allow",
+                        "deny"
+                    ],
+                    "type": "string"
+                },
+                "tags": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "type": {
+                    "enum": [
+                        "tags"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "mode",
+                "tags",
+                "type"
+            ],
+            "type": "object"
+        },
+        "smartvotes_rule_time_window": {
+            "properties": {
+                "older_than": {
+                    "type": "number"
+                },
+                "type": {
+                    "enum": [
+                        "time_window"
+                    ],
+                    "type": "string"
+                },
+                "younger_than": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "older_than",
+                "type",
+                "younger_than"
+            ],
+            "type": "object"
+        },
+        "smartvotes_ruleset": {
+            "properties": {
+                "rules": {
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/smartvotes_rule_tags"
+                            },
+                            {
+                                "$ref": "#/definitions/smartvotes_rule_authors"
+                            },
+                            {
+                                "$ref": "#/definitions/smartvotes_rule_time_window"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "total_weight": {
+                    "type": "number"
+                },
+                "voter": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "rules",
+                "total_weight",
+                "voter"
+            ],
+            "type": "object"
+        },
+        "smartvotes_vote": {
+            "properties": {
+                "delegator": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/smartvotes_vote_type"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "delegator",
+                "slug",
+                "type",
+                "weight"
+            ],
+            "type": "object"
+        },
+        "smartvotes_vote_type": {
+            "enum": [
+                "flag",
+                "vote"
+            ],
+            "type": "string"
+        }
+    },
+    "description": "General type for every smartvotes operation.",
+    "properties": {
+        "command": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/smartvotes_command_set_rules"
+                },
+                {
+                    "$ref": "#/definitions/smartvotes_command_send_votes"
+                }
+            ],
+            "description": "This is a smartvotes command. There are two types of commands: set_rules and send_votes."
+        },
+        "type": {
+            "description": "If an custom_operation on steem blockchain has a parameter \"type\" with value \"smartvotes\"\nit is going to be parsed as a smartvotes operation.",
+            "enum": [
+                "smartvote"
+            ],
+            "type": "string"
+        }
+    },
+    "required": [
+        "command",
+        "type"
+    ],
+    "type": "object"
+}
+
