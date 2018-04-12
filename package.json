@@ -33,7 +33,7 @@
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "debug": "npm run build && npm run watch-debug",
     "build-schema": "npm run convert-schema-to-json && npm run build-schema-docs",
-    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\"",
+    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\" && cp schema/smartvotes.schema.json dist/schema/smartvotes.schema.json",
     "build-schema-docs": "typedoc --out schema/docs --mode file --readme schema/README.md --name \"Steem Smartvotes operation schema\" schema/"
   },
   "repository": {
