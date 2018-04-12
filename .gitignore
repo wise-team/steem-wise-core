@@ -5,6 +5,7 @@
 /.idea/
 
 ## Node
+/dist
 /node_modules
 /coverage
 /schema/node_modules
