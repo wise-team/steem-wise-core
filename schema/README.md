@@ -14,6 +14,6 @@ Besides of typescript definitions — JSON-schema definition is also required be
 $ npm run build-schema
 ```
 
-Schema conversion also occures when you run `npm build`.
+Schema conversion also occures when you run `npm run build`.
 
 Thank you. Converted "smartvotes.schema.json" should be included in commit.
