@@ -8,15 +8,15 @@
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
         "outDir": "dist",
-        "baseUrl": ".",
+        "baseUrl": "lib/",
         "paths": {
             "*": [
                 "node_modules/*",
-                "src/types/*"
+                "lib/types/*"
             ]
         }
     },
     "include": [
-      "src/**/*"
+        "lib/**/*"
     ]
 }
