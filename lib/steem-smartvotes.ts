@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import * as schema from "../schema/operation.schema";
 import * as ajv from "ajv";
 
