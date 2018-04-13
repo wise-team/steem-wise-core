@@ -76,9 +76,12 @@ I would like to thank [@noisy](https://steemit.com/@noisy) ([github.com/noisy](h
 I also send many thanks to the authors of vendor dependencies of the project. You are the ones, who made the development of this tool so joyful and smooth. Many thanks to the contributors of:
 
  - [steem](https://github.com/steemit/steem)
+ - [ajv](https://github.com/epoberezkin/ajv)
  - [json-schema](http://json-schema.org/)
  - [typescript](https://github.com/Microsoft/TypeScript)
  - [typescript-json-schema](https://github.com/YousefED/typescript-json-schema)
+ - [webpack](https://webpack.js.org/)
+ - [mocha](https://mochajs.org/) & [chai](http://www.chaijs.com/)
 
 There are separate thanks in each project's README.
 
