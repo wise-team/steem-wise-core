@@ -66,7 +66,11 @@ For safe and reliable communication smartvotes simply put all operations on Stee
 - [steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards](https://steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards)
 - [steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters](https://steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters)
 
-
+## How to use the library?
+Building:
+```bash
+$ npm run build
+```
 
 
 ## Thank you
