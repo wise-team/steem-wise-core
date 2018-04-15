@@ -1,5 +1,7 @@
 'use strict';
 
+const Visualizer = require('webpack-visualizer-plugin');
+
 const path = require('path');
 const webpack = require('webpack');
 
@@ -17,7 +19,7 @@ module.exports = {
         library: "steemsmartvotes",
         libraryTarget: "umd"
     },
-    devtool: (DEFAULTS.isDevelopment ? 'source-map' : 'cheap-eval-source-map'),
+    devtool: (DEFAULTS.isDevelopment ?  'cheap-eval-source-map' : 'source-map'),
     target: "web",
     module: {
         rules: []
@@ -29,5 +31,8 @@ module.exports = {
         extensions: [".js", ".json"]
     },
     plugins: [
+        new Visualizer({
+            filename: './statistics.html'
+        })
     ]
 }
