@@ -1,11 +1,10 @@
-# Steem smartvotes (core package)
-Vote delegation system for STEEM blockchain: core package.
+# Steem smartvotes (core library)
+Vote delegation system for STEEM blockchain: common library for browser & node.
 
-Currently, there are two tools available:
+Currently, it is used by the following tools:
 
 - [steem-smartvotes-cli](https://github.com/Jblew/steem-smartvotes-cli) — CLI tool for vote delegators
 - [steem-smartvotes-voter-page](https://github.com/Jblew/steem-smartvotes-voter-page) — Simple HTML page that allows a voter to vote on behalf of a delegator. 
-
 
 Links to github-pages hosted online tools can be found here: [jblew.github.io/steem-smartvotes-core/](http://jblew.github.io/steem-smartvotes-core/). Online tools:
 
