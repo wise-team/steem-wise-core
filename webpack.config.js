@@ -14,7 +14,7 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, "dist/browser"),
         filename: "steem-smartvotes.min.js",
-        library: "SteemSmartvotes",
+        library: "steemsmartvotes",
         libraryTarget: "umd"
     },
     devtool: (DEFAULTS.isDevelopment ? 'cheap-eval-source-map' : 'source-map'),
@@ -23,7 +23,7 @@ module.exports = {
         rules: []
     },
     optimization: {
-        minimize: true
+        minimize: (DEFAULTS.isDevelopment ? false : true)
     },
     resolve: {
         extensions: [".js", ".json"]
