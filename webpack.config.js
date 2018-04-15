@@ -17,7 +17,7 @@ module.exports = {
         library: "steemsmartvotes",
         libraryTarget: "umd"
     },
-    devtool: (DEFAULTS.isDevelopment ? 'cheap-eval-source-map' : 'source-map'),
+    devtool: (DEFAULTS.isDevelopment ? 'source-map' : 'cheap-eval-source-map'),
     target: "web",
     module: {
         rules: []
