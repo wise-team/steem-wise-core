@@ -31,7 +31,7 @@
     "webpack-cli": "^2.0.14"
   },
   "scripts": {
-    "build": "npm run build-node",
+    "build": "npm run build-node && npm run build-browser",
     "build-node": "npm run build-ts && npm run tslint && npm run convert-schema-to-json",
     "build-ts": "tsc",
     "build-schema": "npm run convert-schema-to-json && npm run build-schema-docs",
