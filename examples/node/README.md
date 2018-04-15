@@ -7,7 +7,7 @@ $ npm install
 $ npm build
 ```
 
-To run — enter the */examples/browser* directory and type:
+To run — enter the */examples/node* directory and type:
 
 ```bash
 $ node [example-file.js]
