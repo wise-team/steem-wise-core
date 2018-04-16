@@ -10,7 +10,7 @@ loadCredentials(function(credentials) {
 });
 
 function loadCredentials(callback) {
-    var credentials = {username: "", keyWif: ""}
+    var credentials = {username: "", postingWif: ""}
     /* credentials file should be a JSON file with the same structure as the credentials var. */
     if (process.argv.length > 2) {
         var credentialsFilePath = process.argv[2];
@@ -35,7 +35,7 @@ function sendVote(credentials) {
         type: "vote"
     };
 
-    var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.keyWif);
+    var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.postingWif);
     smartvotes.sendVoteOrder(vote, function(error) {
         if(error) {
             console.error(error);
