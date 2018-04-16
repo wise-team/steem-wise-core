@@ -11,6 +11,8 @@ export class SteemSmartvotes {
     constructor(username: string, postingWif: string) {
         this.username = username;
         this.postingWif = postingWif;
+
+        if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
 
     public validateVote(vote: schema.smartvotes_vote): boolean {
