@@ -156,34 +156,43 @@
             "type": "object"
         },
         "smartvotes_vote": {
+            "description": "Schema for sending a single vote order.",
             "properties": {
-                "delegator": {
+                "author": {
+                    "description": "Author of the post.",
                     "type": "string"
                 },
-                "slug": {
+                "delegator": {
+                    "description": "Username of your delegator (a person, who allowed you to vote on his/her behalf.",
+                    "type": "string"
+                },
+                "permlink": {
+                    "description": "Permalink of the post.",
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/smartvotes_vote_type"
+                    "description": "Type of vote: an upvote or a flag.",
+                    "enum": [
+                        "flag",
+                        "upvote"
+                    ],
+                    "type": "string"
                 },
                 "weight": {
-                    "type": "number"
+                    "description": "Weight of the upvote or flag.",
+                    "maximum": 10000,
+                    "minimum": 0,
+                    "type": "integer"
                 }
             },
             "required": [
+                "author",
                 "delegator",
-                "slug",
+                "permlink",
                 "type",
                 "weight"
             ],
             "type": "object"
-        },
-        "smartvotes_vote_type": {
-            "enum": [
-                "flag",
-                "vote"
-            ],
-            "type": "string"
         }
     },
     "description": "General type for every smartvotes operation.",

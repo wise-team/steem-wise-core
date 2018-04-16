@@ -36,4 +36,4 @@ export interface smartvotes_command_send_votes {
 }
 
 export { smartvotes_ruleset, smartvotes_rule, smartvotes_rule_authors, smartvotes_rule_tags, smartvotes_rule_time_window } from "./rules.schema";
-export { smartvotes_vote, smartvotes_vote_type, smartvotes_vote_weight } from "./votes.schema";
+export { smartvotes_vote, smartvotes_vote_weight } from "./votes.schema";
