@@ -1,5 +1,6 @@
 import * as schema from "../schema/operation.schema";
 import * as ajv from "ajv";
+import { SmartvotesError } from "./SmartvotesError";
 
 const schemaJSON = require("../schema/smartvotes.schema.json");
 
@@ -12,7 +13,12 @@ export class SteemSmartvotes {
         this.postingWif = postingWif;
     }
 
-    public sendVote(vote: schema.smartvotes_vote): void {
+    public validateVote(vote: schema.smartvotes_vote): boolean {
+        console.error("Vote validation is not yet supported. It is now returning true in every case.");
+        return true;
+    }
+
+    public sendVote(vote: schema.smartvotes_vote, callback: (success: boolean, error: SmartvotesError) => void): void {
         throw new Error("Not yet supported");
     }
 
@@ -33,4 +39,5 @@ export class SteemSmartvotes {
     }
 }
 
+export { SmartvotesError } from "./SmartvotesError";
 export default SteemSmartvotes;
