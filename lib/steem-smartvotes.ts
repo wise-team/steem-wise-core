@@ -1,4 +1,4 @@
-import * as schema from "../schema/operation.schema";
+import * as schema from "../schema/smartvotes.schema";
 import * as ajv from "ajv";
 
 const schemaJSON = require("../schema/smartvotes.schema.json");
@@ -14,12 +14,12 @@ export class SteemSmartvotes {
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
 
-    public validateVote(vote: schema.smartvotes_vote): boolean {
+    public validateVoteOrder(vote: schema.smartvotes_voteorder): boolean {
         console.error("Vote validation is not yet supported. It is now returning true in every case.");
         return true;
     }
 
-    public sendVote(vote: schema.smartvotes_vote, callback: (error: Error) => void): void {
+    public sendVoteOrder(vote: schema.smartvotes_voteorder, callback: (error: Error) => void): void {
         throw new Error("Not yet supported");
     }
 
@@ -41,3 +41,4 @@ export class SteemSmartvotes {
 }
 
 export default SteemSmartvotes;
+export * from "../schema/smartvotes.schema";

@@ -3,7 +3,7 @@
 /**
  * Schema for sending a single vote order.
  */
-export interface smartvotes_vote {
+export interface smartvotes_voteorder {
     /**
      * Author of the post.
      */

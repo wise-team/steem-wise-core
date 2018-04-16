@@ -2,7 +2,7 @@ import { expect } from "chai";
 import "mocha";
 
 import SteemSmartvotes from "../lib/steem-smartvotes";
-import { smartvotes_operation } from "../schema/operation.schema";
+import { smartvotes_operation } from "../schema/smartvotes.schema";
 
 const validOp: smartvotes_operation = {
     type: "smartvote",

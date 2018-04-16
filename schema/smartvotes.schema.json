@@ -1,17 +1,17 @@
 {
     "$schema": "http://json-schema.org/draft-06/schema#",
     "definitions": {
-        "smartvotes_command_send_votes": {
+        "smartvotes_command_send_voteorders": {
             "properties": {
                 "name": {
                     "enum": [
-                        "send_votes"
+                        "send_voteorders"
                     ],
                     "type": "string"
                 },
                 "votes": {
                     "items": {
-                        "$ref": "#/definitions/smartvotes_vote"
+                        "$ref": "#/definitions/smartvotes_voteorder"
                     },
                     "type": "array"
                 }
@@ -155,7 +155,7 @@
             ],
             "type": "object"
         },
-        "smartvotes_vote": {
+        "smartvotes_voteorder": {
             "description": "Schema for sending a single vote order.",
             "properties": {
                 "author": {
@@ -203,7 +203,7 @@
                     "$ref": "#/definitions/smartvotes_command_set_rules"
                 },
                 {
-                    "$ref": "#/definitions/smartvotes_command_send_votes"
+                    "$ref": "#/definitions/smartvotes_command_send_voteorders"
                 }
             ],
             "description": "This is a smartvotes command. There are two types of commands: set_rules and send_votes."
