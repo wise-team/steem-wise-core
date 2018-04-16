@@ -32,7 +32,7 @@ export interface smartvotes_command_set_rules {
 
 export interface smartvotes_command_send_voteorders {
     name: "send_voteorders";
-    votes: smartvotes_voteorder [];
+    voteorders: smartvotes_voteorder [];
 }
 
 export { smartvotes_ruleset, smartvotes_rule, smartvotes_rule_authors, smartvotes_rule_tags, smartvotes_rule_time_window } from "./rules.schema";

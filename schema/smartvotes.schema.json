@@ -9,7 +9,7 @@
                     ],
                     "type": "string"
                 },
-                "votes": {
+                "voteorders": {
                     "items": {
                         "$ref": "#/definitions/smartvotes_voteorder"
                     },
@@ -18,7 +18,7 @@
             },
             "required": [
                 "name",
-                "votes"
+                "voteorders"
             ],
             "type": "object"
         },
