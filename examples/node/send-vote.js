@@ -28,6 +28,8 @@ var vote = {
 };
 
 var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.keyWif);
-smartvotes.sendVote(vote, function(success, error) {
-    if(success)
+smartvotes.sendVote(vote, function(error) {
+    if(!error) {
+
+    }
 });

@@ -1,6 +1,5 @@
 import * as schema from "../schema/operation.schema";
 import * as ajv from "ajv";
-import { SmartvotesError } from "./SmartvotesError";
 
 const schemaJSON = require("../schema/smartvotes.schema.json");
 
@@ -20,7 +19,7 @@ export class SteemSmartvotes {
         return true;
     }
 
-    public sendVote(vote: schema.smartvotes_vote, callback: (success: boolean, error: SmartvotesError) => void): void {
+    public sendVote(vote: schema.smartvotes_vote, callback: (error: Error) => void): void {
         throw new Error("Not yet supported");
     }
 
@@ -41,5 +40,4 @@ export class SteemSmartvotes {
     }
 }
 
-export { SmartvotesError } from "./SmartvotesError";
 export default SteemSmartvotes;
