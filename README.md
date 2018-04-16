@@ -1,4 +1,6 @@
 # Steem smartvotes (core library)
+[![Known Vulnerabilities](https://snyk.io/test/github/noisy-witness/steem-smartvotes-core/badge.svg?targetFile=package.json)](https://snyk.io/test/github/noisy-witness/steem-smartvotes-core?targetFile=package.json)
+
 Vote delegation system for STEEM blockchain: common library for browser & node.
 
 Currently, it is used by the following tools:
