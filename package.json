@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "ajv": "^6.4.0",
+    "bluebird": "^3.5.1",
     "commander": "^2.15.1",
     "steem": "^0.7.1"
   },
