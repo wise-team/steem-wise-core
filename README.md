@@ -6,11 +6,11 @@ Currently, it is used by the following tools:
 - [steem-smartvotes-cli](https://github.com/Jblew/steem-smartvotes-cli) — CLI tool for vote delegators
 - [steem-smartvotes-voter-page](https://github.com/Jblew/steem-smartvotes-voter-page) — Simple HTML page that allows a voter to vote on behalf of a delegator. 
 
-Links to github-pages hosted online tools can be found here: [jblew.github.io/steem-smartvotes-core/](http://jblew.github.io/steem-smartvotes-core/). Online tools:
+Links to github-pages hosted online tools can be found here: [noisy-witness.github.io/steem-smartvotes-core/](http://noisy-witness.github.io/steem-smartvotes-core/). Online tools:
 
-- [Voter page](https://jblew.github.io/steem-smartvotes-voter-page)
-- [JSON operation API DOCS](https://jblew.github.io/steem-smartvotes-core/schema/docs/index.html)
-- [JSON operation Validator](https://jblew.github.io/steem-smartvotes-core/schema/validator/validator.html)
+- [Voter page](https://noisy-witness.github.io/steem-smartvotes-voter-page)
+- [JSON operation API DOCS](https://noisy-witness.github.io/steem-smartvotes-core/schema/docs/index.html)
+- [JSON operation Validator](https://noisy-witness.github.io/steem-smartvotes-core/schema/validator/validator.html)
 
 ## What will smartvotes do for the community?
 

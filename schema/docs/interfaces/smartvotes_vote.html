@@ -66,6 +66,13 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Schema for sending a single vote order.</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -81,8 +88,9 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#author" class="tsd-kind-icon">author</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#delegator" class="tsd-kind-icon">delegator</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#slug" class="tsd-kind-icon">slug</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#permlink" class="tsd-kind-icon">permlink</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#type" class="tsd-kind-icon">type</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#weight" class="tsd-kind-icon">weight</a></li>
 							</ul>
@@ -93,34 +101,64 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="author" class="tsd-anchor"></a>
+					<h3>author</h3>
+					<div class="tsd-signature tsd-kind-icon">author<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/noisy-witness/steem-smartvotes-core/blob/a459757/schema/votes.schema.ts#L10">votes.schema.ts:10</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Author of the post.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="delegator" class="tsd-anchor"></a>
 					<h3>delegator</h3>
 					<div class="tsd-signature tsd-kind-icon">delegator<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L5">votes.schema.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/noisy-witness/steem-smartvotes-core/blob/a459757/schema/votes.schema.ts#L20">votes.schema.ts:20</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Username of your delegator (a person, who allowed you to vote on his/her behalf.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="slug" class="tsd-anchor"></a>
-					<h3>slug</h3>
-					<div class="tsd-signature tsd-kind-icon">slug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="permlink" class="tsd-anchor"></a>
+					<h3>permlink</h3>
+					<div class="tsd-signature tsd-kind-icon">permlink<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L4">votes.schema.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/noisy-witness/steem-smartvotes-core/blob/a459757/schema/votes.schema.ts#L15">votes.schema.ts:15</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Permalink of the post.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="type" class="tsd-anchor"></a>
 					<h3>type</h3>
-					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <a href="../enums/smartvotes_vote_type.html" class="tsd-signature-type">smartvotes_vote_type</a></div>
+					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"upvote"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"flag"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L7">votes.schema.ts:7</a></li>
+							<li>Defined in <a href="https://github.com/noisy-witness/steem-smartvotes-core/blob/a459757/schema/votes.schema.ts#L30">votes.schema.ts:30</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Type of vote: an upvote or a flag.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="weight" class="tsd-anchor"></a>
@@ -128,9 +166,14 @@
 					<div class="tsd-signature tsd-kind-icon">weight<span class="tsd-signature-symbol">:</span> <a href="../globals.html#smartvotes_vote_weight" class="tsd-signature-type">smartvotes_vote_weight</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L6">votes.schema.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/noisy-witness/steem-smartvotes-core/blob/a459757/schema/votes.schema.ts#L25">votes.schema.ts:25</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Weight of the upvote or flag.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -144,9 +187,6 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-enum">
-						<a href="../enums/smartvotes_vote_type.html" class="tsd-kind-icon">smartvotes_<wbr>vote_<wbr>type</a>
-					</li>
 					<li class=" tsd-kind-interface">
 						<a href="smartvotes_command_send_votes.html" class="tsd-kind-icon">smartvotes_<wbr>command_<wbr>send_<wbr>votes</a>
 					</li>
@@ -174,10 +214,13 @@
 						<a href="smartvotes_vote.html" class="tsd-kind-icon">smartvotes_<wbr>vote</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="smartvotes_vote.html#author" class="tsd-kind-icon">author</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="smartvotes_vote.html#delegator" class="tsd-kind-icon">delegator</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="smartvotes_vote.html#slug" class="tsd-kind-icon">slug</a>
+								<a href="smartvotes_vote.html#permlink" class="tsd-kind-icon">permlink</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="smartvotes_vote.html#type" class="tsd-kind-icon">type</a>

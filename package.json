@@ -33,7 +33,7 @@
   },
   "scripts": {
     "build": "npm run build-node && npm run build-browser",
-    "build-node": "npm run build-ts && npm run tslint && npm run convert-schema-to-json",
+    "build-node": "npm run build-ts && npm run tslint && npm run build-schema",
     "build-ts": "tsc",
     "build-schema": "npm run convert-schema-to-json && npm run build-schema-docs",
     "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\" && cp schema/smartvotes.schema.json dist/schema/smartvotes.schema.json",
@@ -47,7 +47,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jblew/steem-smartvotes-core.git"
+    "url": "git+https://github.com/noisy-witness/steem-smartvotes-core.git"
   },
   "keywords": [
     "steem",
@@ -58,7 +58,7 @@
   "author": "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/Jblew/steem-smartvotes-core/issues"
+    "url": "https://github.com/noisy-witness/steem-smartvotes-core/issues"
   },
-  "homepage": "https://github.com/Jblew/steem-smartvotes-core#readme"
+  "homepage": "https://github.com/noisy-witness/steem-smartvotes-core#readme"
 }
