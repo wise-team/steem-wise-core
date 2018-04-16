@@ -33,6 +33,8 @@ export class SteemSmartvotes {
 
         const jsonStr = JSON.stringify(smartvotesOp);
 
+        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid");
+
         const steemBlockchainOp = ["custom_json", {
             required_auths: [],
             required_posting_auths: [this.username],

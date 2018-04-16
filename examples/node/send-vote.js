@@ -32,7 +32,7 @@ function sendVote(credentials) {
         permalink: "firstpost",
         delegator: "steemprojects1",
         weight: 10000,
-        type: "vote"
+        type: "upvote"
     };
 
     var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.postingWif);
