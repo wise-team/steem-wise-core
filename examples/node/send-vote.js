@@ -35,7 +35,7 @@ function loadCredentials(callback) {
 function sendVote(credentials) {
     var vote = {
         author: "steemit",
-        permalink: "firstpost",
+        permlink: "firstpost",
         delegator: "steemprojects1",
         weight: 10000,
         type: "upvote"
