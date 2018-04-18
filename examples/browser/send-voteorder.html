@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Steem smartvotes — examples — validation</title>
+    <style type="text/css">
+        /* Thanks to http://bettermotherfuckingwebsite.com/ */
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            color: #444;
+            padding: 0 10px
+        }
+
+        h1, h2, h3 {
+            line-height: 1.2
+        }
+
+        pre {
+            background-color: #dddddd;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .result {
+            color: #196666;
+            background: #dddddd;
+            padding: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Steem smartvotes examples: send-voteorder</h1>
+<p><a href="/index.html">Return to full list of examples</a>.</p>
+
+
+
+<!-- -->
+<!-- Example #1. Expected result: valid. -->
+<p>
+    This should be a valid JSON:
+<pre><code id="json-src-1">
+{
+    "type": "smartvote",
+    "command": {
+        "name": "set_rules",
+        "rulesets": []
+    }
+}
+    </code></pre>
+Parse result: <strong id="parse-result-1" class="result">(javascript execution pending or error)</strong>. Expecting valid.
+</p>
+<hr />
+
+
+
+<!-- -->
+<!-- Example #1. Expected result: invalid. -->
+<p>
+    This should be an invalid JSON:
+<pre><code id="json-src-2">
+{
+    "type": "invalid_type",
+    "command": {
+        "name": "set_rules",
+        "rulesets": []
+    }
+}
+    </code></pre>
+Parse result: <strong id="parse-result-2" class="result">(javascript execution pending or error)</strong>. Expecting invalid.
+</p>
+<hr />
+
+
+
+<!-- -->
+<!-- Example #1. Expected result: invalid. -->
+<p>
+    This also should be an invalid JSON:
+<pre><code id="json-src-3">
+{
+    "type": "smartvote",
+    "command": {
+        "name": "unknown_command"
+    }
+}
+    </code></pre>
+Parse result: <strong id="parse-result-3" class="result">(javascript execution pending or error)</strong>. Expecting invalid.
+</p>
+<hr />
+
+
+
+<p>
+    Overall result: <strong id="overall-result" class="result">(javascript execution pending or error)</strong>.
+</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="/steem-smartvotes.min.js"></script>
+<script type="text/javascript">
+    /**
+     * Please note that *steemsmartvotes* is a namespace created by webpack. To access main
+     * class use *steemsmartvotes.SteemSmartvotes*.
+     */
+
+    function validateCodeTag(num) {
+        var input = $("#json-src-"+num).text();
+        var result = steemsmartvotes.SteemSmartvotes.validateJSON(input);
+        $("#parse-result-"+num).html(result? "valid" : "invalid");
+        return result;
+    }
+
+    $(document).ready(function() {
+        var overallResult = true;
+
+        overallResult = overallResult && (validateCodeTag(1) == true);
+        overallResult = overallResult && (validateCodeTag(2) == false);
+        overallResult = overallResult && (validateCodeTag(3) == false);
+
+        $("#overall-result").html(overallResult? "correct" : "incorrect");
+
+    });
+</script>
+</body>
+</html>

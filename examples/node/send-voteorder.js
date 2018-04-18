@@ -12,7 +12,7 @@ var smartvotesLib = require("../../dist/steem-smartvotes.js");
  * Credentials file format: {"username": "", "postingWif": ""}.
  */
 loadCredentials(function(credentials) {
-    sendVote(credentials)
+    sendVoteorder(credentials)
 });
 
 function loadCredentials(callback) {
@@ -32,7 +32,7 @@ function loadCredentials(callback) {
     else callback(credentials);
 }
 
-function sendVote(credentials) {
+function sendVoteorder(credentials) {
     var vote = {
         author: "steemit",
         permlink: "firstpost",
