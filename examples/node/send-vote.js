@@ -1,10 +1,16 @@
 var fs = require("fs");
-var smartvotesLib = require("../../dist/lib/steem-smartvotes.js");
+var smartvotesLib = require("../../dist/steem-smartvotes.js");
 /**
  * Note that smartvotesLib is a module namespace. To access main class use *steemsmartvotes.SteemSmartvotes*.
  * #validateJson() is a static method of the class.
  */
 
+/**
+ * To run this example:
+ * node send-vote.js /path/to/credentials.file.json
+ *
+ * Credentials file format: {"username": "", "postingWif": ""}.
+ */
 loadCredentials(function(credentials) {
     sendVote(credentials)
 });

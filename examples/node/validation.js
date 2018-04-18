@@ -1,4 +1,4 @@
-var steemsmartvotes = require("../../dist/lib/steem-smartvotes.js");
+var steemsmartvotes = require("../../dist/steem-smartvotes.js");
 /**
  * Note that steemsmartvotes is a module namespace. To access main class use *steemsmartvotes.SteemSmartvotes*.
  * #validateJson() is a static method of the class.
