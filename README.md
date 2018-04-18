@@ -11,7 +11,6 @@ Currently, it is used by the following tools:
 Links to github-pages hosted online tools can be found here: [noisy-witness.github.io/steem-smartvotes-core/](http://noisy-witness.github.io/steem-smartvotes-core/). Online tools:
 
 - [Voter page](https://noisy-witness.github.io/steem-smartvotes-voter-page)
-- [JSON operation API DOCS](https://noisy-witness.github.io/steem-smartvotes-core/schema/docs/index.html)
 - [JSON operation Validator](https://noisy-witness.github.io/steem-smartvotes-core/tools/schema-validator.html)
 
 ## What will smartvotes do for the community?
