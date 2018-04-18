@@ -9,7 +9,7 @@
         "allowJs": true,
         "sourceMap": true,
         "outDir": "dist",
-        "baseUrl": "lib/",
+        "baseUrl": "src/",
         "paths": {
             "*": [
                 "node_modules/*",
@@ -18,6 +18,6 @@
         }
     },
     "include": [
-        "lib/**/*"
+        "src/**/*"
     ]
 }
