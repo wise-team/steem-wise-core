@@ -1,3 +1,6 @@
+# Credential files used for examples
+*.credentials.json
+
 # Mac OS X stuff
 .DS_Store
 
@@ -5,6 +8,7 @@
 /.idea/
 
 ## Node
+/dist
 /node_modules
 /coverage
 /schema/node_modules
