@@ -1,8 +1,7 @@
-import * as schema from "../schema/smartvotes.schema";
+import * as schema from "./schema/smartvotes.schema";
 import * as ajv from "ajv";
+import * as schemaJSON from "../smartvotes.schema.json";
 const steem = require("steem");
-
-const schemaJSON = require("../schema/smartvotes.schema.json");
 
 export class SteemSmartvotes {
     private username: string;
@@ -75,4 +74,4 @@ export class SteemSmartvotes {
 }
 
 export default SteemSmartvotes;
-export * from "../schema/smartvotes.schema";
+export * from "./schema/smartvotes.schema";

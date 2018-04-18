@@ -2,7 +2,6 @@ import { expect } from "chai";
 import "mocha";
 
 import SteemSmartvotes from "../src/steem-smartvotes";
-import { smartvotes_operation } from "../schema/smartvotes.schema";
 
 
 describe("SteemSmartvotes.constructor", () => {

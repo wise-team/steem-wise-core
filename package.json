@@ -33,11 +33,11 @@
     "webpack-visualizer-plugin": "^0.1.11"
   },
   "scripts": {
-    "build": "npm run build-node && npm run build-browser",
+    "build": "rm -rf dist && npm run build-node && npm run build-browser",
     "build-node": "npm run build-ts && npm run tslint && npm run build-schema",
     "build-ts": "tsc",
     "build-schema": "npm run convert-schema-to-json",
-    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\" && cp schema/smartvotes.schema.json dist/schema/smartvotes.schema.json",
+    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"smartvotes.schema.json\" \"src/schema/*.schema.ts\" \"smartvotes_operation\" && cp smartvotes.schema.json dist/schema/smartvotes.schema.json",
     "build-browser": "rm -rf dist/browser/ && NODE_ENV=production webpack --config webpack.config.js",
     "build-browser-dev": "rm -rf dist/browser/ && NODE_ENV=development webpack --config webpack.config.js",
     "test": "mocha -r ts-node/register test/**/*.spec.ts",
