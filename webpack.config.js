@@ -12,7 +12,7 @@ const DEFAULTS = {
 
 module.exports = {
     mode: (DEFAULTS.isDevelopment ? "development" : "production"),
-    entry: "./dist/lib/steem-smartvotes",
+    entry: "./dist/steem-smartvotes",
     output: {
         path: path.resolve(__dirname, "dist/browser"),
         filename: "steem-smartvotes.min.js",
