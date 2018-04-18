@@ -12,11 +12,11 @@
             line-height: 1.6;
             font-size: 18px;
             color: #444;
-            padding: 0 10px
+            padding: 0 10px;
         }
 
         h1, h2, h3 {
-            line-height: 1.2
+            line-height: 1.2;
         }
 
         pre {
@@ -25,79 +25,46 @@
             padding-right: 1rem;
         }
 
-        .result {
-            color: #196666;
-            background: #dddddd;
-            padding: 2px;
+        input[type="text"] {
+            width: 100px;
+        }
+
+        input[type="password"] {
+            width: 100px;
         }
     </style>
 </head>
 <body>
 
-<h1>Steem smartvotes examples: send-voteorder</h1>
+<h1>Steem smartvotes examples: send vote order</h1>
 <p><a href="/index.html">Return to full list of examples</a>.</p>
 
-
+<p>
+    Username: <input type="text" id="username" value="guest123" /><br />
+    Posting Wif: <input type="text" id="posting-wif" value="5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg" /><br />
+    <hr />
+    Delegator username: <input type="text" id="delegator" value="steemprojects3" /><br />
+    <hr />
+    Post author: <input type="text" id="author" value="steemit" /><br />
+    Post permlink: <input type="text" id="permlink" value="firstpost" /><br />
+    <hr />
+    Vote type: <select id="type"><option value="upvote" selected>upvote</option><option value="flag">flag</option></select><br />
+    Vote weight: <input type="text" id="weight" value="10000" /><br />
+    <hr />
+    <button id="send-btn">Send vote order</button>
+</p>
 
 <!-- -->
 <!-- Example #1. Expected result: valid. -->
 <p>
-    This should be a valid JSON:
-<pre><code id="json-src-1">
-{
-    "type": "smartvote",
-    "command": {
-        "name": "set_rules",
-        "rulesets": []
-    }
-}
-    </code></pre>
-Parse result: <strong id="parse-result-1" class="result">(javascript execution pending or error)</strong>. Expecting valid.
+Result: <br />
+<h3 id="result-headline"></h3>
+<pre><code id="result">
+</code></pre>
 </p>
-<hr />
 
 
 
-<!-- -->
-<!-- Example #1. Expected result: invalid. -->
-<p>
-    This should be an invalid JSON:
-<pre><code id="json-src-2">
-{
-    "type": "invalid_type",
-    "command": {
-        "name": "set_rules",
-        "rulesets": []
-    }
-}
-    </code></pre>
-Parse result: <strong id="parse-result-2" class="result">(javascript execution pending or error)</strong>. Expecting invalid.
-</p>
-<hr />
-
-
-
-<!-- -->
-<!-- Example #1. Expected result: invalid. -->
-<p>
-    This also should be an invalid JSON:
-<pre><code id="json-src-3">
-{
-    "type": "smartvote",
-    "command": {
-        "name": "unknown_command"
-    }
-}
-    </code></pre>
-Parse result: <strong id="parse-result-3" class="result">(javascript execution pending or error)</strong>. Expecting invalid.
-</p>
-<hr />
-
-
-
-<p>
-    Overall result: <strong id="overall-result" class="result">(javascript execution pending or error)</strong>.
-</p>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script src="/steem-smartvotes.min.js"></script>
@@ -107,22 +74,46 @@ Parse result: <strong id="parse-result-3" class="result">(javascript execution p
      * class use *steemsmartvotes.SteemSmartvotes*.
      */
 
-    function validateCodeTag(num) {
-        var input = $("#json-src-"+num).text();
-        var result = steemsmartvotes.SteemSmartvotes.validateJSON(input);
-        $("#parse-result-"+num).html(result? "valid" : "invalid");
-        return result;
+    function sendSmartvote() {
+        var username = $("#username").val();
+        var postingWif = $("#posting-wif").val();
+        var delegator = $("#delegator").val();
+        var author = $("#author").val();
+        var permlink = $("#permlink").val();
+        var type = $("#type").val();
+        var weight = $("#weight").val();
+
+        var voteorder = {
+            author: author,
+            permlink: permlink,
+            delegator: delegator,
+            weight: 10000,
+            type: type
+        };
+
+        var smartvotes = new steemsmartvotes.SteemSmartvotes(username, postingWif);
+        smartvotes.sendVoteOrder(voteorder, function(error, result) {
+            if(error) {
+                $("#result-headline").css('color', 'red');
+                $("#result-headline").text("Error: "+error.message);
+                $("#result").css('border', '3px solid red');
+            }
+            else {
+                $("#result-headline").css('color', 'green');
+                $("#result-headline").text("Success");
+            }
+            $("#result").html(JSON.stringify(result));
+            console.log(result);
+
+        });
+
+        $("#result-headline").text("Sending...");
     }
 
     $(document).ready(function() {
-        var overallResult = true;
-
-        overallResult = overallResult && (validateCodeTag(1) == true);
-        overallResult = overallResult && (validateCodeTag(2) == false);
-        overallResult = overallResult && (validateCodeTag(3) == false);
-
-        $("#overall-result").html(overallResult? "correct" : "incorrect");
-
+        $("#send-btn").on('click', function() {
+            sendSmartvote();
+        });
     });
 </script>
 </body>
