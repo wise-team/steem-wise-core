@@ -195,7 +195,7 @@
             "type": "object"
         }
     },
-    "description": "General type for every smartvotes operation.",
+    "description": "General type for every smartvotes operation. If an custom_json operation on steem blockchain has\nan id=smartvote parameter: it is going to be parsed as a smartvotes operation using the following schema:",
     "properties": {
         "command": {
             "anyOf": [
@@ -209,7 +209,6 @@
             "description": "This is a smartvotes command. There are two types of commands: set_rules and send_votes."
         },
         "type": {
-            "description": "If an custom_operation on steem blockchain has a parameter \"type\" with value \"smartvotes\"\nit is going to be parsed as a smartvotes operation.",
             "enum": [
                 "smartvote"
             ],

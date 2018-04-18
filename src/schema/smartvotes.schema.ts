@@ -10,12 +10,12 @@ import { smartvotes_ruleset } from "./rules.schema";
 import { smartvotes_voteorder } from "./votes.schema";
 
 /**
- * General type for every smartvotes operation.
+ * General type for every smartvotes operation. If an custom_json operation on steem blockchain has
+ * an id=smartvote parameter: it is going to be parsed as a smartvotes operation using the following schema:
  */
 export interface smartvotes_operation {
     /**
-     * If an custom_operation on steem blockchain has a parameter "type" with value "smartvotes"
-     * it is going to be parsed as a smartvotes operation.
+     *
      */
     type: "smartvote";
 
