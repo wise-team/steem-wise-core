@@ -2,43 +2,53 @@
   "name": "steem-smartvotes",
   "version": "0.1.0",
   "description": "Node/web library for Smartvotes: a vote delegation system for STEEM blockchain",
-  "main": "dist/steem-smartvotes.js",
+  "main": "dist/lib/steem-smartvotes.js",
   "directories": {
+    "lib": "dist/lib",
     "doc": "docs"
   },
   "engines": {
     "node": ">=9.11"
   },
   "dependencies": {
-    "@types/jest": "^22.2.2",
-    "chai": "^4.1.2",
+    "ajv": "^6.4.0",
+    "bluebird": "^3.5.1",
     "commander": "^2.15.1",
-    "jest": "^22.4.3",
-    "steem": "^0.7.1",
-    "ts-jest": "^22.4.2"
+    "steem": "^0.7.1"
   },
   "devDependencies": {
-    "@types/node": "^9.4.6",
-    "ts-node": "^5.0.0",
+    "@types/chai": "^4.1.2",
+    "@types/mocha": "^5.0.0",
+    "@types/node": "^9.6.5",
+    "chai": "^4.1.2",
+    "json-loader": "^0.5.7",
+    "mocha": "^5.1.0",
+    "ts-node": "^5.0.1",
     "tslint": "^5.9.1",
     "typedoc": "^0.11.1",
     "typescript": "^2.7.2",
-    "typescript-json-schema": "^0.22.0"
+    "typescript-json-schema": "^0.22.0",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14",
+    "webpack-visualizer-plugin": "^0.1.11"
   },
   "scripts": {
-    "build": "npm run build-ts && npm run tslint && npm run convert-schema-to-json",
-    "test": "jest --forceExit --coverage --verbose",
+    "build": "npm run build-node && npm run build-browser",
+    "build-node": "npm run build-ts && npm run tslint && npm run build-schema",
     "build-ts": "tsc",
-    "watch-ts": "tsc -w",
+    "build-schema": "npm run convert-schema-to-json && npm run build-schema-docs",
+    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\" && cp schema/smartvotes.schema.json dist/schema/smartvotes.schema.json",
+    "build-schema-docs": "typedoc --out schema/docs --mode file --readme schema/README.md --name \"Steem Smartvotes operation schema\" schema/",
+    "build-browser": "rm -rf dist/browser/ && NODE_ENV=production webpack --config webpack.config.js",
+    "build-browser-dev": "rm -rf dist/browser/ && NODE_ENV=development webpack --config webpack.config.js",
+    "test": "mocha -r ts-node/register test/**/*.spec.ts",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "debug": "npm run build && npm run watch-debug",
-    "build-schema": "npm run convert-schema-to-json && npm run build-schema-docs",
-    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"schema/smartvotes.schema.json\" \"schema/*.schema.ts\" \"smartvotes_operation\"",
-    "build-schema-docs": "typedoc --out schema/docs --mode file --readme schema/README.md --name \"Steem Smartvotes operation schema\" schema/"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jblew/steem-smartvotes-core.git"
+    "url": "git+https://github.com/noisy-witness/steem-smartvotes-core.git"
   },
   "keywords": [
     "steem",
@@ -49,7 +59,7 @@
   "author": "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/Jblew/steem-smartvotes-core/issues"
+    "url": "https://github.com/noisy-witness/steem-smartvotes-core/issues"
   },
-  "homepage": "https://github.com/Jblew/steem-smartvotes-core#readme"
+  "homepage": "https://github.com/noisy-witness/steem-smartvotes-core#readme"
 }

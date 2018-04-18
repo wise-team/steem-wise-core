@@ -7,7 +7,7 @@
  */
 
 import { smartvotes_ruleset } from "./rules.schema";
-import { smartvotes_vote } from "./votes.schema";
+import { smartvotes_voteorder } from "./votes.schema";
 
 /**
  * General type for every smartvotes operation.
@@ -22,7 +22,7 @@ export interface smartvotes_operation {
     /**
      * This is a smartvotes command. There are two types of commands: set_rules and send_votes.
      */
-    command: smartvotes_command_set_rules | smartvotes_command_send_votes;
+    command: smartvotes_command_set_rules | smartvotes_command_send_voteorders;
 }
 
 export interface smartvotes_command_set_rules {
@@ -30,10 +30,10 @@ export interface smartvotes_command_set_rules {
     rulesets: smartvotes_ruleset [];
 }
 
-export interface smartvotes_command_send_votes {
-    name: "send_votes";
-    votes: smartvotes_vote [];
+export interface smartvotes_command_send_voteorders {
+    name: "send_voteorders";
+    voteorders: smartvotes_voteorder [];
 }
 
 export { smartvotes_ruleset, smartvotes_rule, smartvotes_rule_authors, smartvotes_rule_tags, smartvotes_rule_time_window } from "./rules.schema";
-export { smartvotes_vote, smartvotes_vote_type, smartvotes_vote_weight } from "./votes.schema";
+export { smartvotes_voteorder, smartvotes_vote_weight } from "./votes.schema";

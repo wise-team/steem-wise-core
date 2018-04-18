@@ -1,24 +1,24 @@
 {
     "$schema": "http://json-schema.org/draft-06/schema#",
     "definitions": {
-        "smartvotes_command_send_votes": {
+        "smartvotes_command_send_voteorders": {
             "properties": {
                 "name": {
                     "enum": [
-                        "send_votes"
+                        "send_voteorders"
                     ],
                     "type": "string"
                 },
-                "votes": {
+                "voteorders": {
                     "items": {
-                        "$ref": "#/definitions/smartvotes_vote"
+                        "$ref": "#/definitions/smartvotes_voteorder"
                     },
                     "type": "array"
                 }
             },
             "required": [
                 "name",
-                "votes"
+                "voteorders"
             ],
             "type": "object"
         },
@@ -155,35 +155,44 @@
             ],
             "type": "object"
         },
-        "smartvotes_vote": {
+        "smartvotes_voteorder": {
+            "description": "Schema for sending a single vote order.",
             "properties": {
-                "delegator": {
+                "author": {
+                    "description": "Author of the post.",
                     "type": "string"
                 },
-                "slug": {
+                "delegator": {
+                    "description": "Username of your delegator (a person, who allowed you to vote on his/her behalf.",
+                    "type": "string"
+                },
+                "permlink": {
+                    "description": "Permalink of the post.",
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/smartvotes_vote_type"
+                    "description": "Type of vote: an upvote or a flag.",
+                    "enum": [
+                        "flag",
+                        "upvote"
+                    ],
+                    "type": "string"
                 },
                 "weight": {
-                    "type": "number"
+                    "description": "Weight of the upvote or flag.",
+                    "maximum": 10000,
+                    "minimum": 0,
+                    "type": "integer"
                 }
             },
             "required": [
+                "author",
                 "delegator",
-                "slug",
+                "permlink",
                 "type",
                 "weight"
             ],
             "type": "object"
-        },
-        "smartvotes_vote_type": {
-            "enum": [
-                "flag",
-                "vote"
-            ],
-            "type": "string"
         }
     },
     "description": "General type for every smartvotes operation.",
@@ -194,7 +203,7 @@
                     "$ref": "#/definitions/smartvotes_command_set_rules"
                 },
                 {
-                    "$ref": "#/definitions/smartvotes_command_send_votes"
+                    "$ref": "#/definitions/smartvotes_command_send_voteorders"
                 }
             ],
             "description": "This is a smartvotes command. There are two types of commands: set_rules and send_votes."

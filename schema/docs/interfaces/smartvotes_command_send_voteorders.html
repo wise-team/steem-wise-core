@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>smartvotes_vote | Steem Smartvotes operation schema</title>
+	<title>smartvotes_command_send_voteorders | Steem Smartvotes operation schema</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,10 +56,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="smartvotes_vote.html">smartvotes_vote</a>
+					<a href="smartvotes_command_send_voteorders.html">smartvotes_command_send_voteorders</a>
 				</li>
 			</ul>
-			<h1>Interface smartvotes_vote</h1>
+			<h1>Interface smartvotes_command_send_voteorders</h1>
 		</div>
 	</div>
 </header>
@@ -70,7 +70,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">smartvotes_vote</span>
+						<span class="target">smartvotes_command_send_voteorders</span>
 					</li>
 				</ul>
 			</section>
@@ -81,10 +81,8 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#delegator" class="tsd-kind-icon">delegator</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#slug" class="tsd-kind-icon">slug</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#type" class="tsd-kind-icon">type</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_vote.html#weight" class="tsd-kind-icon">weight</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_command_send_voteorders.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="smartvotes_command_send_voteorders.html#voteorders" class="tsd-kind-icon">voteorders</a></li>
 							</ul>
 						</section>
 					</div>
@@ -93,42 +91,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="delegator" class="tsd-anchor"></a>
-					<h3>delegator</h3>
-					<div class="tsd-signature tsd-kind-icon">delegator<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"send_voteorders"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L5">votes.schema.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/noisy-witness/steem-smartvotes-core/blob/fba2530/schema/smartvotes.schema.ts#L34">smartvotes.schema.ts:34</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="slug" class="tsd-anchor"></a>
-					<h3>slug</h3>
-					<div class="tsd-signature tsd-kind-icon">slug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="voteorders" class="tsd-anchor"></a>
+					<h3>voteorders</h3>
+					<div class="tsd-signature tsd-kind-icon">voteorders<span class="tsd-signature-symbol">:</span> <a href="smartvotes_voteorder.html" class="tsd-signature-type">smartvotes_voteorder</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L4">votes.schema.ts:4</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="type" class="tsd-anchor"></a>
-					<h3>type</h3>
-					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <a href="../enums/smartvotes_vote_type.html" class="tsd-signature-type">smartvotes_vote_type</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L7">votes.schema.ts:7</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="weight" class="tsd-anchor"></a>
-					<h3>weight</h3>
-					<div class="tsd-signature tsd-kind-icon">weight<span class="tsd-signature-symbol">:</span> <a href="../globals.html#smartvotes_vote_weight" class="tsd-signature-type">smartvotes_vote_weight</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/Jblew/steem-smartvotes-core/blob/ea460cb/schema/votes.schema.ts#L6">votes.schema.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/noisy-witness/steem-smartvotes-core/blob/fba2530/schema/smartvotes.schema.ts#L35">smartvotes.schema.ts:35</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -144,12 +122,21 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-enum">
-						<a href="../enums/smartvotes_vote_type.html" class="tsd-kind-icon">smartvotes_<wbr>vote_<wbr>type</a>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface">
+						<a href="smartvotes_command_send_voteorders.html" class="tsd-kind-icon">smartvotes_<wbr>command_<wbr>send_<wbr>voteorders</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="smartvotes_command_send_voteorders.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="smartvotes_command_send_voteorders.html#voteorders" class="tsd-kind-icon">voteorders</a>
+							</li>
+						</ul>
 					</li>
-					<li class=" tsd-kind-interface">
-						<a href="smartvotes_command_send_votes.html" class="tsd-kind-icon">smartvotes_<wbr>command_<wbr>send_<wbr>votes</a>
-					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-interface">
 						<a href="smartvotes_command_set_rules.html" class="tsd-kind-icon">smartvotes_<wbr>command_<wbr>set_<wbr>rules</a>
 					</li>
@@ -168,27 +155,9 @@
 					<li class=" tsd-kind-interface">
 						<a href="smartvotes_ruleset.html" class="tsd-kind-icon">smartvotes_<wbr>ruleset</a>
 					</li>
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface">
-						<a href="smartvotes_vote.html" class="tsd-kind-icon">smartvotes_<wbr>vote</a>
-						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="smartvotes_vote.html#delegator" class="tsd-kind-icon">delegator</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="smartvotes_vote.html#slug" class="tsd-kind-icon">slug</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="smartvotes_vote.html#type" class="tsd-kind-icon">type</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="smartvotes_vote.html#weight" class="tsd-kind-icon">weight</a>
-							</li>
-						</ul>
+					<li class=" tsd-kind-interface">
+						<a href="smartvotes_voteorder.html" class="tsd-kind-icon">smartvotes_<wbr>voteorder</a>
 					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-type-alias">
 						<a href="../globals.html#smartvotes_rule" class="tsd-kind-icon">smartvotes_<wbr>rule</a>
 					</li>

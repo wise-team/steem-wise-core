@@ -1,18 +1,18 @@
-# Steem smartvotes (core package)
-Vote delegation system for STEEM blockchain: core package.
+# Steem smartvotes (core library)
+[![Known Vulnerabilities](https://snyk.io/test/github/noisy-witness/steem-smartvotes-core/badge.svg?targetFile=package.json)](https://snyk.io/test/github/noisy-witness/steem-smartvotes-core?targetFile=package.json)
 
-Currently, there are two tools available:
+Vote delegation system for STEEM blockchain: common library for browser & node.
+
+Currently, it is used by the following tools:
 
 - [steem-smartvotes-cli](https://github.com/Jblew/steem-smartvotes-cli) — CLI tool for vote delegators
 - [steem-smartvotes-voter-page](https://github.com/Jblew/steem-smartvotes-voter-page) — Simple HTML page that allows a voter to vote on behalf of a delegator. 
 
+Links to github-pages hosted online tools can be found here: [noisy-witness.github.io/steem-smartvotes-core/](http://noisy-witness.github.io/steem-smartvotes-core/). Online tools:
 
-Links to github-pages hosted online tools can be found here: [jblew.github.io/steem-smartvotes-core/](http://jblew.github.io/steem-smartvotes-core/). Online tools:
-
-- [Voter page](https://jblew.github.io/steem-smartvotes-voter-page)
-- [JSON operation Validator](https://jblew.github.io/steem-smartvotes-core/schema/validator/validator.html)
-
-
+- [Voter page](https://noisy-witness.github.io/steem-smartvotes-voter-page)
+- [JSON operation API DOCS](https://noisy-witness.github.io/steem-smartvotes-core/schema/docs/index.html)
+- [JSON operation Validator](https://noisy-witness.github.io/steem-smartvotes-core/schema/validator/validator.html)
 
 ## What will smartvotes do for the community?
 
@@ -67,7 +67,11 @@ For safe and reliable communication smartvotes simply put all operations on Stee
 - [steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards](https://steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards)
 - [steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters](https://steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters)
 
-
+## How to use the library?
+Building:
+```bash
+$ npm run build
+```
 
 
 ## Thank you
@@ -77,9 +81,12 @@ I would like to thank [@noisy](https://steemit.com/@noisy) ([github.com/noisy](h
 I also send many thanks to the authors of vendor dependencies of the project. You are the ones, who made the development of this tool so joyful and smooth. Many thanks to the contributors of:
 
  - [steem](https://github.com/steemit/steem)
+ - [ajv](https://github.com/epoberezkin/ajv)
  - [json-schema](http://json-schema.org/)
  - [typescript](https://github.com/Microsoft/TypeScript)
  - [typescript-json-schema](https://github.com/YousefED/typescript-json-schema)
+ - [webpack](https://webpack.js.org/)
+ - [mocha](https://mochajs.org/) & [chai](http://www.chaijs.com/)
 
 There are separate thanks in each project's README.
 
