@@ -25,7 +25,6 @@ describe("SteemSmartvotes", () => {
             };
 
             sm.sendVoteOrder(order, function (error: Error, result: any) {
-                console.log("Done");
                 done();
             });
         });
