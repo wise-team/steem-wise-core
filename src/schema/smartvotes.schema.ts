@@ -33,10 +33,10 @@ export interface smartvotes_command_set_rules {
  * This command sends a voteorder.
  */
 export interface smartvotes_command_send_voteorder {
-    name: "send_voteorders";
+    name: "send_voteorder";
 
     /**
-     * An voteorder to be sent.
+     * A voteorder to be sent.
      */
     voteorder: smartvotes_voteorder;
 }

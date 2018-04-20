@@ -21,9 +21,8 @@ describe("blockchain-filter", () => {
         })
 
         it("getSmartvotesOperationsOfUser returns at least 7 smartvote operations for user @guest123", () => {
-            console.log(guest123Ops);
             expect(guest123Ops.length).to.be.greaterThan(6);
         });
-    })
+    });
 
 });
