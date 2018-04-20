@@ -1,6 +1,7 @@
 import * as schema from "./schema/smartvotes.schema";
 import * as ajv from "ajv";
 import * as schemaJSON from "../smartvotes.schema.json";
+
 const steem = require("steem");
 
 export class SteemSmartvotes {
@@ -19,15 +20,11 @@ export class SteemSmartvotes {
         return true;
     }
 
+    // TODO send vote + voteorder
     public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
         const smartvotesOp: schema.smartvotes_operation = {
-            type: "smartvote",
-            command: {
-                name: "send_voteorders",
-                voteorders: [
-                    voteorder
-                ]
-            }
+            name: "send_voteorders",
+            voteorder: voteorder
         };
 
         const jsonStr = JSON.stringify(smartvotesOp);
@@ -43,7 +40,6 @@ export class SteemSmartvotes {
 
         const steemCallback = function(err: Error, result: any): void {
             callback(err, result);
-            console.log(result);
         };
 
         steem.broadcast.send(
@@ -57,11 +53,15 @@ export class SteemSmartvotes {
     }
 
     public sendRules(rulesets: schema.smartvotes_ruleset []): void {
-        throw new Error("Not yet supported");
+        throw new Error("Not implemented yet");
     }
 
     public getRules(): schema.smartvotes_ruleset [] {
-        throw new Error("Not yet supported");
+        throw new Error("Not implemented yet");
+    }
+
+    public loadSmartvotesOperationsOfAccount(username: string, callback: (error: Error, result: schema.smartvotes_operation []) => void): void {
+        throw new Error("Not implemented yet");
     }
 
     public static validateJSON(input: string) {
