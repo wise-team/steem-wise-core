@@ -10,3 +10,11 @@ describe("SteemSmartvotes.constructor", () => {
         expect(() => {new SteemSmartvotes("", "a"); }).to.throw();
     });
 });
+
+/*describe("SteemSmartvotes.loadSmartvotesOperationsOfAccount", () => {
+    it("does nothing so far", () => {
+        new SteemSmartvotes("a", "a").loadSmartvotesOperationsOfAccount("guest123", function(error, result): void {
+            return;
+        });
+    });
+});*/
