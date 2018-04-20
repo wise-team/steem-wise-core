@@ -56,8 +56,32 @@ export class SteemSmartvotes {
         );
     }
 
-    public sendRules(rulesets: schema.smartvotes_ruleset []): void {
-        throw new Error("Not implemented yet");
+    public sendRules(rulesets: schema.smartvotes_ruleset [], callback: (error: Error, result: any) => void): void {
+        const smartvotesOp: schema.smartvotes_operation = {name: "set_rules", rulesets: rulesets};
+        const jsonStr = JSON.stringify(smartvotesOp);
+        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid");
+
+        const customJsonOp: CustomJsonOperation = {
+            required_auths: [],
+            required_posting_auths: [this.username],
+            id: "smartvote",
+            json: jsonStr
+        };
+
+        const steemCallback = function(err: Error, result: any): void {
+            callback(err, result);
+        };
+
+        steem.broadcast.send(
+            {
+                extensions: [],
+                operations: [
+                    ["custom_json", customJsonOp]
+                ]
+            },
+            {posting: this.postingWif},
+            steemCallback
+        );
     }
 
     public getRules(): schema.smartvotes_ruleset [] {
