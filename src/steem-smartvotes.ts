@@ -23,7 +23,7 @@ export class SteemSmartvotes {
 
     public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
         const jsonStr = JSON.stringify({name: "send_voteorder", voteorder: voteorder});
-        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid");
+        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid: "+jsonStr);
 
         const voteOp: VoteOperation = {
             voter: this.username,
@@ -56,10 +56,10 @@ export class SteemSmartvotes {
         );
     }
 
-    public sendRules(rulesets: schema.smartvotes_ruleset [], callback: (error: Error, result: any) => void): void {
+    public sendRulesets(rulesets: schema.smartvotes_ruleset [], callback: (error: Error, result: any) => void): void {
         const smartvotesOp: schema.smartvotes_operation = {name: "set_rules", rulesets: rulesets};
         const jsonStr = JSON.stringify(smartvotesOp);
-        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid");
+        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Set_rulesets command JSON is invalid: " + jsonStr);
 
         const customJsonOp: CustomJsonOperation = {
             required_auths: [],
