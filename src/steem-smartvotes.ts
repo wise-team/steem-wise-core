@@ -1,7 +1,7 @@
 import * as schema from "./schema/smartvotes.schema";
 import * as ajv from "ajv";
 import * as schemaJSON from "../smartvotes.schema.json";
-import { CustomJsonOperation } from "./blockchain-operations-types";
+import { CustomJsonOperation, VoteOperation } from "./blockchain-operations-types";
 
 const steem = require("steem");
 
@@ -21,23 +21,23 @@ export class SteemSmartvotes {
         return true;
     }
 
-    // TODO send vote + voteorder
     public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
-        const smartvotesOp: schema.smartvotes_operation = {
-            name: "send_voteorder",
-            voteorder: voteorder
-        };
-
-        const jsonStr = JSON.stringify(smartvotesOp);
-
+        const jsonStr = JSON.stringify({name: "send_voteorder", voteorder: voteorder});
         if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid");
 
-        const steemBlockchainOp: ["custom_json", CustomJsonOperation] = ["custom_json", {
+        const voteOp: VoteOperation = {
+            voter: this.username,
+            author: voteorder.author,
+            permlink: voteorder.permlink,
+            weight: voteorder.weight
+        };
+
+        const customJsonOp: CustomJsonOperation = {
             required_auths: [],
             required_posting_auths: [this.username],
             id: "smartvote",
             json: jsonStr
-        }];
+        };
 
         const steemCallback = function(err: Error, result: any): void {
             callback(err, result);
@@ -46,7 +46,10 @@ export class SteemSmartvotes {
         steem.broadcast.send(
             {
                 extensions: [],
-                operations: [steemBlockchainOp],
+                operations: [
+                                ["vote", voteOp],
+                                ["custom_json", customJsonOp]
+                            ]
             },
             {posting: this.postingWif},
             steemCallback

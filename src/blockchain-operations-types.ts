@@ -18,3 +18,10 @@ export type CustomJsonOperation = {
     required_auths: string [];
     required_posting_auths: string [];
 };
+
+export interface VoteOperation {
+    voter: string;
+    author: string;
+    permlink: string;
+    weight: number;
+}

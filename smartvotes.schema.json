@@ -14,13 +14,13 @@
             "properties": {
                 "name": {
                     "enum": [
-                        "send_voteorders"
+                        "send_voteorder"
                     ],
                     "type": "string"
                 },
                 "voteorder": {
                     "$ref": "#/definitions/smartvotes_voteorder",
-                    "description": "An voteorder to be sent."
+                    "description": "A voteorder to be sent."
                 }
             },
             "required": [
