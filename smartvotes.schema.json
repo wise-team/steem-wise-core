@@ -44,8 +44,10 @@
             "type": "object"
         },
         "smartvotes_rule_authors": {
+            "description": "A rule for specifying allowed or denied authors.",
             "properties": {
                 "authors": {
+                    "description": "List of authors checked using boolean OR.",
                     "items": {
                         "type": "string"
                     },
@@ -72,7 +74,39 @@
             ],
             "type": "object"
         },
+        "smartvotes_rule_custom_rpc": {
+            "description": "A rule, which allows using custom JSON-RPC for post validation. When user\nbrowses posts / votes / before sending a vote based on a voteorder — a call will be performed.\nRPC should return boolean true or false indicating potential vote validity.",
+            "properties": {
+                "rpc_host": {
+                    "type": "string"
+                },
+                "rpc_method": {
+                    "type": "string"
+                },
+                "rpc_path": {
+                    "type": "string"
+                },
+                "rpc_port": {
+                    "type": "number"
+                },
+                "type": {
+                    "enum": [
+                        "custom_rpc"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "rpc_host",
+                "rpc_method",
+                "rpc_path",
+                "rpc_port",
+                "type"
+            ],
+            "type": "object"
+        },
         "smartvotes_rule_tags": {
+            "description": "A rule for specifying all allowed or denied tags.",
             "properties": {
                 "mode": {
                     "enum": [
@@ -82,6 +116,7 @@
                     "type": "string"
                 },
                 "tags": {
+                    "description": "List of tags checked using boolean OR.",
                     "items": {
                         "type": "string"
                     },
@@ -101,31 +136,15 @@
             ],
             "type": "object"
         },
-        "smartvotes_rule_time_window": {
+        "smartvotes_ruleset": {
+            "description": "This is a named set of rules, which have to be fulfilled by an article supplied by a voter.\nThe delegator can define rulesets for several users, and several rulesets for each single user.\nRules in the ruleset are checked using AND boolean operator. They have to be all fulfilled for the vote to be cast.",
             "properties": {
-                "older_than": {
-                    "type": "number"
-                },
-                "type": {
-                    "enum": [
-                        "time_window"
-                    ],
+                "name": {
+                    "description": "Unique name of a ruleset. A voter selects one of the rulesets available for him. This information is passed\nwith an voteorder.",
                     "type": "string"
                 },
-                "younger_than": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "older_than",
-                "type",
-                "younger_than"
-            ],
-            "type": "object"
-        },
-        "smartvotes_ruleset": {
-            "properties": {
                 "rules": {
+                    "description": "Array of rules, that will be checked using AND boolean operator. An rule should implement smartvotes_rule type.\nsmartvotes_rule type simply connects the following rule types: smartvotes_rule_tags,\nsmartvotes_rule_authors, smartvotes_rule_custom_rpc.",
                     "items": {
                         "anyOf": [
                             {
@@ -135,20 +154,23 @@
                                 "$ref": "#/definitions/smartvotes_rule_authors"
                             },
                             {
-                                "$ref": "#/definitions/smartvotes_rule_time_window"
+                                "$ref": "#/definitions/smartvotes_rule_custom_rpc"
                             }
                         ]
                     },
                     "type": "array"
                 },
                 "total_weight": {
+                    "description": "Total weight of all votes that a voter can cast.\nEg.: 10000 means a single 100% vote, or twenty 5% votes.\nIf you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.",
                     "type": "number"
                 },
                 "voter": {
+                    "description": "Voter's username.",
                     "type": "string"
                 }
             },
             "required": [
+                "name",
                 "rules",
                 "total_weight",
                 "voter"

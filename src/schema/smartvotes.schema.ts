@@ -35,5 +35,8 @@ export interface smartvotes_command_send_voteorders {
     voteorders: smartvotes_voteorder [];
 }
 
-export { smartvotes_ruleset, smartvotes_rule, smartvotes_rule_authors, smartvotes_rule_tags, smartvotes_rule_time_window } from "./rules.schema";
+export { smartvotes_ruleset, smartvotes_rule, smartvotes_rule_authors,
+    smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_custom_rpc_call,
+    smartvotes_custom_rpc_call_parameters } from "./rules.schema";
+
 export { smartvotes_voteorder, smartvotes_vote_weight } from "./votes.schema";
