@@ -34,6 +34,7 @@ function loadCredentials(callback) {
 
 function sendVoteorder(credentials) {
     var vote = {
+        ruleset_name: "test_ruleset",
         author: "steemit",
         permlink: "firstpost",
         delegator: "steemprojects1",
