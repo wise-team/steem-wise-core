@@ -5,26 +5,19 @@ var steemsmartvotes = require("../../dist/steem-smartvotes.js");
  */
 
 var json1 = {
-    "type": "smartvote",
-    "command": {
-        "name": "set_rules",
-        "rulesets": []
-    }
+    "name": "set_rules",
+    "rulesets": []
 };//should be valid
 
 var json2 = {
-    "type": "invalid_type",
-    "command": {
-        "name": "set_rules",
-        "rulesets": []
+    "name": "send_voteorder",
+    "voteorder": {
+        
     }
 };//should be invalid
 
 var json3 = {
-    "type": "smartvote",
-    "command": {
-        "name": "unknown_command"
-    }
+    "name": "unknown_command"
 };//should be invalid
 
 var result1 = steemsmartvotes.SteemSmartvotes.validateJSON(JSON.stringify(json1));
