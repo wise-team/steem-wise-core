@@ -1,7 +1,16 @@
 {
     "$schema": "http://json-schema.org/draft-06/schema#",
+    "anyOf": [
+        {
+            "$ref": "#/definitions/smartvotes_command_set_rules"
+        },
+        {
+            "$ref": "#/definitions/smartvotes_command_send_voteorder"
+        }
+    ],
     "definitions": {
-        "smartvotes_command_send_voteorders": {
+        "smartvotes_command_send_voteorder": {
+            "description": "This command sends a voteorder.",
             "properties": {
                 "name": {
                     "enum": [
@@ -9,20 +18,19 @@
                     ],
                     "type": "string"
                 },
-                "voteorders": {
-                    "items": {
-                        "$ref": "#/definitions/smartvotes_voteorder"
-                    },
-                    "type": "array"
+                "voteorder": {
+                    "$ref": "#/definitions/smartvotes_voteorder",
+                    "description": "An voteorder to be sent."
                 }
             },
             "required": [
                 "name",
-                "voteorders"
+                "voteorder"
             ],
             "type": "object"
         },
         "smartvotes_command_set_rules": {
+            "description": "This command sets the rules. It invalidates previous rules. For a voteorder\na binding set_rules command has to be determined. It is the newest set_rules command\nposted by the delegator to the Blockchain BEFORE the voteorder was sent.",
             "properties": {
                 "name": {
                     "enum": [
@@ -31,6 +39,7 @@
                     "type": "string"
                 },
                 "rulesets": {
+                    "description": "List of named rulesets.",
                     "items": {
                         "$ref": "#/definitions/smartvotes_ruleset"
                     },
@@ -161,7 +170,7 @@
                     "type": "array"
                 },
                 "total_weight": {
-                    "description": "Total weight of all votes that a voter can cast.\nEg.: 10000 means a single 100% vote, or twenty 5% votes.\nIf you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.",
+                    "description": "Total weight of all votes that a voter can cast daily.\nEg.: 10000 means a single 100% vote, or twenty 5% votes.\nIf you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.",
                     "type": "number"
                 },
                 "voter": {
@@ -192,6 +201,10 @@
                     "description": "Permalink of the post.",
                     "type": "string"
                 },
+                "ruleset_name": {
+                    "description": "Name of a Delegator's ruleset, against which this vote should be checked.",
+                    "type": "string"
+                },
                 "type": {
                     "description": "Type of vote: an upvote or a flag.",
                     "enum": [
@@ -211,36 +224,12 @@
                 "author",
                 "delegator",
                 "permlink",
+                "ruleset_name",
                 "type",
                 "weight"
             ],
             "type": "object"
         }
-    },
-    "description": "General type for every smartvotes operation. If an custom_json operation on steem blockchain has\nan id=smartvote parameter: it is going to be parsed as a smartvotes operation using the following schema:",
-    "properties": {
-        "command": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/smartvotes_command_set_rules"
-                },
-                {
-                    "$ref": "#/definitions/smartvotes_command_send_voteorders"
-                }
-            ],
-            "description": "This is a smartvotes command. There are two types of commands: set_rules and send_votes."
-        },
-        "type": {
-            "enum": [
-                "smartvote"
-            ],
-            "type": "string"
-        }
-    },
-    "required": [
-        "command",
-        "type"
-    ],
-    "type": "object"
+    }
 }
 

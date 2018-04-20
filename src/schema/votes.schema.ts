@@ -5,6 +5,11 @@
  */
 export interface smartvotes_voteorder {
     /**
+     * Name of a Delegator's ruleset, against which this vote should be checked.
+     */
+    ruleset_name: string;
+
+    /**
      * Author of the post.
      */
     author: string;

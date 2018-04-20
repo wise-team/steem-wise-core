@@ -11,29 +11,36 @@ import { smartvotes_voteorder } from "./votes.schema";
 
 /**
  * General type for every smartvotes operation. If an custom_json operation on steem blockchain has
- * an id=smartvote parameter: it is going to be parsed as a smartvotes operation using the following schema:
+ * an id=smartvote parameter it is going to be parsed as a smartvotes operation using the following schema:
  */
-export interface smartvotes_operation {
-    /**
-     *
-     */
-    type: "smartvote";
+export type smartvotes_operation = smartvotes_command_set_rules | smartvotes_command_send_voteorder;
 
-    /**
-     * This is a smartvotes command. There are two types of commands: set_rules and send_votes.
-     */
-    command: smartvotes_command_set_rules | smartvotes_command_send_voteorders;
-}
-
+/**
+ * This command sets the rules. It invalidates previous rules. For a voteorder
+ * a binding set_rules command has to be determined. It is the newest set_rules command
+ * posted by the delegator to the Blockchain BEFORE the voteorder was sent.
+ */
 export interface smartvotes_command_set_rules {
     name: "set_rules";
+
+    /**
+     * List of named rulesets.
+     */
     rulesets: smartvotes_ruleset [];
 }
 
-export interface smartvotes_command_send_voteorders {
+/**
+ * This command sends a voteorder.
+ */
+export interface smartvotes_command_send_voteorder {
     name: "send_voteorders";
-    voteorders: smartvotes_voteorder [];
+
+    /**
+     * An voteorder to be sent.
+     */
+    voteorder: smartvotes_voteorder;
 }
+
 
 export { smartvotes_ruleset, smartvotes_rule, smartvotes_rule_authors,
     smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_custom_rpc_call,

@@ -20,11 +20,11 @@ export interface smartvotes_ruleset {
     voter: string;
 
     /**
-     * Total weight of all votes that a voter can cast.
+     * Total weight of all votes that a voter can cast daily.
      * Eg.: 10000 means a single 100% vote, or twenty 5% votes.
      * If you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.
      */
-    total_weight: smartvotes_vote_weight;
+    total_weight: number;
 
     /**
      * Array of rules, that will be checked using AND boolean operator. An rule should implement smartvotes_rule type.
