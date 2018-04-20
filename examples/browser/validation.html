@@ -45,11 +45,8 @@
     This should be a valid JSON:
     <pre><code id="json-src-1">
 {
-    "type": "smartvote",
-    "command": {
-        "name": "set_rules",
-        "rulesets": []
-    }
+    "name": "set_rules",
+    "rulesets": []
 }
     </code></pre>
     Parse result: <strong id="parse-result-1" class="result">(javascript execution pending or error)</strong>. Expecting valid.
@@ -64,10 +61,9 @@
     This should be an invalid JSON:
 <pre><code id="json-src-2">
 {
-    "type": "invalid_type",
-    "command": {
-        "name": "set_rules",
-        "rulesets": []
+    "name": "send_voteorder",
+    "voteorder": {
+
     }
 }
     </code></pre>
@@ -83,10 +79,7 @@ Parse result: <strong id="parse-result-2" class="result">(javascript execution p
     This also should be an invalid JSON:
 <pre><code id="json-src-3">
 {
-    "type": "smartvote",
-    "command": {
-        "name": "unknown_command"
-    }
+    "name": "unknown_command"
 }
     </code></pre>
 Parse result: <strong id="parse-result-3" class="result">(javascript execution pending or error)</strong>. Expecting invalid.
