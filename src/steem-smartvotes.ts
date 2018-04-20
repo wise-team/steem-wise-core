@@ -1,6 +1,7 @@
 import * as schema from "./schema/smartvotes.schema";
 import * as ajv from "ajv";
 import * as schemaJSON from "../smartvotes.schema.json";
+import { CustomJsonOperation } from "./blockchain-operations-types";
 
 const steem = require("steem");
 
@@ -31,7 +32,7 @@ export class SteemSmartvotes {
 
         if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid");
 
-        const steemBlockchainOp = ["custom_json", {
+        const steemBlockchainOp: ["custom_json", CustomJsonOperation] = ["custom_json", {
             required_auths: [],
             required_posting_auths: [this.username],
             id: "smartvote",
