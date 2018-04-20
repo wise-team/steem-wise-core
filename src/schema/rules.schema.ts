@@ -27,6 +27,11 @@ export interface smartvotes_ruleset {
     total_weight: number;
 
     /**
+     * Decide if an user can upvote posts, flag them, or both.
+     */
+    action: "upvote" | "flag" | "upvote+flag";
+
+    /**
      * Array of rules, that will be checked using AND boolean operator. An rule should implement smartvotes_rule type.
      * smartvotes_rule type simply connects the following rule types: smartvotes_rule_tags,
      * smartvotes_rule_authors, smartvotes_rule_custom_rpc.

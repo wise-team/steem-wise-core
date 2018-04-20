@@ -148,6 +148,15 @@
         "smartvotes_ruleset": {
             "description": "This is a named set of rules, which have to be fulfilled by an article supplied by a voter.\nThe delegator can define rulesets for several users, and several rulesets for each single user.\nRules in the ruleset are checked using AND boolean operator. They have to be all fulfilled for the vote to be cast.",
             "properties": {
+                "action": {
+                    "description": "Decide if an user can upvote posts, flag them, or both.",
+                    "enum": [
+                        "flag",
+                        "upvote",
+                        "upvote+flag"
+                    ],
+                    "type": "string"
+                },
                 "name": {
                     "description": "Unique name of a ruleset. A voter selects one of the rulesets available for him. This information is passed\nwith an voteorder.",
                     "type": "string"
@@ -179,6 +188,7 @@
                 }
             },
             "required": [
+                "action",
                 "name",
                 "rules",
                 "total_weight",
