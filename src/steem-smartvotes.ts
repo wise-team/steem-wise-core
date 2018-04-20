@@ -24,7 +24,7 @@ export class SteemSmartvotes {
     // TODO send vote + voteorder
     public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
         const smartvotesOp: schema.smartvotes_operation = {
-            name: "send_voteorders",
+            name: "send_voteorder",
             voteorder: voteorder
         };
 
