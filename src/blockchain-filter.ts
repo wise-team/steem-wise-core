@@ -12,7 +12,7 @@ import { RawOperation, CustomJsonOperation } from "./blockchain-operations-types
  * @param {(error: Error, result: smartvotes_operation []) => void} callback
  */
 export function getOperations(username: string, commands: string [], limit: number, callback: (error: Error, result: smartvotes_operation []) => void): void {
-    filterHistoryRange(username, -1, limit,[], function(op: smartvotes_operation): boolean {
+    filterHistoryRange(username, -1, limit, [], function(op: smartvotes_operation): boolean {
         if (commands.length == 0) return true;
         else if (commands.indexOf(op.name) !== -1) {
             return true;
