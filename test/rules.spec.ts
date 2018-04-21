@@ -66,7 +66,7 @@ describe("rules", () => {
                 const done = function (err?: any) { mochaDone(err); releaseMutex(); }
                 this.timeout(10000);
 
-                RulesValidator.getRulesOfUser("guest123", function (error: Error | undefined, result: smartvotes_ruleset []): void {
+                RulesValidator.getRulesOfUser("guest123", new Date(), function (error: Error | undefined, result: smartvotes_ruleset []): void {
                     if (error) done(error);
                     else {
                         if (result.length >= 2) {
