@@ -1,6 +1,6 @@
 import * as schema from "./schema/smartvotes.schema";
 import { CustomJsonOperation, VoteOperation } from "./blockchain-operations-types";
-import { Validator } from "./Validator";
+import { JSONValidator } from "./JSONValidator";
 
 const steem = require("steem");
 
@@ -92,7 +92,7 @@ export class SteemSmartvotes {
     }
 
     public static validateJSON(input: string): boolean {
-        return Validator.validateJSON(input);
+        return JSONValidator.validateJSON(input);
     }
 }
 

@@ -2,11 +2,10 @@ import * as schema from "./schema/smartvotes.schema";
 import * as ajv from "ajv";
 import * as schemaJSON from "../smartvotes.schema.json";
 
-export class Validator {
-    public static validateVoteOrderAgainstRules(voteorder: schema.smartvotes_voteorder): boolean {
-        return false;
-    }
-
+/**
+ * The JSONValidator validates smartvotes operation JSON using static method #validateJSON
+ */
+export class JSONValidator {
     public static validateJSON(input: string): boolean {
         const aajv: ajv.Ajv = new ajv();
         aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));

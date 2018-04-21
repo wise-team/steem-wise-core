@@ -12,8 +12,8 @@ describe("blockchain-filter", () => {
 
         before(function(done) {
             this.timeout(10000);
-            filter.getSmartvotesOperationsOfUser("guest123", function(error: Error, result: smartvotes_operation []) {
-                if (error) throw error;
+            filter.getSmartvotesOperationsOfUser("guest123", function(error: Error | undefined, result: smartvotes_operation []): void {
+                if (error) done(error);
 
                 guest123Ops = result;
                 done();
