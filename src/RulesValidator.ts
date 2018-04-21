@@ -27,7 +27,6 @@ export class RulesValidator {
         });
     }
 
-    // TODO validation at exact time
     public static validateVoteOrder(username: string, voteorder: smartvotes_voteorder, publishDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
         if (typeof voteorder === "undefined") { callback(new Error("Voteorder must not be empty"), false); return; }
         if (typeof voteorder.delegator === "undefined" || voteorder.delegator.length == 0) { callback(new Error("Delegator must not be empty"), false); return; }
