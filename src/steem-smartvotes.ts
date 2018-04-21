@@ -1,7 +1,6 @@
 import * as schema from "./schema/smartvotes.schema";
-import * as ajv from "ajv";
-import * as schemaJSON from "../smartvotes.schema.json";
 import { CustomJsonOperation, VoteOperation } from "./blockchain-operations-types";
+import { Validator } from "./Validator";
 
 const steem = require("steem");
 
@@ -23,7 +22,7 @@ export class SteemSmartvotes {
 
     public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
         const jsonStr = JSON.stringify({name: "send_voteorder", voteorder: voteorder});
-        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid: "+jsonStr);
+        if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid: " + jsonStr);
 
         const voteOp: VoteOperation = {
             voter: this.username,
@@ -92,12 +91,8 @@ export class SteemSmartvotes {
         throw new Error("Not implemented yet");
     }
 
-    public static validateJSON(input: string) {
-        const aajv: ajv.Ajv = new ajv();
-        aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
-
-        const validate = aajv.compile(schemaJSON);
-        return validate(JSON.parse(input));
+    public static validateJSON(input: string): boolean {
+        return Validator.validateJSON(input);
     }
 }
 
