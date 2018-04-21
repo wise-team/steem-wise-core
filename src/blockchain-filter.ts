@@ -12,7 +12,27 @@ import { RawOperation, CustomJsonOperation } from "./blockchain-operations-types
  * @param {(error: Error, result: smartvotes_operation []) => void} callback
  */
 export function getOperations(username: string, commands: string [], limit: number, callback: (error: Error, result: smartvotes_operation []) => void): void {
-    filterHistoryRange(username, -1, limit, [], function(op: smartvotes_operation): boolean {
+    filterHistoryRange(username, -1, limit, [], function(op: smartvotes_operation, rawOp: RawOperation): boolean {
+        if (commands.length == 0) return true;
+        else if (commands.indexOf(op.name) !== -1) {
+            return true;
+        }
+        else return false;
+    }, callback);
+}
+
+/**
+ * Searches blockchain for smartvotes operations of an user that are older than supplied UTC date.
+ * @param {string} username — voter or delegator username.
+ * @param {string[]} commands — list of commands to search for. If you leave it empty — all valid smartvote commands
+ *     will be included in the results.
+ * @param {Date} beforeDate — only older operations will be returned.
+ * @param {(error: Error, result: smartvotes_operation []) => void} callback
+ */
+export function getOperationsBeforeDate(username: string, commands: string [], limit: number, beforeDate: Date, callback: (error: Error, result: smartvotes_operation []) => void): void {
+    filterHistoryRange(username, -1, limit, [], function(op: smartvotes_operation, rawOp: RawOperation): boolean {
+        if (Date.parse(rawOp[1].timestamp + "Z"/* Z means UTC */) > beforeDate.getTime()) return false;
+
         if (commands.length == 0) return true;
         else if (commands.indexOf(op.name) !== -1) {
             return true;
@@ -40,7 +60,7 @@ export function getSmartvotesOperationsOfUser(username: string, callback: (error
  * @param {(error: Error, result: smartvotes_operation[]) => void} callback
  */
 function filterHistoryRange(username: string, from: number, limit: number, recentOps: smartvotes_operation [],
-                            filter: ((op: smartvotes_operation) => boolean) | undefined, callback: (error: Error, result: smartvotes_operation []) => void) {
+                            filter: ((op: smartvotes_operation, rawOp: RawOperation) => boolean) | undefined, callback: (error: Error, result: smartvotes_operation []) => void) {
     steem.api.getAccountHistory(username, from, 1000, function(error: Error, result: any) {
         if (error) callback(error, []);
         else {
@@ -69,7 +89,7 @@ function filterHistoryRange(username: string, from: number, limit: number, recen
  * @param {(op: smartvotes_operation) => boolean} filter — custom filter for operations
  * @returns {CustomJsonOperation[]} — list of user's smartvotes operations
  */
-function filterAndTransformSmartvoteOps(rawOps: RawOperation [], filter: ((op: smartvotes_operation) => boolean) | undefined): smartvotes_operation [] {
+function filterAndTransformSmartvoteOps(rawOps: RawOperation [], filter: ((op: smartvotes_operation, rawOp: RawOperation) => boolean) | undefined): smartvotes_operation [] {
     const out: smartvotes_operation [] = [];
 
     for (const i in rawOps) {
@@ -78,7 +98,7 @@ function filterAndTransformSmartvoteOps(rawOps: RawOperation [], filter: ((op: s
                 const jsonStr: string = rawOp[1].op[1].json;
                 const op: smartvotes_operation = JSON.parse(jsonStr) as smartvotes_operation;
 
-            if (typeof filter == "undefined" || filter == undefined || filter(op)) {
+            if (typeof filter == "undefined" || filter == undefined || filter(op, rawOp)) {
                 out.push(op);
             }
         }
