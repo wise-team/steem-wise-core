@@ -11,8 +11,8 @@ import { RawOperation, CustomJsonOperation } from "./blockchain-operations-types
  *     will be included in the results.
  * @param {(error: Error, result: smartvotes_operation []) => void} callback
  */
-export function getOperations(username: string, commands: string [], callback: (error: Error, result: smartvotes_operation []) => void): void {
-    filterHistoryRange(username, -1, [], function(op: smartvotes_operation): boolean {
+export function getOperations(username: string, commands: string [], limit: number, callback: (error: Error, result: smartvotes_operation []) => void): void {
+    filterHistoryRange(username, -1, limit,[], function(op: smartvotes_operation): boolean {
         if (commands.length == 0) return true;
         else if (commands.indexOf(op.name) !== -1) {
             return true;
@@ -26,8 +26,8 @@ export function getOperations(username: string, commands: string [], callback: (
  * @param {string} username
  * @param {(error: Error, result: smartvotes_operation[]) => void} callback
  */
-export function getSmartvotesOperationsOfUser(username: string, callback: (error: Error, result: smartvotes_operation []) => void): void {
-    filterHistoryRange(username, -1, [], undefined, callback);
+export function getSmartvotesOperationsOfUser(username: string, callback: (error: Error | undefined, result: smartvotes_operation []) => void): void {
+    filterHistoryRange(username, -1, -1, [], undefined, callback);
 }
 
 /**
@@ -39,7 +39,7 @@ export function getSmartvotesOperationsOfUser(username: string, callback: (error
  * @param {((op: smartvotes_operation) => boolean) | undefined} filter — custom filter or undefined.
  * @param {(error: Error, result: smartvotes_operation[]) => void} callback
  */
-function filterHistoryRange(username: string, from: number, recentOps: smartvotes_operation [],
+function filterHistoryRange(username: string, from: number, limit: number, recentOps: smartvotes_operation [],
                             filter: ((op: smartvotes_operation) => boolean) | undefined, callback: (error: Error, result: smartvotes_operation []) => void) {
     steem.api.getAccountHistory(username, from, 1000, function(error: Error, result: any) {
         if (error) callback(error, []);
@@ -51,12 +51,12 @@ function filterHistoryRange(username: string, from: number, recentOps: smartvote
                 const resultFiltered: smartvotes_operation [] = filterAndTransformSmartvoteOps(result, filter);
                 recentOps = resultFiltered.concat(recentOps);
 
-                if (result.length < 1000) { // all operations were loaded
+                if (result.length < 1000 || (limit > 0 && recentOps.length >= limit)) { // all operations were loaded or limit reached (if limit set)
                     callback(error, recentOps);
                 }
                 else { // if length == 1000 -> there are more ops to load
                     const from = result[0][0] - 1; // absolute number of oldest loaded operation, minus one
-                    filterHistoryRange(username, from, recentOps, filter, callback);
+                    filterHistoryRange(username, from, limit, recentOps, filter, callback);
                 }
             }
         }
