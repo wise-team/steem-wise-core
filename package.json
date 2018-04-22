@@ -4,8 +4,6 @@
   "description": "Node/web library for Smartvotes: a vote delegation system for STEEM blockchain",
   "main": "dist/steem-smartvotes.js",
   "directories": {
-    "lib": "dist/lib",
-    "doc": "docs"
   },
   "engines": {
     "node": ">=9.11"
