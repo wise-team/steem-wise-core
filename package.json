@@ -2,7 +2,7 @@
   "name": "steem-smartvotes",
   "version": "0.1.0",
   "description": "Node/web library for Smartvotes: a vote delegation system for STEEM blockchain",
-  "main": "dist/lib/steem-smartvotes.js",
+  "main": "dist/steem-smartvotes.js",
   "directories": {
     "lib": "dist/lib",
     "doc": "docs"
