@@ -27,6 +27,7 @@ export class RulesValidator {
         });
     }
 
+    // TODO fail on nonexistent post
     public static validateVoteOrder(username: string, voteorder: smartvotes_voteorder, publishDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
         if (typeof voteorder === "undefined") { callback(new Error("Voteorder must not be empty"), false); return; }
         if (typeof voteorder.delegator === "undefined" || voteorder.delegator.length == 0) { callback(new Error("Delegator must not be empty"), false); return; }
@@ -53,6 +54,7 @@ export class RulesValidator {
                 if (voteorder.type === ruleset.action) throw new Error("This ruleset do not allow " + voteorder.type + "action");
             }
 
+            // TODO total vote weight calculator
             if (voteorder.weight > ruleset.total_weight) throw new Error("Total vote weight allowed by this ruleset was exceeded.");
 
             return ruleset;
@@ -87,14 +89,6 @@ export class RulesValidator {
             }
         })
         .catch(error => callback(error, false));
-    }
-
-    public static validateJSON(input: string): boolean {
-        const aajv: ajv.Ajv = new ajv();
-        aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
-
-        const validate = aajv.compile(schemaJSON);
-        return validate(JSON.parse(input)) as boolean;
     }
 }
 

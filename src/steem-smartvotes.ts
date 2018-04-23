@@ -1,6 +1,7 @@
 import * as schema from "./schema/smartvotes.schema";
 import { CustomJsonOperation, VoteOperation } from "./blockchain-operations-types";
 import { JSONValidator } from "./JSONValidator";
+import { RulesValidator } from "./RulesValidator";
 
 const steem = require("steem");
 
@@ -15,9 +16,8 @@ export class SteemSmartvotes {
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
 
-    public validateVoteOrder(voteorder: schema.smartvotes_voteorder): boolean {
-        console.error("Vote validation is not yet supported. It is now returning true in every case.");
-        return true;
+    public validateVoteOrder(username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
+        RulesValidator.validateVoteOrder(username, voteorder, beforeDate, callback);
     }
 
     public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {

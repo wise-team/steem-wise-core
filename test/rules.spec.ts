@@ -5,14 +5,14 @@ import { Mutex } from "./Semaphore";
 import { RulesValidator } from "../src/RulesValidator";
 import { smartvotes_rule, smartvotes_ruleset } from "../src/schema/rules.schema";
 import SteemSmartvotes from "../src/steem-smartvotes";
-import {smartvotes_vote_weight, smartvotes_voteorder} from "../src/schema/votes.schema";
+import { smartvotes_vote_weight, smartvotes_voteorder } from "../src/schema/votes.schema";
 
 
 describe("rules", () => {
     const sequentialMutex: Mutex = new Mutex();
         it("SteemSmartvotes.sendRulesets sends rules without an error", function (mochaDone) {
             sequentialMutex.acquire().then(releaseMutex => {
-                const done = function(err?: any) { mochaDone(err); releaseMutex(); }
+                const done = function(err?: any) { mochaDone(err); releaseMutex(); };
 
                 this.timeout(10000);
 
@@ -64,7 +64,7 @@ describe("rules", () => {
     describe("RulesValidator", () => {
         it("#getRulesOfUser returns at leas two rulesets for user guest123", function (mochaDone) {
             sequentialMutex.acquire().then(releaseMutex => {
-                const done = function (err?: any) { mochaDone(err); releaseMutex(); }
+                const done = function (err?: any) { mochaDone(err); releaseMutex(); };
                 this.timeout(10000);
 
                 RulesValidator.getRulesOfUser("guest123", new Date(), function (error: Error | undefined, result: smartvotes_ruleset []): void {
@@ -81,7 +81,7 @@ describe("rules", () => {
 
         it("#validateVoteOrder fails on nonexistent ruleset", function (mochaDone) {
             sequentialMutex.acquire().then(releaseMutex => {
-                const done = function (err?: any) { mochaDone(err); releaseMutex(); }
+                const done = function (err?: any) { mochaDone(err); releaseMutex(); };
                 this.timeout(10000);
 
                 RulesValidator.validateVoteOrder("guest123", {
@@ -102,7 +102,7 @@ describe("rules", () => {
 
         it("#validateVoteOrder fails on empty voteorder", function (mochaDone) {
             sequentialMutex.acquire().then(releaseMutex => {
-                const done = function (err?: any) { mochaDone(err); releaseMutex(); }
+                const done = function (err?: any) { mochaDone(err); releaseMutex(); };
                 this.timeout(10000);
 
                 RulesValidator.getRulesOfUser("guest123", new Date(), function (error: Error | undefined, result: smartvotes_ruleset []): void {
