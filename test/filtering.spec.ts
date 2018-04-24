@@ -18,9 +18,9 @@ describe("blockchain-filter", () => {
                 guest123Ops = result;
                 done();
             });
-        })
+        });
 
-        it("getSmartvotesOperationsOfUser returns at least 7 smartvote operations for user @guest123", () => {
+        it("returns at least 7 smartvote operations for user @guest123", () => {
             expect(guest123Ops.length).to.be.greaterThan(6);
         });
     });
@@ -36,10 +36,31 @@ describe("blockchain-filter", () => {
                 guest123Ops = result;
                 done();
             });
-        })
+        });
 
-        it("getOperationsBeforeDate returns three set_rules operation before 2018-04-21 13:00 for user @guest123", () => {
+        it("returns three set_rules operation before 2018-04-21 13:00 for user @guest123", () => {
             expect(guest123Ops.length).to.be.equal(3);
+        });
+    });
+
+    describe("loadPost", () => {
+        let post: any;
+
+        before(function(done) {
+            this.timeout(10000);
+            filter.loadPost("steemit",  "firstpost", function(error: Error | undefined, result: any): void {
+                if (error) done(error);
+
+                post = result;
+                done();
+            });
+        });
+
+        it("loads first steemit post without error and with correct content", () => {
+            expect(post.author).to.be("steemit");
+            expect(post.permlink).to.be("firstpost");
+            expect(post.title).to.be("Welcome to Steem!");
+            console.log(post);
         });
     });
 });
