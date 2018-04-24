@@ -4,6 +4,8 @@ import { smartvotes_rule, smartvotes_ruleset } from "./schema/rules.schema";
 import * as filter from "./blockchain-filter";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
     smartvotes_rule_tags, smartvotes_rule_custom_rpc } from "./schema/smartvotes.schema";
+    import { SteemPost } from "./blockchain-operations-types";
+
 import { JSONValidator } from "./JSONValidator";
 import { Promise } from "bluebird";
 
@@ -77,23 +79,35 @@ export class RulesValidator {
             if (voteorder.weight > ruleset.total_weight) throw new Error("Total vote weight allowed by this ruleset was exceeded.");
 
             return ruleset;
-        }).then(function(ruleset: smartvotes_ruleset) {
+        })
+        .then(function(ruleset: smartvotes_ruleset): Promise<{ ruleset: smartvotes_ruleset, post: SteemPost }> {
+            return new Promise(function(resolve, reject) {
+                filter.loadPost(voteorder.author, voteorder.permlink, function(error: Error | undefined, result: SteemPost) {
+                    if (error) throw error;
+                    else resolve({ ruleset: ruleset, post: result });
+                });
+            });
+        })
+        .then(function(data: { ruleset: smartvotes_ruleset, post: SteemPost }) {
+            const ruleset = data.ruleset;
+            const post = data.post;
+
             const validationPromises: Promise<boolean> [] = [];
             for (const i in ruleset.rules) {
                 switch (ruleset.rules[i].type) {
                     case "authors":
                         validationPromises.push(new AuthorsRuleValidator()
-                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_authors));
+                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_authors, post));
                         break;
 
                     case "tags":
                         validationPromises.push(new TagsRuleValidator()
-                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_tags));
+                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_tags, post));
                         break;
 
                     case "custom_rpc":
                         validationPromises.push(new CustomRPCRuleValidator()
-                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_custom_rpc));
+                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_custom_rpc, post));
                         break;
 
                     default:
@@ -117,15 +131,26 @@ export class RulesValidator {
  * in RulesValidator.validateVoteOrder.
  */
 abstract class RuleValidator {
-    public abstract validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule): Promise<boolean>;
+    public abstract validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule, post: SteemPost): Promise<boolean>;
 }
 
 /**
  * Validator for smartvotes_rule_authors (defined in src/schema/rules.schema.ts).
  */
 class AuthorsRuleValidator extends RuleValidator {
-    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_authors): Promise<boolean> {
-        throw new Error("Not implemented yet");
+    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_authors, post: SteemPost): Promise<boolean> {
+        return new Promise(function(resolve, reject) {
+            const allowMode = (rule.mode == "allow");
+            const authorIsOnList: boolean = (rule.authors.indexOf(post.author) !== -1);
+            if (allowMode) {
+                if (authorIsOnList) resolve();
+                else throw new Error("Author of the post is not on the allow list.");
+            }
+            else {
+                if (authorIsOnList) throw new Error("Author of the post is on the deny list.");
+                else resolve();
+            }
+        });
     }
 }
 
@@ -133,7 +158,7 @@ class AuthorsRuleValidator extends RuleValidator {
  * Validator for smartvotes_rule_tags (defined in src/schema/rules.schema.ts).
  */
 class TagsRuleValidator extends RuleValidator {
-    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_tags): Promise<boolean> {
+    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_tags, post: SteemPost): Promise<boolean> {
         throw new Error("Not implemented yet");
     }
 }
@@ -142,7 +167,7 @@ class TagsRuleValidator extends RuleValidator {
  * Validator for smartvotes_rule_custom_rpc (defined in src/schema/rules.schema.ts).
  */
 class CustomRPCRuleValidator extends RuleValidator {
-    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_custom_rpc): Promise<boolean> {
+    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_custom_rpc, post: SteemPost): Promise<boolean> {
         throw new Error("Not implemented yet");
     }
 }
