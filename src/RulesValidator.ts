@@ -8,9 +8,17 @@ import { JSONValidator } from "./JSONValidator";
 import { Promise } from "bluebird";
 
 /**
- * The RulesValidator validates vote orders against delegator's rulesets
+ * The RulesValidator validates vote orders against delegator's rulesets.
  */
 export class RulesValidator {
+    /**
+     * Fetches smartvotes rules of specified steem user, which were valid at
+     * specified time (could be now — 'new Date()')
+     * @param {string} username — a steem username of the Delegator
+     * @param {Date} beforeDate - the latest date and time of returned rules
+     *  If you specify past date — the result will be the rules which were valid at that moment
+     * @param {(error: Error | undefined, result: smartvotes_ruleset []) => void} callback — a callback (can be promisified)
+     */
     public static getRulesOfUser(username: string, beforeDate: Date, callback: (error: Error | undefined, result: smartvotes_ruleset []) => void): void {
         if (typeof username === "undefined" || username.length == 0) { callback(new Error("Username must not be empty"), []); return; }
 
@@ -28,6 +36,17 @@ export class RulesValidator {
     }
 
     // TODO fail on nonexistent post
+    // TODO split validation to separate functions
+    /**
+     * Validates a vote order which was or possibly will be sent by specified user. The vote order
+     *  should specify a name of the ruleset against which it will be validated, and which was
+     *  set in the newest (at publishDate moment) set_rules of the Delegator
+     * @param {string} username — a steem username of the Voter
+     * @param {smartvotes_voteorder} voteorder  — a voteorder object
+     * @param {Date} publishDate — a past datetime of the publication of send_voteorder (date
+     * from blockchain operation timestamp) or (now — 'new Date()') if it is a potential vote order
+     * @param {(error: Error | undefined, result: boolean) => void} callback — a callback (can be promisified)
+     */
     public static validateVoteOrder(username: string, voteorder: smartvotes_voteorder, publishDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
         if (typeof voteorder === "undefined") { callback(new Error("Voteorder must not be empty"), false); return; }
         if (typeof voteorder.delegator === "undefined" || voteorder.delegator.length == 0) { callback(new Error("Delegator must not be empty"), false); return; }
@@ -92,22 +111,36 @@ export class RulesValidator {
     }
 }
 
+/**
+ * Abstract class for Rule Validators. A rule validator is specific for
+ * type smartvotes_rule (src/schema/rules.schema.ts). Switch for rule validation is
+ * in RulesValidator.validateVoteOrder.
+ */
 abstract class RuleValidator {
     public abstract validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule): Promise<boolean>;
 }
 
+/**
+ * Validator for smartvotes_rule_authors (defined in src/schema/rules.schema.ts).
+ */
 class AuthorsRuleValidator extends RuleValidator {
     public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_authors): Promise<boolean> {
         throw new Error("Not implemented yet");
     }
 }
 
+/**
+ * Validator for smartvotes_rule_tags (defined in src/schema/rules.schema.ts).
+ */
 class TagsRuleValidator extends RuleValidator {
     public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_tags): Promise<boolean> {
         throw new Error("Not implemented yet");
     }
 }
 
+/**
+ * Validator for smartvotes_rule_custom_rpc (defined in src/schema/rules.schema.ts).
+ */
 class CustomRPCRuleValidator extends RuleValidator {
     public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_custom_rpc): Promise<boolean> {
         throw new Error("Not implemented yet");
