@@ -2,7 +2,7 @@ import { smartvotes_operation } from "./schema/smartvotes.schema";
 
 const steem = require("steem");
 
-import { RawOperation, CustomJsonOperation } from "./blockchain-operations-types";
+import { RawOperation, CustomJsonOperation, SteemPost } from "./blockchain-operations-types";
 
 /**
  * Searches blockchain for smartvotes operations of an user.
@@ -105,4 +105,16 @@ function filterAndTransformSmartvoteOps(rawOps: RawOperation [], filter: ((op: s
     }
 
     return out;
+}
+
+/**
+ * Loads particular post from blockchain
+ * @param author — Author of the post
+ * @param permlink  — Permlink of the post
+ * @param callback — a callback (can be promisified).
+ */
+export function loadPost(author: string, permlink: string, callback: (error: Error | undefined, result: SteemPost) => void): void {
+    steem.api.getContent(author, permlink, function(error: Error, result: any) {
+            callback(error, result as SteemPost);
+    });
 }
