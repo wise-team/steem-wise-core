@@ -1,7 +1,7 @@
 import * as schema from "./schema/smartvotes.schema";
-import { CustomJsonOperation, VoteOperation } from "./blockchain-operations-types";
-import { JSONValidator } from "./JSONValidator";
-import { RulesValidator } from "./RulesValidator";
+import { CustomJsonOperation, VoteOperation } from "./types/blockchain-operations-types";
+import { JSONValidator } from "./validation/JSONValidator";
+import { RulesValidator } from "./validation/RulesValidator";
 
 const steem = require("steem");
 

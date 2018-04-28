@@ -1,14 +1,14 @@
-import * as ajv from "ajv";
-import * as schemaJSON from "../smartvotes.schema.json";
-import { smartvotes_rule, smartvotes_ruleset } from "./schema/rules.schema";
-import * as filter from "./blockchain-filter";
-import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
-    smartvotes_rule_tags, smartvotes_rule_custom_rpc } from "./schema/smartvotes.schema";
-    import { SteemPost } from "./blockchain-operations-types";
-
-import { JSONValidator } from "./JSONValidator";
 import { Promise } from "bluebird";
 
+import * as schemaJSON from "../../smartvotes.schema.json";
+import * as filter from "../blockchain-filter";
+import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
+    smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_rule, smartvotes_ruleset } from "../schema/smartvotes.schema";
+import { SteemPost, SteemPostJSONMetadata } from "../types/blockchain-operations-types";
+import { JSONValidator } from "./JSONValidator";
+import { TagsRuleValidator } from "./TagsRuleValidator";
+import { AuthorsRuleValidator } from "./AuthorsRuleValidator";
+import { CustomRPCRuleValidator } from "./CustomRPCRuleValidator";
 /**
  * The RulesValidator validates vote orders against delegator's rulesets.
  */
@@ -122,52 +122,5 @@ export class RulesValidator {
             }
         })
         .catch(error => callback(error, false));
-    }
-}
-
-/**
- * Abstract class for Rule Validators. A rule validator is specific for
- * type smartvotes_rule (src/schema/rules.schema.ts). Switch for rule validation is
- * in RulesValidator.validateVoteOrder.
- */
-abstract class RuleValidator {
-    public abstract validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule, post: SteemPost): Promise<boolean>;
-}
-
-/**
- * Validator for smartvotes_rule_authors (defined in src/schema/rules.schema.ts).
- */
-class AuthorsRuleValidator extends RuleValidator {
-    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_authors, post: SteemPost): Promise<boolean> {
-        return new Promise(function(resolve, reject) {
-            const allowMode = (rule.mode == "allow");
-            const authorIsOnList: boolean = (rule.authors.indexOf(post.author) !== -1);
-            if (allowMode) {
-                if (authorIsOnList) resolve();
-                else throw new Error("Author of the post is not on the allow list.");
-            }
-            else {
-                if (authorIsOnList) throw new Error("Author of the post is on the deny list.");
-                else resolve();
-            }
-        });
-    }
-}
-
-/**
- * Validator for smartvotes_rule_tags (defined in src/schema/rules.schema.ts).
- */
-class TagsRuleValidator extends RuleValidator {
-    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_tags, post: SteemPost): Promise<boolean> {
-        throw new Error("Not implemented yet");
-    }
-}
-
-/**
- * Validator for smartvotes_rule_custom_rpc (defined in src/schema/rules.schema.ts).
- */
-class CustomRPCRuleValidator extends RuleValidator {
-    public validate(voteorder: smartvotes_voteorder, rule: smartvotes_rule_custom_rpc, post: SteemPost): Promise<boolean> {
-        throw new Error("Not implemented yet");
     }
 }

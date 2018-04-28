@@ -2,7 +2,7 @@ import { expect } from "chai";
 import "mocha";
 import { Mutex } from "./Semaphore";
 
-import { RulesValidator } from "../src/RulesValidator";
+import { RulesValidator } from "../src/validation/RulesValidator";
 import { smartvotes_rule, smartvotes_ruleset } from "../src/schema/rules.schema";
 import SteemSmartvotes from "../src/steem-smartvotes";
 import { smartvotes_vote_weight, smartvotes_voteorder } from "../src/schema/votes.schema";
@@ -116,5 +116,7 @@ describe("rules", () => {
                 });
             });
         });
+
+        // TODO many specific tests for rules
     });
 });

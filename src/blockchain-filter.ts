@@ -2,7 +2,7 @@ import { smartvotes_operation } from "./schema/smartvotes.schema";
 
 const steem = require("steem");
 
-import { RawOperation, CustomJsonOperation, SteemPost } from "./blockchain-operations-types";
+import { RawOperation, CustomJsonOperation, SteemPost } from "./types/blockchain-operations-types";
 
 /**
  * Searches blockchain for smartvotes operations of an user.

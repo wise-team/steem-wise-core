@@ -1,6 +1,6 @@
-import * as schema from "./schema/smartvotes.schema";
-import * as ajv from "ajv";
-import * as schemaJSON from "../smartvotes.schema.json";
+import * as schema from "../schema/smartvotes.schema";
+import ajv from "ajv";
+import * as schemaJSON from "../../smartvotes.schema.json";
 
 /**
  * The JSONValidator validates smartvotes operation JSON using static method #validateJSON
