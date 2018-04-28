@@ -83,8 +83,8 @@ export class SteemSmartvotes {
         );
     }
 
-    public getRules(): schema.smartvotes_ruleset [] {
-        throw new Error("Not implemented yet");
+    public static getRulesetsOfUser(username: string, beforeDate: Date, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void {
+        RulesValidator.getRulesOfUser(username, beforeDate, callback);
     }
 
     public loadSmartvotesOperationsOfAccount(username: string, callback: (error: Error, result: schema.smartvotes_operation []) => void): void {
