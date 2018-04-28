@@ -2,7 +2,7 @@ import { expect } from "chai";
 import "mocha";
 
 import * as filter from "../src/blockchain-filter";
-import { RawOperation, CustomJsonOperation } from "../src/blockchain-operations-types";
+import { RawOperation, CustomJsonOperation } from "../src/types/blockchain-operations-types";
 import { smartvotes_operation } from "../src/schema/smartvotes.schema";
 
 
@@ -57,10 +57,9 @@ describe("blockchain-filter", () => {
         });
 
         it("loads first steemit post without error and with correct content", () => {
-            expect(post.author).to.be("steemit");
-            expect(post.permlink).to.be("firstpost");
-            expect(post.title).to.be("Welcome to Steem!");
-            console.log(post);
+            expect(post.author).to.be.equal("steemit");
+            expect(post.permlink).to.be.equal("firstpost");
+            expect(post.title).to.be.equal("Welcome to Steem!");
         });
     });
 });
