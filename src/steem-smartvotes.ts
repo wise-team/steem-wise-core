@@ -16,7 +16,7 @@ export class SteemSmartvotes {
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
 
-    public validateVoteOrder(username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
+    public static validateVoteOrder(username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
         RulesValidator.validateVoteOrder(username, voteorder, beforeDate, callback);
     }
 
