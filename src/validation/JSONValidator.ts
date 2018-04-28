@@ -1,5 +1,5 @@
 import * as schema from "../schema/smartvotes.schema";
-import ajv from "ajv";
+import * as ajv from "ajv";
 import * as schemaJSON from "../../smartvotes.schema.json";
 
 /**
