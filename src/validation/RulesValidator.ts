@@ -38,6 +38,7 @@ export class RulesValidator {
     }
 
     // TODO fail on nonexistent post
+    // TODO very precise tests
     // TODO split validation to separate functions
     /**
      * Validates a vote order which was or possibly will be sent by specified user. The vote order
@@ -49,17 +50,15 @@ export class RulesValidator {
      * from blockchain operation timestamp) or (now — 'new Date()') if it is a potential vote order
      * @param {(error: Error | undefined, result: boolean) => void} callback — a callback (can be promisified)
      */
-    public static validateVoteOrder(username: string, voteorder: smartvotes_voteorder, publishDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
-        if (typeof voteorder === "undefined") { callback(new Error("Voteorder must not be empty"), false); return; }
-        if (typeof voteorder.delegator === "undefined" || voteorder.delegator.length == 0) { callback(new Error("Delegator must not be empty"), false); return; }
-        if (typeof voteorder.ruleset_name === "undefined" || voteorder.ruleset_name.length == 0) { callback(new Error("Ruleset_name must not be empty"), false); return; }
-        if (typeof voteorder.author === "undefined" || voteorder.author.length == 0) { callback(new Error("Author must not be empty"), false); return; }
-        if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) { callback(new Error("Permlink must not be empty"), false); return; }
-        if (typeof voteorder.type === "undefined" || voteorder.type.length == 0) { callback(new Error("Type must not be empty"), false); return; }
-        if (!(voteorder.type === "upvote" || voteorder.type === "flag")) { callback(new Error("Type must be: upvote or flag"), false); return; }
-        if (typeof voteorder.weight === "undefined") { callback(new Error("Weight must not be empty"), false); return; }
-        if (voteorder.weight <= 0) { callback(new Error("Weight must be greater than zero"), false); return; }
-        if (voteorder.weight > 10000) { callback(new Error("Weight must be lesser or equal 10000"), false); return; }
+    public static validateVoteOrder(username: string, voteorder: smartvotes_voteorder, publishDate: Date,
+        callback: (error: Error | undefined, result: boolean) => void): void {
+
+        try {
+            RulesValidator.validateVoteorderObject(voteorder);
+        }
+        catch (err) {
+            callback(err, false);
+        }
 
         Promise.promisify(RulesValidator.getRulesOfUser)(voteorder.delegator, publishDate). then( function (rulesets: smartvotes_ruleset []): smartvotes_ruleset {
             for (const i in rulesets) {
@@ -122,5 +121,18 @@ export class RulesValidator {
             }
         })
         .catch(error => callback(error, false));
+    }
+
+    private static validateVoteorderObject(voteorder: smartvotes_voteorder): void {
+        if (typeof voteorder === "undefined") throw new Error("Voteorder must not be empty");
+        if (typeof voteorder.delegator === "undefined" || voteorder.delegator.length == 0) throw new Error("Delegator must not be empty");
+        if (typeof voteorder.ruleset_name === "undefined" || voteorder.ruleset_name.length == 0) throw new Error("Ruleset_name must not be empty");
+        if (typeof voteorder.author === "undefined" || voteorder.author.length == 0) throw new Error("Author must not be empty");
+        if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) throw new Error("Permlink must not be empty");
+        if (typeof voteorder.type === "undefined" || voteorder.type.length == 0) throw new Error("Type must not be empty");
+        if (!(voteorder.type === "upvote" || voteorder.type === "flag")) throw new Error("Type must be: upvote or flag");
+        if (typeof voteorder.weight === "undefined") throw new Error("Weight must not be empty");
+        if (voteorder.weight <= 0) throw new Error("Weight must be greater than zero");
+        if (voteorder.weight > 10000) throw new Error("Weight must be lesser or equal 10000");
     }
 }
