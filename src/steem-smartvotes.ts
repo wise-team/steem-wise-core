@@ -5,6 +5,7 @@ import { RulesValidator } from "./validation/RulesValidator";
 
 const steem = require("steem");
 
+// TODO comment
 export class SteemSmartvotes {
     private username: string;
     private postingWif: string;
@@ -18,8 +19,13 @@ export class SteemSmartvotes {
 
     public static validateVoteOrder(username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
         RulesValidator.validateVoteOrder(username, voteorder, beforeDate, callback);
+    // TODO comment
+    // TODO test
     }
 
+    // TODO comment
+    // TODO move to separate file
+    // TODO validate
     public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
         const jsonStr = JSON.stringify({name: "send_voteorder", voteorder: voteorder});
         if (!SteemSmartvotes.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid: " + jsonStr);
@@ -55,6 +61,8 @@ export class SteemSmartvotes {
         );
     }
 
+    // TODO comment
+    // TODO move to separate file
     public sendRulesets(rulesets: schema.smartvotes_ruleset [], callback: (error: Error, result: any) => void): void {
         const smartvotesOp: schema.smartvotes_operation = {name: "set_rules", rulesets: rulesets};
         const jsonStr = JSON.stringify(smartvotesOp);
@@ -83,14 +91,18 @@ export class SteemSmartvotes {
         );
     }
 
+    // TODO comment
     public static getRulesetsOfUser(username: string, beforeDate: Date, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void {
         RulesValidator.getRulesOfUser(username, beforeDate, callback);
     }
 
+    // TODO comment
+    // TODO implement
     public loadSmartvotesOperationsOfAccount(username: string, callback: (error: Error, result: schema.smartvotes_operation []) => void): void {
         throw new Error("Not implemented yet");
     }
 
+    // TODO comment
     public static validateJSON(input: string): boolean {
         return JSONValidator.validateJSON(input);
     }
