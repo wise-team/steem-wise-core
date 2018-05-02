@@ -79,7 +79,6 @@ export class BlockchainFilter {
                                 filter: ((op: smartvotes_operation, rawOp: RawOperation) => boolean) | undefined, callback: (error: Error, result: smartvotes_operation []) => void) {
         // TODO add some rate limiting for most frequent operations
         const accountHistoryLimit = (from === -1 ? 1000 : Math.min(1000, from)); // Sometimes at the end of account history "from" can be lower than 1000. In that case we should set limit to "from". It will simply load operations including the oldest one.
-        console.log(accountHistoryLimit);
         steem.api.getAccountHistory(username, from, accountHistoryLimit, function(error: Error, result: any) {
             if (error) callback(error, []);
             else {
