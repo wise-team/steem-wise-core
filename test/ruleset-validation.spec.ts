@@ -53,7 +53,7 @@ describe("test/ruleset-validation.spec.ts", () => {
 
         it("fails on invalid type", function(done) {
             this.timeout(100);
-            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, {type: "not-upvote-not-flag"});
+            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { type: "not-upvote-not-flag" });
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
                 else done(new Error("should fail on invalid type"));
@@ -63,11 +63,21 @@ describe("test/ruleset-validation.spec.ts", () => {
         [-1, 0, undefined, NaN, 10001, Infinity].forEach(function(weight) {
             it("fails on invald weight (" + weight + ")", function(done) {
                 this.timeout(100);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, {weight: weight});
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { weight: weight });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (error && !result) done();
                     else done(new Error("should fail on invald weight (" + weight + ")"));
                 });
+            });
+        });
+
+        it("fails on nonexistent ruleset", function(done) {
+            this.timeout(5000);
+            this.retries(1);
+            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: "NonExistent" + Date.now() });
+            RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error && !result) done();
+                else done(new Error("should fail on nonexistent ruleset"));
             });
         });
 
