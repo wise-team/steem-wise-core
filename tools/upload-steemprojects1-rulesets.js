@@ -1,9 +1,9 @@
 var fs = require("fs");
 var smartvotesLib = require("../dist/steem-smartvotes.js");
-var rulesets = require("../test/data/steemprojects1-rulesets.js");
+var steemprojects1Rulesets = require("../test/data/steemprojects1-rulesets.js");
 
 /**
- * To run this example:
+ * To run this script:
  * node upload-steemprojects1-rulesets.js /path/to/credentials.file.json
  *
  * Credentials file format: {"username": "", "postingWif": ""}.
@@ -31,7 +31,7 @@ function loadCredentials(callback) {
 
 function sendRulesets(credentials) {
     var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.postingWif);
-    smartvotes.sendRulesets(rulesets, function(error) {
+    smartvotes.sendRulesets(steemprojects1Rulesets.rulesets, function(error) {
         if(error) {
             console.error(error);
             return;
