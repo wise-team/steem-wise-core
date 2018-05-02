@@ -27,25 +27,6 @@ describe("test/voteorder-sending.spec.ts", () => {
                     else done();
                 });
             });
-
-
-            /*
-            let guest123Ops: smartvotes_operation[];
-
-            before(function(done) {
-                this.timeout(10000);
-                filter.getSmartvotesOperationsOfUser("guest123", function(error: Error, result: smartvotes_operation []) {
-                    if (error) throw error;
-
-                    guest123Ops = result;
-                    done();
-                });
-            })
-
-            it("getSmartvotesOperationsOfUser returns at least 7 smartvote operations for user @guest123", () => {
-                console.log(guest123Ops);
-                expect(guest123Ops.length).to.be.greaterThan(6);
-            });*/
         });
     });
 });
