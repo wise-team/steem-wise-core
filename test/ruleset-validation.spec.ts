@@ -10,7 +10,7 @@ const delegator = "steemprojects1";
 const validVoteorder: smartvotes_voteorder = {
     ruleset_name: <string> steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
     author: "noisy",
-    permlink: "i-ve-bought-4300-stickers-for-steemians-stickers-of-steem-steemit-dtube-dsound-strimi-and-utopian",
+    permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
     delegator: "steemprojects1",
     weight: 1,
     type: "upvote"
@@ -72,8 +72,7 @@ describe("test/ruleset-validation.spec.ts", () => {
         });
 
         it("fails on nonexistent ruleset", function(done) {
-            this.timeout(5000);
-            this.retries(1);
+            this.timeout(10000);
             const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: "NonExistent" + Date.now() });
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
@@ -82,11 +81,35 @@ describe("test/ruleset-validation.spec.ts", () => {
         });
 
         it("fails on different voter", function(done) {
-            this.timeout(5000);
+            this.timeout(10000);
             const voteorder: smartvotes_voteorder = validVoteorder;
             RulesValidator.validateVoteOrder("NonExistent-voter-" + Date.now(), voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
                 else done(new Error("should fail on different voter"));
+            });
+        });
+
+        [
+            {ruleset: steemprojects1Rulesets.upvoteRequireTagSteemprojects, type: "flag", pass: false}, // fail
+            {ruleset: steemprojects1Rulesets.upvoteRequireTagSteemprojects, type: "upvote", pass: true}, // pass
+            {ruleset: steemprojects1Rulesets.flagRequireTagSteemprojects, type: "flag", pass: true}, // pass
+            {ruleset: steemprojects1Rulesets.flagRequireTagSteemprojects, type: "upvote", pass: false}, // fail
+            {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "flag", pass: true}, // pass
+            {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "upvote", pass: true}, // pass
+        ].forEach(function(voteorderCase) {
+            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " vote type [allowed=" + voteorderCase.ruleset.action + ", tested=" + voteorderCase.type + "]", function(done) {
+                this.timeout(10000);
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, type: voteorderCase.type });
+                RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                    if (voteorderCase.pass) {
+                        if (error || !result) done(error);
+                        else done();
+                    }
+                    else {
+                        if (error && !result) done();
+                        else done(new Error("should fail on disallowed vote mode"));
+                    }
+                });
             });
         });
 
