@@ -74,7 +74,7 @@ export class RulesValidator {
             if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) throw new Error("Permlink must not be empty");
             if (typeof voteorder.type === "undefined" || voteorder.type.length == 0) throw new Error("Type must not be empty");
             if (!(voteorder.type === "upvote" || voteorder.type === "flag")) throw new Error("Type must be: upvote or flag");
-            if (typeof voteorder.weight === "undefined") throw new Error("Weight must not be empty");
+            if (typeof voteorder.weight === "undefined" || isNaN(voteorder.weight)) throw new Error("Weight must not be empty");
             if (voteorder.weight <= 0) throw new Error("Weight must be greater than zero");
             if (voteorder.weight > 10000) throw new Error("Weight must be lesser or equal 10000");
             resolve(input);
