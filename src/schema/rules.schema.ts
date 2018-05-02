@@ -58,11 +58,12 @@ export interface smartvotes_rule_tags {
 
     /**
      * Rule mode.
-     * - allow => every tag must be on the list
-     * - deny => none of the tags can be on the list
-     * - require => at least one of the tags should be on the list
+     * - allow => every post tag must be on the specified list
+     * - deny => none of the post tags can be on the specified list
+     * - require => the post should have all of the specified tags
+     * - any => the post should have at least one of the specified tags
      */
-    mode: "allow" | "deny" | "require";
+    mode: "allow" | "deny" | "require" | "any";
 
     /**
      * List of tags checked using boolean OR.

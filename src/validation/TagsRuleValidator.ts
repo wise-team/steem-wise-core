@@ -30,7 +30,15 @@ export class TagsRuleValidator extends AbstractRuleValidator {
                 }
                 resolve(true);
             }
-            else if (rule.mode === "require") { // require => at least one of the tags should be on the list
+            else if (rule.mode === "require") { // the post should have all of the specified tags
+                for (let i = 0; i < rule.tags.length; i++) {
+                    const tag = rule.tags[i];
+                    if (postMetadata.tags.indexOf(tag) === -1)
+                        throw new Error("The post tags [" + postMetadata.tags.join() + "] does not include " + tag + ".");
+                }
+                resolve(true);
+            }
+            else if (rule.mode === "any") { // the post should have at least one of the specified tags
                 for (let i = 0; i < rule.tags.length; i++) {
                     const tag = rule.tags[i];
                     if (postMetadata.tags.indexOf(tag) !== -1) {

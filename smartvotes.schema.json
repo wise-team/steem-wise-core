@@ -115,11 +115,13 @@
             "type": "object"
         },
         "smartvotes_rule_tags": {
-            "description": "A rule for specifying allowed, denied and required tags list.\n- allow => every tag must be on the list\n- deny => none of the tags can be on the list\n- require => at least one of the tags should be on the list",
+            "description": "A rule for specifying allowed, denied and required tags list.",
             "properties": {
                 "mode": {
+                    "description": "Rule mode.\n- allow => every post tag must be on the specified list\n- deny => none of the post tags can be on the specified list\n- require => the post should have all of the specified tags\n- any => the post should have at least one of the specified tags",
                     "enum": [
                         "allow",
+                        "any",
                         "deny",
                         "require"
                     ],
