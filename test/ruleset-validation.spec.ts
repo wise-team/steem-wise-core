@@ -2,9 +2,55 @@ import { expect } from "chai";
 import "mocha";
 
 import { RulesValidator } from "../src/validation/RulesValidator";
+import { smartvotes_voteorder } from "../src/schema/votes.schema";
+import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
+
+const voter = "guest123";
+const delegator = "steemprojects1";
+const validVoteorder: smartvotes_voteorder = {
+    ruleset_name: <string> steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
+    author: "noisy",
+    permlink: "i-ve-bought-4300-stickers-for-steemians-stickers-of-steem-steemit-dtube-dsound-strimi-and-utopian",
+    delegator: "steemprojects1",
+    weight: 1,
+    type: "upvote"
+};
 
 describe("test/ruleset-validation.spec.ts", () => {
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", () => {
+        it("passes valid voteorder", function(done) {
+            this.timeout(10000);
+
+            const voteorder = validVoteorder;
+            RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error) done(error);
+                else if (!result) done(new Error("Unexpected behavior: validation failed, but no error returned."));
+                else done();
+            });
+        });
+
+        it("fails on empty voteorder", function(done) {
+            this.timeout(100);
+            const voteorder = undefined;
+            RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error && !result) done();
+                else done(new Error("should fail on empty voteorder"));
+            });
+        });
+
+        ["delegator", "ruleset_name", "author", "permlink", "type"].forEach(function(prop) {
+            it("fails on empty " + prop, function(done) {
+                this.timeout(500);
+                const propChanger: object = {};
+                propChanger[prop] = "";
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, propChanger);
+                RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                    if (error && !result) done();
+                    else done(new Error("should fail on empty " + prop));
+                });
+            });
+        });
+
         // TODO fails on empty voteorder, delegator, ruleset_name, author, permlink, type (empty or wrong), <=weight, >10000 weight
         // TODO fails on nonexistent ruleset
         // TODO fails on different voter in ruleset
