@@ -9,21 +9,22 @@ describe("test/voteorder-sending.spec.ts", () => {
     describe("SteemSmartvotes", () => {
         describe("sendVoteOrder", () => {
             it("sends vote order without error", function (done) {
-                this.timeout(10000);
+                this.timeout(20000);
                 const sm: SteemSmartvotes = new SteemSmartvotes("guest123",
                     "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg");
 
                 const order: smartvotes_voteorder = {
-                    ruleset_name: "test_ruleset",
-                    author: "steemit",
-                    permlink: "firstpost",
+                    ruleset_name: "Upvote, allow author @noisy",
+                    author: "noisy",
+                    permlink: "ann-introducing-steemprojects-com-information-about-all-steem-projects-in-one-place",
                     delegator: "steemprojects1",
-                    weight: 10,
+                    weight: 1,
                     type: "upvote"
                 };
 
                 sm.sendVoteOrder(order, function (error: Error, result: any) {
-                    done();
+                    if (error) done(error);
+                    else done();
                 });
             });
 
