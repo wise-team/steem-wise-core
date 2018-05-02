@@ -81,10 +81,15 @@ describe("test/ruleset-validation.spec.ts", () => {
             });
         });
 
-        // TODO fails on empty voteorder, delegator, ruleset_name, author, permlink, type (empty or wrong), <=weight, >10000 weight
-        // TODO fails on nonexistent ruleset
-        // TODO fails on different voter in ruleset
-        // TODO allows correct voter
+        it("fails on different voter", function(done) {
+            this.timeout(5000);
+            const voteorder: smartvotes_voteorder = validVoteorder;
+            RulesValidator.validateVoteOrder("NonExistent-voter-" + Date.now(), voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error && !result) done();
+                else done(new Error("should fail on different voter"));
+            });
+        });
+
         // TODO fails on wrong vote mode
         // TODO allows correct mode [upvote,flag,upvote+flag]
         // TODO fails on too high weight
