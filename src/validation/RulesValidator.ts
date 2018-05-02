@@ -77,7 +77,6 @@ export class RulesValidator {
             if (typeof voteorder.weight === "undefined") throw new Error("Weight must not be empty");
             if (voteorder.weight <= 0) throw new Error("Weight must be greater than zero");
             if (voteorder.weight > 10000) throw new Error("Weight must be lesser or equal 10000");
-
             resolve(input);
         });
     }
@@ -97,7 +96,7 @@ export class RulesValidator {
         return new Promise(function(resolve, reject) {
             for (const i in input.rulesets) {
                 if (input.rulesets[i].name == input.voteorder.ruleset_name) {
-                    return { username: input.username, voteorder: input.voteorder, ruleset: input.rulesets[i] };
+                    resolve({ username: input.username, voteorder: input.voteorder, ruleset: input.rulesets[i] });
                 }
             }
             throw new Error("Delegator had no such ruleset (name=" + input.voteorder.ruleset_name + ") at specified datetime.");
