@@ -17,16 +17,16 @@ export class TagsRuleValidator extends AbstractRuleValidator {
             if (allowMode) {
                 for (const i in postMetadata.tags) {
                     const tag = postMetadata.tags[i];
-                    if (rule.tags.indexOf(tag) !== -1)
-                            throw new Error("Tag " + tag + " is not on the allowed tags list.");
+                    if (rule.tags.indexOf(tag) === -1)
+                            throw new Error("Tag " + tag + " is not on the allowed tags list [" + rule.tags.join() + "].");
                 }
                 resolve(true);
             }
             else { // deny mode
                 for (const i in rule.tags) {
                     const tag = postMetadata.tags[i];
-                    if (rule.tags.indexOf(tag) === -1)
-                            throw new Error("Tag " + tag + " is on the denied tags list.");
+                    if (rule.tags.indexOf(tag) !== -1)
+                            throw new Error("Tag " + tag + " is on the denied tags list [" + rule.tags.join() + "].");
                 }
                 resolve(true);
             }
