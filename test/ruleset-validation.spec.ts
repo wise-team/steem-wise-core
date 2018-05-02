@@ -51,6 +51,26 @@ describe("test/ruleset-validation.spec.ts", () => {
             });
         });
 
+        it("fails on invalid type", function(done) {
+            this.timeout(100);
+            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, {type: "not-upvote-not-flag"});
+            RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error && !result) done();
+                else done(new Error("should fail on invalid type"));
+            });
+        });
+
+        [-1, 0, undefined, NaN, 10001, Infinity].forEach(function(weight) {
+            it("fails on invald weight (" + weight + ")", function(done) {
+                this.timeout(100);
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, {weight: weight});
+                RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                    if (error && !result) done();
+                    else done(new Error("should fail on invald weight (" + weight + ")"));
+                });
+            });
+        });
+
         // TODO fails on empty voteorder, delegator, ruleset_name, author, permlink, type (empty or wrong), <=weight, >10000 weight
         // TODO fails on nonexistent ruleset
         // TODO fails on different voter in ruleset
