@@ -34,7 +34,6 @@ describe("test/blockchain-filtering.spec.ts", () => {
 
             for (let i = 0; i < guest123Ops.length; i++) {
                 const op = guest123Ops[i];
-                if (op.name === "send_voteorder") console.log(op.voteorder.permlink);
 
                 if (op.name === "send_voteorder" && op.voteorder.permlink === olderUpvotedPostPermlink) {
                     olderOpIndex = i;
@@ -46,7 +45,6 @@ describe("test/blockchain-filtering.spec.ts", () => {
                     newestOpIndex = i;
                 }
             }
-            console.log("[" + olderOpIndex + ", " + newerOpIndex + ", " + newestOpIndex + "]");
 
             expect(newerOpIndex).to.be.greaterThan(newestOpIndex);
             expect(olderOpIndex).to.be.greaterThan(newerOpIndex);
