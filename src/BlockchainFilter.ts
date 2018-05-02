@@ -78,7 +78,9 @@ export class BlockchainFilter {
     private static filterHistoryRange(username: string, from: number, limit: number, recentOps: smartvotes_operation [],
                                 filter: ((op: smartvotes_operation, rawOp: RawOperation) => boolean) | undefined, callback: (error: Error, result: smartvotes_operation []) => void) {
         // TODO add some rate limiting for most frequent operations
-        const accountHistoryLimit = (from === -1 ? 1000 : Math.min(1000, from)); // Sometimes at the end of account history "from" can be lower than 1000. In that case we should set limit to "from". It will simply load operations including the oldest one.
+        // TODO load only operations present after introduction of smartvotes
+        const batchSize = 1000; // this is maximal batch for this command.
+        const accountHistoryLimit = (from === -1 ? batchSize : Math.min(batchSize, from)); // Sometimes at the end of account history "from" can be lower than 1000. In that case we should set limit to "from". It will simply load operations including the oldest one.
         steem.api.getAccountHistory(username, from, accountHistoryLimit, function(error: Error, result: any) {
             if (error) callback(error, []);
             else {
@@ -86,14 +88,17 @@ export class BlockchainFilter {
                     callback(error, recentOps);
                 }
                 else {
+                    result.reverse(); // getAccountHistory(from=-1) returns last "batchSize" of operations, but they are sorted from oldest to the newest.
+                    // So the newest operation index is 1000 (it is a little awkward, but when limit=1000, steem returns 1001
+                    // operations — it may be a bug, so I do not rely on this behavior — thats why I use result.length < batchSize instead of result.length <= batchSize) below.
                     const resultFiltered: smartvotes_operation [] = BlockchainFilter.filterAndTransformSmartvoteOps(result, filter);
                     recentOps = resultFiltered.concat(recentOps);
 
-                    if (result.length < 1000 || (limit > 0 && recentOps.length >= limit)) { // all operations were loaded or limit reached (if limit set)
+                    if (result.length < batchSize || (limit > 0 && recentOps.length >= limit)) { // all operations were loaded or limit reached (if limit set)
                         callback(error, recentOps);
                     }
-                    else { // if length == 1000 -> there are more ops to load
-                        const from = result[0][0] - 1; // absolute number of oldest loaded operation, minus one
+                    else { // if length == batchSize -> there are more ops to load
+                        const from = result[result.length - 1][0] - 1; // absolute number of oldest loaded operation, minus one (remember that the result array was previously reversed)
                         BlockchainFilter.filterHistoryRange(username, from, limit, recentOps, filter, callback);
                     }
                 }
@@ -110,6 +115,7 @@ export class BlockchainFilter {
     private static filterAndTransformSmartvoteOps(rawOps: RawOperation [], filter: ((op: smartvotes_operation, rawOp: RawOperation) => boolean) | undefined): smartvotes_operation [] {
         const out: smartvotes_operation [] = [];
 
+        // TODO replace all for in to classic for
         for (const i in rawOps) {
             const rawOp: RawOperation = rawOps[i];
             if (rawOp[1].op[0] == "custom_json" && rawOp[1].op[1].id == "smartvote") {
