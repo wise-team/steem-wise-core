@@ -24,6 +24,7 @@ rulesets.push(upvoteRequireTagSteemprojects);
 module.exports.upvoteRequireTagSteemprojects = upvoteRequireTagSteemprojects;
 
 
+
 const flagRequireTagSteemprojects = {
     name: "Flag, require tag #steemprojects",
     voter: "guest123",
@@ -39,6 +40,7 @@ const flagRequireTagSteemprojects = {
 };
 rulesets.push(flagRequireTagSteemprojects);
 module.exports.flagRequireTagSteemprojects = flagRequireTagSteemprojects;
+
 
 
 const upvoteAndFlagRequireTagSteemprojects = {
@@ -58,8 +60,10 @@ rulesets.push(upvoteAndFlagRequireTagSteemprojects);
 module.exports.upvoteAndFlagRequireTagSteemprojects = upvoteAndFlagRequireTagSteemprojects;
 
 
-const upvoteAllowTagSteemprojects = {
-    name: "Upvote, allow tag #steemprojects",
+
+// this is for validation of https://steemit.com/steemprojects/@cryptoctopus/steemprojects-com-a-project-we-should-all-care-about-suggestions
+const upvoteAllowTags = {
+    name: "Upvote, allow tags #steemprojects, #steemdev, #suggestion, #input, #busy, #esteem, #nonexistenttag",
     voter: "guest123",
     total_weight: 1,
     action: "upvote",
@@ -67,12 +71,13 @@ const upvoteAllowTagSteemprojects = {
         {
             type: "tags",
             mode: "allow",
-            tags: ["steemprojects"]
+            tags: ["steemprojects", "steemdev", "suggestion", "input", "busy", "esteem", "nonexistenttag"]
         }
     ]
 };
-rulesets.push(upvoteAllowTagSteemprojects);
-module.exports.upvoteAllowTagSteemprojects = upvoteAllowTagSteemprojects;
+rulesets.push(upvoteAllowTags);
+module.exports.upvoteAllowTags = upvoteAllowTags;
+
 
 
 const upvoteDenyTagSteemprojects = {
@@ -91,8 +96,26 @@ const upvoteDenyTagSteemprojects = {
 rulesets.push(upvoteDenyTagSteemprojects);
 module.exports.upvoteDenyTagSteemprojects = upvoteDenyTagSteemprojects;
 
+
+const upvoteRequireTagSteemprojectsAndReview = {
+    name: "Upvote, require tags #steemprojects and #review",
+    voter: "guest123",
+    total_weight: 1,
+    action: "upvote",
+    rules: [
+        {
+            type: "tags",
+            mode: "require",
+            tags: ["steemprojects", "review"]
+        }
+    ]
+};
+rulesets.push(upvoteRequireTagSteemprojectsAndReview);
+module.exports.upvoteRequireTagSteemprojectsAndReview = upvoteRequireTagSteemprojectsAndReview;
+
+
 const upvoteAnyOfTags = {
-    name: "Upvote, any of the tags: #steemprojects, #steemdevs",
+    name: "Upvote, any of the tags: #steemprojects, #review",
     voter: "guest123",
     total_weight: 1,
     action: "upvote",
@@ -100,12 +123,13 @@ const upvoteAnyOfTags = {
         {
             type: "tags",
             mode: "deny",
-            tags: ["steemprojects", "steemdevs"]
+            tags: ["steemprojects", "review"]
         }
     ]
 };
 rulesets.push(upvoteAnyOfTags);
 module.exports.upvoteAnyOfTags = upvoteAnyOfTags;
+
 
 
 const upvoteAllowAuthorNoisy = {
@@ -124,6 +148,8 @@ const upvoteAllowAuthorNoisy = {
 rulesets.push(upvoteAllowAuthorNoisy);
 module.exports.upvoteAllowAuthorNoisy = upvoteAllowAuthorNoisy;
 
+
+
 const upvoteAllowAuthorsNoisyAndPerduta = {
     name: "Upvote, allow authors @noisy and @perduta",
     voter: "guest123",
@@ -139,6 +165,8 @@ const upvoteAllowAuthorsNoisyAndPerduta = {
 };
 rulesets.push(upvoteAllowAuthorsNoisyAndPerduta);
 module.exports.upvoteAllowAuthorsNoisyAndPerduta = upvoteAllowAuthorsNoisyAndPerduta;
+
+
 
 const upvoteDenyAuthorNoisy = {
     name: "Upvote, deny author @noisy",
@@ -157,6 +185,7 @@ rulesets.push(upvoteDenyAuthorNoisy);
 module.exports.upvoteDenyAuthorNoisy = upvoteDenyAuthorNoisy;
 
 
+
 const upvoteNoRulesMaxWeight2 = {
     name: "Upvote, no rules, max total weight 2",
     voter: "guest123",
@@ -166,6 +195,7 @@ const upvoteNoRulesMaxWeight2 = {
 };
 rulesets.push(upvoteNoRulesMaxWeight2);
 module.exports.upvoteNoRulesMaxWeight2 = upvoteNoRulesMaxWeight2;
+
 
 
 module.exports.rulesets = rulesets;
