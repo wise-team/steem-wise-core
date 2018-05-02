@@ -51,11 +51,18 @@ export type smartvotes_rule = smartvotes_rule_tags
 
 
 /**
- * A rule for specifying all allowed or denied tags.
+ * A rule for specifying allowed, denied and required tags list.
  */
 export interface smartvotes_rule_tags {
     type: "tags";
-    mode: "allow" | "deny";
+
+    /**
+     * Rule mode.
+     * - allow => every tag must be on the list
+     * - deny => none of the tags can be on the list
+     * - require => at least one of the tags should be on the list
+     */
+    mode: "allow" | "deny" | "require";
 
     /**
      * List of tags checked using boolean OR.

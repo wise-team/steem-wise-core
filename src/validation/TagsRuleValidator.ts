@@ -14,22 +14,33 @@ export class TagsRuleValidator extends AbstractRuleValidator {
             const postMetadata: SteemPostJSONMetadata = JSON.parse(post.json_metadata) as SteemPostJSONMetadata;
             const allowMode = (rule.mode == "allow");
 
-            if (allowMode) {
-                for (const i in postMetadata.tags) {
+            if (rule.mode === "allow") { // allow mode (every post tag must be within this list)
+                for (let i = 0; i < postMetadata.tags.length; i++) {
                     const tag = postMetadata.tags[i];
                     if (rule.tags.indexOf(tag) === -1)
                             throw new Error("Tag " + tag + " is not on the allowed tags list [" + rule.tags.join() + "].");
                 }
                 resolve(true);
             }
-            else { // deny mode
-                for (const i in rule.tags) {
+            else if (rule.mode === "deny") { // deny mode (none of post tags can be on this list)
+                for (let i = 0; i < postMetadata.tags.length; i++) {
                     const tag = postMetadata.tags[i];
                     if (rule.tags.indexOf(tag) !== -1)
                             throw new Error("Tag " + tag + " is on the denied tags list [" + rule.tags.join() + "].");
                 }
                 resolve(true);
             }
+            else if (rule.mode === "require") { // require => at least one of the tags should be on the list
+                for (let i = 0; i < rule.tags.length; i++) {
+                    const tag = rule.tags[i];
+                    if (postMetadata.tags.indexOf(tag) !== -1) {
+                        resolve(true);
+                        return;
+                    }
+                }
+                throw new Error("None of the tags [" + postMetadata.tags.join() + "] is on the \"require\" tags list [" + rule.tags.join() + "].");
+            }
+            else throw new Error("Unknown mode in tags rule.");
         });
     }
 }
