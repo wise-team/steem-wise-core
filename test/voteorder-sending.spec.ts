@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import "mocha";
 
-import * as filter from "../src/blockchain-filter";
 import { smartvotes_operation } from "../src/schema/smartvotes.schema";
 import SteemSmartvotes from "../src/steem-smartvotes";
 import { smartvotes_vote_weight, smartvotes_voteorder } from "../src/schema/votes.schema";

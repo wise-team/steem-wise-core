@@ -1,7 +1,7 @@
 import { Promise } from "bluebird";
 
 import * as schemaJSON from "../../smartvotes.schema.json";
-import * as blockchainFilter from "../blockchain-filter";
+import { BlockchainFilter } from "../BlockchainFilter";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
     smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_rule, smartvotes_ruleset } from "../schema/smartvotes.schema";
 import { SteemPost, SteemPostJSONMetadata } from "../types/blockchain-operations-types";
@@ -25,7 +25,7 @@ export class RulesValidator {
     public static getRulesOfUser(username: string, beforeDate: Date, callback: (error: Error | undefined, result: smartvotes_ruleset []) => void): void {
         if (typeof username === "undefined" || username.length == 0) { callback(new Error("Username must not be empty"), []); return; }
 
-        blockchainFilter.getOperationsBeforeDate(username, ["set_rules"], 1, beforeDate, function(error: Error, result: smartvotes_operation []): void {
+        BlockchainFilter.getSmartvotesOperationsBeforeDate(username, ["set_rules"], 1, beforeDate, function(error: Error, result: smartvotes_operation []): void {
             if (error) {
                 callback(error, []);
             }
@@ -127,7 +127,7 @@ export class RulesValidator {
 
     private static loadPost(input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset, post: SteemPost }> {
         return new Promise(function(resolve, reject) {
-            blockchainFilter.loadPost(input.voteorder.author, input.voteorder.permlink, function(error: Error | undefined, result: SteemPost) {
+            BlockchainFilter.loadPost(input.voteorder.author, input.voteorder.permlink, function(error: Error | undefined, result: SteemPost) {
                 if (error) throw error;
                 else resolve({ username: input.username, voteorder: input.voteorder, ruleset: input.ruleset, post: result });
             });

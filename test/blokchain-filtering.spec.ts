@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import "mocha";
 
-import * as filter from "../src/blockchain-filter";
+import { BlockchainFilter } from "../src/BlockchainFilter";
 import { RawOperation, CustomJsonOperation } from "../src/types/blockchain-operations-types";
 import { smartvotes_operation } from "../src/schema/smartvotes.schema";
 
@@ -12,7 +12,7 @@ describe("test/blockchain-filtering.spec.ts", () => {
 
             before(function(done) {
                 this.timeout(20000);
-                filter.getSmartvotesOperationsOfUser("guest123", function(error: Error | undefined, result: smartvotes_operation []): void {
+                BlockchainFilter.getSmartvotesOperationsOfUser("guest123", function(error: Error | undefined, result: smartvotes_operation []): void {
                     if (error) done(error);
                     else {
                         guest123Ops = result;
@@ -31,7 +31,7 @@ describe("test/blockchain-filtering.spec.ts", () => {
 
             before(function(done) {
                 this.timeout(20000);
-                filter.getOperationsBeforeDate("guest123",  ["set_rules"], -1, new Date("2018-04-21 13:00"), function(error: Error | undefined, result: smartvotes_operation []): void {
+                BlockchainFilter.getSmartvotesOperationsBeforeDate("guest123",  ["set_rules"], -1, new Date("2018-04-21 13:00"), function(error: Error | undefined, result: smartvotes_operation []): void {
                     if (error) done(error);
                     else {
                         guest123Ops = result;
@@ -50,7 +50,7 @@ describe("test/blockchain-filtering.spec.ts", () => {
 
             before(function(done) {
                 this.timeout(10000);
-                filter.loadPost("steemit",  "firstpost", function(error: Error | undefined, result: any): void {
+                BlockchainFilter.loadPost("steemit",  "firstpost", function(error: Error | undefined, result: any): void {
                     if (error) done(error);
 
                     post = result;
