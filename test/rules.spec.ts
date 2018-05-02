@@ -1,12 +1,13 @@
 import { expect } from "chai";
 import "mocha";
-import { Mutex } from "./Semaphore";
+import { Mutex } from "./util/Semaphore";
 
 import { RulesValidator } from "../src/validation/RulesValidator";
 import { smartvotes_rule, smartvotes_ruleset } from "../src/schema/rules.schema";
 import SteemSmartvotes from "../src/steem-smartvotes";
 import { smartvotes_vote_weight, smartvotes_voteorder } from "../src/schema/votes.schema";
 
+import { testRulesets } from "./data/rulesets-test-data";
 
 describe("rules", () => {
     const sequentialMutex: Mutex = new Mutex();
@@ -16,42 +17,9 @@ describe("rules", () => {
 
                 this.timeout(10000);
 
-                const ruleset1: smartvotes_ruleset = {
-                    name: "Curator of tag #smartvotes",
-                    voter: "steemprojects1",
-                    total_weight: 20000,
-                    action: "upvote+flag",
-                    rules: [
-                        {
-                            type: "tags",
-                            mode: "allow",
-                            tags: ["smartvotes"]
-                        }
-                    ]
-                };
-
-                const ruleset2: smartvotes_ruleset = {
-                    name: "Punish bad content by @nonexistentuser1 and @nonexistentuser2 on tags #tag1 and #tag2.",
-                    voter: "steemprojects1",
-                    total_weight: 20000,
-                    action: "flag",
-                    rules: [
-                        {
-                            type: "tags",
-                            mode: "allow",
-                            tags: ["tag1", "tag2"]
-                        },
-                        {
-                            type: "authors",
-                            mode: "allow",
-                            authors: ["nonexistentuser1", "nonexistentuser2"]
-                        }
-                    ]
-                };
-
                 const smartvotes = new SteemSmartvotes("guest123",
                     "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg");
-                smartvotes.sendRulesets([ruleset1, ruleset2], function (error: Error) {
+                smartvotes.sendRulesets(testRulesets, function (error: Error) {
                     releaseMutex();
                     if (error) {
                         done(error);
