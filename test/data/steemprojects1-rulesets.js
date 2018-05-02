@@ -7,6 +7,57 @@
  */
 const rulesets = [];
 
+const upvoteRequireTagSteemprojects = {
+    name: "Upvote, require tag #steemprojects",
+    voter: "guest123",
+    total_weight: 1,
+    action: "upvote",
+    rules: [
+        {
+            type: "tags",
+            mode: "require",
+            tags: ["steemprojects"]
+        }
+    ]
+};
+rulesets.push(upvoteRequireTagSteemprojects);
+module.exports.upvoteRequireTagSteemprojects = upvoteRequireTagSteemprojects;
+
+
+const flagRequireTagSteemprojects = {
+    name: "Flag, require tag #steemprojects",
+    voter: "guest123",
+    total_weight: 1,
+    action: "flag",
+    rules: [
+        {
+            type: "tags",
+            mode: "require",
+            tags: ["steemprojects"]
+        }
+    ]
+};
+rulesets.push(flagRequireTagSteemprojects);
+module.exports.flagRequireTagSteemprojects = flagRequireTagSteemprojects;
+
+
+const upvoteAndFlagRequireTagSteemprojects = {
+    name: "Upvote and flag, require tag #steemprojects",
+    voter: "guest123",
+    total_weight: 1,
+    action: "upvote+flag",
+    rules: [
+        {
+            type: "tags",
+            mode: "require",
+            tags: ["steemprojects"]
+        }
+    ]
+};
+rulesets.push(upvoteAndFlagRequireTagSteemprojects);
+module.exports.upvoteAndFlagRequireTagSteemprojects = upvoteAndFlagRequireTagSteemprojects;
+
+
 const upvoteAllowTagSteemprojects = {
     name: "Upvote, allow tag #steemprojects",
     voter: "guest123",
@@ -24,40 +75,6 @@ rulesets.push(upvoteAllowTagSteemprojects);
 module.exports.upvoteAllowTagSteemprojects = upvoteAllowTagSteemprojects;
 
 
-const flagAllowTagSteemprojects = {
-    name: "Flag, allow tag #steemprojects",
-    voter: "guest123",
-    total_weight: 1,
-    action: "flag",
-    rules: [
-        {
-            type: "tags",
-            mode: "allow",
-            tags: ["steemprojects"]
-        }
-    ]
-};
-rulesets.push(flagAllowTagSteemprojects);
-module.exports.flagAllowTagSteemprojects = flagAllowTagSteemprojects;
-
-
-const upvoteFlagAllowTagSteemprojects = {
-    name: "Upvote and flag, allow tag #steemprojects",
-    voter: "guest123",
-    total_weight: 1,
-    action: "upvote+flag",
-    rules: [
-        {
-            type: "tags",
-            mode: "allow",
-            tags: ["steemprojects"]
-        }
-    ]
-};
-rulesets.push(upvoteFlagAllowTagSteemprojects);
-module.exports.upvoteFlagAllowTagSteemprojects = upvoteFlagAllowTagSteemprojects;
-
-
 const upvoteDenyTagSteemprojects = {
     name: "Upvote, deny tag #steemprojects",
     voter: "guest123",
@@ -73,6 +90,22 @@ const upvoteDenyTagSteemprojects = {
 };
 rulesets.push(upvoteDenyTagSteemprojects);
 module.exports.upvoteDenyTagSteemprojects = upvoteDenyTagSteemprojects;
+
+const upvoteAnyOfTags = {
+    name: "Upvote, any of the tags: #steemprojects, #steemdevs",
+    voter: "guest123",
+    total_weight: 1,
+    action: "upvote",
+    rules: [
+        {
+            type: "tags",
+            mode: "deny",
+            tags: ["steemprojects", "steemdevs"]
+        }
+    ]
+};
+rulesets.push(upvoteAnyOfTags);
+module.exports.upvoteAnyOfTags = upvoteAnyOfTags;
 
 
 const upvoteAllowAuthorNoisy = {
