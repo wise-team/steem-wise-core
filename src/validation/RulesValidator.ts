@@ -100,7 +100,7 @@ export class RulesValidator {
                     return { username: input.username, voteorder: input.voteorder, ruleset: input.rulesets[i] };
                 }
             }
-            throw new Error("Delegator had no such ruleset at specified datetime.");
+            throw new Error("Delegator had no such ruleset (name=" + input.voteorder.ruleset_name + ") at specified datetime.");
         });
     }
 
