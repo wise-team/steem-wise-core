@@ -16,7 +16,7 @@ describe("test/voteorder-sending.spec.ts", () => {
                 const order: smartvotes_voteorder = {
                     ruleset_name: "Upvote, allow author @noisy",
                     author: "noisy",
-                    permlink: "ann-introducing-steemprojects-com-information-about-all-steem-projects-in-one-place",
+                    permlink: "bitcoin-translation-decentralized-truth-polish-subtitles-for-andreas-m-antonopoulos-video",
                     delegator: "steemprojects1",
                     weight: 1,
                     type: "upvote"
