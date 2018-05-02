@@ -63,7 +63,7 @@ describe("ruleset-sending.spec.ts", () => {
                     if (error) {
                         done();
                     }
-                    else done("Should throw error on nonexistent ruleset");
+                    else done(new Error("Should throw error on nonexistent ruleset"));
                 });
             });
         });
