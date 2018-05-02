@@ -108,7 +108,7 @@ export class RulesValidator {
             if (input.ruleset.voter !== input.username) throw new Error("This ruleset do not allow " + input.username + " to vote.");
 
             if (input.ruleset.action !== "upvote+flag") {
-                if (input.voteorder.type === input.ruleset.action) throw new Error("This ruleset do not allow " + input.voteorder.type + "action");
+                if (input.voteorder.type !== input.ruleset.action) throw new Error("This ruleset do not allow " + input.voteorder.type + " action");
             }
 
             resolve(input);
