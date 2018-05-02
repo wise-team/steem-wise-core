@@ -14,12 +14,12 @@ export class AuthorsRuleValidator extends AbstractRuleValidator {
             const allowMode = (rule.mode == "allow");
             const authorIsOnList: boolean = (rule.authors.indexOf(post.author) !== -1);
             if (allowMode) {
-                if (authorIsOnList) resolve();
+                if (authorIsOnList) resolve(true);
                 else throw new Error("Author of the post is not on the allow list.");
             }
             else {
                 if (authorIsOnList) throw new Error("Author of the post is on the deny list.");
-                else resolve();
+                else resolve(true);
             }
         });
     }
