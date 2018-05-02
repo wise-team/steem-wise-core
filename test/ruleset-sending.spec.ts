@@ -84,7 +84,5 @@ describe("test/ruleset-sending.spec.ts", () => {
                 });
             });
         });
-
-        // TODO many specific tests for rules
     });
 });

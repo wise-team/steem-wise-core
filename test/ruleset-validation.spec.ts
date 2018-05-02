@@ -34,7 +34,7 @@ describe("test/ruleset-validation.spec.ts", () => {
             const voteorder = undefined;
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
-                else done(new Error("should fail on empty voteorder"));
+                else done(new Error("Should fail on empty voteorder"));
             });
         });
 
@@ -46,7 +46,7 @@ describe("test/ruleset-validation.spec.ts", () => {
                 const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, propChanger);
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (error && !result) done();
-                    else done(new Error("should fail on empty " + prop));
+                    else done(new Error("Should fail on empty " + prop));
                 });
             });
         });
@@ -56,18 +56,27 @@ describe("test/ruleset-validation.spec.ts", () => {
             const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { type: "not-upvote-not-flag" });
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
-                else done(new Error("should fail on invalid type"));
+                else done(new Error("Should fail on invalid type"));
             });
         });
 
-        [-1, 0, undefined, NaN, 10001, Infinity].forEach(function(weight) {
+        [-1, 0, undefined, NaN, 3, 10000, Infinity].forEach(function(weight) {
             it("fails on invald weight (" + weight + ")", function(done) {
-                this.timeout(100);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { weight: weight });
+                this.timeout(10000);
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (error && !result) done();
-                    else done(new Error("should fail on invald weight (" + weight + ")"));
+                    else done(new Error("Should fail on invald weight (" + weight + ")"));
                 });
+            });
+        });
+
+        it("allows valid weight (2)", function(done) {
+            this.timeout(10000);
+            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 2 });
+            RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error || result) done(error);
+                else done();
             });
         });
 
@@ -76,7 +85,7 @@ describe("test/ruleset-validation.spec.ts", () => {
             const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: "NonExistent" + Date.now() });
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
-                else done(new Error("should fail on nonexistent ruleset"));
+                else done(new Error("Should fail on nonexistent ruleset"));
             });
         });
 
@@ -85,7 +94,7 @@ describe("test/ruleset-validation.spec.ts", () => {
             const voteorder: smartvotes_voteorder = validVoteorder;
             RulesValidator.validateVoteOrder("NonExistent-voter-" + Date.now(), voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
-                else done(new Error("should fail on different voter"));
+                else done(new Error("Should fail on different voter"));
             });
         });
 
@@ -95,7 +104,7 @@ describe("test/ruleset-validation.spec.ts", () => {
             {ruleset: steemprojects1Rulesets.flagRequireTagSteemprojects, type: "flag", pass: true}, // pass
             {ruleset: steemprojects1Rulesets.flagRequireTagSteemprojects, type: "upvote", pass: false}, // fail
             {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "flag", pass: true}, // pass
-            {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "upvote", pass: true}, // pass
+            {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "upvote", pass: true} // pass
         ].forEach(function(voteorderCase) {
             it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " vote type [allowed=" + voteorderCase.ruleset.action + ", tested=" + voteorderCase.type + "]", function(done) {
                 this.timeout(10000);
@@ -107,19 +116,49 @@ describe("test/ruleset-validation.spec.ts", () => {
                     }
                     else {
                         if (error && !result) done();
-                        else done(new Error("should fail on disallowed vote mode"));
+                        else done(new Error("Should fail on disallowed vote mode"));
                     }
                 });
             });
         });
 
-        // TODO fails on wrong vote mode
-        // TODO allows correct mode [upvote,flag,upvote+flag]
-        // TODO fails on too high weight
-        // TODO rule-authors[allow] pass on correct author
-        // TODO rule-authors[allow] fails on incorrect author
-        // TODO rule-authors[deny] pass on correct author
-        // TODO rule-authors[deny] fails on incorrect author
+        [
+            {ruleset: steemprojects1Rulesets.upvoteAllowAuthorNoisy, author: "noisy",
+                permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                pass: true}, // pass
+            {ruleset: steemprojects1Rulesets.upvoteAllowAuthorNoisy, author: "perduta",
+                permlink: "game-that-i-fall-in-love-with-as-developer",
+                pass: false}, // fail
+            {ruleset: steemprojects1Rulesets.upvoteDenyAuthorNoisy, author: "noisy",
+                permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                pass: false}, // fail
+            {ruleset: steemprojects1Rulesets.upvoteDenyAuthorNoisy, author: "perduta",
+                permlink: "game-that-i-fall-in-love-with-as-developer",
+                pass: true}, // pass
+            {ruleset: steemprojects1Rulesets.upvoteAllowAuthorsNoisyAndPerduta, author: "noisy",
+                permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                pass: true}, // pass
+            {ruleset: steemprojects1Rulesets.upvoteAllowAuthorsNoisyAndPerduta, author: "perduta",
+                permlink: "game-that-i-fall-in-love-with-as-developer",
+                pass: true} // pass
+        ].forEach(function(voteorderCase) {
+            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [allowed=" + voteorderCase.ruleset.rules[0].authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
+                this.timeout(10000);
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                    if (voteorderCase.pass) {
+                        if (error || !result) done(error);
+                        else done();
+                    }
+                    else {
+                        if (error && !result) done();
+                        else done(new Error("Should fail on disallowed author"));
+                    }
+                });
+            });
+        });
+
+
         // TODO rule-tags[allow] pass on correct tag
         // TODO rule-tags[allow] fails on incorrect tag
         // TODO rule-tags[deny] pass on correct tag
