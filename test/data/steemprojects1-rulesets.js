@@ -124,6 +124,21 @@ const upvoteAllowAuthorNoisy = {
 rulesets.push(upvoteAllowAuthorNoisy);
 module.exports.upvoteAllowAuthorNoisy = upvoteAllowAuthorNoisy;
 
+const upvoteAllowAuthorsNoisyAndPerduta = {
+    name: "Upvote, allow authors @noisy and @perduta",
+    voter: "guest123",
+    total_weight: 1,
+    action: "upvote",
+    rules: [
+        {
+            type: "authors",
+            mode: "allow",
+            authors: ["noisy", "perduta"]
+        }
+    ]
+};
+rulesets.push(upvoteAllowAuthorsNoisyAndPerduta);
+module.exports.upvoteAllowAuthorsNoisyAndPerduta = upvoteAllowAuthorsNoisyAndPerduta;
 
 const upvoteDenyAuthorNoisy = {
     name: "Upvote, deny author @noisy",
