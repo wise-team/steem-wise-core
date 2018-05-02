@@ -122,7 +122,7 @@ const upvoteAnyOfTags = {
     rules: [
         {
             type: "tags",
-            mode: "deny",
+            mode: "any",
             tags: ["steemprojects", "review"]
         }
     ]
