@@ -9,7 +9,7 @@ import { smartvotes_vote_weight, smartvotes_voteorder } from "../src/schema/vote
 
 import { testRulesets } from "./data/rulesets-test-data";
 
-describe("ruleset-sending.spec.ts", () => {
+describe("test/ruleset-sending.spec.ts", () => {
     const sequentialMutex: Mutex = new Mutex();
         it("SteemSmartvotes.sendRulesets sends rules without an error", function (mochaDone) {
             sequentialMutex.acquire().then(releaseMutex => {
