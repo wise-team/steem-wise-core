@@ -16,8 +16,10 @@ const validVoteorder: smartvotes_voteorder = {
     type: "upvote"
 };
 
-describe("test/ruleset-validation.spec.ts", () => {
-    describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", () => {
+describe("test/ruleset-validation.spec.ts", function() {
+    describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
+        this.retries(1);
+
         it("passes valid voteorder", function(done) {
             this.timeout(10000);
 
@@ -106,7 +108,7 @@ describe("test/ruleset-validation.spec.ts", () => {
             {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "flag", pass: true}, // pass
             {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "upvote", pass: true} // pass
         ].forEach(function(voteorderCase) {
-            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " vote type [allowed=" + voteorderCase.ruleset.action + ", tested=" + voteorderCase.type + "]", function(done) {
+            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " vote type [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + voteorderCase.ruleset.action + ", tested=" + voteorderCase.type + "]", function(done) {
                 this.timeout(10000);
                 const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, type: voteorderCase.type });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
@@ -142,7 +144,7 @@ describe("test/ruleset-validation.spec.ts", () => {
                 permlink: "game-that-i-fall-in-love-with-as-developer",
                 pass: true} // pass
         ].forEach(function(voteorderCase) {
-            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [allowed=" + voteorderCase.ruleset.rules[0].authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
+            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + voteorderCase.ruleset.rules[0].authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
                 this.timeout(10000);
                 const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
@@ -158,11 +160,63 @@ describe("test/ruleset-validation.spec.ts", () => {
             });
         });
 
+        [
+            {ruleset: steemprojects1Rulesets.upvoteAllowTags, author: "cryptoctopus",
+                permlink: "steemprojects-com-a-project-we-should-all-care-about-suggestions",
+                pass: true}, // has all tags from allow list => pass
+            {ruleset: steemprojects1Rulesets.upvoteAllowTags, author: "nmax83",
+                permlink: "steemprojects-com-sebuah-proyek-yang-seharusnya-kita-semua-peduli-tentang-saran-e78b56ef99562",
+                pass: false}, // only one of the post tags in not on the list => fail
+            {ruleset: steemprojects1Rulesets.upvoteDenyTagSteemprojects, author: "noisy",
+                permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                pass: false}, // has on tag from the list => fail
+            {ruleset: steemprojects1Rulesets.upvoteDenyTagSteemprojects, author: "perduta",
+                permlink: "game-that-i-fall-in-love-with-as-developer",
+                pass: true}, // has no tags from the list => pass
+            {ruleset: steemprojects1Rulesets.upvoteRequireTagSteemprojectsAndReview, author: "perduta",
+                permlink: "game-that-i-fall-in-love-with-as-developer",
+                pass: false}, // it does not have any of the required tags => fail
+            {ruleset: steemprojects1Rulesets.upvoteRequireTagSteemprojectsAndReview, author: "noisy",
+                permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                pass: false}, // it has only one of the required tags => fail
+            {ruleset: steemprojects1Rulesets.upvoteRequireTagSteemprojectsAndReview, author: "phgnomo",
+                permlink: "steem-project-of-the-week-1-get-on-steem",
+                pass: true}, // it has both of the required tags => pass
+            {ruleset: steemprojects1Rulesets.upvoteAnyOfTags, author: "phgnomo",
+                permlink: "steem-project-of-the-week-1-get-on-steem",
+                pass: true}, // it has both of the required tags => pass
+            {ruleset: steemprojects1Rulesets.upvoteAnyOfTags, author: "noisy",
+                permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                pass: true}, // it has only one of the required tags => pass
+            {ruleset: steemprojects1Rulesets.upvoteAnyOfTags, author: "tanata",
+                permlink: "man-of-steel",
+                pass: true}, // it has only one of the required tags => pass
+            {ruleset: steemprojects1Rulesets.upvoteAnyOfTags, author: "perduta",
+                permlink: "game-that-i-fall-in-love-with-as-developer",
+                pass: false} // it has no one of the required tags => fail
+        ].forEach(function(voteorderCase) {
+            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " tags [ruleset=\"" + voteorderCase.ruleset.name + "\","
+            + " mode=" + voteorderCase.ruleset.rules[0].mode + ", tags=" + voteorderCase.ruleset.rules[0].tags.join() + ","
+            + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
+                this.timeout(10000);
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                    if (voteorderCase.pass) {
+                        if (error || !result) done(error);
+                        else done();
+                    }
+                    else {
+                        if (error && !result) done();
+                        else done(new Error("Should fail on disallowed tag"));
+                    }
+                });
+            });
+        });
 
-        // TODO rule-tags[allow] pass on correct tag
-        // TODO rule-tags[allow] fails on incorrect tag
-        // TODO rule-tags[deny] pass on correct tag
-        // TODO rule-tags[deny] fails on incorrect tag
-        // TODO add TODO for custom RPC test
+        // TODO test rule joining
+        // TODO test non existing post
+
+        // TODO unit test custom_rpc
+        // TODO unit test total_weight
     });
 });
