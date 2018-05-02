@@ -11,12 +11,13 @@ describe("blockchain-filter", () => {
         let guest123Ops: smartvotes_operation[];
 
         before(function(done) {
-            this.timeout(10000);
+            this.timeout(20000);
             filter.getSmartvotesOperationsOfUser("guest123", function(error: Error | undefined, result: smartvotes_operation []): void {
                 if (error) done(error);
-
-                guest123Ops = result;
-                done();
+                else {
+                    guest123Ops = result;
+                    done();
+                }
             });
         });
 
@@ -29,12 +30,13 @@ describe("blockchain-filter", () => {
         let guest123Ops: smartvotes_operation[];
 
         before(function(done) {
-            this.timeout(10000);
+            this.timeout(20000);
             filter.getOperationsBeforeDate("guest123",  ["set_rules"], -1, new Date("2018-04-21 13:00"), function(error: Error | undefined, result: smartvotes_operation []): void {
                 if (error) done(error);
-
-                guest123Ops = result;
-                done();
+                else {
+                    guest123Ops = result;
+                    done();
+                }
             });
         });
 
