@@ -26,12 +26,12 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
+    public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error | undefined, result: any) => void): void {
         BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback);
     }
 
     // TODO comment
-    public sendRulesets(rulesets: schema.smartvotes_ruleset [], callback: (error: Error, result: any) => void): void {
+    public sendRulesets(rulesets: schema.smartvotes_ruleset [], callback: (error: Error | undefined, result: any) => void): void {
         BlockchainSender.sendRulesets(this.steem, this.username, this.postingWif, rulesets, callback);
     }
 
@@ -42,7 +42,7 @@ export class SteemSmartvotes {
 
     // TODO comment
     // TODO implement
-    public loadSmartvotesOperationsOfAccount(username: string, callback: (error: Error, result: schema.smartvotes_operation []) => void): void {
+    public loadSmartvotesOperationsOfAccount(username: string, callback: (error: Error | undefined, result: schema.smartvotes_operation []) => void): void {
         throw new Error("Not implemented yet");
     }
 

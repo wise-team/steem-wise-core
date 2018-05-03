@@ -3,43 +3,81 @@ import { CustomJsonOperation, VoteOperation } from "./types/blockchain-operation
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
 
+import { Promise } from "bluebird";
+
 export class BlockchainSender {
     // TODO comment
     // TODO add proggress callback
     // TODO validate
-    public static sendVoteOrder(steem: any, username: string, postingWif: string, voteorder: schema.smartvotes_voteorder, callback: (error: Error, result: any) => void): void {
-        const jsonStr = JSON.stringify({name: "send_voteorder", voteorder: voteorder});
-        if (!JSONValidator.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid: " + jsonStr);
+    public static sendVoteOrder(steem: any, username: string, postingWif: string, voteorder: schema.smartvotes_voteorder,
+        callback: (error: Error | undefined, result: any) => void,
+        proggressCallback?: (msg: string, proggress: number) => void): void {
 
-        const voteOp: VoteOperation = {
-            voter: username,
-            author: voteorder.author,
-            permlink: voteorder.permlink,
-            weight: voteorder.weight
+        const notifyProggress = function(msg: string, proggress: number) {
+            if (proggressCallback) proggressCallback(msg, proggress);
         };
 
-        const customJsonOp: CustomJsonOperation = {
-            required_auths: [],
-            required_posting_auths: [username],
-            id: "smartvote",
-            json: jsonStr
+        const validateJSON = function(): Promise<string> {
+            return new Promise(function(resolve, reject) {
+                const jsonStr: string = JSON.stringify({name: "send_voteorder", voteorder: voteorder});
+                if (!JSONValidator.validateJSON(jsonStr)) throw new Error("Vote order command JSON is invalid: " + jsonStr);
+                resolve(jsonStr);
+            });
         };
 
-        const steemCallback = function(err: Error, result: any): void {
-            callback(err, result);
+        const validateRules  = function(jsonStr: string): Promise<string> {
+            return new Promise(function(resolve, reject) {
+                RulesValidator.validateVoteOrder(username, voteorder, new Date(), function(error, success) {
+                    if (error) reject(error);
+                    else {
+                        notifyProggress("Sending vote order to blockchain", 0.8);
+                        resolve(jsonStr);
+                    }
+                }, function(msg: string, proggress: number) {
+                    notifyProggress(msg, proggress * 0.8); // validation takes 80% of proggress
+                });
+            });
         };
 
-        steem.broadcast.send(
-            {
-                extensions: [],
-                operations: [
-                                ["vote", voteOp],
-                                ["custom_json", customJsonOp]
-                            ]
-            },
-            {posting: postingWif},
-            steemCallback
-        );
+        const doSend = function(jsonStr: string): Promise<string> {
+            return new Promise(function(resolve, reject) {
+                const voteOp: VoteOperation = {
+                    voter: username,
+                    author: voteorder.author,
+                    permlink: voteorder.permlink,
+                    weight: voteorder.weight
+                };
+
+                const customJsonOp: CustomJsonOperation = {
+                    required_auths: [],
+                    required_posting_auths: [username],
+                    id: "smartvote",
+                    json: jsonStr
+                };
+
+                const steemCallback = function(err: Error, result: any): void {
+                    callback(err, result);
+                };
+
+                steem.broadcast.send(
+                    {
+                        extensions: [],
+                        operations: [
+                                        ["vote", voteOp],
+                                        ["custom_json", customJsonOp]
+                                    ]
+                    },
+                    {posting: postingWif},
+                    steemCallback
+                );
+            });
+        };
+
+        validateJSON()
+        .then(validateRules)
+        .then(doSend)
+        .then(function(result: any) { callback(undefined, result); })
+        .catch(error => { callback(error, undefined); });
     }
 
     // TODO comment
