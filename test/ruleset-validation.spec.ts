@@ -241,6 +241,17 @@ describe("test/ruleset-validation.spec.ts", function() {
             });
         });
 
+        it("fails on non existing post", function(done) {
+            this.timeout(10000);
+            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder,
+                { ruleset_name: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
+                    author: "noisy", permlink: "Non-existing-post" + (new Date()) }); // author is correct, but post doesnt exist => fail
+            RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error && !result) done();
+                else done(new Error("Should fail on non existing post"));
+            });
+        });
+
         // TODO unit test custom_rpc
         // TODO unit test total_weight
     });
