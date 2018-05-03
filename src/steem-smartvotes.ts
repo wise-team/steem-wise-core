@@ -17,10 +17,11 @@ export class SteemSmartvotes {
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
 
-    public static validateVoteOrder(username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date, callback: (error: Error | undefined, result: boolean) => void): void {
-        RulesValidator.validateVoteOrder(username, voteorder, beforeDate, callback);
     // TODO comment
-    // TODO test
+    public static validateVoteOrder(username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date,
+        callback: (error: Error | undefined, result: boolean) => void,
+        progressCallback: (msg: string, proggress: number) => void = function(msg, percent) {}): void {
+        RulesValidator.validateVoteOrder(username, voteorder, beforeDate, callback, progressCallback);
     }
 
     // TODO comment
@@ -63,6 +64,7 @@ export class SteemSmartvotes {
 
     // TODO comment
     // TODO move to separate file
+    // TODO reject duplicate names
     public sendRulesets(rulesets: schema.smartvotes_ruleset [], callback: (error: Error, result: any) => void): void {
         const smartvotesOp: schema.smartvotes_operation = {name: "set_rules", rulesets: rulesets};
         const jsonStr = JSON.stringify(smartvotesOp);
@@ -78,6 +80,8 @@ export class SteemSmartvotes {
         const steemCallback = function(err: Error, result: any): void {
             callback(err, result);
         };
+
+        // steem.api.setOptions({ url: "https://gtg.steem.house:8090", uri: "https://gtg.steem.house:8090" });
 
         steem.broadcast.send(
             {
