@@ -213,8 +213,33 @@ describe("test/ruleset-validation.spec.ts", function() {
             });
         });
 
-        // TODO test rule joining
-        // TODO test non existing post
+        [
+            {ruleset: steemprojects1Rulesets.upvoteTwoRulesJoined, author: "cryptoctopus",
+                permlink: "steemprojects-com-a-project-we-should-all-care-about-suggestions",
+                pass: false}, // has tag #steemprojects, but is not authored by @noisy => fail
+            {ruleset: steemprojects1Rulesets.upvoteTwoRulesJoined, author: "noisy",
+                permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                pass: true}, // has tag #steemprojects and is authored by @noisy => pass
+                {ruleset: steemprojects1Rulesets.upvoteTwoRulesJoined, author: "noisy",
+                permlink: "public-and-private-keys-how-to-generate-all-steem-user-s-keys-from-master-password-without-a-steemit-website-being-offline",
+                pass: false} // is authored by @noisy, but does not have tag #steemprojects => fail
+        ].forEach(function(voteorderCase) {
+            it((voteorderCase.pass ? "passes when all rules fulfilled" : "fails when not all rules fulfilled") + " [ruleset=\"" + voteorderCase.ruleset.name + "\","
+            + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
+                this.timeout(10000);
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                    if (voteorderCase.pass) {
+                        if (error || !result) done(error);
+                        else done();
+                    }
+                    else {
+                        if (error && !result) done();
+                        else done(new Error("Should fail when not all rules are fulfilled"));
+                    }
+                });
+            });
+        });
 
         // TODO unit test custom_rpc
         // TODO unit test total_weight

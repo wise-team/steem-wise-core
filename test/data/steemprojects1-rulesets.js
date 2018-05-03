@@ -198,4 +198,27 @@ module.exports.upvoteNoRulesMaxWeight2 = upvoteNoRulesMaxWeight2;
 
 
 
+const upvoteTwoRulesJoined = {
+    name: "Upvote, two rules joined",
+    voter: "guest123",
+    total_weight: 1,
+    action: "upvote",
+    rules: [
+        {
+            type: "authors",
+            mode: "allow",
+            authors: ["noisy"]
+        },
+        {
+            type: "tags",
+            mode: "require",
+            tags: ["steemprojects"]
+        }
+    ]
+};
+rulesets.push(upvoteTwoRulesJoined);
+module.exports.upvoteTwoRulesJoined = upvoteTwoRulesJoined;
+
+
+
 module.exports.rulesets = rulesets;
