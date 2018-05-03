@@ -255,4 +255,48 @@ describe("test/ruleset-validation.spec.ts", function() {
         // TODO unit test custom_rpc
         // TODO unit test total_weight
     });
+
+
+    describe("RulesValidator.validatePotentialVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
+        this.retries(1);
+
+        it("allows too high weight", function(done) {
+            this.timeout(10000);
+            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 3 });
+            RulesValidator.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: boolean) {
+                if (error || result) done(error);
+                else done();
+            });
+        });
+
+        [-1, 0, undefined, NaN, Infinity].forEach(function(weight) {
+            it("fails on invald weight type (" + weight + ")", function(done) {
+                this.timeout(10000);
+                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
+                RulesValidator.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: boolean) {
+                    if (error && !result) done();
+                    else done(new Error("Should fail on invald weight (" + weight + ")"));
+                });
+            });
+        });
+    });
+
+    describe("RulesValidator.validateVoteOrder#proggressCallback [delegator=steemprojects1, voter=guest123]", function() {
+        let proggressCounter: number = 0;
+
+        it("calls proggressCallback at least 4 times", function(done) {
+            this.timeout(10000);
+
+            const voteorder = validVoteorder;
+            RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
+                if (error) done(error);
+                else {
+                    if (proggressCounter >= 4) done();
+                    else done(new Error("Proggress callback should be called at leas 4 times"));
+                }
+            }, function(msg: string, proggress: number) {
+                proggressCounter++;
+            });
+        });
+    });
 });

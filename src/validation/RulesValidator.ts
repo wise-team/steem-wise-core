@@ -38,8 +38,6 @@ export class RulesValidator {
         });
     }
 
-    // TODO fail on nonexistent post
-    // TODO very precise tests
     /**
      * Validates a vote order which was or possibly will be sent by specified user. The vote order
      *  should specify a name of the ruleset against which it will be validated, and which was
@@ -51,17 +49,33 @@ export class RulesValidator {
      * @param {(error: Error | undefined, result: boolean) => void} callback — a callback (can be promisified)
      */
     public static validateVoteOrder(username: string, voteorder: smartvotes_voteorder, publishDate: Date,
-        callback: (error: Error | undefined, result: boolean) => void): void {
+        callback: (error: Error | undefined, result: boolean) => void,
+        proggressCallback?: (msg: string, proggress: number) => void, skipWeightCheck: boolean = false): void {
+
+        const notifyProggress = function(msg: string, proggress: number) {
+            if (proggressCallback) proggressCallback(msg, proggress);
+        };
 
         RulesValidator.validateVoteorderObject({ username: username, voteorder: voteorder, publishDate: publishDate})
-        .then(RulesValidator.loadRulesets)
-        .then(RulesValidator.checkRuleset)
-        .then(RulesValidator.checkMode)
-        .then(RulesValidator.checkWeight)
-        .then(RulesValidator.loadPost)
-        .then(RulesValidator.validateRules)
+        .then(function(input: any) { notifyProggress("Loading rulesets", 0.2); return input; })
+        /**/.then(RulesValidator.loadRulesets)
+        /**/.then(RulesValidator.checkRuleset)
+        /**/.then(RulesValidator.checkMode)
+        .then(function(input: any) { if (!skipWeightCheck) notifyProggress("Checking weight", 0.4); return input; })
+        /**/.then(function(input: any) { if (!skipWeightCheck) return RulesValidator.checkWeight(input); else return input; })
+        .then(function(input: any) { notifyProggress("Loading post", 0.6); return input; })
+        /**/.then(RulesValidator.loadPost)
+        .then(function(input: any) { notifyProggress("Validating rules", 0.8); return input; })
+        /**/.then(RulesValidator.validateRules)
         .then(function() { callback(undefined, true); })
         .catch(error => { callback(error, false); });
+    }
+
+    // TODO comment
+    public static validatePotentialVoteOrder(username: string, voteorder: smartvotes_voteorder,
+        callback: (error: Error | undefined, result: boolean) => void,
+        proggressCallback?: (msg: string, proggress: number) => void): void {
+            RulesValidator.validateVoteOrder(username, voteorder, new Date(), callback, proggressCallback, true);
     }
 
     private static validateVoteorderObject(input: { username: string, voteorder: smartvotes_voteorder, publishDate: Date }): Promise<{ username: string, voteorder: smartvotes_voteorder, publishDate: Date }> {
