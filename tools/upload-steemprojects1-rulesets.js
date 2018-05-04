@@ -30,7 +30,8 @@ function loadCredentials(callback) {
 }
 
 function sendRulesets(credentials) {
-    var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.postingWif);
+    var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.postingWif,
+        { url: "https://gtg.steem.house:8090", uri: "https://gtg.steem.house:8090" });
     smartvotes.sendRulesets(steemprojects1Rulesets.rulesets, function(error) {
         if(error) {
             console.error(error);
