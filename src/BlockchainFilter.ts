@@ -1,8 +1,7 @@
+import { steem } from "steem";
+
 import { smartvotes_operation } from "./schema/smartvotes.schema";
 import { RawOperation, CustomJsonOperation, SteemPost } from "./types/blockchain-operations-types";
-
-// TODO generate type definitions for steem-js (https://github.com/Microsoft/dts-gen). // Then TODO in tsconfig.json: allowJs=>false, declaration=>true
-const steem = require("steem");
 
 /**
  * Toolkit for blockchain operation filtering.
