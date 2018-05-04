@@ -1,4 +1,4 @@
-import { steem } from "steem";
+import * as steem from "steem";
 
 import { smartvotes_operation } from "./schema/smartvotes.schema";
 import { RawOperation, CustomJsonOperation, SteemPost } from "./types/blockchain-operations-types";

@@ -1,4 +1,4 @@
-import { steem } from "steem";
+import * as steem from "steem";
 
 import * as schema from "./schema/smartvotes.schema";
 import { BlockchainSender } from "./BlockchainSender";
@@ -19,7 +19,7 @@ export class SteemSmartvotes {
         this.postingWif = postingWif;
 
         // TODO generate type definitions for steem-js (https://github.com/Microsoft/dts-gen). // Then TODO in tsconfig.json: allowJs=>false, declaration=>true
-        this.steem = require("steem"); // TODO generate type definitions and turn on definition generation for this library in tsconfig.
+        this.steem = steem; // TODO generate type definitions and turn on definition generation for this library in tsconfig.
 
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
