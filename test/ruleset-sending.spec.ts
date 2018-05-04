@@ -11,7 +11,8 @@ import { testRulesets } from "./data/rulesets-test-data";
 
 describe("test/ruleset-sending.spec.ts", () => {
     const sequentialMutex: Mutex = new Mutex();
-        it("SteemSmartvotes.sendRulesets sends rules without an error", function (mochaDone) {
+    describe("SteemSmartvotes.sendRulesets", function() {
+        it("sends valid rules without an error", function (mochaDone) {
             sequentialMutex.acquire().then(releaseMutex => {
                 const done = function(err?: any) { mochaDone(err); releaseMutex(); };
 
@@ -28,8 +29,10 @@ describe("test/ruleset-sending.spec.ts", () => {
                 });
             });
         });
+    });
 
     describe("RulesValidator", () => {
+        // TODO move test
         it("#getRulesOfUser returns at leas two rulesets for user guest123", function (mochaDone) {
             sequentialMutex.acquire().then(releaseMutex => {
                 const done = function (err?: any) { mochaDone(err); releaseMutex(); };
@@ -85,4 +88,6 @@ describe("test/ruleset-sending.spec.ts", () => {
             });
         });
     });
+
+    // TODO add test: invalid post fails to send
 });
