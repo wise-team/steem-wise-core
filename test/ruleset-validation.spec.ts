@@ -5,6 +5,7 @@ import { RulesValidator } from "../src/validation/RulesValidator";
 import { smartvotes_voteorder } from "../src/schema/votes.schema";
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
 import { _objectAssign } from "../src/util";
+import { smartvotes_rule_authors, smartvotes_rule_tags } from "../src/steem-smartvotes";
 
 const voter = "guest123";
 const delegator = "steemprojects1";
@@ -145,7 +146,7 @@ describe("test/ruleset-validation.spec.ts", function() {
                 permlink: "game-that-i-fall-in-love-with-as-developer",
                 pass: true} // pass
         ].forEach(function(voteorderCase) {
-            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + voteorderCase.ruleset.rules[0].authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
+            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + (voteorderCase.ruleset.rules[0] as smartvotes_rule_authors).authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
                 this.timeout(10000);
                 const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
@@ -197,7 +198,7 @@ describe("test/ruleset-validation.spec.ts", function() {
                 pass: false} // it has no one of the required tags => fail
         ].forEach(function(voteorderCase) {
             it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " tags [ruleset=\"" + voteorderCase.ruleset.name + "\","
-            + " mode=" + voteorderCase.ruleset.rules[0].mode + ", tags=" + voteorderCase.ruleset.rules[0].tags.join() + ","
+            + " mode=" + (voteorderCase.ruleset.rules[0] as smartvotes_rule_tags).mode + ", tags=" + (voteorderCase.ruleset.rules[0] as smartvotes_rule_tags).tags.join() + ","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(10000);
                 const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
