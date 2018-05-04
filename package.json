@@ -55,7 +55,7 @@
     "cli"
   ],
   "author": "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/noisy-witness/steem-smartvotes-core/issues"
   },
