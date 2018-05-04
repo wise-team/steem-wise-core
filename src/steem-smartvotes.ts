@@ -2,6 +2,7 @@ import * as schema from "./schema/smartvotes.schema";
 import { BlockchainSender } from "./BlockchainSender";
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
+import { BlockchainFilter } from "BlockchainFilter";
 
 // TODO comment
 export class SteemSmartvotes {
@@ -36,14 +37,14 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    public static getRulesetsOfUser(username: string, beforeDate: Date, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void {
-        RulesValidator.getRulesOfUser(username, beforeDate, callback);
+    public static getRulesetsOfUser(username: string, atTime: Date, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void {
+        RulesValidator.getRulesOfUser(username, atTime, callback);
     }
 
     // TODO comment
     // TODO implement
     public loadSmartvotesOperationsOfAccount(username: string, callback: (error: Error | undefined, result: schema.smartvotes_operation []) => void): void {
-        throw new Error("Not implemented yet");
+        BlockchainFilter.getSmartvotesOperationsOfUser(username, callback);
     }
 
     // TODO comment
