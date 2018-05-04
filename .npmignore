@@ -1,4 +1,9 @@
+/.idea
 /coverage
 /examples
-/lib
-.idea
+/test
+/tools
+/index.html
+/webpack.config.js
+
+/dist/browser/statistics.html
