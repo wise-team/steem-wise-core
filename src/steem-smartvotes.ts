@@ -2,7 +2,7 @@ import * as schema from "./schema/smartvotes.schema";
 import { BlockchainSender } from "./BlockchainSender";
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
-import { BlockchainFilter } from "BlockchainFilter";
+import { BlockchainFilter } from "./BlockchainFilter";
 
 // TODO comment
 export class SteemSmartvotes {
