@@ -6,8 +6,6 @@ import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
 import { BlockchainFilter } from "./BlockchainFilter";
 
-// TODO add "noImplicitAny": true in tsconfig.json
-
 // TODO comment
 export class SteemSmartvotes {
     private steem: any;
@@ -19,6 +17,7 @@ export class SteemSmartvotes {
         this.postingWif = postingWif;
 
         this.steem = steem;
+        // TODO use this steem (with these options in static methods of this class (make them non-static)).
         if (steemOptions) this.steem.api.setOptions(steemOptions);
 
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
