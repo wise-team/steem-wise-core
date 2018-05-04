@@ -99,8 +99,7 @@ export class BlockchainSender {
             callback(err, result);
         };
 
-        // steem.api.setOptions({ url: "https://gtg.steem.house:8090", uri: "https://gtg.steem.house:8090" });
-
+        // console.log("Sending " + jsonStr.length + " chars.");
         steem.broadcast.send(
             {
                 extensions: [],

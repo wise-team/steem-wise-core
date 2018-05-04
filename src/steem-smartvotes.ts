@@ -14,12 +14,12 @@ export class SteemSmartvotes {
     private username: string;
     private postingWif: string;
 
-    constructor(username: string, postingWif: string) {
+    constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined) {
         this.username = username;
         this.postingWif = postingWif;
 
-        // TODO generate type definitions for steem-js (https://github.com/Microsoft/dts-gen). // Then TODO in tsconfig.json: allowJs=>false, declaration=>true
-        this.steem = steem; // TODO generate type definitions and turn on definition generation for this library in tsconfig.
+        this.steem = steem;
+        if (steemOptions) this.steem.api.setOptions(steemOptions);
 
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }

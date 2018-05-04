@@ -15,6 +15,7 @@ import { smartvotes_voteorder } from "./votes.schema";
  */
 export type smartvotes_operation = smartvotes_command_set_rules | smartvotes_command_send_voteorder;
 
+// TODO separate set_rules for every voter (8kb limit https://github.com/steemit/steem/commit/81f4c6373f1ddeb8c435b5c91fa67bcd361e29a3#diff-04f6af9cdbf180a31ccdbf6335b8f240R1517)
 /**
  * This command sets the rules. It invalidates previous rules. For a voteorder
  * a binding set_rules command has to be determined. It is the newest set_rules command
