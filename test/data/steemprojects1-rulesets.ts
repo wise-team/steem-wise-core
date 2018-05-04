@@ -1,3 +1,5 @@
+import { smartvotes_ruleset } from "../../src/steem-smartvotes";
+
 /**
  * These are rulesets used for rule validation unit tests. They are uploaded to @steemprojects1
  * steem account and delegates votes to @guest123. To send them use the following command (from project root dir):
@@ -5,9 +7,9 @@
  * It was already done by authors of the project, so it it unlikely that you have to do it. You should
  * be able to just run the tests which uses these rulesets (they were already uploaded to steem blockchain).
  */
-const rulesets = [];
+export const rulesets: smartvotes_ruleset [] = [];
 
-const upvoteRequireTagSteemprojects = {
+export const upvoteRequireTagSteemprojects: smartvotes_ruleset = {
     name: "Upvote, require tag #steemprojects",
     voter: "guest123",
     total_weight: 1,
@@ -21,11 +23,10 @@ const upvoteRequireTagSteemprojects = {
     ]
 };
 rulesets.push(upvoteRequireTagSteemprojects);
-module.exports.upvoteRequireTagSteemprojects = upvoteRequireTagSteemprojects;
 
 
 
-const flagRequireTagSteemprojects = {
+export const flagRequireTagSteemprojects: smartvotes_ruleset = {
     name: "Flag, require tag #steemprojects",
     voter: "guest123",
     total_weight: 1,
@@ -39,11 +40,10 @@ const flagRequireTagSteemprojects = {
     ]
 };
 rulesets.push(flagRequireTagSteemprojects);
-module.exports.flagRequireTagSteemprojects = flagRequireTagSteemprojects;
 
 
 
-const upvoteAndFlagRequireTagSteemprojects = {
+export const upvoteAndFlagRequireTagSteemprojects: smartvotes_ruleset = {
     name: "Upvote and flag, require tag #steemprojects",
     voter: "guest123",
     total_weight: 1,
@@ -57,12 +57,11 @@ const upvoteAndFlagRequireTagSteemprojects = {
     ]
 };
 rulesets.push(upvoteAndFlagRequireTagSteemprojects);
-module.exports.upvoteAndFlagRequireTagSteemprojects = upvoteAndFlagRequireTagSteemprojects;
 
 
 
 // this is for validation of https://steemit.com/steemprojects/@cryptoctopus/steemprojects-com-a-project-we-should-all-care-about-suggestions
-const upvoteAllowTags = {
+export const upvoteAllowTags: smartvotes_ruleset = {
     name: "Upvote, allow tags #steemprojects, #steemdev, #suggestion, #input, #busy, #esteem, #nonexistenttag",
     voter: "guest123",
     total_weight: 1,
@@ -76,11 +75,10 @@ const upvoteAllowTags = {
     ]
 };
 rulesets.push(upvoteAllowTags);
-module.exports.upvoteAllowTags = upvoteAllowTags;
 
 
 
-const upvoteDenyTagSteemprojects = {
+export const upvoteDenyTagSteemprojects: smartvotes_ruleset = {
     name: "Upvote, deny tag #steemprojects",
     voter: "guest123",
     total_weight: 1,
@@ -94,10 +92,9 @@ const upvoteDenyTagSteemprojects = {
     ]
 };
 rulesets.push(upvoteDenyTagSteemprojects);
-module.exports.upvoteDenyTagSteemprojects = upvoteDenyTagSteemprojects;
 
 
-const upvoteRequireTagSteemprojectsAndReview = {
+export const upvoteRequireTagSteemprojectsAndReview: smartvotes_ruleset = {
     name: "Upvote, require tags #steemprojects and #review",
     voter: "guest123",
     total_weight: 1,
@@ -111,10 +108,9 @@ const upvoteRequireTagSteemprojectsAndReview = {
     ]
 };
 rulesets.push(upvoteRequireTagSteemprojectsAndReview);
-module.exports.upvoteRequireTagSteemprojectsAndReview = upvoteRequireTagSteemprojectsAndReview;
 
 
-const upvoteAnyOfTags = {
+export const upvoteAnyOfTags: smartvotes_ruleset = {
     name: "Upvote, any of the tags: #steemprojects, #review",
     voter: "guest123",
     total_weight: 1,
@@ -128,11 +124,10 @@ const upvoteAnyOfTags = {
     ]
 };
 rulesets.push(upvoteAnyOfTags);
-module.exports.upvoteAnyOfTags = upvoteAnyOfTags;
 
 
 
-const upvoteAllowAuthorNoisy = {
+export const upvoteAllowAuthorNoisy: smartvotes_ruleset = {
     name: "Upvote, allow author @noisy",
     voter: "guest123",
     total_weight: 1,
@@ -146,11 +141,10 @@ const upvoteAllowAuthorNoisy = {
     ]
 };
 rulesets.push(upvoteAllowAuthorNoisy);
-module.exports.upvoteAllowAuthorNoisy = upvoteAllowAuthorNoisy;
 
 
 
-const upvoteAllowAuthorsNoisyAndPerduta = {
+export const upvoteAllowAuthorsNoisyAndPerduta: smartvotes_ruleset = {
     name: "Upvote, allow authors @noisy and @perduta",
     voter: "guest123",
     total_weight: 1,
@@ -164,11 +158,10 @@ const upvoteAllowAuthorsNoisyAndPerduta = {
     ]
 };
 rulesets.push(upvoteAllowAuthorsNoisyAndPerduta);
-module.exports.upvoteAllowAuthorsNoisyAndPerduta = upvoteAllowAuthorsNoisyAndPerduta;
 
 
 
-const upvoteDenyAuthorNoisy = {
+export const upvoteDenyAuthorNoisy: smartvotes_ruleset = {
     name: "Upvote, deny author @noisy",
     voter: "guest123",
     total_weight: 1,
@@ -182,11 +175,10 @@ const upvoteDenyAuthorNoisy = {
     ]
 };
 rulesets.push(upvoteDenyAuthorNoisy);
-module.exports.upvoteDenyAuthorNoisy = upvoteDenyAuthorNoisy;
 
 
 
-const upvoteNoRulesMaxWeight2 = {
+export const upvoteNoRulesMaxWeight2: smartvotes_ruleset = {
     name: "Upvote, no rules, max total weight 2",
     voter: "guest123",
     total_weight: 2,
@@ -194,11 +186,10 @@ const upvoteNoRulesMaxWeight2 = {
     rules: []
 };
 rulesets.push(upvoteNoRulesMaxWeight2);
-module.exports.upvoteNoRulesMaxWeight2 = upvoteNoRulesMaxWeight2;
 
 
 
-const upvoteTwoRulesJoined = {
+export const upvoteTwoRulesJoined: smartvotes_ruleset = {
     name: "Upvote, two rules joined",
     voter: "guest123",
     total_weight: 1,
@@ -217,8 +208,3 @@ const upvoteTwoRulesJoined = {
     ]
 };
 rulesets.push(upvoteTwoRulesJoined);
-module.exports.upvoteTwoRulesJoined = upvoteTwoRulesJoined;
-
-
-
-module.exports.rulesets = rulesets;

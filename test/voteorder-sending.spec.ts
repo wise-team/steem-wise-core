@@ -22,7 +22,7 @@ describe("test/voteorder-sending.spec.ts", () => {
                     type: "upvote"
                 };
 
-                sm.sendVoteOrder(order, function (error: Error, result: any) {
+                sm.sendVoteOrder(order, function (error: Error | undefined, result: any) {
                     if (error) done(error);
                     else done();
                 });
@@ -42,7 +42,7 @@ describe("test/voteorder-sending.spec.ts", () => {
                     type: "upvote"
                 };
 
-                sm.sendVoteOrder(order, function (error: Error, result: any) {
+                sm.sendVoteOrder(order, function (error: Error | undefined, result: any) {
                     if (error) done();
                     else done(new Error("Should fail on invalid voteorder"));
                 });

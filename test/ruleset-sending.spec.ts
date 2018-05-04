@@ -20,7 +20,7 @@ describe("test/ruleset-sending.spec.ts", () => {
 
                 const smartvotes = new SteemSmartvotes("guest123",
                     "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg");
-                smartvotes.sendRulesets(testRulesets, function (error: Error) {
+                smartvotes.sendRulesets(testRulesets, function (error: Error | undefined) {
                     releaseMutex();
                     if (error) {
                         done(error);

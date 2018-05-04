@@ -4,6 +4,7 @@ import "mocha";
 import { RulesValidator } from "../src/validation/RulesValidator";
 import { smartvotes_voteorder } from "../src/schema/votes.schema";
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
+import { _objectAssign } from "../src/util";
 
 const voter = "guest123";
 const delegator = "steemprojects1";
@@ -33,19 +34,19 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("fails on empty voteorder", function(done) {
             this.timeout(100);
-            const voteorder = undefined;
+            const voteorder = JSON.parse("{}") as smartvotes_voteorder;
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
                 else done(new Error("Should fail on empty voteorder"));
             });
         });
 
-        ["delegator", "ruleset_name", "author", "permlink", "type"].forEach(function(prop) {
+        ["delegator", "ruleset_name", "author", "permlink", "type"].forEach(function(prop: string) {
             it("fails on empty " + prop, function(done) {
                 this.timeout(500);
-                const propChanger: object = {};
+                const propChanger: any = {};
                 propChanger[prop] = "";
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, propChanger);
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, propChanger);
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (error && !result) done();
                     else done(new Error("Should fail on empty " + prop));
@@ -55,7 +56,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("fails on invalid type", function(done) {
             this.timeout(100);
-            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { type: "not-upvote-not-flag" });
+            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { type: "not-upvote-not-flag" });
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
                 else done(new Error("Should fail on invalid type"));
@@ -65,7 +66,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         [-1, 0, undefined, NaN, 3, 10000, Infinity].forEach(function(weight) {
             it("fails on invald weight (" + weight + ")", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (error && !result) done();
                     else done(new Error("Should fail on invald weight (" + weight + ")"));
@@ -75,7 +76,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("allows valid weight (2)", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 2 });
+            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 2 });
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error || result) done(error);
                 else done();
@@ -84,7 +85,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("fails on nonexistent ruleset", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: "NonExistent" + Date.now() });
+            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: "NonExistent" + Date.now() });
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                 if (error && !result) done();
                 else done(new Error("Should fail on nonexistent ruleset"));
@@ -110,7 +111,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         ].forEach(function(voteorderCase) {
             it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " vote type [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + voteorderCase.ruleset.action + ", tested=" + voteorderCase.type + "]", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, type: voteorderCase.type });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, type: voteorderCase.type });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (voteorderCase.pass) {
                         if (error || !result) done(error);
@@ -146,7 +147,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         ].forEach(function(voteorderCase) {
             it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + voteorderCase.ruleset.rules[0].authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (voteorderCase.pass) {
                         if (error || !result) done(error);
@@ -199,7 +200,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             + " mode=" + voteorderCase.ruleset.rules[0].mode + ", tags=" + voteorderCase.ruleset.rules[0].tags.join() + ","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (voteorderCase.pass) {
                         if (error || !result) done(error);
@@ -227,7 +228,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             it((voteorderCase.pass ? "passes when all rules fulfilled" : "fails when not all rules fulfilled") + " [ruleset=\"" + voteorderCase.ruleset.name + "\","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
                 RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
                     if (voteorderCase.pass) {
                         if (error || !result) done(error);
@@ -243,7 +244,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("fails on non existing post", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder,
+            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder,
                 { ruleset_name: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
                     author: "noisy", permlink: "Non-existing-post" + (new Date()) }); // author is correct, but post doesnt exist => fail
             RulesValidator.validateVoteOrder(voter, voteorder, new Date(), function(error: Error | undefined, result: boolean) {
@@ -262,7 +263,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("allows too high weight", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 3 });
+            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 3 });
             RulesValidator.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: boolean) {
                 if (error || result) done(error);
                 else done();
@@ -272,7 +273,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         [-1, 0, undefined, NaN, Infinity].forEach(function(weight) {
             it("fails on invald weight type (" + weight + ")", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = Object.assign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
                 RulesValidator.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: boolean) {
                     if (error && !result) done();
                     else done(new Error("Should fail on invald weight (" + weight + ")"));
