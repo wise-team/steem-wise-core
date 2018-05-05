@@ -1,12 +1,10 @@
 import { RawOperation, CustomJsonOperation } from "../../../types/blockchain-operations-types";
-import { Supplier } from "../../Supplier";
-import { Consumer } from "../../Consumer";
-import { ChainableFilter } from "../ChainableFilter";
+import { ChainableFilter } from "../../Chainable";
 
 /**
  * Filters out blockchain operations older that this date.
  */
-export class DateFilter extends ChainableFilter<RawOperation> {
+export class DateFilter extends ChainableFilter<RawOperation, DateFilter> {
     private beforeDate: Date;
 
     constructor(beforeDate: Date) {
@@ -14,9 +12,15 @@ export class DateFilter extends ChainableFilter<RawOperation> {
         this.beforeDate = beforeDate;
     }
 
-    protected getMyFilterFunction(): ((rawOp: RawOperation) => boolean) {
-        return (rawOp: RawOperation): boolean => {
-            return !(Date.parse(rawOp[1].timestamp + "Z"/* Z means UTC */) > this.beforeDate.getTime());
-        };
+    protected me(): DateFilter {
+        return this;
+    }
+
+    protected take(error: Error | undefined, rawOp: RawOperation): boolean {
+        if (error) throw error;
+        if (!(Date.parse(rawOp[1].timestamp + "Z"/* Z means UTC */) > this.beforeDate.getTime())) {
+            return this.give(undefined, rawOp);
+        }
+        else return true;
     }
 }

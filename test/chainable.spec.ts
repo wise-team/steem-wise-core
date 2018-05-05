@@ -3,22 +3,11 @@ import "mocha";
 
 import * as steem from "steem";
 
-import { Supplier } from "../src/chainable/Supplier";
-import { Consumer } from "../src/chainable/Consumer";
 import { RawOperation, CustomJsonOperation, VoteOperation } from "../src/types/blockchain-operations-types";
 import { AccountHistorySupplier } from "../src/chainable/suppliers/AccountHistorySupplier";
-import { SmartvotesFilter } from "../src/chainable/filters/SmartvotesFilter";
+import { Chainable, SmartvotesFilter, ChainableLimiter, SimpleTaker, OperationTypeFilter } from "../src/chainable/_exports";
 
 describe("test/iterator.spec.ts", () => {
-    describe("Supplier", () => {
-        describe("#notifyConsumers", () => {
-            it("throws error on empty consumer list", () => {
-                const s: Supplier<string> = new Supplier();
-                expect(() => { s.notifyConsumers(undefined, ""); }).to.throw();
-            });
-        });
-    });
-
     describe("AccountHistorySupplier", () => {
         describe("AccountHistorySupplier [username = steemprojects1]", () => {
             const steemprojects1Operations: RawOperation [] = [];
@@ -26,26 +15,20 @@ describe("test/iterator.spec.ts", () => {
             before(function(done) {
                 this.timeout(15000);
                 new AccountHistorySupplier(steem, "steemprojects1")
-                .withLimit(6)
-                .onEmptyResult(() => done(new Error("AccountHistorySupplier returned no operations")))
-                .onError((error) => done(error))
-                .addFilter(SmartvotesFilter.filterFunction)
-                .addConsumer((error: Error | undefined, op: RawOperation | undefined): boolean => {
-                    if (error) {
+                .branch((historySupplier) => {
+                    historySupplier
+                    .chain(new SmartvotesFilter())
+                    .chain(new ChainableLimiter(6))
+                    .chain(new SimpleTaker((item: RawOperation): boolean => {
+                        steemprojects1Operations.push(item);
+                        return true;
+                    }))
+                    .catch((error: Error): boolean => {
                         done(error);
                         return false;
-                    }
-                    if (op) {
-                        steemprojects1Operations.push(op);
-                        return true;
-                    }
-                    else {
-                        done(new Error("Empty operation returned"));
-                        return false;
-                    }
+                    });
                 })
-                .onFinish(() => done())
-                .start();
+                .start(() => done());
             });
 
             it("Returns exactly 6 operations", () => {
@@ -76,19 +59,12 @@ describe("test/iterator.spec.ts", () => {
 
             it("Loads operations in correct order", function(done) {
                 this.timeout(15000);
+
                 new AccountHistorySupplier(steem, "guest123")
-                .withLimit(Infinity)
-                .onEmptyResult(() => done(new Error("AccountHistorySupplier returned no operations")))
-                .onError((error) => done(error))
-                .addFilter((rawOp: RawOperation): boolean => {
-                    return rawOp[1].op[0] == "vote";
-                })
-                .addConsumer((error: Error | undefined, rawOp: RawOperation | undefined): boolean => {
-                    if (error) {
-                        done(error);
-                        return false;
-                    }
-                    if (rawOp) {
+                .branch((historySupplier) => {
+                    historySupplier
+                    .chain(new OperationTypeFilter("vote"))
+                    .chain(new SimpleTaker((rawOp: RawOperation): boolean => {
                         const vote: VoteOperation = rawOp[1].op[1] as VoteOperation;
 
                         const indexInSamples: number = randomVoteOperationsInDescendingTimeOrder.indexOf(vote.permlink);
@@ -108,14 +84,17 @@ describe("test/iterator.spec.ts", () => {
                         }
 
                         return true;
-                    }
-                    else {
-                        done(new Error("Empty operation returned"));
+                    }))
+                    .catch((error: Error): boolean => {
+                        done(error);
                         return false;
-                    }
+                    });
                 })
-                .onFinish(() => { if (!allDone) done(new Error()); })
-                .start();
+                .start(() => {
+                    if (randomVoteOperationsInDescendingTimeOrder.length > 0) {
+                        done(new Error("Not all votes were loaded"));
+                    }
+                });
             });
         });
     });

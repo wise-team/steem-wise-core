@@ -1,38 +1,23 @@
 // TODO
 
-import { Supplier } from "../Supplier";
-import { Consumer } from "../Consumer";
+import { ChainableSupplier } from "../Chainable";
 import { smartvotes_operation } from "../../steem-smartvotes";
 import { RawOperation } from "../../types/blockchain-operations-types";
 
-export class AccountHistorySupplier {
+export class AccountHistorySupplier extends ChainableSupplier<RawOperation, AccountHistorySupplier> {
     private steem: any;
     private username: string;
-    private limit: number = Infinity;
     private batchSize: number = 1000;
-    // private ascending = true;
-    private filters: ((rawOp: RawOperation) => boolean) [];
-    private onEmptyResultCallback: () => void;
     private onFinishCallback: () => void;
-    private onErrorCallback: (error: Error) => void;
-
-    private supplier: Supplier<RawOperation> = new Supplier<RawOperation>();
-
-    private resultCounter: number = 0;
 
     constructor(steem: any, username: string) {
+        super();
         this.steem = steem;
         this.username = username;
-
-        this.filters = [];
-
-        this.onEmptyResultCallback = function(): void {};
         this.onFinishCallback = function(): void {};
-        this.onErrorCallback = function(error: Error): void {};
     }
 
-    public withLimit(limit: number): AccountHistorySupplier {
-        this.limit = limit;
+    protected me(): AccountHistorySupplier {
         return this;
     }
 
@@ -41,45 +26,21 @@ export class AccountHistorySupplier {
         return this;
     }
 
-    /*public withOrder(order: "ascending" | "descending"): AccountHistorySupplier {
-        if (order === "ascending") this.ascending = true;
-        else if (order === "descending") this.ascending = false;
-        else throw new Error("Invalid order");
-        return this;
-    }*/
-
-    public addFilter(filter: (rawOp: RawOperation) => boolean): AccountHistorySupplier {
-        this.filters.push(filter);
-        return this;
-    }
-
-    public addConsumer(consumer: Consumer<RawOperation>): AccountHistorySupplier {
-        this.supplier.addConsumer(consumer);
-        return this;
-    }
-
-    public onEmptyResult(callback: () => void): AccountHistorySupplier {
-        this.onEmptyResultCallback = callback;
-        return this;
-    }
-
-    public onError(callback: (error: Error) => void): AccountHistorySupplier {
-        this.onErrorCallback = callback;
-        return this;
-    }
-
     public onFinish(callback: () => void): AccountHistorySupplier {
         this.onFinishCallback = callback;
         return this;
     }
 
-    public start() {
+    public start(callback?: () => void) {
+        if (callback) {
+            this.onFinishCallback = callback;
+        }
         // load and iterate over blockchain
         this.loadFromOnlyIfConsumers(-1);
     }
 
     private loadFromOnlyIfConsumers(from: number): void {
-        if (this.supplier.shouldLoadNewItems()) {
+        if (this.shouldLoadNewItems()) {
             this.loadFrom(from);
         }
     }
@@ -93,11 +54,12 @@ export class AccountHistorySupplier {
 
         this.steem.api.getAccountHistory(this.username, from, batchLimit, (error: Error, result: any) => {
             if (error) {
-                this.supplier.notifyConsumers(error, undefined);
-                this.onErrorCallback(error);
+                this.give(error, undefined);
             }
             else {
-                if (result.length == 0) this.onEmptyResultCallback();
+                if (result.length == 0) {
+                    this.onFinishCallback();
+                }
                 else {
                     result.reverse(); // loadFrom(from=-1) returns last "batchSize" of operations, but they are sorted from oldest to the newest.
                     // So the newest operation index is 1000 (it is a little awkward, but when limit=1000, steem returns 1001
@@ -121,26 +83,9 @@ export class AccountHistorySupplier {
         let loadNext: boolean = true;
         for (let i = 0; i < ops.length; i++) {
             const operation: RawOperation = ops[i];
-            if (this.filter(operation)) {
-                loadNext = this.supplier.notifyConsumers(undefined, operation);
-                if (!loadNext) break;
-
-                if (this.limit !== Infinity) {
-                    this.resultCounter++;
-                    if (this.resultCounter >= this.limit) {
-                        loadNext = false;
-                        break;
-                    }
-                }
-            }
+            loadNext = this.give(undefined, operation);
+            if (loadNext === false) break;
         }
         return loadNext;
-    }
-
-    private filter(op: RawOperation): boolean {
-        for (let i = 0; i < this.filters.length; i++) {
-            if (!this.filters[i](op)) return false;
-        }
-        return true;
     }
 }

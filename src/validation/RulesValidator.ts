@@ -1,7 +1,6 @@
 import { Promise } from "bluebird";
 
 import * as schemaJSON from "../../smartvotes.schema.json";
-import { BlockchainFilter } from "../BlockchainFilter";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
     smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_rule, smartvotes_ruleset } from "../schema/smartvotes.schema";
 import { SteemPost, SteemPostJSONMetadata } from "../types/blockchain-operations-types";
@@ -9,32 +8,50 @@ import { JSONValidator } from "./JSONValidator";
 import { TagsRuleValidator } from "./TagsRuleValidator";
 import { AuthorsRuleValidator } from "./AuthorsRuleValidator";
 import { CustomRPCRuleValidator } from "./CustomRPCRuleValidator";
-
+import { AccountHistorySupplier, SmartvotesFilter, DateFilter, SimpleTaker,
+    ToSmartvotesOperationTransformer, SmartvotesOperationTypeFilter,
+    ChainableLimiter } from "../chainable/_exports";
 /**
  * The RulesValidator validates vote orders against delegator's rulesets.
  */
 export class RulesValidator {
+    private steem: any;
+
+    constructor(steem: any) {
+        this.steem = steem;
+    }
+
     /**
      * Fetches smartvotes rules of specified steem user, which were valid at
      * specified time (could be now — 'new Date()')
      * @param {string} username — a steem username of the Delegator
      * @param {Date} beforeDate - the latest date and time of returned rules
      *  If you specify past date — the result will be the rules which were valid at that moment
-     * @param {(error: Error | undefined, result: smartvotes_ruleset []) => void} callback — a callback (can be promisified)
      */
-    public static getRulesOfUser(username: string, beforeDate: Date, callback: (error: Error | undefined, result: smartvotes_ruleset []) => void): void {
-        if (typeof username === "undefined" || username.length == 0) { callback(new Error("Username must not be empty"), []); return; }
+    public getRulesOfUser = (username: string, beforeDate: Date): Promise<smartvotes_ruleset []> => {
+        return new Promise((resolve, reject) => {
+            if (typeof username === "undefined" || username.length == 0) throw new Error("Username must not be empty");
 
-        BlockchainFilter.getSmartvotesOperationsBeforeDate(username, ["set_rules"], 1, beforeDate, function(error: Error, result: smartvotes_operation []): void {
-            if (error) {
-                callback(error, []);
-            }
-            else if (result.length == 0) {
-                callback(undefined, []);
-            }
-            else {
-                callback(undefined, (result[0] as smartvotes_command_set_rules).rulesets);
-            }
+            const loadedRulesets: smartvotes_ruleset [] = [];
+
+            new AccountHistorySupplier(this.steem, username)
+            .branch((historySupplier) => {
+                historySupplier
+                .chain(new SmartvotesFilter())
+                .chain(new DateFilter(beforeDate))
+                .chain(new ToSmartvotesOperationTransformer())
+                .chain(new SmartvotesOperationTypeFilter<smartvotes_command_set_rules>("set_rules"))
+                .chain(new ChainableLimiter(1))
+                .chain(new SimpleTaker((item: smartvotes_command_set_rules): boolean => {
+                    resolve(item.rulesets);
+                    return false;
+                }))
+                .catch((error: Error) => {
+                    reject(error);
+                    return false;
+                });
+            })
+            .start();
         });
     }
 
@@ -48,37 +65,37 @@ export class RulesValidator {
      * from blockchain operation timestamp) or (now — 'new Date()') if it is a potential vote order
      * @param {(error: Error | undefined, result: boolean) => void} callback — a callback (can be promisified)
      */
-    public static validateVoteOrder(username: string, voteorder: smartvotes_voteorder, publishDate: Date,
+    public validateVoteOrder = (username: string, voteorder: smartvotes_voteorder, publishDate: Date,
         callback: (error: Error | undefined, result: boolean) => void,
-        proggressCallback?: (msg: string, proggress: number) => void, skipWeightCheck: boolean = false): void {
+        proggressCallback?: (msg: string, proggress: number) => void, skipWeightCheck: boolean = false): void => {
 
         const notifyProggress = function(msg: string, proggress: number) {
             if (proggressCallback) proggressCallback(msg, proggress);
         };
 
-        RulesValidator.validateVoteorderObject({ username: username, voteorder: voteorder, publishDate: publishDate})
+        this.validateVoteorderObject({ username: username, voteorder: voteorder, publishDate: publishDate})
         .then(function(input: any) { notifyProggress("Loading rulesets", 0.2); return input; })
-        /**/.then(RulesValidator.loadRulesets)
-        /**/.then(RulesValidator.checkRuleset)
-        /**/.then(RulesValidator.checkMode)
+        /**/.then(this.loadRulesets)
+        /**/.then(this.checkRuleset)
+        /**/.then(this.checkMode)
         .then(function(input: any) { if (!skipWeightCheck) notifyProggress("Checking weight", 0.4); return input; })
-        /**/.then(function(input: any) { if (!skipWeightCheck) return RulesValidator.checkWeight(input); else return input; })
+        /**/.then((input: any) => { if (!skipWeightCheck) return this.checkWeight(input); else return input; })
         .then(function(input: any) { notifyProggress("Loading post", 0.6); return input; })
-        /**/.then(RulesValidator.loadPost)
+        /**/.then(this.loadPost)
         .then(function(input: any) { notifyProggress("Validating rules", 0.8); return input; })
-        /**/.then(RulesValidator.validateRules)
+        /**/.then(this.validateRules)
         .then(function() { callback(undefined, true); })
         .catch(error => { callback(error, false); });
     }
 
     // TODO comment
-    public static validatePotentialVoteOrder(username: string, voteorder: smartvotes_voteorder,
+    public validatePotentialVoteOrder = (username: string, voteorder: smartvotes_voteorder,
         callback: (error: Error | undefined, result: boolean) => void,
-        proggressCallback?: (msg: string, proggress: number) => void): void {
-            RulesValidator.validateVoteOrder(username, voteorder, new Date(), callback, proggressCallback, true);
+        proggressCallback?: (msg: string, proggress: number) => void): void => {
+            this.validateVoteOrder(username, voteorder, new Date(), callback, proggressCallback, true);
     }
 
-    private static validateVoteorderObject(input: { username: string, voteorder: smartvotes_voteorder, publishDate: Date }): Promise<{ username: string, voteorder: smartvotes_voteorder, publishDate: Date }> {
+    private validateVoteorderObject = (input: { username: string, voteorder: smartvotes_voteorder, publishDate: Date }): Promise<{ username: string, voteorder: smartvotes_voteorder, publishDate: Date }> => {
         return new Promise(function(resolve, reject) {
             const voteorder: smartvotes_voteorder = input.voteorder;
             if (typeof voteorder === "undefined") throw new Error("Voteorder must not be empty");
@@ -95,18 +112,16 @@ export class RulesValidator {
         });
     }
 
-    private static loadRulesets(input: { username: string, voteorder: smartvotes_voteorder, publishDate: Date }): Promise<{ username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset []}> {
-        return new Promise(function(resolve, reject) {
-            RulesValidator.getRulesOfUser(input.voteorder.delegator, input.publishDate, function(error: Error | undefined, result: smartvotes_ruleset []) {
-                if (error) throw error;
-                else {
-                    resolve({ username: input.username, voteorder: input.voteorder, rulesets: result});
-                }
+    private loadRulesets = (input: { username: string, voteorder: smartvotes_voteorder, publishDate: Date }): Promise<{ username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset []}> => {
+        // console.log(this);
+        // console.log(JSON.stringify(this));
+        return this.getRulesOfUser(input.voteorder.delegator, input.publishDate)
+            .then(function(result: smartvotes_ruleset []) {
+                return ({ username: input.username, voteorder: input.voteorder, rulesets: result});
             });
-        });
     }
 
-    private static checkRuleset(input: { username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset [] }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset}> {
+    private checkRuleset = (input: { username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset [] }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset}> => {
         return new Promise(function(resolve, reject) {
             for (const i in input.rulesets) {
                 if (input.rulesets[i].name == input.voteorder.ruleset_name) {
@@ -117,7 +132,7 @@ export class RulesValidator {
         });
     }
 
-    private static checkMode(input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }> {
+    private checkMode = (input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }> => {
         return new Promise(function(resolve, reject) {
             if (input.ruleset.voter !== input.username) throw new Error("This ruleset do not allow " + input.username + " to vote.");
 
@@ -129,7 +144,7 @@ export class RulesValidator {
         });
     }
 
-    private static checkWeight(input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }> {
+    private checkWeight = (input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }> => {
         return new Promise(function(resolve, reject) {
             // TODO total vote weight calculator
             if (input.voteorder.weight > input.ruleset.total_weight) throw new Error("Total vote weight allowed by this ruleset was exceeded.");
@@ -138,16 +153,16 @@ export class RulesValidator {
         });
     }
 
-    private static loadPost(input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset, post: SteemPost }> {
-        return new Promise(function(resolve, reject) {
-            BlockchainFilter.loadPost(input.voteorder.author, input.voteorder.permlink, function(error: Error | undefined, result: SteemPost) {
-                if (error) throw error;
+    private loadPost = (input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset, post: SteemPost }> => {
+        return new Promise((resolve, reject) => {
+            this.steem.api.getContent(input.voteorder.author, input.voteorder.permlink, function(error: Error, result: any) {
+                if (error) reject(error);
                 else resolve({ username: input.username, voteorder: input.voteorder, ruleset: input.ruleset, post: result });
             });
         });
     }
 
-    private static validateRules(input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset, post: SteemPost}): Promise<true> {
+    private validateRules = (input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset, post: SteemPost}): Promise<true> => {
         return new Promise(function(resolve, reject) {
             const ruleset = input.ruleset;
             const post = input.post;

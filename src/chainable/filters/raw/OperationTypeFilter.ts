@@ -1,12 +1,10 @@
 import { RawOperation, CustomJsonOperation } from "../../../types/blockchain-operations-types";
-import { Supplier } from "../../Supplier";
-import { Consumer } from "../../Consumer";
-import { ChainableFilter } from "../ChainableFilter";
+import { ChainableFilter } from "../../Chainable";
 
 /**
  * Filters steem blockchain operations by type.
  */
-export class OperationTypeFilter extends ChainableFilter<RawOperation> {
+export class OperationTypeFilter extends ChainableFilter<RawOperation, OperationTypeFilter> {
     private typeName: string;
 
     constructor(typeName: string) {
@@ -14,9 +12,15 @@ export class OperationTypeFilter extends ChainableFilter<RawOperation> {
         this.typeName = typeName;
     }
 
-    protected getMyFilterFunction(): ((rawOp: RawOperation) => boolean) {
-        return (rawOp: RawOperation): boolean => {
-            return rawOp[1].op[0] == this.typeName;
-        };
+    protected me(): OperationTypeFilter {
+        return this;
+    }
+
+    public take(error: Error | undefined, rawOp: RawOperation): boolean {
+        if (error) throw error;
+        if (rawOp[1].op[0] == this.typeName) {
+            return this.give(undefined, rawOp);
+        }
+        else return true;
     }
 }

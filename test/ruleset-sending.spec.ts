@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import "mocha";
 import { Mutex } from "./util/Semaphore";
+import * as steem from "steem";
 
 import { RulesValidator } from "../src/validation/RulesValidator";
 import { smartvotes_rule, smartvotes_ruleset } from "../src/schema/rules.schema";
@@ -38,15 +39,14 @@ describe("test/ruleset-sending.spec.ts", () => {
                 const done = function (err?: any) { mochaDone(err); releaseMutex(); };
                 this.timeout(10000);
 
-                RulesValidator.getRulesOfUser("guest123", new Date(), function (error: Error | undefined, result: smartvotes_ruleset []): void {
-                    if (error) done(error);
-                    else {
-                        if (result.length >= 2) {
-                            done();
-                        }
-                        else done(new Error("Too few rulesets for guest123"));
+                new RulesValidator(steem).getRulesOfUser("guest123", new Date())
+                .then((result: smartvotes_ruleset []): void => {
+                    if (result.length >= 2) {
+                        done();
                     }
-                });
+                    else done(new Error("Too few rulesets for guest123"));
+                })
+                .catch((error: Error) => done(error));
             });
         });
 
@@ -55,7 +55,7 @@ describe("test/ruleset-sending.spec.ts", () => {
                 const done = function (err?: any) { mochaDone(err); releaseMutex(); };
                 this.timeout(10000);
 
-                RulesValidator.validateVoteOrder("guest123", {
+                new RulesValidator(steem).validateVoteOrder("guest123", {
                     ruleset_name: "nonexistent_ruleset",
                     author: "steemit",
                     permlink: "firstpost",
@@ -67,23 +67,6 @@ describe("test/ruleset-sending.spec.ts", () => {
                         done();
                     }
                     else done(new Error("Should throw error on nonexistent ruleset"));
-                });
-            });
-        });
-
-        it("#validateVoteOrder fails on empty voteorder", function (mochaDone) {
-            sequentialMutex.acquire().then(releaseMutex => {
-                const done = function (err?: any) { mochaDone(err); releaseMutex(); };
-                this.timeout(10000);
-
-                RulesValidator.getRulesOfUser("guest123", new Date(), function (error: Error | undefined, result: smartvotes_ruleset []): void {
-                    if (error) done(error);
-                    else {
-                        if (result.length >= 2) {
-                            done();
-                        }
-                        else done(new Error("Too few rulesets for guest123"));
-                    }
                 });
             });
         });

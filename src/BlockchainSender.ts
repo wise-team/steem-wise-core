@@ -25,9 +25,9 @@ export class BlockchainSender {
             });
         };
 
-        const validateRules  = function(jsonStr: string): Promise<string> {
-            return new Promise(function(resolve, reject) {
-                RulesValidator.validateVoteOrder(username, voteorder, new Date(), function(error, success) {
+        const validateRules  = (jsonStr: string): Promise<string> => {
+            return new Promise((resolve, reject) => {
+                new RulesValidator(steem).validateVoteOrder(username, voteorder, new Date(), function(error, success) {
                     if (error) reject(error);
                     else {
                         notifyProggress("Sending vote order to blockchain", 0.8);
