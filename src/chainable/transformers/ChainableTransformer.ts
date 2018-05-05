@@ -3,17 +3,18 @@ import { Supplier } from "../Supplier";
 import { Consumer } from "../Consumer";
 
 /**
- * Generic filter that can be chained. It is a supplier and has a consumer.
+ * Transforms one object to another
  */
-export abstract class ChainableFilter<T> {
+export abstract class ChainableTransformer<F, T> {
     private supplier: Supplier<T> = new Supplier<T>();
 
-    public getConsumer(): Consumer<T> {
-        return (error: Error | undefined, item: T | undefined): boolean => {
+    public getConsumer(): Consumer<F> {
+        return (error: Error | undefined, from: F | undefined): boolean => {
             if (error) this.supplier.notifyConsumers(error, undefined);
             else {
-                if (item && this.getMyFilterFunction()(item)) {
-                    this.supplier.notifyConsumers(undefined, item);
+                if (from) {
+                    const toObj: T = this.getMyTransformFunction()(from);
+                    this.supplier.notifyConsumers(undefined, toObj);
                 }
             }
             return this.supplier.shouldLoadNewItems();
@@ -25,5 +26,5 @@ export abstract class ChainableFilter<T> {
         return consumer;
     }
 
-    protected abstract getMyFilterFunction(): ((item: T) => boolean);
+    protected abstract getMyTransformFunction(): ((item: F) => T);
 }

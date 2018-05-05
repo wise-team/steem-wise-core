@@ -1,9 +1,9 @@
 // TODO
 
-import { Supplier } from "./Supplier";
-import { Consumer } from "./Consumer";
-import { smartvotes_operation } from "../steem-smartvotes";
-import { RawOperation } from "../types/blockchain-operations-types";
+import { Supplier } from "../Supplier";
+import { Consumer } from "../Consumer";
+import { smartvotes_operation } from "../../steem-smartvotes";
+import { RawOperation } from "../../types/blockchain-operations-types";
 
 export class AccountHistorySupplier {
     private steem: any;

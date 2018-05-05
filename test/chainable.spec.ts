@@ -6,7 +6,7 @@ import * as steem from "steem";
 import { Supplier } from "../src/chainable/Supplier";
 import { Consumer } from "../src/chainable/Consumer";
 import { RawOperation, CustomJsonOperation, VoteOperation } from "../src/types/blockchain-operations-types";
-import { AccountHistorySupplier } from "../src/chainable/AccountHistorySupplier";
+import { AccountHistorySupplier } from "../src/chainable/suppliers/AccountHistorySupplier";
 import { SmartvotesFilter } from "../src/chainable/filters/SmartvotesFilter";
 
 describe("test/iterator.spec.ts", () => {
