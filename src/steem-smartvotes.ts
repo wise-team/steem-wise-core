@@ -64,3 +64,5 @@ export class SteemSmartvotes {
 
 export default SteemSmartvotes;
 export * from "./schema/smartvotes.schema";
+export * from "./chainable/_exports";
+
