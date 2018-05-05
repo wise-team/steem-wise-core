@@ -6,9 +6,32 @@
         },
         {
             "$ref": "#/definitions/smartvotes_command_send_voteorder"
+        },
+        {
+            "$ref": "#/definitions/smartvotes_command_confirm_vote"
         }
     ],
     "definitions": {
+        "smartvotes_command_confirm_vote": {
+            "description": "This command confirms that a vote order has been accomplished.",
+            "properties": {
+                "name": {
+                    "enum": [
+                        "confirm_vote"
+                    ],
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "description": "Transaction id of a voteorder.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "transaction_id"
+            ],
+            "type": "object"
+        },
         "smartvotes_command_send_voteorder": {
             "description": "This command sends a voteorder.",
             "properties": {
