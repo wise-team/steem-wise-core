@@ -3,6 +3,7 @@ import * as steem from "steem";
 import { smartvotes_operation } from "./schema/smartvotes.schema";
 import { RawOperation, CustomJsonOperation, SteemPost } from "./types/blockchain-operations-types";
 
+// TODO move everything to new chainable api
 /**
  * Toolkit for blockchain operation filtering.
  */
@@ -117,8 +118,8 @@ export class BlockchainFilter {
         // TODO replace all for in to classic for
         for (const i in rawOps) {
             const rawOp: RawOperation = rawOps[i];
-            if (rawOp[1].op[0] == "custom_json" && rawOp[1].op[1].id == "smartvote") {
-                    const jsonStr: string = rawOp[1].op[1].json;
+            if (rawOp[1].op[0] == "custom_json" && (rawOp[1].op[1] as CustomJsonOperation).id == "smartvote") {
+                    const jsonStr: string = (rawOp[1].op[1] as CustomJsonOperation).json;
                     const op: smartvotes_operation = JSON.parse(jsonStr) as smartvotes_operation;
 
                 if (typeof filter == "undefined" || filter == undefined || filter(op, rawOp)) {

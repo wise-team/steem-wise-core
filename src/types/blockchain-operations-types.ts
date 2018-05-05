@@ -3,7 +3,7 @@ export type RawOperation =
         number,
         {
             block: number,
-            op: [string, CustomJsonOperation],
+            op: [string, CustomJsonOperation | VoteOperation | object],
             op_in_trx: number,
             timestamp: string,
             trx_id: string,
