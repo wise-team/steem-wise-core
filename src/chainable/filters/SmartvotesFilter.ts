@@ -11,6 +11,11 @@ export class SmartvotesFilter extends ChainableFilter<RawOperation> {
         return rawOp[1].op[0] == "custom_json" && (rawOp[1].op[1] as CustomJsonOperation).id == "smartvote";
     }
 
+    public addConsumer(consumer: Consumer<RawOperation>): SmartvotesFilter {
+        super.addConsumer(consumer);
+        return this;
+    }
+
     protected getMyFilterFunction(): ((item: RawOperation) => boolean) {
         return SmartvotesFilter.filterFunction;
     }
