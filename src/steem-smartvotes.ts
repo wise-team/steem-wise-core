@@ -31,8 +31,13 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    public sendVoteOrder(voteorder: schema.smartvotes_voteorder, callback: (error: Error | undefined, result: any) => void): void {
-        BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback);
+    public sendVoteOrder(voteorder: schema.smartvotes_voteorder,
+        callback: (error: Error | undefined, result: any) => void,
+        proggressCallback?: (msg: string, proggress: number) => void): void {
+        if (proggressCallback)
+            BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback, proggressCallback);
+        else
+            BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback);
     }
 
     // TODO comment
