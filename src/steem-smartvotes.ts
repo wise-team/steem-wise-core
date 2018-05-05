@@ -24,17 +24,16 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    // TODO pass instance of steem
-    public static validateVoteOrder(username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date,
+    public validateVoteOrder = (username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date,
         callback: (error: Error | undefined, result: boolean) => void,
-        progressCallback: (msg: string, proggress: number) => void = function(msg, percent) {}): void {
-        new RulesValidator(steem).validateVoteOrder(username, voteorder, beforeDate, callback, progressCallback);
+        progressCallback: (msg: string, proggress: number) => void = function(msg, percent) {}): void => {
+        new RulesValidator(this.steem).validateVoteOrder(username, voteorder, beforeDate, callback, progressCallback);
     }
 
     // TODO comment
-    public sendVoteOrder(voteorder: schema.smartvotes_voteorder,
+    public sendVoteOrder = (voteorder: schema.smartvotes_voteorder,
         callback: (error: Error | undefined, result: any) => void,
-        proggressCallback?: (msg: string, proggress: number) => void): void {
+        proggressCallback?: (msg: string, proggress: number) => void): void => {
         if (proggressCallback)
             BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback, proggressCallback);
         else
@@ -42,31 +41,30 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    public sendRulesets(rulesets: schema.smartvotes_ruleset [], callback: (error: Error | undefined, result: any) => void): void {
+    public sendRulesets = (rulesets: schema.smartvotes_ruleset [], callback: (error: Error | undefined, result: any) => void): void => {
         BlockchainSender.sendRulesets(this.steem, this.username, this.postingWif, rulesets, callback);
     }
 
     // TODO comment
-    // TODO pass instance of steem
-    public static getRulesetsOfUser(username: string, atTime: Date, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void {
+    public getRulesetsOfUser = (username: string, atTime: Date, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void => {
         new RulesValidator(steem).getRulesOfUser(username, atTime)
         .then((result: schema.smartvotes_ruleset []) => callback(undefined, result))
         .catch((error: Error) => callback(error, []));
     }
 
     // TODO comment
-    public createAccountHistoryChain(username: string): AccountHistorySupplier {
+    public createAccountHistoryChain = (username: string): AccountHistorySupplier => {
         return new AccountHistorySupplier(this.steem, username);
     }
 
     // TODO comment
     // TODO implement
-    public createLiveBlockchainChain(username: string): AccountHistorySupplier {
+    public createLiveBlockchainChain = (username: string): AccountHistorySupplier => {
         throw new Error("Not implemented yet");
     }
 
     // TODO comment
-    public static validateJSON(input: string): boolean {
+    public static validateJSON = (input: string): boolean => {
         return JSONValidator.validateJSON(input);
     }
 }
