@@ -23,7 +23,9 @@ var voteorder1_wrong_tag = {
     type: "upvote"
 };
 
-smartvotesLib.SteemSmartvotes.validateVoteOrder("steemprojects1", voteorder1_wrong_tag, new Date(), function(error, isValid) {
+var smartvotes = new smartvotesLib.SteemSmartvotes("guest123, ", "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg");
+
+smartvotes.validateVoteOrder("steemprojects1", voteorder1_wrong_tag, new Date(), function(error, isValid) {
     console.log("Vote order is [ " + (isValid? "valid" : "invalid") + " ].");
     if (error) {
         console.error(error);
