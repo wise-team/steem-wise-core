@@ -1,4 +1,4 @@
-import { RawOperation } from "../types/blockchain-operations-types";
+import { RawOperation } from "./blockchain-operations-types";
 
 export class SteemOperationNumber {
     public blockNum: number;
@@ -15,18 +15,24 @@ export class SteemOperationNumber {
 
     public isGreaterThan(tn: SteemOperationNumber): boolean {
         if (this.blockNum > tn.blockNum) return true;
-        else if (this.transactionNum > tn.transactionNum) return true;
-        else return this.operationNum > tn.operationNum;
+        else if (this.blockNum == tn.blockNum && this.transactionNum > tn.transactionNum) return true;
+        else if (this.blockNum == tn.blockNum && this.transactionNum == tn.transactionNum) return this.operationNum > tn.operationNum;
+        else return false;
     }
 
     public isLesserThan(tn: SteemOperationNumber): boolean {
         if (this.blockNum < tn.blockNum) return true;
-        else if (this.transactionNum < tn.transactionNum) return true;
-        else return this.operationNum < tn.operationNum;
+        else if (this.blockNum == tn.blockNum && this.transactionNum < tn.transactionNum) return true;
+        else if (this.blockNum == tn.blockNum && this.transactionNum == tn.transactionNum) return this.operationNum < tn.operationNum;
+        else return false;
     }
 
     public isEqual(tn: SteemOperationNumber): boolean {
         return this.blockNum == tn.blockNum && this.transactionNum == tn.transactionNum && this.operationNum == tn.operationNum;
+    }
+
+    public toString(): string {
+        return "[b=" + this.blockNum + ", tx=" + this.transactionNum + ", op=" + this.operationNum + "]";
     }
 
     public static fromOperation(rawOp: RawOperation): SteemOperationNumber {
