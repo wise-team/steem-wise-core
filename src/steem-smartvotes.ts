@@ -1,8 +1,8 @@
 import * as steem from "steem";
 
 import * as schema from "./schema/smartvotes.schema";
-import { BlockchainSender } from "./BlockchainSender";
-import { Synchronizer } from "./Synchronizer";
+import { BlockchainSender } from "./blockchain/BlockchainSender";
+import { Synchronizer } from "./blockchain/Synchronizer";
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
 import { AccountHistorySupplier } from "./chainable/_exports";

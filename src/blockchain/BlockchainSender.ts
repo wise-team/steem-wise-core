@@ -1,7 +1,7 @@
-import * as schema from "./schema/smartvotes.schema";
-import { CustomJsonOperation, VoteOperation } from "./types/blockchain-operations-types";
-import { JSONValidator } from "./validation/JSONValidator";
-import { RulesValidator } from "./validation/RulesValidator";
+import * as schema from "../schema/smartvotes.schema";
+import { CustomJsonOperation, VoteOperation } from "../blockchain/blockchain-operations-types";
+import { JSONValidator } from "../validation/JSONValidator";
+import { RulesValidator } from "../validation/RulesValidator";
 
 import { Promise } from "bluebird";
 

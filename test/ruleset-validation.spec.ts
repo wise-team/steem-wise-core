@@ -6,7 +6,7 @@ import * as steem from "steem";
 import { RulesValidator } from "../src/validation/RulesValidator";
 import { smartvotes_voteorder } from "../src/schema/votes.schema";
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
-import { _objectAssign } from "../src/util";
+import { _objectAssign } from "../src/util/util";
 import { smartvotes_rule_authors, smartvotes_rule_tags } from "../src/steem-smartvotes";
 
 const voter = "guest123";

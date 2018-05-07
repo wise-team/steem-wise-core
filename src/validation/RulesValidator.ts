@@ -3,7 +3,7 @@ import { Promise } from "bluebird";
 import * as schemaJSON from "../../smartvotes.schema.json";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
     smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_rule, smartvotes_ruleset } from "../schema/smartvotes.schema";
-import { SteemPost, SteemPostJSONMetadata } from "../types/blockchain-operations-types";
+import { SteemPost, SteemPostJSONMetadata } from "../blockchain/blockchain-operations-types";
 import { JSONValidator } from "./JSONValidator";
 import { TagsRuleValidator } from "./TagsRuleValidator";
 import { AuthorsRuleValidator } from "./AuthorsRuleValidator";

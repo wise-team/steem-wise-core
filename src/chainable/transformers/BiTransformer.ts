@@ -1,6 +1,6 @@
 import { ChainableTransformer } from "../Chainable";
 
-import { RawOperation, CustomJsonOperation } from "../../types/blockchain-operations-types";
+import { RawOperation, CustomJsonOperation } from "../../blockchain/blockchain-operations-types";
 import { smartvotes_operation } from "../../steem-smartvotes";
 
 /**

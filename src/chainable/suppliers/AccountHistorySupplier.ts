@@ -2,7 +2,7 @@
 
 import { ChainableSupplier } from "../Chainable";
 import { smartvotes_operation } from "../../steem-smartvotes";
-import { RawOperation } from "../../types/blockchain-operations-types";
+import { RawOperation } from "../../blockchain/blockchain-operations-types";
 
 export class AccountHistorySupplier extends ChainableSupplier<RawOperation, AccountHistorySupplier> {
     private steem: any;

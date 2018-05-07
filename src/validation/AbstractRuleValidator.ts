@@ -1,6 +1,6 @@
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
     smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_rule } from "../schema/smartvotes.schema";
-import { SteemPost, SteemPostJSONMetadata } from "../types/blockchain-operations-types";
+import { SteemPost, SteemPostJSONMetadata } from "../blockchain/blockchain-operations-types";
 
 /**
  * Abstract class for Rule Validators. A rule validator is specific for

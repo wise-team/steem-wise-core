@@ -1,11 +1,11 @@
 import { Promise } from "bluebird";
 import { AccountHistorySupplier, SmartvotesFilter, OperationNumberFilter, SimpleTaker,
     ToSmartvotesOperationTransformer, SmartvotesOperationTypeFilter,
-    ChainableLimiter, BiTransformer, OperationTypeFilter, OperationNumberLimiter } from "./chainable/_exports";
-import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_ruleset } from "./schema/smartvotes.schema";
-import { RawOperation } from "./types/blockchain-operations-types";
-import { _objectAssign } from "./util";
-import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
+    ChainableLimiter, BiTransformer, OperationTypeFilter, OperationNumberLimiter } from "../chainable/_exports";
+import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_ruleset } from "../schema/smartvotes.schema";
+import { RawOperation } from "../blockchain/blockchain-operations-types";
+import { _objectAssign } from "../util/util";
+import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 
 interface BeforeSyncData1 {
     rulesets: {

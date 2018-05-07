@@ -1,4 +1,4 @@
-import { RawOperation, CustomJsonOperation } from "../../../types/blockchain-operations-types";
+import { RawOperation, CustomJsonOperation } from "../../../blockchain/blockchain-operations-types";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { ChainableFilter } from "../../Chainable";
 
@@ -36,6 +36,8 @@ export class OperationNumberFilter extends ChainableFilter<RawOperation, Operati
         else if (this.mode === ">=" && (tn.isGreaterThan(this.tn) || tn.isEqual(this.tn))) {
             return this.give(undefined, rawOp);
         }
-        else return true; // this is filter
+        else {
+            return true; // this is filter
+        }
     }
 }
