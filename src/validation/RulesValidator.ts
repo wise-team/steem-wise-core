@@ -8,9 +8,10 @@ import { JSONValidator } from "./JSONValidator";
 import { TagsRuleValidator } from "./TagsRuleValidator";
 import { AuthorsRuleValidator } from "./AuthorsRuleValidator";
 import { CustomRPCRuleValidator } from "./CustomRPCRuleValidator";
-import { AccountHistorySupplier, SmartvotesFilter, DateFilter, SimpleTaker,
+import { AccountHistorySupplier, SmartvotesFilter, SimpleTaker,
     ToSmartvotesOperationTransformer, SmartvotesOperationTypeFilter,
-    ChainableLimiter } from "../chainable/_exports";
+    ChainableLimiter, OperationNumberFilter } from "../chainable/_exports";
+import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 /**
  * The RulesValidator validates vote orders against delegator's rulesets.
  */
@@ -25,10 +26,10 @@ export class RulesValidator {
      * Fetches smartvotes rules of specified steem user, which were valid at
      * specified time (could be now — 'new Date()')
      * @param {string} username — a steem username of the Delegator
-     * @param {Date} beforeDate - the latest date and time of returned rules
+     * @param {Date} atMoment - // TODO comment
      *  If you specify past date — the result will be the rules which were valid at that moment
      */
-    public getRulesOfUser = (username: string, beforeDate: Date): Promise<smartvotes_ruleset []> => {
+    public getRulesOfUser = (username: string, atMoment: SteemOperationNumber = SteemOperationNumber.FUTURE): Promise<smartvotes_ruleset []> => {
         return new Promise((resolve, reject) => {
             if (typeof username === "undefined" || username.length == 0) throw new Error("Username must not be empty");
 
@@ -38,7 +39,7 @@ export class RulesValidator {
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new SmartvotesFilter())
-                .chain(new DateFilter(beforeDate))
+                .chain(new OperationNumberFilter("<", atMoment))
                 .chain(new ToSmartvotesOperationTransformer())
                 .chain(new SmartvotesOperationTypeFilter<smartvotes_command_set_rules>("set_rules"))
                 .chain(new ChainableLimiter(1))
@@ -61,8 +62,7 @@ export class RulesValidator {
      *  set in the newest (at publishDate moment) set_rules of the Delegator
      * @param {string} username — a steem username of the Voter
      * @param {smartvotes_voteorder} voteorder  — a voteorder object
-     * @param {Date} publishDate — a past datetime of the publication of send_voteorder (date
-     * from blockchain operation timestamp) or (now — 'new Date()') if it is a potential vote order
+     * @param // TODO comment
      * @param {(error: Error | undefined, result: boolean) => void} callback — a callback (can be promisified)
      */
     public validateVoteOrder = (username: string, voteorder: smartvotes_voteorder, publishDate: Date,
@@ -112,10 +112,10 @@ export class RulesValidator {
         });
     }
 
-    private loadRulesets = (input: { username: string, voteorder: smartvotes_voteorder, publishDate: Date }): Promise<{ username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset []}> => {
+    private loadRulesets = (input: { username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber }): Promise<{ username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset []}> => {
         // console.log(this);
         // console.log(JSON.stringify(this));
-        return this.getRulesOfUser(input.voteorder.delegator, input.publishDate)
+        return this.getRulesOfUser(input.voteorder.delegator, input.at)
             .then(function(result: smartvotes_ruleset []) {
                 return ({ username: input.username, voteorder: input.voteorder, rulesets: result});
             });

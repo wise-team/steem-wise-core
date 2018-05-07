@@ -5,6 +5,7 @@ import { RulesValidator } from "./validation/RulesValidator";
 
 import { Promise } from "bluebird";
 
+// TODO move to /blockchain
 export class BlockchainSender {
     // TODO comment
     // TODO add proggress callback

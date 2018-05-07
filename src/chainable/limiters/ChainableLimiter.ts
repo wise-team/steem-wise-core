@@ -1,5 +1,5 @@
 
-import { ChainableFilter } from "./Chainable";
+import { ChainableFilter } from "../Chainable";
 
 export class ChainableLimiter<T> extends ChainableFilter<T, ChainableLimiter<T>> {
     private limit: number;

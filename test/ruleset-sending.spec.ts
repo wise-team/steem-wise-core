@@ -39,7 +39,7 @@ describe("test/ruleset-sending.spec.ts", () => {
                 const done = function (err?: any) { mochaDone(err); releaseMutex(); };
                 this.timeout(10000);
 
-                new RulesValidator(steem).getRulesOfUser("guest123", new Date())
+                new RulesValidator(steem).getRulesOfUser("guest123")
                 .then((result: smartvotes_ruleset []): void => {
                     if (result.length >= 2) {
                         done();

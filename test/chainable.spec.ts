@@ -5,9 +5,10 @@ import * as steem from "steem";
 
 import { RawOperation, CustomJsonOperation, VoteOperation } from "../src/types/blockchain-operations-types";
 import { AccountHistorySupplier } from "../src/chainable/suppliers/AccountHistorySupplier";
-import { Chainable, SmartvotesFilter, ChainableLimiter, SimpleTaker, OperationTypeFilter } from "../src/chainable/_exports";
+import { Chainable, SmartvotesFilter, ChainableLimiter, SimpleTaker, OperationTypeFilter, OperationNumberFilter } from "../src/chainable/_exports";
+import { SteemOperationNumber } from "../src/steem-smartvotes";
 
-describe("test/iterator.spec.ts", () => {
+describe("test/chainable.spec.ts", () => {
     describe("AccountHistorySupplier", () => {
         describe("AccountHistorySupplier [username = steemprojects1]", () => {
             const steemprojects1Operations: RawOperation [] = [];
@@ -18,6 +19,7 @@ describe("test/iterator.spec.ts", () => {
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new SmartvotesFilter())
+                    .chain(new OperationNumberFilter("<=", new SteemOperationNumber(22202938, 14, 0))) // ensure no one will be able to manipulate test results by voting
                     .chain(new ChainableLimiter(6))
                     .chain(new SimpleTaker((item: RawOperation): boolean => {
                         steemprojects1Operations.push(item);
@@ -47,6 +49,58 @@ describe("test/iterator.spec.ts", () => {
         });
 
         describe("AccountHistorySupplier [username = guest123]", () => {
+            const realAndVirtual: string [] = [
+                "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+                "bitcoin-translation-decentralized-truth-polish-subtitles-for-andreas-m-antonopoulos-video",
+                "falf",
+                "20180411162422237-diceroll",
+                "top-5-cities-in-bangladesh",
+                "what-makes-you-you-secret-of-individuality-and-uniqueness"
+            ];
+
+            const order: string [] = [];
+
+            it("Loads both real and virtual operations", function(done) {
+                this.timeout(25000);
+                new AccountHistorySupplier(steem, "guest123")
+                .branch((historySupplier) => {
+                    historySupplier
+                    .chain(new OperationTypeFilter("vote"))
+                    .chain(new OperationNumberFilter("<=", new SteemOperationNumber(22202938, 14, 0))) // ensure no one will be able to manipulate test results by voting
+                    .chain(new SimpleTaker((rawOp: RawOperation): boolean => {
+                        const vote: VoteOperation = rawOp[1].op[1] as VoteOperation;
+
+                        const indexInSamples: number = realAndVirtual.indexOf(vote.permlink);
+                        if (indexInSamples !== -1) {
+                            realAndVirtual.splice(indexInSamples, 1);
+                            order.push(vote.permlink);
+                            if (realAndVirtual.length == 0) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }))
+                    .catch((error: Error): boolean => {
+                        console.error(error);
+                        done(error);
+                        return false;
+                    });
+                })
+                .start(() => {
+                    if (realAndVirtual.length > 0) {
+                        console.error(new Error("Not all votes were loaded: missing: " + JSON.stringify(realAndVirtual)));
+                        done(new Error("Not all votes were loaded: missing: " + JSON.stringify(realAndVirtual)));
+                    }
+                    else {
+                        done();
+                        console.log("Done");
+                    }
+                    /* tslint:disable no-null-keyword */
+                    console.log("Order: " + JSON.stringify(order, null, 2));
+                });
+            });
+
             const randomVoteOperationsInDescendingTimeOrder: string [] = [
                 "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
                 "bitcoin-translation-decentralized-truth-polish-subtitles-for-andreas-m-antonopoulos-video",
@@ -55,29 +109,28 @@ describe("test/iterator.spec.ts", () => {
                 "top-5-cities-in-bangladesh",
                 "what-makes-you-you-secret-of-individuality-and-uniqueness"
             ];
-            let allDone = false;
 
             it("Loads operations in correct order", function(done) {
-                this.timeout(15000);
-
+                this.timeout(25000);
                 new AccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationTypeFilter("vote"))
+                    .chain(new OperationNumberFilter("<=", new SteemOperationNumber(22202938, 14, 0))) // ensure no one will be able to manipulate test results by voting
                     .chain(new SimpleTaker((rawOp: RawOperation): boolean => {
                         const vote: VoteOperation = rawOp[1].op[1] as VoteOperation;
 
                         const indexInSamples: number = randomVoteOperationsInDescendingTimeOrder.indexOf(vote.permlink);
                         if (indexInSamples !== -1) {
                             if (indexInSamples !== 0) {
-                                done(new Error("Votes returned in wrogn order"));
+                                const error = new Error("Votes returned in wrogn order. Received " + vote.permlink + ", sholudReceive: " + randomVoteOperationsInDescendingTimeOrder[0]);
+                                console.error(error);
+                                done(error);
                                 return false;
                             }
                             else {
                                 randomVoteOperationsInDescendingTimeOrder.shift();
                                 if (randomVoteOperationsInDescendingTimeOrder.length == 0) {
-                                    allDone = true;
-                                    done();
                                     return false;
                                 }
                             }
@@ -86,14 +139,16 @@ describe("test/iterator.spec.ts", () => {
                         return true;
                     }))
                     .catch((error: Error): boolean => {
+                        console.error(error);
                         done(error);
                         return false;
                     });
                 })
                 .start(() => {
                     if (randomVoteOperationsInDescendingTimeOrder.length > 0) {
-                        done(new Error("Not all votes were loaded"));
+                        done(new Error("Not all votes were loaded: missing: " + JSON.stringify(randomVoteOperationsInDescendingTimeOrder)));
                     }
+                    else done();
                 });
             });
         });

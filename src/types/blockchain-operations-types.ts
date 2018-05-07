@@ -1,4 +1,4 @@
-export type RawOperation =
+export type RawOperation = // TODO rename to BlockchainEntry or BlockchainOperationDescriptor
     [
         number,
         {
@@ -45,3 +45,4 @@ export interface SteemPostJSONMetadata {
     tags: string [];
     [x: string]: any; // allows other properties
 }
+// TODO move to "/blockchain"

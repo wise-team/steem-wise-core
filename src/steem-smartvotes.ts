@@ -2,11 +2,14 @@ import * as steem from "steem";
 
 import * as schema from "./schema/smartvotes.schema";
 import { BlockchainSender } from "./BlockchainSender";
+import { Synchronizer } from "./Synchronizer";
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
 import { AccountHistorySupplier } from "./chainable/_exports";
+import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 
 // TODO comment
+// TODO blockchain input sanitization
 export class SteemSmartvotes {
     private steem: any;
     private username: string;
@@ -46,10 +49,14 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    public getRulesetsOfUser = (username: string, atTime: Date, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void => {
-        new RulesValidator(steem).getRulesOfUser(username, atTime)
+    public getRulesetsOfUser = (username: string, atMoment: SteemOperationNumber, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void => {
+        new RulesValidator(this.steem).getRulesOfUser(username, atMoment)
         .then((result: schema.smartvotes_ruleset []) => callback(undefined, result))
         .catch((error: Error) => callback(error, []));
+    }
+
+    public synchronizeSmartvotes = (callback: (error: Error | undefined) => void): void => {
+        new Synchronizer(this.steem, this.username, this.postingWif).synchronize(callback);
     }
 
     // TODO comment
@@ -71,5 +78,6 @@ export class SteemSmartvotes {
 
 export default SteemSmartvotes;
 export * from "./schema/smartvotes.schema";
+export * from "./blockchain/_exports";
 export * from "./chainable/_exports";
 

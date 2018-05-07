@@ -25,7 +25,8 @@ var voteorder1_wrong_tag = {
 
 var smartvotes = new smartvotesLib.SteemSmartvotes("guest123, ", "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg");
 
-smartvotes.validateVoteOrder("steemprojects1", voteorder1_wrong_tag, new Date(), function(error, isValid) {
+// TODO check if SteemOperationNumber.FUTURE works here
+smartvotes.validateVoteOrder("steemprojects1", voteorder1_wrong_tag, function(error, isValid) {
     console.log("Vote order is [ " + (isValid? "valid" : "invalid") + " ].");
     if (error) {
         console.error(error);
