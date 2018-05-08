@@ -27,10 +27,10 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    public validateVoteOrder = (username: string, voteorder: schema.smartvotes_voteorder, beforeDate: Date,
+    public validateVoteOrder = (username: string, voteorder: schema.smartvotes_voteorder, atMoment: SteemOperationNumber,
         callback: (error: Error | undefined, result: boolean) => void,
         progressCallback: (msg: string, proggress: number) => void = function(msg, percent) {}): void => {
-        new RulesValidator(this.steem).validateVoteOrder(username, voteorder, beforeDate, callback, progressCallback);
+        new RulesValidator(this.steem).validateVoteOrder(username, voteorder, atMoment, callback, progressCallback);
     }
 
     // TODO comment

@@ -2,7 +2,7 @@ import * as schema from "../schema/smartvotes.schema";
 import { CustomJsonOperation, VoteOperation } from "../blockchain/blockchain-operations-types";
 import { JSONValidator } from "../validation/JSONValidator";
 import { RulesValidator } from "../validation/RulesValidator";
-
+import { SteemOperationNumber } from "./SteemOperationNumber";
 import { Promise } from "bluebird";
 
 // TODO move to /blockchain
@@ -28,7 +28,7 @@ export class BlockchainSender {
 
         const validateRules  = (jsonStr: string): Promise<string> => {
             return new Promise((resolve, reject) => {
-                new RulesValidator(steem).validateVoteOrder(username, voteorder, new Date(), function(error, success) {
+                new RulesValidator(steem).validateVoteOrder(username, voteorder, SteemOperationNumber.FUTURE, function(error, success) {
                     if (error) reject(error);
                     else {
                         notifyProggress("Sending vote order to blockchain", 0.8);

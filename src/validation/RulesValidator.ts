@@ -79,7 +79,7 @@ export class RulesValidator {
      * @param // TODO comment
      * @param {(error: Error | undefined, result: boolean) => void} callback — a callback (can be promisified)
      */
-    public validateVoteOrder = (username: string, voteorder: smartvotes_voteorder, publishDate: Date,
+    public validateVoteOrder = (username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber,
         callback: (error: Error | undefined, result: boolean) => void,
         proggressCallback?: (msg: string, proggress: number) => void, skipWeightCheck: boolean = false): void => {
 
@@ -87,7 +87,7 @@ export class RulesValidator {
             if (proggressCallback) proggressCallback(msg, proggress);
         };
 
-        this.validateVoteorderObject({ username: username, voteorder: voteorder, publishDate: publishDate})
+        this.validateVoteorderObject({ username: username, voteorder: voteorder, at: at})
         .then(function(input: any) { notifyProggress("Loading rulesets", 0.2); return input; })
         /**/.then(this.loadRulesets)
         /**/.then(this.checkRuleset)
@@ -106,10 +106,10 @@ export class RulesValidator {
     public validatePotentialVoteOrder = (username: string, voteorder: smartvotes_voteorder,
         callback: (error: Error | undefined, result: boolean) => void,
         proggressCallback?: (msg: string, proggress: number) => void): void => {
-            this.validateVoteOrder(username, voteorder, new Date(), callback, proggressCallback, true);
+            this.validateVoteOrder(username, voteorder, SteemOperationNumber.FUTURE, callback, proggressCallback, true);
     }
 
-    private validateVoteorderObject = (input: { username: string, voteorder: smartvotes_voteorder, publishDate: Date }): Promise<{ username: string, voteorder: smartvotes_voteorder, publishDate: Date }> => {
+    private validateVoteorderObject = (input: { username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber }): Promise<{ username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber }> => {
         return new Promise(function(resolve, reject) {
             const voteorder: smartvotes_voteorder = input.voteorder;
             if (typeof voteorder === "undefined") throw new Error("Voteorder must not be empty");

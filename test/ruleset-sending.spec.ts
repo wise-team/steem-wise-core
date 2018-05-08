@@ -1,14 +1,17 @@
-import { expect } from "chai";
 import "mocha";
+import { expect } from "chai";
 import { Mutex } from "./util/Semaphore";
+
 import * as steem from "steem";
 
 import { RulesValidator } from "../src/validation/RulesValidator";
 import { smartvotes_rule, smartvotes_ruleset } from "../src/schema/rules.schema";
-import SteemSmartvotes from "../src/steem-smartvotes";
 import { smartvotes_vote_weight, smartvotes_voteorder } from "../src/schema/votes.schema";
+import { SteemOperationNumber } from "../src/blockchain/SteemOperationNumber";
+import SteemSmartvotes from "../src/steem-smartvotes";
 
 import { testRulesets } from "./data/rulesets-test-data";
+
 
 describe("test/ruleset-sending.spec.ts", () => {
     const sequentialMutex: Mutex = new Mutex();
@@ -62,7 +65,7 @@ describe("test/ruleset-sending.spec.ts", () => {
                     delegator: "steemprojects1",
                     weight: 10,
                     type: "upvote"
-                }, new Date(), function(error: Error|undefined, result: boolean) {
+                }, SteemOperationNumber.FUTURE, function(error: Error|undefined, result: boolean) {
                     if (error) {
                         done();
                     }
