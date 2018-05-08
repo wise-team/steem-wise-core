@@ -4,6 +4,7 @@ import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorde
     smartvotes_rule_tags, smartvotes_rule_custom_rpc } from "../schema/smartvotes.schema";
 import { SteemPost, SteemPostJSONMetadata } from "../blockchain/blockchain-operations-types";
 import { AbstractRuleValidator } from "./AbstractRuleValidator";
+import { ValidationError } from "./ValidationError";
 
 /**
  * Validator for smartvotes_rule_tags (defined in src/schema/rules.schema.ts).
@@ -18,7 +19,7 @@ export class TagsRuleValidator extends AbstractRuleValidator {
                 for (let i = 0; i < postMetadata.tags.length; i++) {
                     const tag = postMetadata.tags[i];
                     if (rule.tags.indexOf(tag) === -1)
-                            throw new Error("Tag " + tag + " is not on the allowed tags list [" + rule.tags.join() + "].");
+                            throw new ValidationError("Tag " + tag + " is not on the allowed tags list [" + rule.tags.join() + "].");
                 }
                 resolve(true);
             }
@@ -26,7 +27,7 @@ export class TagsRuleValidator extends AbstractRuleValidator {
                 for (let i = 0; i < postMetadata.tags.length; i++) {
                     const tag = postMetadata.tags[i];
                     if (rule.tags.indexOf(tag) !== -1)
-                            throw new Error("Tag " + tag + " is on the denied tags list [" + rule.tags.join() + "].");
+                            throw new ValidationError("Tag " + tag + " is on the denied tags list [" + rule.tags.join() + "].");
                 }
                 resolve(true);
             }
@@ -34,7 +35,7 @@ export class TagsRuleValidator extends AbstractRuleValidator {
                 for (let i = 0; i < rule.tags.length; i++) {
                     const tag = rule.tags[i];
                     if (postMetadata.tags.indexOf(tag) === -1)
-                        throw new Error("The post tags [" + postMetadata.tags.join() + "] does not include " + tag + ".");
+                        throw new ValidationError("The post tags [" + postMetadata.tags.join() + "] does not include " + tag + ".");
                 }
                 resolve(true);
             }
@@ -46,9 +47,9 @@ export class TagsRuleValidator extends AbstractRuleValidator {
                         return;
                     }
                 }
-                throw new Error("None of the tags [" + postMetadata.tags.join() + "] is on the \"require\" tags list [" + rule.tags.join() + "].");
+                throw new ValidationError("None of the tags [" + postMetadata.tags.join() + "] is on the \"require\" tags list [" + rule.tags.join() + "].");
             }
-            else throw new Error("Unknown mode in tags rule.");
+            else throw new ValidationError("Unknown mode in tags rule.");
         });
     }
 }

@@ -4,6 +4,7 @@ import * as schemaJSON from "../../smartvotes.schema.json";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_rule_authors,
     smartvotes_rule_tags, smartvotes_rule_custom_rpc, smartvotes_rule, smartvotes_ruleset } from "../schema/smartvotes.schema";
 import { SteemPost, SteemPostJSONMetadata } from "../blockchain/blockchain-operations-types";
+import { ValidationError } from "./ValidationError";
 import { JSONValidator } from "./JSONValidator";
 import { TagsRuleValidator } from "./TagsRuleValidator";
 import { AuthorsRuleValidator } from "./AuthorsRuleValidator";
@@ -79,6 +80,7 @@ export class RulesValidator {
      * @param // TODO comment
      * @param {(error: Error | undefined, result: boolean) => void} callback — a callback (can be promisified)
      */
+    // TODO validation error should be different from generic error
     public validateVoteOrder = (username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber,
         callback: (error: Error | undefined, result: boolean) => void,
         proggressCallback?: (msg: string, proggress: number) => void, skipWeightCheck: boolean = false): void => {
@@ -112,16 +114,16 @@ export class RulesValidator {
     private validateVoteorderObject = (input: { username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber }): Promise<{ username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber }> => {
         return new Promise(function(resolve, reject) {
             const voteorder: smartvotes_voteorder = input.voteorder;
-            if (typeof voteorder === "undefined") throw new Error("Voteorder must not be empty");
-            if (typeof voteorder.delegator === "undefined" || voteorder.delegator.length == 0) throw new Error("Delegator must not be empty");
-            if (typeof voteorder.ruleset_name === "undefined" || voteorder.ruleset_name.length == 0) throw new Error("Ruleset_name must not be empty");
-            if (typeof voteorder.author === "undefined" || voteorder.author.length == 0) throw new Error("Author must not be empty");
-            if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) throw new Error("Permlink must not be empty");
-            if (typeof voteorder.type === "undefined" || voteorder.type.length == 0) throw new Error("Type must not be empty");
-            if (!(voteorder.type === "upvote" || voteorder.type === "flag")) throw new Error("Type must be: upvote or flag");
-            if (typeof voteorder.weight === "undefined" || isNaN(voteorder.weight)) throw new Error("Weight must not be empty");
-            if (voteorder.weight <= 0) throw new Error("Weight must be greater than zero");
-            if (voteorder.weight > 10000) throw new Error("Weight must be lesser or equal 10000");
+            if (typeof voteorder === "undefined") throw new ValidationError("Voteorder must not be empty");
+            if (typeof voteorder.delegator === "undefined" || voteorder.delegator.length == 0) throw new ValidationError("Delegator must not be empty");
+            if (typeof voteorder.ruleset_name === "undefined" || voteorder.ruleset_name.length == 0) throw new ValidationError("Ruleset_name must not be empty");
+            if (typeof voteorder.author === "undefined" || voteorder.author.length == 0) throw new ValidationError("Author must not be empty");
+            if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) throw new ValidationError("Permlink must not be empty");
+            if (typeof voteorder.type === "undefined" || voteorder.type.length == 0) throw new ValidationError("Type must not be empty");
+            if (!(voteorder.type === "upvote" || voteorder.type === "flag")) throw new ValidationError("Type must be: upvote or flag");
+            if (typeof voteorder.weight === "undefined" || isNaN(voteorder.weight)) throw new ValidationError("Weight must not be empty");
+            if (voteorder.weight <= 0) throw new ValidationError("Weight must be greater than zero");
+            if (voteorder.weight > 10000) throw new ValidationError("Weight must be lesser or equal 10000");
             resolve(input);
         });
     }
@@ -137,7 +139,7 @@ export class RulesValidator {
                         return;
                     }
                 }
-                throw new Error("Provided rulesets does not specify any set of rulesets for specified moment.");
+                throw new ValidationError("Provided rulesets does not specify any set of rulesets for specified moment.");
             });
         }
         else {
@@ -155,16 +157,16 @@ export class RulesValidator {
                     resolve({ username: input.username, voteorder: input.voteorder, ruleset: input.rulesets[i] });
                 }
             }
-            throw new Error("Delegator had no such ruleset (name=" + input.voteorder.ruleset_name + ") at specified datetime.");
+            throw new ValidationError("Delegator had no such ruleset (name=" + input.voteorder.ruleset_name + ") at specified datetime.");
         });
     }
 
     private checkMode = (input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }> => {
         return new Promise(function(resolve, reject) {
-            if (input.ruleset.voter !== input.username) throw new Error("This ruleset do not allow " + input.username + " to vote.");
+            if (input.ruleset.voter !== input.username) throw new ValidationError("This ruleset do not allow " + input.username + " to vote.");
 
             if (input.ruleset.action !== "upvote+flag") {
-                if (input.voteorder.type !== input.ruleset.action) throw new Error("This ruleset do not allow " + input.voteorder.type + " action");
+                if (input.voteorder.type !== input.ruleset.action) throw new ValidationError("This ruleset do not allow " + input.voteorder.type + " action");
             }
 
             resolve(input);
@@ -174,7 +176,7 @@ export class RulesValidator {
     private checkWeight = (input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset }> => {
         return new Promise(function(resolve, reject) {
             // TODO total vote weight calculator
-            if (input.voteorder.weight > input.ruleset.total_weight) throw new Error("Total vote weight allowed by this ruleset was exceeded.");
+            if (input.voteorder.weight > input.ruleset.total_weight) throw new ValidationError("Total vote weight allowed by this ruleset was exceeded.");
 
             resolve(input);
         });
@@ -225,7 +227,7 @@ export class RulesValidator {
             .then(function(values: any []) { // is this check redundant?
                 const validityArray: boolean [] = values as boolean [];
                 for (const i in validityArray) {
-                    if (!validityArray[i]) throw new Error("Rule validation failed");
+                    if (!validityArray[i]) throw new ValidationError("Rule validation failed");
                 }
             })
             .then(function() { resolve(true); })
