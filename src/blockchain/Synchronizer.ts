@@ -7,24 +7,8 @@ import { RawOperation } from "../blockchain/blockchain-operations-types";
 import { _objectAssign } from "../util/util";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { RulesValidator } from "../validation/RulesValidator";
-
-interface VoteConfirmedAtMoment {
-    opNum: SteemOperationNumber;
-    voteorderTransactionId: string;
-}
-
-interface RulesetAtMoment {
-    opNum: SteemOperationNumber;
-    ruleset: smartvotes_ruleset;
-    validityUntil: SteemOperationNumber;
-}
-
-interface VoteorderAtMoment {
-    transactionId: string;
-    opNum: SteemOperationNumber;
-    voter: string;
-    voteorder: smartvotes_voteorder;
-}
+import { VoteConfirmedAtMoment, VoteorderAtMoment, RulesetsAtMoment } from "../validation/smartvote-types-at-moment";
+import { ValidationError } from "../validation/ValidationError";
 
 /*interface BeforeSyncData1 {
     rulesets: RulesetAtMoment [];
@@ -40,6 +24,8 @@ export class Synchronizer {
     private username: string;
     private postingWif: string;
     private proggressCallback: (msg: string, proggress: number) => void = (msg, proggress) => {};
+    private validateOnly: boolean = false;
+    private concurrency: number = 4;
 
     constructor(steem: any, username: string, postingWif: string) {
         this.steem = steem;
@@ -51,27 +37,41 @@ export class Synchronizer {
         this.proggressCallback = proggressCallback;
     }
 
-    public synchronize = (callback: (error: Error | undefined) => void, ): void => {
+    public withValidateOnly(validateOnly: boolean): Synchronizer {
+        this.validateOnly = validateOnly;
+        return this;
+    }
+
+    public withConcurrency(concurrency: number): Synchronizer {
+        this.concurrency = concurrency;
+        return this;
+    }
+
+    public synchronize = (callback: (error: Error | undefined, result: VoteorderAtMoment [] | undefined) => void, ): void => {
         this.proggressCallback("Loading rulesets since last synchronized voteorder", 0);
 
         this.loadUnsynchronizedOperations()
-        .then((input: any) => { this.proggressCallback("Loading new voteorders from voters you delegated to", 0.2); return input; })
         .then(this.loadVoteorders)
-        .then((input: any) => { this.proggressCallback("Loaded all voteorders, validating...", 0.6); return input; })
         .then(this.removeAlreadyConfirmedVotes)
         .then(this.sortVoteordersFromOldestToNewest)
         .then(this.removeDuplicateVoteorders)
-        .then(this.validateAndSend)
-        .then((input: any) => { callback(undefined); })
-        .catch((error: Error) => callback(error));
+        .then(this.validate)
+        .then((input: VoteorderAtMoment []) => {
+            if (this.validateOnly) return input;
+            else return this.vote(input);
+        })
+        .then((input: VoteorderAtMoment []) => { callback(undefined, input); })
+        .catch((error: Error) => callback(error, undefined));
     }
 
-    private loadUnsynchronizedOperations = (): Promise<{rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment []}> => {
+    private loadUnsynchronizedOperations = (): Promise<{rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment []}> => {
         return new Promise((resolve, reject) => {
-            let rulesets: RulesetAtMoment [] = [];
+            let rulesets: RulesetsAtMoment [] = [];
             const confirmedVotes: VoteConfirmedAtMoment [] = [];
 
             let foundVoteConfirmation = false;
+            let previousRulesetOpNum = new SteemOperationNumber(Infinity, Infinity, Infinity);
+
             new AccountHistorySupplier(this.steem, this.username)
             .branch((historySupplier) => {
                 historySupplier
@@ -86,14 +86,13 @@ export class Synchronizer {
                         foundVoteConfirmation = true;
                     }
                     else if (item.op.name === "set_rules") {
-                        for (let i = 0; i < item.op.rulesets.length; i++) {
-                            const ruleset = item.op.rulesets[i];
-                            rulesets.push({
-                                opNum: SteemOperationNumber.fromOperation(item.rawOp),
-                                ruleset: ruleset,
-                                validityUntil: new SteemOperationNumber(Infinity, Infinity, Infinity)
-                            });
-                        }
+                        rulesets.push({ // TODO bug: ruleset should be invalidated only by new set_rules command (not by other ruleset from the same family)
+                            opNum: SteemOperationNumber.fromOperation(item.rawOp),
+                            rulesets: item.op.rulesets,
+                            validityUntil: previousRulesetOpNum // commands are returned from oldest to newest
+                        });
+                        previousRulesetOpNum = SteemOperationNumber.fromOperation(item.rawOp);
+
                         if (foundVoteConfirmation) return false;
                     }
 
@@ -106,12 +105,12 @@ export class Synchronizer {
             })
             .start(() => {
                 rulesets = this.calculateRulesetValidityInterval(rulesets);
-                resolve({rulesets: rulesets, confirmedVotes: confirmedVotes});
+                resolve({rulesetsAtMomentArr: rulesets, confirmedVotes: confirmedVotes});
             });
         });
     }
 
-    private calculateRulesetValidityInterval = (rulesets: RulesetAtMoment []) => {
+    private calculateRulesetValidityInterval = (rulesets: RulesetsAtMoment []) => {
         rulesets.sort((a, b) => {
             if (a.opNum.isLesserThan(b.opNum))
                 return -1;
@@ -128,57 +127,42 @@ export class Synchronizer {
         return rulesets;
     }
 
-    /*private calculateOldestTransactionNumber = (input: BeforeSyncData1): Promise<BeforeSyncData2> => {
-        return new Promise((resolve, reject) => {
-            let oldest: TransactionNumber | undefined = undefined;
-            if (input.confirmedVotes.length > 0) {
-                for (let i = 0; i < input.confirmedVotes.length; i++) {
-                    const tn = input.confirmedVotes[i].tn;
-                    if (!oldest || tn.isSmallerThan(oldest)) oldest = tn;
-                }
-            }
-            else {
-                for (let i = 0; i < input.rulesets.length; i++) {
-                    const tn = input.rulesets[i].tn;
-                    if (!oldest || tn.isSmallerThan(oldest)) oldest = tn;
-                }
-            }
-
-            if (!oldest) oldest = new TransactionNumber(0, 0);
-
-            resolve({rulesets: input.rulesets, confirmedVotes: input.confirmedVotes, oldestTn: oldest});
-        });
-    }*/
-
-    private loadVoteorders = (input: {rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment []}): Promise<{rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [], voteorders: VoteorderAtMoment []}> => {
+    private loadVoteorders = (input: {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment []}): Promise<{rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [], voteorders: VoteorderAtMoment []}> => {
         const voters: string [] = [];
         const votersLookupSince: SteemOperationNumber [] = [];
 
-        for (let i = 0; i < input.rulesets.length; i++) {
-            const ruleset = input.rulesets[i];
-            if (voters.indexOf(ruleset.ruleset.voter) !== -1) {
-                const index = voters.indexOf(ruleset.ruleset.voter);
-                if (ruleset.opNum.isLesserThan(votersLookupSince[index])) votersLookupSince[index] = ruleset.opNum;
-            }
-            else {
-                voters.push(ruleset.ruleset.voter);
-                votersLookupSince.push(ruleset.opNum);
+        this.proggressCallback("Loading new voteorders from voters you delegated to", 0.2);
+
+        for (let i = 0; i < input.rulesetsAtMomentArr.length; i++) {
+            const rulesetsAtMoment = input.rulesetsAtMomentArr[i];
+            for (let j = 0; j < rulesetsAtMoment.rulesets.length; j ++) {
+                const ruleset = rulesetsAtMoment.rulesets[j];
+                if (voters.indexOf(ruleset.voter) !== -1) {
+                    const index = voters.indexOf(ruleset.voter);
+                    if (rulesetsAtMoment.opNum.isLesserThan(votersLookupSince[index])) votersLookupSince[index] = rulesetsAtMoment.opNum;
+                }
+                else {
+                    voters.push(ruleset.voter);
+                    votersLookupSince.push(rulesetsAtMoment.opNum);
+                }
             }
         }
 
-        const promises: Promise<VoteorderAtMoment[]> [] = [];
+        const loaders: (() => Promise<VoteorderAtMoment[]>) [] = [];
         for (let i = 0; i < voters.length; i++) {
-            promises.push(this.loadUserVoteorders(voters[i], votersLookupSince[i]));
+            loaders.push(() => { return this.loadUserVoteorders(voters[i], votersLookupSince[i]); });
         }
 
-        return Promise.all(promises).then(
-            (value: {}[]): {rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [], voteorders: VoteorderAtMoment []} => {
+        return Promise.map(loaders, (loader: () => Promise<VoteorderAtMoment[]>) => { return loader(); }, { concurrency: this.concurrency }).then(
+            (value: {}[]): {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [], voteorders: VoteorderAtMoment []} => {
                 const voteorders: VoteorderAtMoment [] = [];
                 for (let i = 0; i < value.length; i++) {
-                    const voteorder = value[i] as VoteorderAtMoment;
-                    voteorders.push(voteorder);
+                    const userVoteorders = value[i] as VoteorderAtMoment [];
+                    for (let j = 0; j < userVoteorders.length; j++) {
+                        voteorders.push(userVoteorders[j]);
+                    }
                 }
-                return {confirmedVotes: input.confirmedVotes, rulesets: input.rulesets, voteorders: voteorders};
+                return {confirmedVotes: input.confirmedVotes, rulesetsAtMomentArr: input.rulesetsAtMomentArr, voteorders: voteorders};
             }
         );
     }
@@ -218,8 +202,8 @@ export class Synchronizer {
         });
     }
 
-    private removeAlreadyConfirmedVotes = (input: {rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
-                voteorders: VoteorderAtMoment []}): Promise<{rulesets: RulesetAtMoment [],
+    private removeAlreadyConfirmedVotes = (input: {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
+                voteorders: VoteorderAtMoment []}): Promise<{rulesetsAtMomentArr: RulesetsAtMoment [],
                 confirmedVotes: VoteConfirmedAtMoment [], voteorders: VoteorderAtMoment []}> => {
         return new Promise((resolve, reject) => {
             const unsyncedVoteorders: VoteorderAtMoment [] = [];
@@ -237,12 +221,12 @@ export class Synchronizer {
                 if (unsynced) unsyncedVoteorders.push(voteorder);
             }
 
-            resolve({voteorders: unsyncedVoteorders, rulesets: input.rulesets, confirmedVotes: input.confirmedVotes});
+            resolve({voteorders: unsyncedVoteorders, rulesetsAtMomentArr: input.rulesetsAtMomentArr, confirmedVotes: input.confirmedVotes});
         });
     }
 
-    private sortVoteordersFromOldestToNewest = (input: {rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
-            voteorders: VoteorderAtMoment []}): Promise<{rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
+    private sortVoteordersFromOldestToNewest = (input: {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
+            voteorders: VoteorderAtMoment []}): Promise<{rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
             voteorders: VoteorderAtMoment []}> => {
         return new Promise((resolve, reject) => {
             const voteorders = input.voteorders; // there is no need to copy them (just sort)
@@ -250,12 +234,12 @@ export class Synchronizer {
                 return a.opNum.isGreaterThan(b.opNum) ? -1 : a.opNum.isLesserThan(b.opNum) ? 1 : 0;
             });
 
-            resolve({voteorders: voteorders, rulesets: input.rulesets, confirmedVotes: input.confirmedVotes});
+            resolve({voteorders: voteorders, rulesetsAtMomentArr: input.rulesetsAtMomentArr, confirmedVotes: input.confirmedVotes});
         });
     }
 
-    private removeDuplicateVoteorders = (input: {rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
-        voteorders: VoteorderAtMoment []}): Promise<{rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
+    private removeDuplicateVoteorders = (input: {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
+        voteorders: VoteorderAtMoment []}): Promise<{rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
         voteorders: VoteorderAtMoment []}> => {
         return new Promise((resolve, reject) => {
             const cleanedVoteorders: VoteorderAtMoment [] = []; // there is no need to copy them (just sort)
@@ -274,22 +258,66 @@ export class Synchronizer {
                 if (!duplicate) cleanedVoteorders.push(voteorderCandidate);
             }
 
-            resolve({voteorders: cleanedVoteorders, rulesets: input.rulesets, confirmedVotes: input.confirmedVotes});
+            resolve({voteorders: cleanedVoteorders, rulesetsAtMomentArr: input.rulesetsAtMomentArr, confirmedVotes: input.confirmedVotes});
         });
     }
 
-    private validateAndSend = (input: {rulesets: RulesetAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
-            voteorders: VoteorderAtMoment []}): Promise<void> => {
-        /* tslint:disable no-null-keyword  */
-        return new Promise((resolve, reject) => {
-            for (let i = 0; i < input.voteorders.length; i++) {
-                const voteorder = input.voteorders[i];
+    private validate = (input: {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
+            voteorders: VoteorderAtMoment []}): Promise<VoteorderAtMoment []> => {
+
+        this.proggressCallback("Loaded all voteorders, validating...", 0.6);
+
+        const validatorPromiseReturners: (() => Promise<VoteorderAtMoment|undefined>) [] = [];
+
+        for (let i = 0; i < input.voteorders.length; i++) {
+            const voteorder = input.voteorders[i];
+            validatorPromiseReturners.push(() => {
+                return this.validateSingleVoteorder(voteorder, input.rulesetsAtMomentArr);
+            });
+        }
+
+        return Promise.map(validatorPromiseReturners, (returner: () => Promise<boolean[]>) => { return returner(); }, { concurrency: this.concurrency })
+        .then((values: (any | undefined) []): VoteorderAtMoment [] => {
+            const out: VoteorderAtMoment [] = [];
+            for (let i = 0; i < values.length; i++) {
+                const value: any = values[i];
+                if (value !== undefined) {
+                    out.push(value as VoteorderAtMoment);
+                }
             }
+            return out;
+         })
+         .catch(error => { throw error; });
+    }
 
-            console.log("Loaded: ");
-            console.log(JSON.stringify(input, null, 2));
+    private validateSingleVoteorder = (voteorder: VoteorderAtMoment, rulesetsAtMomentArr: RulesetsAtMoment []): Promise<VoteorderAtMoment|undefined> => {
+        return new Promise((resolve, reject) => {
+            if (!voteorder) throw new Error("Got undefined voteorder for validation");
+            this.proggressCallback("Starting validation of @" + voteorder.voter + ": /@" + voteorder.voteorder.author + "/" + voteorder.voteorder.permlink, 0.6);
 
-            resolve();
-        });
+            new RulesValidator(this.steem)
+            .withConcurrency(1/* because synchronization is already concurrent*/)
+            .provideRulesetsForValidation(rulesetsAtMomentArr)
+            .validateVoteOrder(voteorder.voter, voteorder.voteorder, voteorder.opNum, (error: Error | undefined, result: boolean) => {
+                if (error && (<ValidationError>error).validationError) {
+                    this.proggressCallback("Validation "
+                        + " failed for voteorder of @" + voteorder.voter + ": /@" + voteorder.voteorder.author + "/" + voteorder.voteorder.permlink + "; error: " + error.message, 0.6);
+                    resolve(undefined);
+                }
+                else if (error) {
+                    reject(error);
+                }
+                else if (result) {
+                    this.proggressCallback("Validation "
+                        + " succeeded for voteorder of @" + voteorder.voter + ": /@" + voteorder.voteorder.author + "/" + voteorder.voteorder.permlink + "", 0.6);
+                     resolve(voteorder);
+                }
+                else throw new Error("Invalid voteorder, but no error");
+            });
+         });
+    }
+
+    private vote = (voteorders: VoteorderAtMoment []): Promise<VoteorderAtMoment []> => {
+        throw new Error("Unsupported operation");
     }
 }
