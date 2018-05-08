@@ -20,10 +20,24 @@ export class SteemOperationNumber {
         else return false;
     }
 
+    public isGreaterOrEqual(tn: SteemOperationNumber): boolean {
+        if (this.blockNum > tn.blockNum) return true;
+        else if (this.blockNum == tn.blockNum && this.transactionNum > tn.transactionNum) return true;
+        else if (this.blockNum == tn.blockNum && this.transactionNum == tn.transactionNum) return this.operationNum >= tn.operationNum;
+        else return false;
+    }
+
     public isLesserThan(tn: SteemOperationNumber): boolean {
         if (this.blockNum < tn.blockNum) return true;
         else if (this.blockNum == tn.blockNum && this.transactionNum < tn.transactionNum) return true;
         else if (this.blockNum == tn.blockNum && this.transactionNum == tn.transactionNum) return this.operationNum < tn.operationNum;
+        else return false;
+    }
+
+    public isLesserOrEqual(tn: SteemOperationNumber): boolean {
+        if (this.blockNum < tn.blockNum) return true;
+        else if (this.blockNum == tn.blockNum && this.transactionNum < tn.transactionNum) return true;
+        else if (this.blockNum == tn.blockNum && this.transactionNum == tn.transactionNum) return this.operationNum <= tn.operationNum;
         else return false;
     }
 

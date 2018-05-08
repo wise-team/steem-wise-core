@@ -12,14 +12,22 @@ import { AccountHistorySupplier, SmartvotesFilter, SimpleTaker,
     ToSmartvotesOperationTransformer, SmartvotesOperationTypeFilter,
     ChainableLimiter, OperationNumberFilter } from "../chainable/_exports";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { RulesetsAtMoment } from "../validation/smartvote-types-at-moment";
+
 /**
  * The RulesValidator validates vote orders against delegator's rulesets.
  */
 export class RulesValidator {
     private steem: any;
+    private providedRulesets: RulesetsAtMoment [] | undefined = undefined;
 
     constructor(steem: any) {
         this.steem = steem;
+    }
+
+    public provideRulesetsForValidation(providedRulesets: RulesetsAtMoment []): RulesValidator {
+        this.providedRulesets = providedRulesets;
+        return this;
     }
 
     /**
@@ -113,12 +121,25 @@ export class RulesValidator {
     }
 
     private loadRulesets = (input: { username: string, voteorder: smartvotes_voteorder, at: SteemOperationNumber }): Promise<{ username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset []}> => {
-        // console.log(this);
-        // console.log(JSON.stringify(this));
-        return this.getRulesOfUser(input.voteorder.delegator, input.at)
-            .then(function(result: smartvotes_ruleset []) {
-                return ({ username: input.username, voteorder: input.voteorder, rulesets: result});
+        if (this.providedRulesets) {
+            const providedRulesets = this.providedRulesets;
+            return new Promise((resolve, reject) => {
+                for (let i = 0; i < providedRulesets.length; i++) {
+                    const rulesetsAtMoment = providedRulesets[i];
+                    if (input.at.isGreaterThan(rulesetsAtMoment.opNum) && input.at.isLesserThan(rulesetsAtMoment.validityUntil)) {
+                        resolve({ username: input.username, voteorder: input.voteorder, rulesets: rulesetsAtMoment.rulesets});
+                        return;
+                    }
+                }
+                throw new Error("Provided rulesets does not specify any set of rulesets for specified moment.");
             });
+        }
+        else {
+            return this.getRulesOfUser(input.voteorder.delegator, input.at)
+                .then(function(result: smartvotes_ruleset []) {
+                    return ({ username: input.username, voteorder: input.voteorder, rulesets: result});
+                });
+        }
     }
 
     private checkRuleset = (input: { username: string, voteorder: smartvotes_voteorder, rulesets: smartvotes_ruleset [] }): Promise<{ username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset}> => {
