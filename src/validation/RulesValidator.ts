@@ -20,6 +20,7 @@ import { RulesetsAtMoment } from "../validation/smartvote-types-at-moment";
 export class RulesValidator {
     private steem: any;
     private providedRulesets: RulesetsAtMoment [] | undefined = undefined;
+    private concurrency: number = 4;
 
     constructor(steem: any) {
         this.steem = steem;
@@ -27,6 +28,11 @@ export class RulesValidator {
 
     public provideRulesetsForValidation(providedRulesets: RulesetsAtMoment []): RulesValidator {
         this.providedRulesets = providedRulesets;
+        return this;
+    }
+
+    public withConcurrency(concurrency: number): RulesValidator {
+        this.concurrency = concurrency;
         return this;
     }
 
@@ -184,34 +190,39 @@ export class RulesValidator {
     }
 
     private validateRules = (input: { username: string, voteorder: smartvotes_voteorder, ruleset: smartvotes_ruleset, post: SteemPost}): Promise<true> => {
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             const ruleset = input.ruleset;
             const post = input.post;
             const voteorder = input.voteorder;
 
-            const validationPromises: Promise<boolean> [] = [];
-            for (const i in ruleset.rules) {
-                switch (ruleset.rules[i].type) {
+            const validatorPromiseReturners: (() => Promise<boolean>) [] = [];
+            for (let i = 0; i < ruleset.rules.length; i++) {
+                const rule = ruleset.rules[i];
+                switch (rule.type) {
                     case "authors":
-                        validationPromises.push(new AuthorsRuleValidator()
-                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_authors, post));
+                        validatorPromiseReturners.push(() => {
+                            return new AuthorsRuleValidator().validate(voteorder, rule as smartvotes_rule_authors, post);
+                        });
                         break;
 
                     case "tags":
-                        validationPromises.push(new TagsRuleValidator()
-                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_tags, post));
+                        validatorPromiseReturners.push(() => {
+                            return new TagsRuleValidator().validate(voteorder, rule as smartvotes_rule_tags, post);
+                        });
                         break;
 
                     case "custom_rpc":
-                        validationPromises.push(new CustomRPCRuleValidator()
-                            .validate(voteorder, ruleset.rules[i] as smartvotes_rule_custom_rpc, post));
+                        validatorPromiseReturners.push(() => {
+                            return new CustomRPCRuleValidator().validate(voteorder, rule as smartvotes_rule_custom_rpc, post);
+                        });
                         break;
 
                     default:
-                        throw new Error("Unknown rule type: " + ruleset.rules[i].type);
+                        throw new Error("Unknown rule type");
                 }
             }
-            Promise.all(validationPromises).then(function(values: any []) { // is this check redundant?
+            Promise.map(validatorPromiseReturners, (returner: () => Promise<boolean[]>) => { return returner(); }, { concurrency: this.concurrency })
+            .then(function(values: any []) { // is this check redundant?
                 const validityArray: boolean [] = values as boolean [];
                 for (const i in validityArray) {
                     if (!validityArray[i]) throw new Error("Rule validation failed");
