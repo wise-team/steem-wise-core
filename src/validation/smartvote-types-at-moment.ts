@@ -7,9 +7,9 @@ export interface VoteConfirmedAtMoment {
     voteorderTransactionId: string;
 }
 
-export interface RulesetAtMoment {
+export interface RulesetsAtMoment {
     opNum: SteemOperationNumber;
-    ruleset: smartvotes_ruleset;
+    rulesets: smartvotes_ruleset [];
     validityUntil: SteemOperationNumber;
 }
 
