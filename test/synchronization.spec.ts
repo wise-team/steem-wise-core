@@ -10,6 +10,8 @@ import { SteemOperationNumber } from "../src/steem-smartvotes";
 import { Synchronizer } from "../src/blockchain/Synchronizer";
 import { VoteorderAtMoment } from "../src/validation/smartvote-types-at-moment";
 
+// TODO add many tests
+// TODO test confirmation
 describe("test/synchronization.spec.ts", () => {
     describe("Synchronizer", () => {
         it.skip("prints something", function(done) {
