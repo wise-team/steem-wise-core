@@ -13,7 +13,7 @@ import { smartvotes_voteorder } from "./votes.schema";
  * General type for every smartvotes operation. If an custom_json operation on steem blockchain has
  * an id=smartvote parameter it is going to be parsed as a smartvotes operation using the following schema:
  */
-export type smartvotes_operation = smartvotes_command_set_rules | smartvotes_command_send_voteorder | smartvotes_command_confirm_vote;
+export type smartvotes_operation = smartvotes_command_set_rules | smartvotes_command_send_voteorder | smartvotes_command_confirm_votes;
 
 // TODO separate set_rules for every voter (8kb limit https://github.com/steemit/steem/commit/81f4c6373f1ddeb8c435b5c91fa67bcd361e29a3#diff-04f6af9cdbf180a31ccdbf6335b8f240R1517)
 /**
@@ -45,13 +45,16 @@ export interface smartvotes_command_send_voteorder {
 /**
  * This command confirms that a vote order has been accomplished.
  */
-export interface smartvotes_command_confirm_vote {
-    name: "confirm_vote";
+export interface smartvotes_command_confirm_votes {
+    name: "confirm_votes";
 
     /**
-     * Transaction id of a voteorder.
+     * Transaction id & num of operation in transaction of a voteorder.
      */
-    transaction_id: string;
+    voteorders: {
+        transaction_id: string;
+        operation_num: number;
+    } [];
 }
 
 

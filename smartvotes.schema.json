@@ -8,27 +8,42 @@
             "$ref": "#/definitions/smartvotes_command_send_voteorder"
         },
         {
-            "$ref": "#/definitions/smartvotes_command_confirm_vote"
+            "$ref": "#/definitions/smartvotes_command_confirm_votes"
         }
     ],
     "definitions": {
-        "smartvotes_command_confirm_vote": {
+        "smartvotes_command_confirm_votes": {
             "description": "This command confirms that a vote order has been accomplished.",
             "properties": {
                 "name": {
                     "enum": [
-                        "confirm_vote"
+                        "confirm_votes"
                     ],
                     "type": "string"
                 },
-                "transaction_id": {
-                    "description": "Transaction id of a voteorder.",
-                    "type": "string"
+                "voteorders": {
+                    "description": "Transaction id & num of operation in transaction of a voteorder.",
+                    "items": {
+                        "properties": {
+                            "operation_num": {
+                                "type": "number"
+                            },
+                            "transaction_id": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "operation_num",
+                            "transaction_id"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
                 "name",
-                "transaction_id"
+                "voteorders"
             ],
             "type": "object"
         },
