@@ -5,6 +5,7 @@ import { smartvotes_ruleset, smartvotes_voteorder } from "../schema/smartvotes.s
 export interface VoteConfirmedAtMoment {
     opNum: SteemOperationNumber;
     voteorderTransactionId: string;
+    voteorderOperationNum: number;
 }
 
 export interface RulesetsAtMoment {

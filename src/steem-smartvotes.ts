@@ -7,6 +7,7 @@ import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
 import { AccountHistorySupplier } from "./chainable/_exports";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
+import { VoteorderAtMoment } from "./validation/smartvote-types-at-moment";
 
 // TODO comment
 // TODO blockchain input sanitization
@@ -49,14 +50,14 @@ export class SteemSmartvotes {
     }
 
     // TODO comment
-    public getRulesetsOfUser = (username: string, atMoment: SteemOperationNumber, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void): void => {
+    public getRulesetsOfUser = (username: string, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void, atMoment: SteemOperationNumber = SteemOperationNumber.FUTURE): void => {
         new RulesValidator(this.steem).getRulesOfUser(username, atMoment)
         .then((result: schema.smartvotes_ruleset []) => callback(undefined, result))
         .catch((error: Error) => callback(error, []));
     }
 
-    public synchronizeSmartvotes = (callback: (error: Error | undefined) => void): void => {
-        new Synchronizer(this.steem, this.username, this.postingWif).synchronize(callback);
+    public synchronizeSmartvotes = (callback: (error: Error | undefined, result: VoteorderAtMoment [] | undefined) => void, proggressCallback: ((msg: string, proggress: number) => void) = () => {}, concurrency: number = 4): void => {
+        new Synchronizer(this.steem, this.username, this.postingWif).withConcurrency(concurrency).withProggressCallback(proggressCallback).synchronize(callback);
     }
 
     // TODO comment

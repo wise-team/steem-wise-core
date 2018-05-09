@@ -2,8 +2,8 @@ import { Promise } from "bluebird";
 import { AccountHistorySupplier, SmartvotesFilter, OperationNumberFilter, SimpleTaker,
     ToSmartvotesOperationTransformer, SmartvotesOperationTypeFilter,
     ChainableLimiter, BiTransformer, OperationTypeFilter, OperationNumberLimiter } from "../chainable/_exports";
-import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_ruleset } from "../schema/smartvotes.schema";
-import { RawOperation } from "../blockchain/blockchain-operations-types";
+import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_ruleset, smartvotes_command_confirm_votes } from "../schema/smartvotes.schema";
+import { RawOperation, VoteOperation, CustomJsonOperation } from "../blockchain/blockchain-operations-types";
 import { _objectAssign } from "../util/util";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { RulesValidator } from "../validation/RulesValidator";
@@ -33,8 +33,9 @@ export class Synchronizer {
         this.postingWif = postingWif;
     }
 
-    public withProggressCallback(proggressCallback: (msg: string, proggress: number) => void) {
+    public withProggressCallback(proggressCallback: (msg: string, proggress: number) => void): Synchronizer {
         this.proggressCallback = proggressCallback;
+        return this;
     }
 
     public withValidateOnly(validateOnly: boolean): Synchronizer {
@@ -54,7 +55,6 @@ export class Synchronizer {
         .then(this.loadVoteorders)
         .then(this.removeAlreadyConfirmedVotes)
         .then(this.sortVoteordersFromOldestToNewest)
-        .then(this.removeDuplicateVoteorders)
         .then(this.validate)
         .then((input: VoteorderAtMoment []) => {
             if (this.validateOnly) return input;
@@ -78,11 +78,16 @@ export class Synchronizer {
                 .chain(new SmartvotesFilter())
                 .chain(new BiTransformer())
                 .chain(new SimpleTaker((item: {rawOp: RawOperation, op: smartvotes_operation}): boolean => {
-                    if (item.op.name === "confirm_vote") {
-                        confirmedVotes.push({
-                            opNum: SteemOperationNumber.fromOperation(item.rawOp),
-                            voteorderTransactionId: item.op.transaction_id
-                        });
+                    if (item.op.name === "confirm_votes") {
+                        for (let i = 0; i < item.op.voteorders.length; i++) {
+                            const confirmedVo = item.op.voteorders[i];
+                            const confirmedVoAtMoment: VoteConfirmedAtMoment = {
+                                opNum: SteemOperationNumber.fromOperation(item.rawOp),
+                                voteorderTransactionId: confirmedVo.transaction_id,
+                                voteorderOperationNum: confirmedVo.operation_num
+                            };
+                            confirmedVotes.push(confirmedVoAtMoment);
+                        }
                         foundVoteConfirmation = true;
                     }
                     else if (item.op.name === "set_rules") {
@@ -207,13 +212,13 @@ export class Synchronizer {
                 confirmedVotes: VoteConfirmedAtMoment [], voteorders: VoteorderAtMoment []}> => {
         return new Promise((resolve, reject) => {
             const unsyncedVoteorders: VoteorderAtMoment [] = [];
-
             for (let i = 0; i < input.voteorders.length; i++) {
                 const voteorder = input.voteorders[i];
                 let unsynced = true;
-                for (let j = 0; i < input.confirmedVotes.length; j++) {
+                for (let j = 0; j < input.confirmedVotes.length; j++) {
                     const confirmedVote = input.confirmedVotes[j];
-                    if (voteorder.transactionId === confirmedVote.voteorderTransactionId) {
+                    if (!confirmedVote) throw new Error("Undefined or null confirmed vote in array");
+                    if (voteorder.transactionId === confirmedVote.voteorderTransactionId && voteorder.opNum.operationNum === confirmedVote.voteorderOperationNum) {
                         unsynced = false;
                         break;
                     }
@@ -238,6 +243,7 @@ export class Synchronizer {
         });
     }
 
+    /* // this complicated voteorder confirmation, so i disable it now
     private removeDuplicateVoteorders = (input: {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
         voteorders: VoteorderAtMoment []}): Promise<{rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
         voteorders: VoteorderAtMoment []}> => {
@@ -261,6 +267,7 @@ export class Synchronizer {
             resolve({voteorders: cleanedVoteorders, rulesetsAtMomentArr: input.rulesetsAtMomentArr, confirmedVotes: input.confirmedVotes});
         });
     }
+    */
 
     private validate = (input: {rulesetsAtMomentArr: RulesetsAtMoment [], confirmedVotes: VoteConfirmedAtMoment [],
             voteorders: VoteorderAtMoment []}): Promise<VoteorderAtMoment []> => {
@@ -318,6 +325,58 @@ export class Synchronizer {
     }
 
     private vote = (voteorders: VoteorderAtMoment []): Promise<VoteorderAtMoment []> => {
-        throw new Error("Unsupported operation");
+        if (voteorders.length == 0) return new Promise((resolve, reject) => {
+            this.proggressCallback("Nothing to synchronize", 1.0);
+            resolve();
+        });
+
+        const operations: (["custom_json", CustomJsonOperation] | ["vote", VoteOperation]) [] = [];
+        const voteConfirmations: { transaction_id: string, operation_num: number } [] = [];
+
+        for (let i = 0; i < voteorders.length; i++) {
+            const voteorder = voteorders[i];
+
+            const voteOp: VoteOperation = {
+                voter: this.username,
+                author: voteorder.voteorder.author,
+                permlink: voteorder.voteorder.permlink,
+                weight: (voteorder.voteorder.weight * (voteorder.voteorder.type === "flag" ? -1 : 1)),
+            };
+            operations.push(["vote", voteOp]);
+            voteConfirmations.push({transaction_id: voteorder.transactionId, operation_num: voteorder.opNum.operationNum});
+        }
+
+        const confirmationOp: smartvotes_command_confirm_votes = {
+            name: "confirm_votes",
+            voteorders: voteConfirmations
+        };
+
+        const customJsonOp: CustomJsonOperation = {
+            required_auths: [],
+            required_posting_auths: [this.username],
+            id: "smartvote",
+            json: JSON.stringify(confirmationOp)
+        };
+        operations.push(["custom_json", customJsonOp]);
+
+        console.log(JSON.stringify(operations, undefined, 2));
+
+        return new Promise((resolve, reject) => {
+            this.proggressCallback("Sending votes... ", 0.9);
+            this.steem.broadcast.send(
+                {
+                    extensions: [],
+                    operations: operations
+                },
+                {posting: this.postingWif},
+                (error: Error, result: any) => {
+                    if (error) reject(error);
+                    else {
+                        this.proggressCallback("Synchronization done", 1.0);
+                        resolve(voteorders);
+                    }
+                }
+            );
+        });
     }
 }
