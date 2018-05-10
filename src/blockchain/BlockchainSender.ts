@@ -12,7 +12,7 @@ export class BlockchainSender {
     // TODO validate
     public static sendVoteOrder(steem: any, username: string, postingWif: string, voteorder: schema.smartvotes_voteorder,
         callback: (error: Error | undefined, result: any) => void,
-        proggressCallback?: (msg: string, proggress: number) => void): void {
+        proggressCallback?: (msg: string, proggress: number) => void, skipValidation?: boolean): void {
 
         const notifyProggress = function(msg: string, proggress: number) {
             if (proggressCallback) proggressCallback(msg, proggress);
@@ -74,11 +74,18 @@ export class BlockchainSender {
             });
         };
 
-        validateJSON()
-        .then(validateRules)
-        .then(doSend)
-        .then(function(result: any) { callback(undefined, result); })
-        .catch(error => { callback(error, undefined); });
+        if (skipValidation) {
+            doSend(JSON.stringify({name: "send_voteorder", voteorder: voteorder}))
+            .then(function(result: any) { callback(undefined, result); })
+            .catch(error => { callback(error, undefined); });
+        }
+        else {
+            validateJSON()
+            .then(validateRules)
+            .then(doSend)
+            .then(function(result: any) { callback(undefined, result); })
+            .catch(error => { callback(error, undefined); });
+        }
     }
 
     // TODO comment

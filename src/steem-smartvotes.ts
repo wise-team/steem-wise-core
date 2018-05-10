@@ -37,9 +37,9 @@ export class SteemSmartvotes {
     // TODO comment
     public sendVoteOrder = (voteorder: schema.smartvotes_voteorder,
         callback: (error: Error | undefined, result: any) => void,
-        proggressCallback?: (msg: string, proggress: number) => void): void => {
+        proggressCallback?: (msg: string, proggress: number) => void, skipValidation?: boolean): void => {
         if (proggressCallback)
-            BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback, proggressCallback);
+            BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback, proggressCallback, (skipValidation ? true : false));
         else
             BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback);
     }
