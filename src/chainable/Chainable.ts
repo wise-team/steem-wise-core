@@ -37,10 +37,11 @@ export abstract class Chainable<FROM, TO, IMPLEMENTERCLASS extends Chainable<FRO
         return this.shouldLoadNewItems();
     }
 
-    private doTake(error: Error | undefined, item: FROM | undefined): boolean {
+    protected doTake(error: Error | undefined, item: FROM | undefined): boolean {
+        if (typeof(item) === "undefined" && !error) throw new Error("Got undefined item");
+
         try {
-            if (typeof(item) === "undefined") throw new Error("Got undefined item");
-            return this.take(error, item);
+            return this.take(error, <FROM> item);
         }
         catch (error) {
             this.give(error, undefined);
@@ -83,7 +84,7 @@ export abstract class ChainableTaker<FROM, IMPLEMENTERCLASS extends ChainableTak
     }
 
     protected give(error: Error | undefined, item: undefined | undefined): boolean {
-        throw new Error("Taker has no downstream.");
+        throw new Error("Taker has no downstream. Cannot call his give");
     }
 }
 
@@ -104,10 +105,27 @@ export class SimpleTaker<T> extends ChainableTaker<T, SimpleTaker<T>> {
         return this;
     }
 
+    protected onErrorCought(error: Error) {
+        this.onErrorCallback(error);
+    }
+
     protected take(error: Error | undefined, item: T): boolean {
         if (error) {
             return this.onErrorCallback(error);
         }
         else return this.callback(item);
+    }
+
+    protected doTake(error: Error | undefined, item: T): boolean {
+        if (typeof(item) === "undefined" && !error) throw new Error("Got undefined item");
+
+        try {
+            return this.take(error, <T> item);
+        }
+        catch (error) {
+            this.onErrorCallback(error);
+            console.error(error);
+            return false;
+        }
     }
 }
