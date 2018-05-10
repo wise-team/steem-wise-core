@@ -152,8 +152,8 @@ describe("test/chainable.spec.ts", () => {
     });
 
     describe("OperationNumberFilter", () => {
-        it("returns only operations with number < (block=22202938, tx=14, op=1)", function(done) {
-            this.timeout(25000);
+        it.only("returns only operations with number < (block=22202938, tx=14, op=1)", function(done) {
+            this.timeout(35000);
             new Promise((resolve, reject) => {
                 new AccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {

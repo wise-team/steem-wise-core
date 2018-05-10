@@ -54,7 +54,7 @@ export class RulesValidator {
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new SmartvotesFilter())
-                .chain(new OperationNumberFilter("<", atMoment))
+                .chain(new OperationNumberFilter("<=", atMoment))
                 .chain(new ToSmartvotesOperationTransformer())
                 .chain(new SmartvotesOperationTypeFilter<smartvotes_command_set_rules>("set_rules"))
                 .chain(new ChainableLimiter(1))
