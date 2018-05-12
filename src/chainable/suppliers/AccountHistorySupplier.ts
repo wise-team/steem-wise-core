@@ -1,5 +1,3 @@
-// TODO
-
 import { ChainableSupplier } from "../Chainable";
 import { smartvotes_operation } from "../../steem-smartvotes";
 import { RawOperation } from "../../blockchain/blockchain-operations-types";

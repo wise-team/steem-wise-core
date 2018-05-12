@@ -2,12 +2,12 @@ import * as steem from "steem";
 
 import * as schema from "./schema/smartvotes.schema";
 import { BlockchainSender } from "./blockchain/BlockchainSender";
-import { Synchronizer } from "./blockchain/Synchronizer";
+import { Synchronizer, SynchronizationResult } from "./blockchain/Synchronizer";
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
 import { AccountHistorySupplier } from "./chainable/_exports";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
-import { VoteorderAtMoment } from "./validation/smartvote-types-at-moment";
+import { VoteorderAtMoment, RulesetsAtMoment, VoteConfirmedAtMoment } from "./validation/smartvote-types-at-moment";
 
 // TODO comment
 // TODO blockchain input sanitization
@@ -56,7 +56,7 @@ export class SteemSmartvotes {
         .catch((error: Error) => callback(error, []));
     }
 
-    public synchronizeSmartvotes = (callback: (error: Error | undefined, result: VoteorderAtMoment [] | undefined) => void, proggressCallback: ((msg: string, proggress: number) => void) = () => {}, concurrency: number = 4): void => {
+    public synchronizeSmartvotes = (callback: (error: Error | undefined, result: SynchronizationResult | undefined) => void, proggressCallback: ((msg: string, proggress: number) => void) = () => {}, concurrency: number = 4): void => {
         new Synchronizer(this.steem, this.username, this.postingWif).withConcurrency(concurrency).withProggressCallback(proggressCallback).synchronize(callback);
     }
 
