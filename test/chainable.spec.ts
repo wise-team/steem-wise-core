@@ -20,7 +20,7 @@ describe("test/chainable.spec.ts", () => {
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new SmartvotesFilter())
-                    .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
+                    .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
                     .chain(new ChainableLimiter(6))
                     .chain(new SimpleTaker((item: RawOperation): boolean => {
                         steemprojects1Operations.push(item);
@@ -65,7 +65,7 @@ describe("test/chainable.spec.ts", () => {
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationTypeFilter("vote"))
-                    .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
+                    .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
                     .chain(new SimpleTaker((rawOp: RawOperation): boolean => {
                         const vote: VoteOperation = rawOp[1].op[1] as VoteOperation;
 
@@ -157,7 +157,7 @@ describe("test/chainable.spec.ts", () => {
                 new AccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {
                     historySupplier
-                    .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1)))
+                    .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1)))
                     .chain(new SimpleTaker((rawOp: RawOperation): boolean => {
                         if (rawOp[1].block > 22202938) {
                             reject(new Error("Operation outside of scope was passed: " + SteemOperationNumber.fromOperation(rawOp).toString()));

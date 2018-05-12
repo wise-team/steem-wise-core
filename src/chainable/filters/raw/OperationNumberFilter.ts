@@ -7,9 +7,9 @@ import { ChainableFilter } from "../../Chainable";
  */
 export class OperationNumberFilter extends ChainableFilter<RawOperation, OperationNumberFilter> {
     private tn: SteemOperationNumber;
-    private mode: "<" | "<=" | ">" | ">=";
+    private mode: "<" | "<_solveOpInTrxBug" | "<=" | ">" | ">=";
 
-    constructor(mode: "<" | "<=" | ">" | ">=", tn: SteemOperationNumber) {
+    constructor(mode: "<" | "<_solveOpInTrxBug" | "<=" | ">" | ">=", tn: SteemOperationNumber) {
         super();
         this.mode = mode;
         this.tn = tn;
@@ -25,6 +25,9 @@ export class OperationNumberFilter extends ChainableFilter<RawOperation, Operati
         const tn = SteemOperationNumber.fromOperation(rawOp);
 
         if (this.mode === "<" && tn.isLesserThan(this.tn)) {
+            return this.give(undefined, rawOp);
+        }
+        else if (this.mode === "<_solveOpInTrxBug" && tn.isLesserThan_solveOpInTrxBug(this.tn)) {
             return this.give(undefined, rawOp);
         }
         else if (this.mode === "<=" && (tn.isLesserThan(this.tn) || tn.isEqual(this.tn))) {
