@@ -72,10 +72,12 @@ Building:
 $ npm run build
 ```
 
+// TODO
+
 
 ## Thank you
 
-I would like to thank [@noisy](https://steemit.com/@noisy) ([github.com/noisy](https://github.com/noisy)) who invented smartvotes  and is a total backer of this project. Let the light of his wisdom shine down upon steem community for ever ;)
+I would like to thank [@noisy](https://steemit.com/@noisy) ([github.com/noisy](https://github.com/noisy)) who invented smartvotes  and is a total backer of this project. Let the light of his wisdom shine down upon steem community for ever ;) // TODO usunąć
 
 I also send many thanks to the authors of vendor dependencies of the project. You are the ones, who made the development of this tool so joyful and smooth. Many thanks to the contributors of:
 

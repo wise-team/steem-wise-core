@@ -49,6 +49,16 @@ export class SteemOperationNumber {
         return "[b=" + this.blockNum + ", tx=" + this.transactionNum + ", op=" + this.operationNum + "]";
     }
 
+    /**
+     * There is a bug in account_history api: op_in_trx is always zero in returned operations.
+     * This prevents proper comparison of SteemOperationNumbers. Thuswe have to use the following hack in some places.
+     * Issue: https://github.com/steemit/steem/issues/2272 It is solved, but in api.steemit.com endpoint the bug still exists.
+     * TODO: Stop using this function when the bug is solved.
+     */
+    public previousTransaction(): SteemOperationNumber {
+
+    }
+
     public static fromOperation(rawOp: RawOperation): SteemOperationNumber {
         return new SteemOperationNumber(rawOp[1].block, rawOp[1].trx_in_block, rawOp[1].op_in_trx);
     }
