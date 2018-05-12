@@ -236,7 +236,8 @@ export class Synchronizer {
         return new Promise((resolve, reject) => {
             const voteorders = input.voteorders; // there is no need to copy them (just sort)
             voteorders.sort((a, b): number => {
-                return a.opNum.isGreaterThan(b.opNum) ? -1 : a.opNum.isLesserThan(b.opNum) ? 1 : 0;
+                if (a.opNum.isEqual_solveOpInTrxBug(b.opNum)) return 0;
+                else return  a.opNum.isGreaterThan(b.opNum) ? 1 : -1;
             });
 
             resolve({voteorders: voteorders, rulesetsAtMomentArr: input.rulesetsAtMomentArr, confirmedVotes: input.confirmedVotes});
