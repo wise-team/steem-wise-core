@@ -8,7 +8,7 @@ import { smartvotes_vote_weight, smartvotes_voteorder } from "../src/schema/vote
 describe("test/voteorder-sending.spec.ts", () => {
     describe("SteemSmartvotes", () => {
         describe("sendVoteOrder", () => {
-            it("sends valid vote order without error", function (done) {
+            it("sends vote order without error (skipValidation=true)", function (done) {
                 this.timeout(20000);
                 const sm: SteemSmartvotes = new SteemSmartvotes("guest123",
                     "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg");
@@ -25,7 +25,7 @@ describe("test/voteorder-sending.spec.ts", () => {
                 sm.sendVoteOrder(order, function (error: Error | undefined, result: any) {
                     if (error) done(error);
                     else done();
-                });
+                }, () => {}, true);
             });
 
             it("does not send invalid voteorder", function (done) {

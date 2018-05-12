@@ -20,8 +20,8 @@ describe("test/steem.spec.ts", () => {
                     }
                     else {
                         const rawOp: RawOperation = result[0] as RawOperation;
-                        if (rawOp[1].op_in_trx === 3) done();
-                        else done(new Error("Steem account_history_api returns wrong op_in_trx (" + rawOp[1].op_in_trx + ")"));
+                        if (rawOp[1].op_in_trx === 3) done(new Error("Steem account_history_api returns correct op_in_trx (" + rawOp[1].op_in_trx + "). The bug was repaird. Please replace all lesserThan_solveOpInTrxBug to lesserThan."));
+                        else done(new Error("Steem account_history_api returns wrong op_in_trx (" + rawOp[1].op_in_trx + "). The bug still exists"));
                     }
                 }
             });

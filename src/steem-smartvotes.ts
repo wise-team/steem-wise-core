@@ -9,8 +9,10 @@ import { AccountHistorySupplier } from "./chainable/_exports";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { VoteorderAtMoment, RulesetsAtMoment, VoteConfirmedAtMoment } from "./validation/smartvote-types-at-moment";
 
+// TODO semver
+
 // TODO comment
-// TODO blockchain input sanitization
+// TODO blockchain input sanitization (prevent malicious json)
 export class SteemSmartvotes {
     private steem: any;
     private username: string;
