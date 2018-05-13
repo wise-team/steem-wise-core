@@ -44,7 +44,7 @@
     "test": "mocha -r ts-node/register test/**/*.spec.ts",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "debug": "npm run build && npm run watch-debug",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
