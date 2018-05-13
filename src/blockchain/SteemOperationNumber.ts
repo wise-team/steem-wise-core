@@ -69,6 +69,10 @@ export class SteemOperationNumber {
         return this.blockNum == tn.blockNum && this.transactionNum == tn.transactionNum;
     }
 
+    public addTransactions(txNum: number): SteemOperationNumber {
+        return new SteemOperationNumber(this.blockNum, this.transactionNum + txNum, this.operationNum);
+    }
+
     public toString(): string {
         return "[b=" + this.blockNum + ", tx=" + this.transactionNum + ", op=" + this.operationNum + "]";
     }

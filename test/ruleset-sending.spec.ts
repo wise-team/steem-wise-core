@@ -73,6 +73,21 @@ describe("test/ruleset-sending.spec.ts", () => {
                 });
             });
         });
+
+        it("#getRulesOfUser does not finish silently, but returns empty list", function (done) {
+            this.timeout(10000);
+
+            new RulesValidator(steem).getRulesOfUser("steemprojects2", new SteemOperationNumber(22144254, 42, 0))
+            .then((result: smartvotes_ruleset []): void => {
+                if (result.length > 0) {
+                    done(new Error("Should return empty list"));
+                }
+                else {
+                    done();
+                }
+            })
+            .catch((error: Error) => done(error));
+        });
     });
 
     // TODO add test: invalid post fails to send

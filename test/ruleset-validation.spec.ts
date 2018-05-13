@@ -20,7 +20,7 @@ const validVoteorder: smartvotes_voteorder = {
     type: "upvote"
 };
 
-const rulesetMomentForValidation: SteemOperationNumber = new SteemOperationNumber(22144059, 32, 0); // tx_id = 7fe4a1a4efadb1230c41c2c865df15d91eb3c452
+const rulesetMomentForValidation: SteemOperationNumber = new SteemOperationNumber(22144059, 32, 0).addTransactions(1); // Moment just after tx_id = 7fe4a1a4efadb1230c41c2c865df15d91eb3c452
 
 describe("test/ruleset-validation.spec.ts", function() {
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {

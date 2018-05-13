@@ -50,24 +50,29 @@ export class RulesValidator {
 
             const loadedRulesets: smartvotes_ruleset [] = [];
 
+            let noResult: boolean = true;
             new AccountHistorySupplier(this.steem, username)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new SmartvotesFilter())
-                .chain(new OperationNumberFilter("<=", atMoment))
+                .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
                 .chain(new ToSmartvotesOperationTransformer())
                 .chain(new SmartvotesOperationTypeFilter<smartvotes_command_set_rules>("set_rules"))
                 .chain(new ChainableLimiter(1))
                 .chain(new SimpleTaker((item: smartvotes_command_set_rules): boolean => {
+                    noResult = false;
                     resolve(item.rulesets);
                     return false;
                 }))
                 .catch((error: Error) => {
+                    noResult = false;
                     reject(error);
                     return false;
                 });
             })
-            .start();
+            .start(() => {
+                if (noResult) resolve([]);
+            });
         });
     }
 
