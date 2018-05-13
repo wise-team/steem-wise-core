@@ -12,7 +12,6 @@
     "@types/bluebird": "^3.5.20",
     "ajv": "^6.4.0",
     "bluebird": "^3.5.1",
-    "commander": "^2.15.1",
     "jayson": "^2.0.5",
     "setprototypeof": "^1.1.0",
     "steem": "^0.7.1"
