@@ -166,4 +166,30 @@ describe("test/synchronization.spec.ts", () => {
             }
         });
     });
+
+    describe("Synchronizer — stage 3 testing", () => {
+        it("returns no voteorders after successful synchronization is done", function(done) {
+            this.timeout(35000);
+            const synchronizer = new Synchronizer(steem, "steemprojects2", "-");
+            // synchronizer.withProggressCallback((msg, proggress) => console.log("Proggress: " + msg));
+            synchronizer.atMoment(new SteemOperationNumber(sequence.stage3_1_SyncConfirmationMoment.blockNum, sequence.stage3_1_SyncConfirmationMoment.transactionNum + 1, 0));
+            synchronizer.validateOnly(true);
+            synchronizer.synchronize((error: Error | undefined, result: SynchronizationResult | undefined) => {
+                if (error) done(error);
+                else {
+                    if (result) {
+                        if (result.validVoteorders.length > 0 || result.invalidVoteorders.length > 0) done(new Error("Returned [" + result.validVoteorders.length + " valid,"
+                            + " and " + result.invalidVoteorders.length + " invalid] voteorder after successful sync is done"));
+                        else done();
+                    }
+                    else {
+                        done(new Error("Undefined results returned"));
+                    }
+                }
+            });
+        });
+    });
+
+    // TODO test — synchronization returns nothing just after it is done
+    // TODO test partial synchronization
 });

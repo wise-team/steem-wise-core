@@ -83,4 +83,3 @@ export default SteemSmartvotes;
 export * from "./schema/smartvotes.schema";
 export * from "./blockchain/_exports";
 export * from "./chainable/_exports";
-

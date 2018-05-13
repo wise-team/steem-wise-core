@@ -450,3 +450,5 @@ export const stage3_0_Rulesets: RulesetsAtMoment = {
     validityUntil: SteemOperationNumber.FUTURE
 };
 
+export const stage3_1_SyncConfirmationMoment = new SteemOperationNumber(22389679, 24, 1);
+export const stage3_1_SyncConfirmationTransactionId: string = "cdaaf8da87a5a3f4ffa44c9123454d8361bab979";

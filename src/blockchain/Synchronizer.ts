@@ -10,15 +10,6 @@ import { RulesValidator } from "../validation/RulesValidator";
 import { VoteConfirmedAtMoment, VoteorderAtMoment, RulesetsAtMoment } from "../validation/smartvote-types-at-moment";
 import { ValidationError } from "../validation/ValidationError";
 
-/*interface BeforeSyncData1 {
-    rulesets: RulesetAtMoment [];
-    confirmedVotes: VoteConfirmedAtMoment [];
-}
-
-interface BeforeSyncData2 extends BeforeSyncData1 {
-    voteorders: VoteorderAtMoment [];
-}*/
-
 export interface SynchronizationResult {
     rulesAtMoment: RulesetsAtMoment [];
     confirmedVotes: VoteConfirmedAtMoment [];
