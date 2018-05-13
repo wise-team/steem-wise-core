@@ -1,6 +1,6 @@
 {
   "name": "steem-smartvotes",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "Node/web library for Smartvotes: a vote delegation system for STEEM blockchain",
   "main": "dist/steem-smartvotes.js",
   "types": "dist/steem-smartvotes.d.ts",
