@@ -4,8 +4,7 @@ import * as steem from "steem";
 
 import { RawOperation } from "../src/blockchain/blockchain-operations-types";
 import { SteemSmartvotes, SteemOperationNumber } from "../src/steem-smartvotes";
-// TODO add many tests
-// TODO test confirmation
+
 describe("test/steem.spec.ts", () => {
     describe("account_history_api.get_account_history", () => {
         it("Returns incorrect op_in_trx", function(done) {

@@ -25,6 +25,9 @@
                     "description": "Transaction id & num of operation in transaction of a voteorder.",
                     "items": {
                         "properties": {
+                            "invalid": {
+                                "type": "boolean"
+                            },
                             "operation_num": {
                                 "type": "number"
                             },
@@ -33,6 +36,7 @@
                             }
                         },
                         "required": [
+                            "invalid",
                             "operation_num",
                             "transaction_id"
                         ],

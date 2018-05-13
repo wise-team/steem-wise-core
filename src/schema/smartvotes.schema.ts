@@ -54,6 +54,7 @@ export interface smartvotes_command_confirm_votes {
     voteorders: {
         transaction_id: string;
         operation_num: number;
+        invalid: boolean;
     } [];
 }
 

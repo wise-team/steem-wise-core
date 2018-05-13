@@ -105,7 +105,7 @@ export class Synchronizer {
                         foundVoteConfirmation = true;
                     }
                     else if (item.op.name === "set_rules") {
-                        rulesets.push({ // TODO bug: ruleset should be invalidated only by new set_rules command (not by other ruleset from the same family)
+                        rulesets.push({
                             opNum: SteemOperationNumber.fromOperation(item.rawOp),
                             rulesets: item.op.rulesets,
                             validityUntil: previousRulesetOpNum // commands are returned from oldest to newest
@@ -354,7 +354,7 @@ export class Synchronizer {
         });
 
         const operations: (["custom_json", CustomJsonOperation] | ["vote", VoteOperation]) [] = [];
-        const voteConfirmations: { transaction_id: string, operation_num: number } [] = [];
+        const voteConfirmations: { transaction_id: string, operation_num: number, invalid: boolean } [] = [];
 
         for (let i = 0; i < input.validVoteorders.length; i++) {
             const voteorder = input.validVoteorders[i];
@@ -366,7 +366,12 @@ export class Synchronizer {
                 weight: (voteorder.voteorder.weight * (voteorder.voteorder.type === "flag" ? -1 : 1)),
             };
             operations.push(["vote", voteOp]);
-            voteConfirmations.push({transaction_id: voteorder.transactionId, operation_num: voteorder.opNum.operationNum});
+            voteConfirmations.push({transaction_id: voteorder.transactionId, operation_num: voteorder.opNum.operationNum, invalid: false});
+        }
+
+        for (let i = 0; i < input.invalidVoteorders.length; i++) {
+            const voteorder = input.invalidVoteorders[i];
+            voteConfirmations.push({transaction_id: voteorder[0].transactionId, operation_num: voteorder[0].opNum.operationNum, invalid: true});
         }
 
         const confirmationOp: smartvotes_command_confirm_votes = {
