@@ -160,7 +160,7 @@
             "description": "A rule for specifying allowed, denied and required tags list.",
             "properties": {
                 "mode": {
-                    "description": "Rule mode.\n- allow => every post tag must be on the specified list\n- deny => none of the post tags can be on the specified list\n- require => the post should have all of the specified tags\n- any => the post should have at least one of the specified tags",
+                    "description": "Rule mode.\n- allow => every post tag must be on the specified list // TODO: rename to all\n- deny => none of the post tags can be on the specified list\n- require => the post should have all of the specified tags\n- any => the post should have at least one of the specified tags",
                     "enum": [
                         "allow",
                         "any",
@@ -224,7 +224,7 @@
                     "type": "array"
                 },
                 "total_weight": {
-                    "description": "Total weight of all votes that a voter can cast daily.\nEg.: 10000 means a single 100% vote, or twenty 5% votes.\nIf you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.",
+                    "description": "Total weight of all votes that a voter can cast daily.\nEg.: 10000 means a single 100% vote, or twenty 5% votes.\nIf you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.\n// TODO: rename to max_weight. And add next rule rule_weight",
                     "type": "number"
                 },
                 "voter": {

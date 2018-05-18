@@ -3,7 +3,7 @@ export type RawOperation = // TODO rename to BlockchainEntry or BlockchainOperat
         number,
         {
             block: number,
-            op: [string, CustomJsonOperation | VoteOperation | object],
+            op: [string, object],
             op_in_trx: number,
             timestamp: string,
             trx_id: string,

@@ -1,8 +1,28 @@
-import { ChainableSupplier } from "../Chainable";
-import { smartvotes_operation } from "../../steem-smartvotes";
-import { RawOperation } from "../../blockchain/blockchain-operations-types";
+import { RawOperation } from "../blockchain/blockchain-operations-types";
+import { Chainable, ChainableSupplier } from "../chainable/Chainable";
+import { ApiFactory } from "./ApiFactory";
+import { SmartvotesFilter } from "../chainable/filters/raw/SmartvotesFilter";
 
-export class AccountHistorySupplier extends ChainableSupplier<RawOperation, AccountHistorySupplier> {
+export class SteemJsApiFactory extends ApiFactory {
+    private batchSize: number;
+
+    public constructor(batchSize: number = 1000) {
+        super();
+
+        this.batchSize = batchSize;
+    }
+
+    public createSmartvotesSupplier(steem: any, username: string): ChainableSupplier<RawOperation, any> {
+        return new SteemJsAccountHistorySupplier(steem, username)
+        .withBatchSize(this.batchSize);
+    }
+
+    public getName(): string {
+        return "SteemJs";
+    }
+}
+
+class SteemJsAccountHistorySupplier extends ChainableSupplier<RawOperation, SteemJsAccountHistorySupplier> {
     private steem: any;
     private username: string;
     private batchSize: number = 1000;
@@ -15,16 +35,16 @@ export class AccountHistorySupplier extends ChainableSupplier<RawOperation, Acco
         this.onFinishCallback = function(): void {};
     }
 
-    protected me(): AccountHistorySupplier {
+    protected me(): SteemJsAccountHistorySupplier {
         return this;
     }
 
-    public withBatchSize(batchSize: number): AccountHistorySupplier {
+    public withBatchSize(batchSize: number): SteemJsAccountHistorySupplier {
         this.batchSize = batchSize;
         return this;
     }
 
-    public onFinish(callback: () => void): AccountHistorySupplier {
+    public onFinish(callback: () => void): SteemJsAccountHistorySupplier {
         this.onFinishCallback = callback;
         return this;
     }

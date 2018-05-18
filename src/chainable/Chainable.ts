@@ -69,6 +69,10 @@ export abstract class ChainableSupplier<TO, IMPLEMENTERCLASS extends ChainableSu
     public take(error: Error | undefined, item: undefined | undefined): boolean {
         throw new Error("Supplier cannot take.");
     }
+
+    public abstract onFinish(callback: () => void): IMPLEMENTERCLASS;
+
+    public abstract start(callback?: () => void): void;
 }
 
 /**

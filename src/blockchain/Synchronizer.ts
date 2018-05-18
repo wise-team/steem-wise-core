@@ -1,5 +1,5 @@
 import { Promise } from "bluebird";
-import { AccountHistorySupplier, SmartvotesFilter, OperationNumberFilter, SimpleTaker,
+import { OperationNumberFilter, SimpleTaker,
     ToSmartvotesOperationTransformer, SmartvotesOperationTypeFilter,
     ChainableLimiter, BiTransformer, OperationTypeFilter, OperationNumberLimiter } from "../chainable/_exports";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_voteorder, smartvotes_ruleset, smartvotes_command_confirm_votes } from "../schema/smartvotes.schema";
@@ -9,6 +9,7 @@ import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { RulesValidator } from "../validation/RulesValidator";
 import { VoteConfirmedAtMoment, VoteorderAtMoment, RulesetsAtMoment } from "../validation/smartvote-types-at-moment";
 import { ValidationError } from "../validation/ValidationError";
+import { ApiFactory } from "../api/ApiFactory";
 
 export interface SynchronizationResult {
     rulesAtMoment: RulesetsAtMoment [];
@@ -19,6 +20,7 @@ export interface SynchronizationResult {
 
 export class Synchronizer {
     private steem: any;
+    private apiFactory: ApiFactory;
     private username: string;
     private postingWif: string;
     private proggressCallback: (msg: string, proggress: number) => void = (msg, proggress) => {};
@@ -26,8 +28,9 @@ export class Synchronizer {
     private concurrency: number = 4;
     private beforeMoment: SteemOperationNumber = SteemOperationNumber.FUTURE;
 
-    constructor(steem: any, username: string, postingWif: string) {
+    constructor(steem: any, apiFactory: ApiFactory, username: string, postingWif: string) {
         this.steem = steem;
+        this.apiFactory = apiFactory;
         this.username = username;
         this.postingWif = postingWif;
     }
@@ -76,11 +79,10 @@ export class Synchronizer {
             let foundVoteConfirmation = false;
             let previousRulesetOpNum = new SteemOperationNumber(Infinity, Infinity, Infinity);
 
-            new AccountHistorySupplier(this.steem, this.username)
+            this.apiFactory.createSmartvotesSupplier(this.steem, this.username)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", this.beforeMoment))
-                .chain(new SmartvotesFilter())
                 .chain(new BiTransformer())
                 .chain(new SimpleTaker((item: {rawOp: RawOperation, op: smartvotes_operation}): boolean => {
                     if (item.op.name === "confirm_votes") {
@@ -182,12 +184,11 @@ export class Synchronizer {
 
         const voteorders: VoteorderAtMoment [] = [];
         return new Promise((resolve, reject) => {
-            new AccountHistorySupplier(this.steem, voter)
+            this.apiFactory.createSmartvotesSupplier(this.steem, voter)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", this.beforeMoment))
                 .chain(new OperationNumberLimiter(">=", lookupSince))
-                .chain(new SmartvotesFilter())
                 .chain(new BiTransformer())
                 .chain(new SimpleTaker((item: {rawOp: RawOperation, op: smartvotes_operation}): boolean => {
                     if (item.op.name === "send_voteorder") {
@@ -316,7 +317,7 @@ export class Synchronizer {
             if (!voteorder) throw new Error("Got undefined voteorder for validation");
             this.proggressCallback("Starting validation of @" + voteorder.voter + ": /@" + voteorder.voteorder.author + "/" + voteorder.voteorder.permlink, 0.6);
 
-            new RulesValidator(this.steem)
+            new RulesValidator(this.steem, this.apiFactory)
             .withConcurrency(1/* because synchronization is already concurrent*/)
             .provideRulesetsForValidation(rulesAtMoment)
             .validateVoteOrder(voteorder.voter, voteorder.voteorder, voteorder.opNum, (error: Error | undefined, result: boolean) => {

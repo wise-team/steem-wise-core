@@ -5,9 +5,12 @@ import { BlockchainSender } from "./blockchain/BlockchainSender";
 import { Synchronizer, SynchronizationResult } from "./blockchain/Synchronizer";
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
-import { AccountHistorySupplier } from "./chainable/_exports";
+import { ApiFactory } from "./api/ApiFactory";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { VoteorderAtMoment, RulesetsAtMoment, VoteConfirmedAtMoment } from "./validation/smartvote-types-at-moment";
+import { SteemJsApiFactory } from "./api/SteemJsApiFactory";
+import { ChainableSupplier } from "./chainable/Chainable";
+import { RawOperation } from "./blockchain/blockchain-operations-types";
 
 // TODO semver
 
@@ -17,10 +20,12 @@ export class SteemSmartvotes {
     private steem: any;
     private username: string;
     private postingWif: string;
+    private apiFactory: ApiFactory;
 
-    constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined) {
+    constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined, apiFactory: ApiFactory = new SteemJsApiFactory(1000)) {
         this.username = username;
         this.postingWif = postingWif;
+        this.apiFactory = apiFactory;
 
         this.steem = steem;
         // TODO use this steem (with these options in static methods of this class (make them non-static)).
@@ -29,11 +34,15 @@ export class SteemSmartvotes {
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
 
+    public setApiFactory(apiFactory: ApiFactory): void {
+        this.apiFactory = apiFactory;
+    }
+
     // TODO comment
     public validateVoteOrder = (username: string, voteorder: schema.smartvotes_voteorder, atMoment: SteemOperationNumber,
         callback: (error: Error | undefined, result: boolean) => void,
         progressCallback: (msg: string, proggress: number) => void = function(msg, percent) {}): void => {
-        new RulesValidator(this.steem).validateVoteOrder(username, voteorder, atMoment, callback, progressCallback);
+        new RulesValidator(this.steem, this.apiFactory).validateVoteOrder(username, voteorder, atMoment, callback, progressCallback);
     }
 
     // TODO comment
@@ -41,9 +50,9 @@ export class SteemSmartvotes {
         callback: (error: Error | undefined, result: any) => void,
         proggressCallback?: (msg: string, proggress: number) => void, skipValidation?: boolean): void => {
         if (proggressCallback)
-            BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback, proggressCallback, (skipValidation ? true : false));
+            BlockchainSender.sendVoteOrder(this.steem, this.apiFactory, this.username, this.postingWif, voteorder, callback, proggressCallback, (skipValidation ? true : false));
         else
-            BlockchainSender.sendVoteOrder(this.steem, this.username, this.postingWif, voteorder, callback);
+            BlockchainSender.sendVoteOrder(this.steem, this.apiFactory, this.username, this.postingWif, voteorder, callback);
     }
 
     // TODO comment
@@ -53,23 +62,23 @@ export class SteemSmartvotes {
 
     // TODO comment
     public getRulesetsOfUser = (username: string, callback: (error: Error | undefined, result: schema.smartvotes_ruleset []) => void, atMoment: SteemOperationNumber = SteemOperationNumber.FUTURE): void => {
-        new RulesValidator(this.steem).getRulesOfUser(username, atMoment)
+        new RulesValidator(this.steem, this.apiFactory).getRulesOfUser(username, atMoment)
         .then((result: schema.smartvotes_ruleset []) => callback(undefined, result))
         .catch((error: Error) => callback(error, []));
     }
 
     public synchronizeSmartvotes = (callback: (error: Error | undefined, result: SynchronizationResult | undefined) => void, proggressCallback: ((msg: string, proggress: number) => void) = () => {}, concurrency: number = 4): void => {
-        new Synchronizer(this.steem, this.username, this.postingWif).withConcurrency(concurrency).withProggressCallback(proggressCallback).synchronize(callback);
+        new Synchronizer(this.steem, this.apiFactory, this.username, this.postingWif).withConcurrency(concurrency).withProggressCallback(proggressCallback).synchronize(callback);
     }
 
     // TODO comment
-    public createAccountHistoryChain = (username: string): AccountHistorySupplier => {
-        return new AccountHistorySupplier(this.steem, username);
+    public createAccountHistoryChain = (username: string): ChainableSupplier<RawOperation, any> => {
+        return this.apiFactory.createSmartvotesSupplier(this.steem, username);
     }
 
     // TODO comment
     // TODO implement
-    public createLiveBlockchainChain = (username: string): AccountHistorySupplier => {
+    public createLiveBlockchainChain = (username: string): ChainableSupplier<RawOperation, any> => {
         throw new Error("Not implemented yet");
     }
 

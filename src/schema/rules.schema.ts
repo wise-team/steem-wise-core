@@ -23,6 +23,7 @@ export interface smartvotes_ruleset {
      * Total weight of all votes that a voter can cast daily.
      * Eg.: 10000 means a single 100% vote, or twenty 5% votes.
      * If you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.
+     * // TODO: rename to max_weight. And add next rule rule_weight
      */
     total_weight: number;
 
@@ -58,7 +59,7 @@ export interface smartvotes_rule_tags {
 
     /**
      * Rule mode.
-     * - allow => every post tag must be on the specified list
+     * - allow => every post tag must be on the specified list // TODO: rename to all
      * - deny => none of the post tags can be on the specified list
      * - require => the post should have all of the specified tags
      * - any => the post should have at least one of the specified tags
@@ -120,3 +121,7 @@ export interface smartvotes_custom_rpc_call_parameters {
      */
     voteorder: smartvotes_voteorder;
 }
+
+// TODO voting_power of delegator rule
+// TODO weight rule (per rule & per delegator)
+// TODO rule: maksymalna wartosc postu

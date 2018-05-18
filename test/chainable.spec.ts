@@ -5,9 +5,8 @@ import { Promise } from "bluebird";
 import * as steem from "steem";
 
 import { RawOperation, CustomJsonOperation, VoteOperation } from "../src/blockchain/blockchain-operations-types";
-import { AccountHistorySupplier } from "../src/chainable/suppliers/AccountHistorySupplier";
 import { Chainable, SmartvotesFilter, ChainableLimiter, SimpleTaker, OperationTypeFilter, OperationNumberFilter } from "../src/chainable/_exports";
-import { SteemOperationNumber } from "../src/steem-smartvotes";
+import { SteemOperationNumber, SteemSmartvotes } from "../src/steem-smartvotes";
 
 describe("test/chainable.spec.ts", () => {
     describe("AccountHistorySupplier", () => {
@@ -16,7 +15,7 @@ describe("test/chainable.spec.ts", () => {
 
             before(function(done) {
                 this.timeout(15000);
-                new AccountHistorySupplier(steem, "steemprojects1")
+                new SteemSmartvotes("steemprojects1", "-").createAccountHistoryChain("steemprojects1")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new SmartvotesFilter())
@@ -61,7 +60,7 @@ describe("test/chainable.spec.ts", () => {
 
             it("Loads both real and virtual operations", function(done) {
                 this.timeout(25000);
-                new AccountHistorySupplier(steem, "guest123")
+                new SteemSmartvotes("guest123", "-").createAccountHistoryChain("guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationTypeFilter("vote"))
@@ -108,7 +107,7 @@ describe("test/chainable.spec.ts", () => {
 
             it("Loads operations in correct order", function(done) {
                 this.timeout(25000);
-                new AccountHistorySupplier(steem, "guest123")
+                new SteemSmartvotes("guest123", "-").createAccountHistoryChain("guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationTypeFilter("vote"))
@@ -154,7 +153,7 @@ describe("test/chainable.spec.ts", () => {
         it("returns only operations with number < (block=22202938, tx=14, op=1)", function(done) {
             this.timeout(35000);
             new Promise((resolve, reject) => {
-                new AccountHistorySupplier(steem, "guest123")
+                new SteemSmartvotes("guest123", "-").createAccountHistoryChain("guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1)))

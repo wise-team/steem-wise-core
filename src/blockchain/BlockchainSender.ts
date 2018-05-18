@@ -4,13 +4,12 @@ import { JSONValidator } from "../validation/JSONValidator";
 import { RulesValidator } from "../validation/RulesValidator";
 import { SteemOperationNumber } from "./SteemOperationNumber";
 import { Promise } from "bluebird";
+import { ApiFactory } from "../api/ApiFactory";
 
-// TODO move to /blockchain
 export class BlockchainSender {
     // TODO comment
     // TODO add proggress callback
-    // TODO validate
-    public static sendVoteOrder(steem: any, username: string, postingWif: string, voteorder: schema.smartvotes_voteorder,
+    public static sendVoteOrder(steem: any, apiFactory: ApiFactory, username: string, postingWif: string, voteorder: schema.smartvotes_voteorder,
         callback: (error: Error | undefined, result: any) => void,
         proggressCallback?: (msg: string, proggress: number) => void, skipValidation?: boolean): void {
 
@@ -28,7 +27,7 @@ export class BlockchainSender {
 
         const validateRules  = (jsonStr: string): Promise<string> => {
             return new Promise((resolve, reject) => {
-                new RulesValidator(steem).validateVoteOrder(username, voteorder, SteemOperationNumber.FUTURE, function(error, success) {
+                new RulesValidator(steem, apiFactory).validateVoteOrder(username, voteorder, SteemOperationNumber.FUTURE, function(error, success) {
                     if (error) reject(error);
                     else {
                         notifyProggress("Sending vote order to blockchain", 0.8);
@@ -40,6 +39,8 @@ export class BlockchainSender {
             });
         };
 
+        // TODO separete field for vote
+        // TODO anulowanie glosu (weight=0?)
         const doSend = function(jsonStr: string): Promise<string> {
             return new Promise(function(resolve, reject) {
                 const voteOp: VoteOperation = {

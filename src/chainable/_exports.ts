@@ -10,8 +10,5 @@ export * from "./limiters/OperationNumberLimiter";
 
 export * from "./filters/smartvotes/SmartvotesOperationTypeFilter";
 
-export * from "./suppliers/AccountHistorySupplier";
-// export * from "./suppliers/BlockchainLiveSupplier";
-
 export * from "./transformers/ToSmartvotesOperationTransformer";
 export * from "./transformers/BiTransformer";

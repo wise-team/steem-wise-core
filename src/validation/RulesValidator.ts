@@ -9,22 +9,25 @@ import { JSONValidator } from "./JSONValidator";
 import { TagsRuleValidator } from "./TagsRuleValidator";
 import { AuthorsRuleValidator } from "./AuthorsRuleValidator";
 import { CustomRPCRuleValidator } from "./CustomRPCRuleValidator";
-import { AccountHistorySupplier, SmartvotesFilter, SimpleTaker,
+import { SimpleTaker,
     ToSmartvotesOperationTransformer, SmartvotesOperationTypeFilter,
     ChainableLimiter, OperationNumberFilter } from "../chainable/_exports";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { RulesetsAtMoment } from "../validation/smartvote-types-at-moment";
+import { ApiFactory } from "../api/ApiFactory";
 
 /**
  * The RulesValidator validates vote orders against delegator's rulesets.
  */
 export class RulesValidator {
     private steem: any;
+    private apiFactory: ApiFactory;
     private providedRulesets: RulesetsAtMoment [] | undefined = undefined;
     private concurrency: number = 4;
 
-    constructor(steem: any) {
+    constructor(steem: any, apiFactory: ApiFactory) {
         this.steem = steem;
+        this.apiFactory = apiFactory;
     }
 
     public provideRulesetsForValidation(providedRulesets: RulesetsAtMoment []): RulesValidator {
@@ -51,10 +54,9 @@ export class RulesValidator {
             const loadedRulesets: smartvotes_ruleset [] = [];
 
             let noResult: boolean = true;
-            new AccountHistorySupplier(this.steem, username)
+            this.apiFactory.createSmartvotesSupplier(this.steem, username)
             .branch((historySupplier) => {
                 historySupplier
-                .chain(new SmartvotesFilter())
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
                 .chain(new ToSmartvotesOperationTransformer())
                 .chain(new SmartvotesOperationTypeFilter<smartvotes_command_set_rules>("set_rules"))
