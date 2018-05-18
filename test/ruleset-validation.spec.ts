@@ -24,11 +24,6 @@ const validVoteorder: smartvotes_voteorder = {
 const rulesetMomentForValidation: SteemOperationNumber = new SteemOperationNumber(22144059, 32, 0).addTransactions(1); // Moment just after tx_id = 7fe4a1a4efadb1230c41c2c865df15d91eb3c452
 
 describe("test/ruleset-validation.spec.ts", function() {
-    before(function(done) {
-        steem.api.setOptions({ url: "http://rpc.buildteam.io/", uri: "http://rpc.buildteam.io/" });
-        done();
-    });
-
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
         this.retries(1);
 
