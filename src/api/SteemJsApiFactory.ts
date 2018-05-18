@@ -1,4 +1,4 @@
-import { RawOperation } from "../blockchain/blockchain-operations-types";
+import { RawOperation, CustomJsonOperation } from "../blockchain/blockchain-operations-types";
 import { Chainable, ChainableSupplier } from "../chainable/Chainable";
 import { ApiFactory } from "./ApiFactory";
 import { SmartvotesFilter } from "../chainable/filters/raw/SmartvotesFilter";
@@ -101,8 +101,10 @@ class SteemJsAccountHistorySupplier extends ChainableSupplier<RawOperation, Stee
         let loadNext: boolean = true;
         for (let i = 0; i < ops.length; i++) {
             const operation: RawOperation = ops[i];
-            loadNext = this.give(undefined, operation);
-            if (loadNext === false) break;
+            if (operation[1].op[0] == "custom_json" && (operation[1].op[1] as CustomJsonOperation).id == "smartvote") {
+                loadNext = this.give(undefined, operation);
+                if (loadNext === false) break;
+            }
         }
         return loadNext;
     }
