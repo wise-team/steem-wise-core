@@ -79,7 +79,7 @@ export class Synchronizer {
             let foundVoteConfirmation = false;
             let previousRulesetOpNum = new SteemOperationNumber(Infinity, Infinity, Infinity);
 
-            this.apiFactory.createSmartvotesSupplier(this.steem, this.username)
+            this.apiFactory.createSmartvotesSupplier(this.username)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", this.beforeMoment))
@@ -184,7 +184,7 @@ export class Synchronizer {
 
         const voteorders: VoteorderAtMoment [] = [];
         return new Promise((resolve, reject) => {
-            this.apiFactory.createSmartvotesSupplier(this.steem, voter)
+            this.apiFactory.createSmartvotesSupplier(voter)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", this.beforeMoment))

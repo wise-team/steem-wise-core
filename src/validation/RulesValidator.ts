@@ -54,7 +54,7 @@ export class RulesValidator {
             const loadedRulesets: smartvotes_ruleset [] = [];
 
             let noResult: boolean = true;
-            this.apiFactory.createSmartvotesSupplier(this.steem, username)
+            this.apiFactory.createSmartvotesSupplier(username)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))

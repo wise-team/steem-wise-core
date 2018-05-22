@@ -12,6 +12,8 @@ export class SteemJsApiFactory extends ApiFactory {
 
         this.steem = steem;
         this.batchSize = batchSize;
+
+        if (this.steem === 1000) throw new Error("1000 error");
     }
 
     public createSmartvotesSupplier(username: string): ChainableSupplier<RawOperation, any> {
@@ -35,6 +37,8 @@ class SteemJsAccountHistorySupplier extends ChainableSupplier<RawOperation, Stee
         this.steem = steem;
         this.username = username;
         this.onFinishCallback = function(): void {};
+
+        if (!this.steem) throw new Error("Supplied steem object is null");
     }
 
     protected me(): SteemJsAccountHistorySupplier {

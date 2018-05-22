@@ -22,14 +22,19 @@ export class SteemSmartvotes {
     private postingWif: string;
     private apiFactory: ApiFactory;
 
-    constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined, apiFactory: ApiFactory = new SteemJsApiFactory(1000)) {
+    constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined, apiFactory?: ApiFactory) {
         this.username = username;
         this.postingWif = postingWif;
-        this.apiFactory = apiFactory;
-
         this.steem = steem;
-        // TODO use this steem (with these options in static methods of this class (make them non-static)).
+
         if (steemOptions) this.steem.api.setOptions(steemOptions);
+
+        if (apiFactory) {
+            this.apiFactory = apiFactory;
+        }
+        else {
+            this.apiFactory = new SteemJsApiFactory(this.steem, 1000);
+        }
 
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
@@ -73,7 +78,7 @@ export class SteemSmartvotes {
 
     // TODO comment
     public createAccountHistoryChain = (username: string): ChainableSupplier<RawOperation, any> => {
-        return this.apiFactory.createSmartvotesSupplier(this.steem, username);
+        return this.apiFactory.createSmartvotesSupplier(username);
     }
 
     // TODO comment

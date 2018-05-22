@@ -17,7 +17,7 @@ import { SteemJsApiFactory } from "../src/api/SteemJsApiFactory";
 
 describe("test/ruleset-sending.spec.ts", () => {
     const apiFactories: ApiFactory [] = [
-        new SteemJsApiFactory(1000),
+        new SteemJsApiFactory(steem, 1000),
     ];
     for (const apiFactory of apiFactories) {
         describe("Synchronizer — apiFactory = " + apiFactory.getName(), () => {
