@@ -4,16 +4,18 @@ import { ApiFactory } from "./ApiFactory";
 import { SmartvotesFilter } from "../chainable/filters/raw/SmartvotesFilter";
 
 export class SteemJsApiFactory extends ApiFactory {
+    private steem: any;
     private batchSize: number;
 
-    public constructor(batchSize: number = 1000) {
+    public constructor(steem: any, batchSize: number = 1000) {
         super();
 
+        this.steem = steem;
         this.batchSize = batchSize;
     }
 
-    public createSmartvotesSupplier(steem: any, username: string): ChainableSupplier<RawOperation, any> {
-        return new SteemJsAccountHistorySupplier(steem, username)
+    public createSmartvotesSupplier(username: string): ChainableSupplier<RawOperation, any> {
+        return new SteemJsAccountHistorySupplier(this.steem, username)
         .withBatchSize(this.batchSize);
     }
 
