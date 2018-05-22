@@ -1,0 +1,18 @@
+1. Synchronizowanie głosów odbywać się będzie tylko w trybie daemona z jednym głosem i jednym custom_json na blok (według limitu)
+2. Żeby zmniejszyć ilość operacji na blockchainie i ilość parsowania — reguły będą ustawiane oddzielnie dla każdego votera (nie wpłynie to na czas synchronizacji w trybie daemon. Jedynie wydłuży czas startu synchronizatora do kilkunastu sekund — co w przypadku pracy ciągłej nie wydaje się problemem) — co więcej zapytania do account_history api będą się odbywały tylko po uruchomieniu daemona. Dzięki temu też będzie można ustawić więcej reguł [1]
+3. custom_json.id będzie zawierał więcej danych, żeby nie było trzeba dla każdego (nawet cudzego) smartvote parsować json w daemonie. Proponowany format: "[wise=4chars][protocolversion-1char]:[rules_for|voteorder|v_confirm=9characters]:[delegator=3-16characters]". Maksymalna długość będzie wynośić 32 znaki[2,3,4]
+
+[1] https://github.com/steemit/steem/commit/81f4c6373f1ddeb8c435b5c91fa67bcd361e29a3#diff-04f6af9cdbf180a31ccdbf6335b8f240R1517
+[2] https://github.com/steemit/steem/blob/bb8ca476f33c08434274f2d76333fcb74cfa58b8/libraries/protocol/steem_operations.cpp#L294
+[3]https://github.com/steemit/steem/blob/62b48877d9f731c3fe00ef818e3324a0a3de3e63/libraries/protocol/include/steem/protocol/config.hpp#L215
+[4]https://github.com/steemit/steem/blob/1cfdf8101ec415156b155c9ec90b0a4d439a039f/libraries/protocol/authority.cpp#L46
+
+Po rozmowie z Patrykiem:
+Ad 2: Z racji powstawania naszego własnego backendu (który już zacząłem tworzyć na postgresql+postgREST) załadowanie reguł z bazy danych będzie wymagać tylko jednego zapytania i będzie bardzo szybkie
+Ad 3: Rezygnujemy z dynamicznego id (zrobiliśmy benchmark i zysk czasu byłby pomijalnie mały)
+4. Zrezygnowanie z total_weight i zastąpienie regułą weight_rule.
+5. Zrezygnowanie z confirm_votes (daemon będzie zapisywał ostatni zscynchronizowany blok lokalnie). Natomiast wtedy nie będzie to klarowne w blockchainie, że @noisy zagłosował akurat z danego voteorderu (aczkolwiek można to stwierdzić po dogłębnej analizie). WiseVotes explorer będzie mógł to pokazywać (ponieważ streamuje blockchain może to robić na żywo)
+6. Zmiana custom_json na użycie custom_binary — protokół byłby oparty o Google Protobuf [5,6]
+
+[5] https://github.com/google/protobuf
+[6] https://github.com/dcodeIO/ProtoBuf.js/
