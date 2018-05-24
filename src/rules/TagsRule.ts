@@ -1,6 +1,7 @@
 import { Rule } from "./Rule";
 import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
-import { ValidationError } from "./ValidationError";
+import { ValidationError } from "../validation/ValidationError";
+import { ValidationContext } from "../validation/ValidationContext";
 
 export class TagsRule extends Rule {
     private tags: string [];
@@ -15,7 +16,8 @@ export class TagsRule extends Rule {
 
     public validate (
         op: SmartvotesOperation,
-        callback: (error: Error, result: ValidationError | undefined) => void
+        context: ValidationContext,
+        callback: (error: Error | undefined, result: ValidationError | true) => void
     ): void {
         throw new Error("Not implemented yet");
     }

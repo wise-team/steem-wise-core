@@ -1,7 +1,5 @@
 import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
-import { SteemOperation } from "../../SteemOperation";
 import { SmartvotesOperation } from "../../SmartvotesOperation";
-import { CustomJsonOperation } from "./blockchain-operations-types";
 
 import * as ajv from "ajv";
 import * as schemaJSON from "./smartvotes.schema.json";
@@ -12,6 +10,8 @@ import { Rule } from "../../../rules/Rule";
 import { TagsRule } from "../../../rules/TagsRule";
 import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
+import { SteemOperation } from "../../../blockchain/SteemOperation";
+import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 
 export class V1Handler implements ProtocolVersionHandler {
     public handleOrReject(op: SteemOperation): SmartvotesOperation [] | undefined {
