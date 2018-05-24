@@ -1,3 +1,6 @@
+import { SteemOperation } from "../SteemOperation";
+import { SmartvotesOperation } from "../current/SmartvotesOperation";
+
 export interface ProtocolVersionHandler {
-  isMyOperation: () => boolean;
+  handleOrReject: (op: SteemOperation) => SmartvotesOperation | undefined;
 }
