@@ -1,5 +1,8 @@
 import { Rule } from "../rules/Rule";
 
 export interface SetRules {
-    rules: Rule [];
+    rulesets: {
+        name: string;
+        rules: Rule [];
+    } [];
 }
