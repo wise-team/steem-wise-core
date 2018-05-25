@@ -1,16 +1,18 @@
 import * as steem from "steem";
 
-import * as schema from "./schema/smartvotes.schema";
 import { BlockchainSender } from "./blockchain/BlockchainSender";
 import { Synchronizer, SynchronizationResult } from "./blockchain/Synchronizer";
 import { JSONValidator } from "./validation/JSONValidator";
 import { RulesValidator } from "./validation/RulesValidator";
-import { ApiFactory } from "./api/ApiFactory";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { VoteorderAtMoment, RulesetsAtMoment, VoteConfirmedAtMoment } from "./validation/smartvote-types-at-moment";
-import { SteemJsApiFactory } from "./api/SteemJsApiFactory";
 import { ChainableSupplier } from "./chainable/Chainable";
 import { RawOperation } from "./blockchain/blockchain-operations-types";
+import { Protocol } from "./protocol/Protocol";
+import { V1Handler } from "./protocol/versions/v1/V1Handler";
+import { ProtocolVersionHandler } from "./protocol/versions/ProtocolVersionHandler";
+import { DirectBlockchainApi } from "./api/DirectBlockchainApi";
+import { Api } from "./api/Api";
 
 // TODO semver
 
@@ -20,27 +22,29 @@ export class SteemSmartvotes {
     private steem: any;
     private username: string;
     private postingWif: string;
-    private apiFactory: ApiFactory;
 
-    constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined, apiFactory?: ApiFactory) {
+    private api: Api = new DirectBlockchainApi();
+    private protocol: Protocol = new Protocol([
+        new V1Handler()
+    ]);
+
+
+    constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined) {
         this.username = username;
         this.postingWif = postingWif;
         this.steem = steem;
 
         if (steemOptions) this.steem.api.setOptions(steemOptions);
 
-        if (apiFactory) {
-            this.apiFactory = apiFactory;
-        }
-        else {
-            this.apiFactory = new SteemJsApiFactory(this.steem, 1000);
-        }
-
         if (username.length == 0 || postingWif.length == 0) throw new Error("Credentials cannot be empty");
     }
 
-    public setApiFactory(apiFactory: ApiFactory): void {
-        this.apiFactory = apiFactory;
+    public setPotocol(protocol: Protocol): void {
+        this.protocol = protocol;
+    }
+
+    public setApi(api: Api): void {
+        this.api = api;
     }
 
     // TODO comment

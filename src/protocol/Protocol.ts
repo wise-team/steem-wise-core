@@ -1,9 +1,21 @@
-import { SteemOperation } from "./SteemOperation";
+import { SteemOperation } from "../blockchain/SteemOperation";
 import { SmartvotesOperation } from "./SmartvotesOperation";
-import { ProtocolVersionRegistry } from "./versions/ProtocolVersionRegistry";
+import { ProtocolVersionHandler } from "./versions/ProtocolVersionHandler";
 
 export class Protocol {
+    private registry: ProtocolVersionHandler [];
+
+    public constructor(handlers: ProtocolVersionHandler []) {
+        this.registry = handlers;
+    }
+
     public handleOrReject(op: SteemOperation): SmartvotesOperation [] | undefined {
-        return ProtocolVersionRegistry.handleOrReject(op);
+        for (const pv of this.registry) {
+            const result = pv.handleOrReject(op);
+            if (result) {
+                return result;
+            }
+        }
+        return undefined;
     }
 }
