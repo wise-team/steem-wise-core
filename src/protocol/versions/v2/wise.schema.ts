@@ -2,6 +2,15 @@
 
 import { wise_rule } from "./rules.schema";
 
+export const wise_send_voteorder_descriptor: string = "v2:send_voteorder";
+export const wise_set_rules_descriptor: string = "v2:set_rules";
+export const wise_confirm_vote_descriptor: string = "v2:confirm_vote";
+export const wise_descriptors = [
+    wise_send_voteorder_descriptor,
+    wise_set_rules_descriptor,
+    wise_confirm_vote_descriptor
+];
+
 export type wise_send_voteorder_operation = ["v2:send_voteorder", wise_send_voteorder];
 export type wise_set_rules_operation = ["v2:set_rules", wise_set_rules];
 export type wise_confirm_vote_operation = ["v2:confirm_vote", wise_confirm_vote];

@@ -14,7 +14,7 @@ import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { isConfirmVote } from "../../ConfirmVote";
-import { wise_operation } from "./wise.schema";
+import { wise_operation, wise_descriptors, wise_set_rules_descriptor, wise_confirm_vote_descriptor, wise_send_voteorder_descriptor } from "./wise.schema";
 
 export class V2Handler implements ProtocolVersionHandler {
     public static CUSTOM_JSON_ID = "wise";
@@ -27,10 +27,18 @@ export class V2Handler implements ProtocolVersionHandler {
         if ((op.op[1] as CustomJsonOperation).required_posting_auths.length != 1) return undefined; // must be authorized by single user
 
         const jsonObj = JSON.parse((op.op[1] as CustomJsonOperation).json);
+
+        if (!this.isMyOperation(jsonObj)) return undefined;
         if (!this.validateJSON(jsonObj)) return undefined;
 
-        const smartvotesOp = jsonObj as wise_operation;
-        return this.transform(op, smartvotesOp, (op.op[1] as CustomJsonOperation).required_posting_auths[0]);
+        const wiseOp = jsonObj as wise_operation;
+        return this.transform(op, wiseOp, (op.op[1] as CustomJsonOperation).required_posting_auths[0]);
+    }
+
+    private isMyOperation(jsonStr: string) {
+        const descriptorStart = jsonStr.indexOf("\"");
+        const descriptor = jsonStr.substring(descriptorStart, jsonStr.indexOf("\"", descriptorStart + 1));
+        return wise_descriptors.indexOf(descriptor) !== -1;
     }
 
     private validateJSON(input: object): boolean {
@@ -41,12 +49,15 @@ export class V2Handler implements ProtocolVersionHandler {
         return validate(input) as boolean;
     }
 
-    private transform(op: SteemOperation, smartvotesOp: smartvotes_operation, sender: string): EffectuatedSmartvotesOperation [] | undefined {
-        if (smartvotesOp.name == "set_rules") { // sort for every voter
-            return this.transformSetRules(op, smartvotesOp, sender);
+    private transform(op: SteemOperation, wiseOp: wise_operation, sender: string): EffectuatedSmartvotesOperation [] | undefined {
+        if (wiseOp[0] == wise_confirm_vote_descriptor) {
+            return this.transformConfirmVote(op, wiseOp, sender);
         }
-        else if (smartvotesOp.name == "send_voteorder") {
-            return this.transformSendVoteorder(op, smartvotesOp, sender);
+        if (wiseOp[0] == wise_set_rules_descriptor) {
+            return this.transformSetRules(op, wiseOp, sender);
+        }
+        else if (wiseOp[0] == wise_send_voteorder_descriptor) {
+            return this.transformSendVoteorder(op, wiseOp, sender);
         }
         else return undefined;
     }
