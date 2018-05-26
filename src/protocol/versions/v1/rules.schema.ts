@@ -121,7 +121,3 @@ export interface smartvotes_custom_rpc_call_parameters {
      */
     voteorder: smartvotes_voteorder;
 }
-
-// TODO voting_power of delegator rule
-// TODO weight rule (per rule & per delegator)
-// TODO rule: maksymalna wartosc postu

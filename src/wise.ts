@@ -15,6 +15,7 @@ import { SteemOperation } from "./blockchain/SteemOperation";
 import { ValidationError } from "./validation/ValidationError";
 import { Validator } from "./validation/Validator";
 import { Synchronizer } from "./Synchronizer";
+import { V2Handler } from "./protocol/versions/v2/V2Handler";
 
 /**
  * TODO blockchain input sanitization (prevent malicious json)
@@ -47,6 +48,7 @@ export class Wise {
         }
         else {
             this.protocol = new Protocol([
+                new V2Handler(),
                 new V1Handler()
             ]);
         }

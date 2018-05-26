@@ -2,8 +2,7 @@ import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
 import { SmartvotesOperation } from "../../SmartvotesOperation";
 
 import * as ajv from "ajv";
-import * as schemaJSON from "./smartvotes.schema.json";
-import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_ruleset, smartvotes_command_send_voteorder } from "./smartvotes.schema";
+import * as schemaJSON from "./wise.schema.json";
 import { SendVoteorder, isSendVoteorder } from "../../SendVoteorder";
 import { SetRules, isSetRules } from "../../SetRules";
 import { Rule } from "../../../rules/Rule";
@@ -15,21 +14,22 @@ import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { isConfirmVote } from "../../ConfirmVote";
+import { wise_operation } from "./wise.schema";
 
-export class V1Handler implements ProtocolVersionHandler {
-    public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
+export class V2Handler implements ProtocolVersionHandler {
+    public static CUSTOM_JSON_ID = "wise";
 
     public handleOrReject(op: SteemOperation): EffectuatedSmartvotesOperation [] | undefined {
-        if (op.block_num > 22710498) return undefined; // this protocol version is disabled for new transactions
+        if (op.block_num <= 22710498) return undefined;
 
-        if (op.op[0] != "custom_json" || (op.op[1] as CustomJsonOperation).id != "smartvote") return undefined;
+        if (op.op[0] != "custom_json" || (op.op[1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) return undefined;
 
         if ((op.op[1] as CustomJsonOperation).required_posting_auths.length != 1) return undefined; // must be authorized by single user
 
         const jsonObj = JSON.parse((op.op[1] as CustomJsonOperation).json);
         if (!this.validateJSON(jsonObj)) return undefined;
 
-        const smartvotesOp = jsonObj as smartvotes_operation;
+        const smartvotesOp = jsonObj as wise_operation;
         return this.transform(op, smartvotesOp, (op.op[1] as CustomJsonOperation).required_posting_auths[0]);
     }
 

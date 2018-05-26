@@ -37,7 +37,7 @@
     "build": "rm -rf dist && npm run build-node && npm run build-browser",
     "build-node": "npm run build-ts && npm run tslint && npm run build-schema",
     "build-ts": "tsc",
-    "build-schema": "src/protocol/versions/v1/build-schema.sh",
+    "build-schema": "src/protocol/versions/v1/build-schema.sh && src/protocol/versions/v2/build-schema.sh",
     "build-browser": "rm -rf dist/browser/ && NODE_ENV=production webpack --config webpack.config.js",
     "build-browser-dev": "rm -rf dist/browser/ && NODE_ENV=development webpack --config webpack.config.js",
     "test": "mocha -r ts-node/register test/**/*.spec.ts",
