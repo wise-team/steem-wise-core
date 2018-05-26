@@ -1,13 +1,11 @@
-import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
-import { ChainableFilter } from "../../Chainable";
-import { SteemOperation } from "../../../blockchain/SteemOperation";
+import { ChainableFilter } from "../../chainable/Chainable";
+import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
+import { SteemOperation } from "../../blockchain/SteemOperation";
 
-/**
- * Filters out blockchain operations older that this date.
- */
 export class OperationNumberFilter extends ChainableFilter<SteemOperation, OperationNumberFilter> {
     private tn: SteemOperationNumber;
     private mode: "<" | "<_solveOpInTrxBug" | "<=" | ">" | ">=";
+    private limiter: boolean = false;
 
     constructor(mode: "<" | "<_solveOpInTrxBug" | "<=" | ">" | ">=", tn: SteemOperationNumber) {
         super();
@@ -40,7 +38,12 @@ export class OperationNumberFilter extends ChainableFilter<SteemOperation, Opera
             return this.give(undefined, rawOp);
         }
         else {
-            return true; // this is filter
+            return !this.limiter; // true if filter, false if limiter
         }
+    }
+
+    public makeLimiter(): OperationNumberFilter {
+        this.limiter = true;
+        return this;
     }
 }

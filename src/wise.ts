@@ -5,7 +5,7 @@ import { ChainableSupplier } from "./chainable/Chainable";
 import { Protocol } from "./protocol/Protocol";
 import { V1Handler } from "./protocol/versions/v1/V1Handler";
 import { ProtocolVersionHandler } from "./protocol/versions/ProtocolVersionHandler";
-import { DirectBlockchainApi } from "./api/DirectBlockchainApi";
+import { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
 import { Api } from "./api/Api";
 import { SendVoteorder } from "./protocol/SendVoteorder";
 import { ProggressCallback } from "./ProggressCallback";
@@ -182,7 +182,7 @@ export class Wise {
 export default Wise;
 
 export { Api } from "./api/Api";
-export { DirectBlockchainApi } from "./api/DirectBlockchainApi";
+export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
 export { WiseRESTApi } from "./api/WiseRESTApi";
 
 export { SteemOperation } from "./blockchain/SteemOperation";

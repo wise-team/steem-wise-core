@@ -13,8 +13,11 @@ import { CustomRPCRule } from "../../../rules/CustomRPCRule";
 import { SteemOperation } from "../../../blockchain/SteemOperation";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
+import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 
 export class V1Handler implements ProtocolVersionHandler {
+    public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
+
     public handleOrReject(op: SteemOperation): EffectuatedSmartvotesOperation [] | undefined {
         if (op.block_num > 22710498) return undefined; // this protocol version is disabled for new transactions
 

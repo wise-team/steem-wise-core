@@ -4,7 +4,7 @@ import "mocha";
 
 import { Wise } from "../src/wise";
 import { Api } from "../src/api/Api";
-import { DirectBlockchainApi } from "../src/api/DirectBlockchainApi";
+import { DirectBlockchainApi } from "../src/api/directblockchain/DirectBlockchainApi";
 import { WiseRESTApi } from "../src/api/WiseRESTApi";
 import { SteemPost } from "../src/blockchain/SteemPost";
 import { SteemOperationNumber } from "../src/blockchain/SteemOperationNumber";

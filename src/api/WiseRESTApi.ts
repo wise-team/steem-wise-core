@@ -7,7 +7,7 @@ import { ChainableSupplier } from "../chainable/Chainable";
 import { SteemOperation } from "../blockchain/SteemOperation";
 import { Api } from "./Api";
 import { Protocol } from "../protocol/Protocol";
-import { DirectBlockchainApi } from "./DirectBlockchainApi";
+import { DirectBlockchainApi } from "./directblockchain/DirectBlockchainApi";
 import axios from "axios";
 
 export class WiseRESTApi extends Api {
