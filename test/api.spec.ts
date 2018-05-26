@@ -13,6 +13,7 @@ import { WeightRule } from "../src/rules/WeightRule";
 import { TagsRule } from "../src/rules/TagsRule";
 
 import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
+import { Rule } from "../src/rules/Rule";
 
 describe("test/api.spec.ts", function () {
     this.timeout(10000);
@@ -75,9 +76,11 @@ describe("test/api.spec.ts", function () {
                         const receivedRuleset = r.rulesets[i];
                         expect(receivedRuleset.name).to.equal(expectedRuleset.name);
                         receivedRuleset.rules.forEach(rule => {
-                            
+                            if (rule.type() == Rule.Type.Weight) {
+                                expect((rule as WeightRule).max).to.be.equal(1);
+                                expect((rule as WeightRule).max).to.be.equal(0);
+                            }
                         });
-                        expect(receivedRuleset.rules).to.include(new WeightRule(WeightRule.Mode.VOTES_PER_DAY, 0, expectedRuleset.total_weight));
                     }
                 }));
             });
@@ -98,6 +101,7 @@ describe("test/api.spec.ts", function () {
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
                 return api.loadRulesets(delegator, voter, moment, wise.getProtocol())
                 .then(((r: SetRules) => {
+                    console.log(r);
                     expect(r.rulesets).to.be.an("array").with.length(0);
                 }));
             });
