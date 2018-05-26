@@ -1,12 +1,30 @@
-import { smartvotes_ruleset, smartvotes_voteorder } from "../../src/steem-smartvotes";
+import { smartvotes_ruleset, smartvotes_voteorder } from "../../src/protocol/versions/v1/smartvotes.schema";
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
-import { RulesetsAtMoment, VoteorderAtMoment, VoteConfirmedAtMoment } from "../../src/validation/smartvote-types-at-moment";
 
 /**
  * These are rulesets used for synchronization unit tests. They are uploaded to @steemprojects2
  * steem account and delegate votes to @steemprojects1. The beauty of the blockchain tehnology allowed us to upload them in such a way, that
  *  they will always exist as long, as Steem exists.
  */
+
+export interface VoteConfirmedAtMoment {
+  opNum: SteemOperationNumber;
+  voteorderTransactionId: string;
+  voteorderOperationNum: number;
+}
+
+export interface RulesetsAtMoment {
+  opNum: SteemOperationNumber;
+  rulesets: smartvotes_ruleset [];
+  validityUntil: SteemOperationNumber;
+}
+
+export interface VoteorderAtMoment {
+  transactionId: string;
+  opNum: SteemOperationNumber;
+  voter: string;
+  voteorder: smartvotes_voteorder;
+}
 
 export const previousArtifactoryInvalidVoteorders: VoteorderAtMoment [] = [
           {

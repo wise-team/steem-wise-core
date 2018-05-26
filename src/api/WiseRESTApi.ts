@@ -6,10 +6,18 @@ import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { ChainableSupplier } from "../chainable/Chainable";
 import { SteemOperation } from "../blockchain/SteemOperation";
 import { Api } from "./Api";
+import { Protocol } from "../protocol/Protocol";
+import { DirectBlockchainApi } from "./DirectBlockchainApi";
 
 export class WiseRESTApi extends Api {
-    public constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined) {
+    private host: string;
+    private directBlockchainApi: DirectBlockchainApi;
+
+    public constructor(host: string, username: string, postingWif: string, steemOptions: object | undefined = undefined) {
         super();
+
+        this.host = host;
+        this.directBlockchainApi = new DirectBlockchainApi(username, postingWif, steemOptions);
     }
 
     public name(): string {
@@ -20,7 +28,7 @@ export class WiseRESTApi extends Api {
         return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 
-    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
+    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
         return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 

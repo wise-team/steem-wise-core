@@ -7,6 +7,7 @@ import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { ChainableSupplier } from "../chainable/Chainable";
 import { SteemOperation } from "../blockchain/SteemOperation";
 import { Api } from "./Api";
+import { Protocol } from "../protocol/Protocol";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -37,8 +38,10 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
+        return new Promise((resolve, reject) => {
+            reject(new Error("Not implemented yet"));
+        });
     }
 
     public streamSince(moment: SteemOperationNumber): ChainableSupplier<SteemOperation, any> {

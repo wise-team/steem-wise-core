@@ -21,6 +21,8 @@ import { Synchronizer } from "./Synchronizer";
  * TODO rename smartvotes to wise
  * TODO comments
  * TODO unit tests
+ * TODO update packages
+ * TODO npm audit, snyk audit
  */
 
 /**
@@ -139,7 +141,7 @@ export class Wise {
      * @param callback — a callback
      */
     public getRulesets = (delegator: string, atMoment: SteemOperationNumber, callback: (error: Error | undefined, result: SetRules | undefined) => void): void => {
-        this.api.loadRulesets(delegator, this.username, atMoment)
+        this.api.loadRulesets(delegator, this.username, atMoment, this.protocol)
         .then((rules: SetRules) => callback(undefined, rules))
         .catch(error => callback(error, undefined));
     }
@@ -165,8 +167,15 @@ export class Wise {
      * @param since - where to start sinchronization
      * @param notifierCallback - a callback which is notified every time an event occurs. It should return true to continue synchronization, or false if to stop it.
      */
-    public runSynchronizerLoop(since: SteemOperationNumber, notifierCallback: (error: Error | undefined, message: string, moment: SteemOperationNumber) => boolean): void {
+    public runSynchronizerLoop = (since: SteemOperationNumber, notifierCallback: (error: Error | undefined, message: string, moment: SteemOperationNumber) => boolean): void {
         new Synchronizer(this.api, this.protocol, this.username).runLoop(since, notifierCallback);
+    }
+
+    /**
+     * Returns current protocol
+     */
+    public getProtocol = (): Protocol => {
+        return this.protocol;
     }
 }
 
