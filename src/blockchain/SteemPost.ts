@@ -12,8 +12,9 @@ export interface SteemPost {
     last_payout: string;
     [x: string]: any; // allows other properties
 }
-
-export interface SteemPostJSONMetadata {
-    tags: string [];
-    [x: string]: any; // allows other properties
+export namespace SteemPost {
+    export interface JSONMetadata {
+        tags: string [];
+        [x: string]: any; // allows other properties
+    }
 }

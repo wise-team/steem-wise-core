@@ -2,7 +2,7 @@ import { Rule } from "./Rule";
 import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
 import { ValidationError } from "../validation/ValidationError";
 import { ValidationContext } from "../validation/ValidationContext";
-import { SteemPostJSONMetadata } from "../blockchain/SteemPost";
+import { SteemPost } from "../blockchain/SteemPost";
 
 export class TagsRule extends Rule {
     private tags: string [];
@@ -16,7 +16,7 @@ export class TagsRule extends Rule {
     }
 
     public validate (op: SmartvotesOperation, context: ValidationContext, callback: (error: Error | undefined, result: ValidationError | true) => void): void {
-        const postMetadata: SteemPostJSONMetadata = JSON.parse(context.getPost().json_metadata) as SteemPostJSONMetadata;
+        const postMetadata: SteemPost.JSONMetadata = JSON.parse(context.getPost().json_metadata) as SteemPost.JSONMetadata;
 
         if (this.mode === TagsRule.Mode.ALLOW) { // allow mode (every post tag must be within this list)
             for (let i = 0; i < postMetadata.tags.length; i++) {
