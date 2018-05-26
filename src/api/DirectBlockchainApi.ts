@@ -1,4 +1,5 @@
 import { Promise } from "bluebird";
+import * as steem from "steem";
 
 import { SteemPost } from "../blockchain/SteemPost";
 import { SetRules } from "../protocol/SetRules";
@@ -8,8 +9,18 @@ import { SteemOperation } from "../blockchain/SteemOperation";
 import { Api } from "./Api";
 
 export class DirectBlockchainApi extends Api {
-    public constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined) {
+    private steem: any;
+    private username: string;
+    private postingWif: string;
+
+    public constructor(username: string, postingWif: string, steemOptions?: object) {
         super();
+
+        this.steem = steem;
+        this.username = username;
+        this.postingWif = postingWif;
+
+        if (steemOptions) this.steem.api.setOptions(steemOptions);
     }
 
     public name(): string {
@@ -17,7 +28,12 @@ export class DirectBlockchainApi extends Api {
     }
 
     public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return new Promise((resolve, reject) => {
+            this.steem.api.getContent(author, permlink, function(error: Error, result: any) {
+                if (error) reject(error);
+                else resolve(result as SteemPost);
+            });
+        });
     }
 
     public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
