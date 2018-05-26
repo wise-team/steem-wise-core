@@ -11,6 +11,8 @@ import { DirectBlockchainApi } from "./directblockchain/DirectBlockchainApi";
 import axios from "axios";
 
 export class WiseRESTApi extends Api {
+    public static NOISY_ENDPOINT_HOST: string = "//to-be-launched/";
+
     private host: string;
     private directBlockchainApi: DirectBlockchainApi;
 

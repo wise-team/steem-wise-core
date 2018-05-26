@@ -22,7 +22,7 @@ describe("test/api.spec.ts", function () {
 
     [
         new DirectBlockchainApi(username, postingWif),
-        new WiseRESTApi(username, postingWif)
+        new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
     ]
     .forEach((api: Api) => describe("api " + api.name(), () => {
         const wise = new Wise(username, api);
@@ -74,6 +74,9 @@ describe("test/api.spec.ts", function () {
                         const expectedRuleset = v1TestingSequence.stage1_0_Rulesets.rulesets[i];
                         const receivedRuleset = r.rulesets[i];
                         expect(receivedRuleset.name).to.equal(expectedRuleset.name);
+                        receivedRuleset.rules.forEach(rule => {
+                            
+                        });
                         expect(receivedRuleset.rules).to.include(new WeightRule(WeightRule.Mode.VOTES_PER_DAY, 0, expectedRuleset.total_weight));
                     }
                 }));
