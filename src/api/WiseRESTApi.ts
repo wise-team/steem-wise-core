@@ -8,6 +8,7 @@ import { SteemOperation } from "../blockchain/SteemOperation";
 import { Api } from "./Api";
 import { Protocol } from "../protocol/Protocol";
 import { DirectBlockchainApi } from "./DirectBlockchainApi";
+import axios from "axios";
 
 export class WiseRESTApi extends Api {
     private host: string;
@@ -25,7 +26,7 @@ export class WiseRESTApi extends Api {
     }
 
     public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return this.directBlockchainApi.loadPost(author, permlink);
     }
 
     public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
@@ -37,6 +38,6 @@ export class WiseRESTApi extends Api {
     }
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return this.directBlockchainApi.sendToBlockchain(operations);
     }
 }
