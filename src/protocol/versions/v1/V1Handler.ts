@@ -12,9 +12,10 @@ import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
 import { SteemOperation } from "../../../blockchain/SteemOperation";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
+import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 
 export class V1Handler implements ProtocolVersionHandler {
-    public handleOrReject(op: SteemOperation): SmartvotesOperation [] | undefined {
+    public handleOrReject(op: SteemOperation): EffectuatedSmartvotesOperation [] | undefined {
         if (op.block_num > 22710498) return undefined; // this protocol version is disabled for new transactions
 
         if (op.op[0] != "custom_json" || (op.op[1] as CustomJsonOperation).id != "smartvote") return undefined;
@@ -36,7 +37,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return validate(input) as boolean;
     }
 
-    private transform(op: SteemOperation, smartvotesOp: smartvotes_operation, sender: string): SmartvotesOperation [] | undefined {
+    private transform(op: SteemOperation, smartvotesOp: smartvotes_operation, sender: string): EffectuatedSmartvotesOperation [] | undefined {
         if (smartvotesOp.name == "set_rules") { // sort for every voter
             return this.transformSetRules(op, smartvotesOp, sender);
         }
@@ -46,7 +47,7 @@ export class V1Handler implements ProtocolVersionHandler {
         else return undefined;
     }
 
-    private transformSetRules(op: SteemOperation, smartvotesOp: smartvotes_command_set_rules, sender: string): SmartvotesOperation [] {
+    private transformSetRules(op: SteemOperation, smartvotesOp: smartvotes_command_set_rules, sender: string): EffectuatedSmartvotesOperation [] {
         const rulesPerVoter: [string, {name: string, rules: Rule []}[]][] = [];
 
         for (let i = 0; i < smartvotesOp.rulesets.length; i++) {
@@ -63,7 +64,7 @@ export class V1Handler implements ProtocolVersionHandler {
             }
         }
 
-        const out: SmartvotesOperation [] = [];
+        const out: EffectuatedSmartvotesOperation [] = [];
 
         for (let i = 0; i < rulesPerVoter.length; i++) {
             const cmd: SetRules = {
@@ -81,7 +82,7 @@ export class V1Handler implements ProtocolVersionHandler {
                 delegator: sender,
 
                 command: cmd
-            } as SmartvotesOperation);
+            } as EffectuatedSmartvotesOperation);
         }
 
         return out;
@@ -110,7 +111,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return {name: ruleset.name, rules: rules};
     }
 
-    private transformSendVoteorder(op: SteemOperation, smartvotesOp: smartvotes_command_send_voteorder, sender: string): SmartvotesOperation [] {
+    private transformSendVoteorder(op: SteemOperation, smartvotesOp: smartvotes_command_send_voteorder, sender: string): EffectuatedSmartvotesOperation [] {
         const cmd: SendVoteorder = {
             rulesetName: smartvotesOp.voteorder.ruleset_name,
             permlink: smartvotesOp.voteorder.permlink,
@@ -128,6 +129,10 @@ export class V1Handler implements ProtocolVersionHandler {
             delegator: smartvotesOp.voteorder.delegator,
 
             command: cmd
-        } as SmartvotesOperation];
+        } as EffectuatedSmartvotesOperation];
+    }
+
+    public serializeToBlockchain(op: SmartvotesOperation): [string, object][] {
+        throw new Error("Not implemented yet");
     }
 }

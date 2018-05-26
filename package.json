@@ -1,9 +1,9 @@
 {
   "name": "steem-smartvotes",
   "version": "0.13.2",
-  "description": "Node/web library for Smartvotes: a vote delegation system for STEEM blockchain",
-  "main": "dist/steem-smartvotes.js",
-  "types": "dist/steem-smartvotes.d.ts",
+  "description": "Node/web library for Wise: a vote delegation system for STEEM blockchain",
+  "main": "dist/wise.js",
+  "types": "dist/wise.d.ts",
   "directories": {},
   "engines": {
     "node": ">=9.11"
@@ -23,7 +23,6 @@
     "@types/mocha": "^5.2.0",
     "@types/node": "^9.6.11",
     "chai": "^4.1.2",
-    "json-loader": "^0.5.7",
     "mocha": "^5.1.1",
     "ts-node": "^6.0.2",
     "tslint": "^5.10.0",
@@ -38,8 +37,7 @@
     "build": "rm -rf dist && npm run build-node && npm run build-browser",
     "build-node": "npm run build-ts && npm run tslint && npm run build-schema",
     "build-ts": "tsc",
-    "build-schema": "npm run convert-schema-to-json",
-    "convert-schema-to-json": "typescript-json-schema --strictNullChecks --required --out \"smartvotes.schema.json\" \"src/schema/*.schema.ts\" \"smartvotes_operation\" && cp smartvotes.schema.json dist/schema/smartvotes.schema.json",
+    "build-schema": "src/protocol/versions/v1/build-schema.sh",
     "build-browser": "rm -rf dist/browser/ && NODE_ENV=production webpack --config webpack.config.js",
     "build-browser-dev": "rm -rf dist/browser/ && NODE_ENV=development webpack --config webpack.config.js",
     "test": "mocha -r ts-node/register test/**/*.spec.ts",

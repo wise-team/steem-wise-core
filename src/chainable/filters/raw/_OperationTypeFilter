@@ -1,4 +1,4 @@
-import { RawOperation, CustomJsonOperation } from "../../../blockchain/blockchain-operations-types";
+import { SteemOperation } from "../../../blockchain/SteemOperation";
 import { ChainableFilter } from "../../Chainable";
 
 /**

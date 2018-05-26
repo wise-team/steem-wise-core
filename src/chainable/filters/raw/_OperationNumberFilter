@@ -1,11 +1,11 @@
-import { RawOperation, CustomJsonOperation } from "../../../blockchain/blockchain-operations-types";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { ChainableFilter } from "../../Chainable";
+import { SteemOperation } from "../../../blockchain/SteemOperation";
 
 /**
  * Filters out blockchain operations older that this date.
  */
-export class OperationNumberFilter extends ChainableFilter<RawOperation, OperationNumberFilter> {
+export class OperationNumberFilter extends ChainableFilter<SteemOperation, OperationNumberFilter> {
     private tn: SteemOperationNumber;
     private mode: "<" | "<_solveOpInTrxBug" | "<=" | ">" | ">=";
 
@@ -19,7 +19,7 @@ export class OperationNumberFilter extends ChainableFilter<RawOperation, Operati
         return this;
     }
 
-    protected take(error: Error | undefined, rawOp: RawOperation): boolean {
+    protected take(error: Error | undefined, rawOp: SteemOperation): boolean {
         if (error) throw error;
 
         const tn = SteemOperationNumber.fromOperation(rawOp);

@@ -5,7 +5,7 @@ import { ChainableSupplier } from "../chainable/Chainable";
 import { SteemOperation } from "../blockchain/SteemOperation";
 import { Api } from "./Api";
 
-export class DirectBlockchainApi extends Api {
+export class WiseRESTApi extends Api {
     public constructor(username: string, postingWif: string, steemOptions: object | undefined = undefined) {
         super();
     }

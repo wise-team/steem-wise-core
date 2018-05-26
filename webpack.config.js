@@ -12,11 +12,11 @@ const DEFAULTS = {
 
 module.exports = {
     mode: (DEFAULTS.isDevelopment ? "development" : "production"),
-    entry: "./dist/steem-smartvotes",
+    entry: "./dist/wise",
     output: {
         path: path.resolve(__dirname, "dist/browser"),
-        filename: "steem-smartvotes.min.js",
-        library: "steemsmartvotes",
+        filename: "wise.min.js",
+        library: "wise",
         libraryTarget: "umd"
     },
     devtool: (DEFAULTS.isDevelopment ?  'cheap-eval-source-map' : 'source-map'),

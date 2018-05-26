@@ -1,4 +1,4 @@
-import { RawOperation } from "./blockchain-operations-types";
+import { SteemOperation } from "./SteemOperation";
 
 export class SteemOperationNumber {
     public blockNum: number;
@@ -77,7 +77,7 @@ export class SteemOperationNumber {
         return "[b=" + this.blockNum + ", tx=" + this.transactionNum + ", op=" + this.operationNum + "]";
     }
 
-    public static fromOperation(rawOp: RawOperation): SteemOperationNumber {
-        return new SteemOperationNumber(rawOp[1].block, rawOp[1].trx_in_block, rawOp[1].op_in_trx);
+    public static fromOperation(op: SteemOperation): SteemOperationNumber {
+        return new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num);
     }
 }
