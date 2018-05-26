@@ -29,7 +29,7 @@ export class WiseRESTApi extends Api {
         return this.directBlockchainApi.loadPost(author, permlink);
     }
 
-    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
+    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
         return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 

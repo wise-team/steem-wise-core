@@ -1,5 +1,4 @@
 import { ChainableTransformer } from "../../chainable/Chainable";
-import { RawOperation } from "./RawOperation";
 import { SteemOperation } from "../../blockchain/SteemOperation";
 import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
 import { Protocol } from "../../protocol/Protocol";

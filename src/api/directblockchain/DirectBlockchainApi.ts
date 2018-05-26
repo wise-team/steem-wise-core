@@ -22,12 +22,10 @@ export class DirectBlockchainApi extends Api {
     private steem: any;
     private username: string;
     private postingWif: string;
-    private protocol: Protocol;
 
-    public constructor(protocol: Protocol, username: string, postingWif: string, steemOptions?: object) {
+    public constructor(username: string, postingWif: string, steemOptions?: object) {
         super();
 
-        this.protocol = protocol;
         this.steem = steem;
         this.username = username;
         this.postingWif = postingWif;
@@ -62,7 +60,7 @@ export class DirectBlockchainApi extends Api {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
                 .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
-                .chain(new ToSmartvotesOperationTransformer(this.protocol))
+                .chain(new ToSmartvotesOperationTransformer(protocol))
                 .chain(new SmartvotesOperationTypeFilter<EffectuatedSmartvotesOperation>(SmartvotesOperationTypeFilter.OperationType.SetRules))
                 .chain(new ChainableLimiter(1))
                 .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
