@@ -1,3 +1,5 @@
+import { Promise } from "bluebird";
+
 import { SteemPost } from "../blockchain/SteemPost";
 import { SetRules } from "../protocol/SetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
@@ -10,12 +12,16 @@ export class WiseRESTApi extends Api {
         super();
     }
 
+    public name(): string {
+        return "WiseRESTApi";
+    }
+
     public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        throw new Error("Not implemented yet");
+        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 
     public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
-        throw new Error("Not implemented yet");
+        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 
     public streamSince(moment: SteemOperationNumber): ChainableSupplier<SteemOperation, any> {
@@ -23,6 +29,6 @@ export class WiseRESTApi extends Api {
     }
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
-        throw new Error("Not implemented yet");
+        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 }
