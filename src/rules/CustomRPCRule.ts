@@ -4,10 +4,10 @@ import { ValidationError } from "../validation/ValidationError";
 import { ValidationContext } from "../validation/ValidationContext";
 
 export class CustomRPCRule extends Rule {
-    private host: string;
-    private port: number;
-    private path: string;
-    private method: string;
+    public host: string;
+    public port: number;
+    public path: string;
+    public method: string;
 
     public constructor(host: string, port: number, path: string, method: string) {
         super();

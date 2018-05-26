@@ -4,9 +4,9 @@ import { ValidationError } from "../validation/ValidationError";
 import { ValidationContext } from "../validation/ValidationContext";
 
 export class WeightRule extends Rule {
-    private min: number;
-    private max: number;
-    private mode: WeightRule.Mode;
+    public min: number;
+    public max: number;
+    public mode: WeightRule.Mode;
 
     public constructor(mode: WeightRule.Mode, min: number, max: number) {
         super();

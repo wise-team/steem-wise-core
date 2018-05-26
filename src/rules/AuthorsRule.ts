@@ -4,8 +4,8 @@ import { ValidationError } from "../validation/ValidationError";
 import { ValidationContext } from "../validation/ValidationContext";
 
 export class AuthorsRule extends Rule {
-    private authors: string [];
-    private mode: AuthorsRule.Mode;
+    public authors: string [];
+    public mode: AuthorsRule.Mode;
 
     public constructor(mode: AuthorsRule.Mode, authors: string []) {
         super();

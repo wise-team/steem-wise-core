@@ -5,8 +5,8 @@ import { ValidationContext } from "../validation/ValidationContext";
 import { SteemPost } from "../blockchain/SteemPost";
 
 export class TagsRule extends Rule {
-    private tags: string [];
-    private mode: TagsRule.Mode;
+    public tags: string [];
+    public mode: TagsRule.Mode;
 
     public constructor(mode: TagsRule.Mode, tags: string []) {
         super();
