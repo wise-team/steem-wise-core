@@ -17,6 +17,7 @@ import { EffectuatedSmartvotesOperation } from "../../protocol/EffectuatedSmartv
 import { OperationNumberFilter } from "../../chainable/filters/OperationNumberFilter";
 import { ToSmartvotesOperationTransformer } from "../../chainable/transformers/ToSmartvotesOperationTransformer";
 import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
+import { VoterFilter } from "./VoterFilter";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -61,6 +62,7 @@ export class DirectBlockchainApi extends Api {
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
                 .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
                 .chain(new ToSmartvotesOperationTransformer(protocol))
+                .chain(new VoterFilter(voter))
                 .chain(new SmartvotesOperationTypeFilter<EffectuatedSmartvotesOperation>(SmartvotesOperationTypeFilter.OperationType.SetRules))
                 .chain(new ChainableLimiter(1))
                 .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
