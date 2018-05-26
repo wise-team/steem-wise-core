@@ -16,6 +16,10 @@ export class WeightRule extends Rule {
         this.max = max;
     }
 
+    public type(): Rule.Type {
+        return Rule.Type.Weight;
+    }
+
     public validate (
         op: SmartvotesOperation,
         context: ValidationContext,

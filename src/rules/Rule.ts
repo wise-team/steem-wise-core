@@ -8,4 +8,12 @@ export abstract class Rule {
         context: ValidationContext,
         callback: (error: Error | undefined, result: ValidationError | true) => void
     ): void;
+
+    public abstract type(): Rule.Type;
+}
+
+export namespace Rule {
+    export enum Type {
+        Authors, Weight, CustomRPC, Tags
+    }
 }

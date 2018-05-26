@@ -15,6 +15,10 @@ export class TagsRule extends Rule {
         this.tags = tags;
     }
 
+    public type(): Rule.Type {
+        return Rule.Type.Tags;
+    }
+
     public validate (op: SmartvotesOperation, context: ValidationContext, callback: (error: Error | undefined, result: ValidationError | true) => void): void {
         const postMetadata: SteemPost.JSONMetadata = JSON.parse(context.getPost().json_metadata) as SteemPost.JSONMetadata;
 

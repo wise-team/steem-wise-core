@@ -18,6 +18,10 @@ export class CustomRPCRule extends Rule {
         this.method = method;
     }
 
+    public type(): Rule.Type {
+        return Rule.Type.CustomRPC;
+    }
+
     public validate (
         op: SmartvotesOperation,
         context: ValidationContext,

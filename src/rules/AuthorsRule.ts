@@ -14,6 +14,10 @@ export class AuthorsRule extends Rule {
         this.authors = authors;
     }
 
+    public type(): Rule.Type {
+        return Rule.Type.Authors;
+    }
+
     public validate (op: SmartvotesOperation, context: ValidationContext, callback: (error: Error | undefined, result: ValidationError | true) => void): void {
         const authorIsOnList: boolean = (this.authors.indexOf(context.getPost().author) !== -1);
         if (this.mode == AuthorsRule.Mode.ALLOW) {
