@@ -59,7 +59,7 @@ export class Validator {
             if (typeof voteorder.weight === "undefined" || isNaN(voteorder.weight)) throw new ValidationError("Weight must not be empty");
             if (voteorder.weight <= 0) throw new ValidationError("Weight must be greater than zero");
             if (voteorder.weight > 10000) throw new ValidationError("Weight must be lesser or equal 10000");
-            return true;
+            resolve();
         });
     }
 
