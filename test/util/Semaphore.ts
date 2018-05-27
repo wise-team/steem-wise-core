@@ -3,6 +3,8 @@ import { Promise } from "bluebird";
 /**
  * Source: https://github.com/notenoughneon/await-semaphore/blob/master/index.ts .
  * By https://github.com/notenoughneon under MIT license. Thank you.
+ * Semaphore uses setImmediate, which is not a JS standard (and probably will not be): https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate
+ * Use it only for tests.
  */
 export class Semaphore {
     private tasks: (() => void)[] = [];
