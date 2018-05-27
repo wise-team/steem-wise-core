@@ -34,7 +34,7 @@ export class Validator {
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
         callback: (error: Error | undefined, result: undefined | ValidationError | true) => void) => {
 
-        const context = new ValidationContext();
+        const context = new ValidationContext(this.api, delegator, voter, voteorder);
 
         this.validateVoteorderObject(voteorder)
         .then(() => this.api.loadRulesets(delegator, voter, atMoment, this.protocol))
