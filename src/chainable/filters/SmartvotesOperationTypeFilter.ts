@@ -33,7 +33,7 @@ export class SmartvotesOperationTypeFilter<T extends SmartvotesOperation> extend
         }
         else throw new Error("Illegal type of filter");
 
-        throw new Error("Unknown type of SmartvotesOperation");
+        return true;
     }
 }
 
