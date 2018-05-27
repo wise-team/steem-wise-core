@@ -69,6 +69,7 @@ export class Validator {
                 const ruleset = rulesets.rulesets[i];
                 if (ruleset.name === voteorder.rulesetName) {
                     resolve(ruleset.rules);
+                    return;
                 }
             }
             throw new ValidationError("Delegator had no such ruleset (name=" + voteorder.rulesetName + ") at specified datetime.");

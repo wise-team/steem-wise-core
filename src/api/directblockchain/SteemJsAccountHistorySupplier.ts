@@ -82,10 +82,8 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemOperat
         let loadNext: boolean = true;
         for (let i = 0; i < ops.length; i++) {
             const operation: RawOperation = ops[i];
-            if (operation[1].op[0] == "custom_json" && (operation[1].op[1] as CustomJsonOperation).id == "smartvote") {
-                loadNext = this.give(undefined, this.convertOperation(operation));
-                if (loadNext === false) break;
-            }
+            loadNext = this.give(undefined, this.convertOperation(operation));
+            if (loadNext === false) break;
         }
         return loadNext;
     }

@@ -64,7 +64,7 @@ describe("test/api.spec.ts", function () {
                 }));
             });
 
-            it("loads proper rules", () => {
+            it("loads proper rules (v1)", () => {
                 const delegator = v1TestingSequence.stage1_0_RulesetsUsername;
                 const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
@@ -114,4 +114,19 @@ describe("test/api.spec.ts", function () {
             it.skip("TODO write tests", () => {});
         });
     }));
+
+    describe("Temporarily test here v2 rules loading", () => {
+        it("loads proper rules (v2)", () => {
+            const api = new DirectBlockchainApi("guest123", "");
+            const wise = new Wise("guest123", api);
+            const delegator = "guest123";
+            const voter = "guest123";
+            const moment = new SteemOperationNumber(22806999, 38, 0);
+            return api.loadRulesets(delegator, voter, moment, wise.getProtocol())
+            .then(((r: SetRules) => {
+                expect(r.rulesets).to.be.an("array").with.length(1);
+                expect(r.rulesets[0].name).to.equal("test_purpose_ruleset");
+            }));
+        });
+    });
 });
