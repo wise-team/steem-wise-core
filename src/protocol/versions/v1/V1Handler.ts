@@ -138,37 +138,5 @@ export class V1Handler implements ProtocolVersionHandler {
 
     public serializeToBlockchain(op: SmartvotesOperation): [string, object][] {
         throw new Error("Protocol version V1 is disabled");
-        /*let senderUsername = "";
-        let jsonObj: smartvotes_operation;
-
-        if (isSetRules(op.command)) {
-            senderUsername = op.delegator;
-            jsonObj = {
-                name: "set_rules",
-                rulesets: {
-
-                }
-            };
-        }
-        else if (isSendVoteorder(op.command)) {
-            senderUsername = op.voter;
-            jsonObj = {
-                name: "send_voteorder"
-            };
-        }
-        else if (isConfirmVote(op.command)) {
-            senderUsername = op.delegator;
-            jsonObj = {
-                name: "confirm_votes"
-            };
-        }
-        else throw new Error("Unknown type of command");
-
-        return [["custom_json", {
-            id: "smartvote",
-            json: JSON.stringify(jsonObj),
-            required_auths: [],
-            required_posting_auths: [ senderUsername ]
-        } as CustomJsonOperation]];*/ // TODO remove
     }
 }
