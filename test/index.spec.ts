@@ -26,7 +26,10 @@ describe("test/index.spec.ts", () => {
                     wise.sendRules(data.sendRules_valid.voter, data.sendRules_valid.rules, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
                         if (error) done(error);
                         else {
-                            if (result) done();
+                            if (result) {
+                                if (result && result.blockNum && result.blockNum > 1) done();
+                                else done(new Error("#sendRules did not returned valid block number"));
+                            }
                             else done(new Error("Inconsistent state: no error and no result"));
                         }
                     });
@@ -43,7 +46,10 @@ describe("test/index.spec.ts", () => {
                     wise.sendVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
                         if (error) done(error);
                         else {
-                            if (result) done();
+                            if (result) {
+                                if (result && result.blockNum && result.blockNum > 1) done();
+                                else done(new Error("#sendVoteorder did not returned valid block number"));
+                            }
                             else done(new Error("Inconsistent state: no error and no result"));
                         }
                     });

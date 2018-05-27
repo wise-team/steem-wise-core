@@ -39,17 +39,6 @@ export interface wise_send_voteorder {
     weight: number;
 }
 
-export class WiseConstants {
-    public static wise_send_voteorder_descriptor: string = "v2:send_voteorder";
-    public static wise_set_rules_descriptor: string = "v2:set_rules";
-    public static wise_confirm_vote_descriptor: string = "v2:confirm_vote";
-    public static wise_descriptors: string [] = [
-        WiseConstants.wise_send_voteorder_descriptor,
-        WiseConstants.wise_set_rules_descriptor,
-        WiseConstants.wise_confirm_vote_descriptor
-    ];
-}
-
 export { wise_rule } from "./rules-schema";
 
 // TODO voting_power of delegator rule

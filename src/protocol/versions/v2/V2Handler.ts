@@ -14,8 +14,19 @@ import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { isConfirmVote, ConfirmVote } from "../../ConfirmVote";
-import { wise_operation, wise_set_rules, WiseConstants, wise_rule, wise_send_voteorder_operation, wise_set_rules_operation, wise_confirm_vote_operation } from "./wise-schema";
+import { wise_operation, wise_set_rules, wise_rule, wise_send_voteorder_operation, wise_set_rules_operation, wise_confirm_vote_operation } from "./wise-schema";
 import { wise_rule_decode, wise_rule_encode } from "./rules-schema";
+
+class WiseConstants {
+    public static wise_send_voteorder_descriptor: string = "v2:send_voteorder";
+    public static wise_set_rules_descriptor: string = "v2:set_rules";
+    public static wise_confirm_vote_descriptor: string = "v2:confirm_vote";
+    public static wise_descriptors: string [] = [
+        WiseConstants.wise_send_voteorder_descriptor,
+        WiseConstants.wise_set_rules_descriptor,
+        WiseConstants.wise_confirm_vote_descriptor
+    ];
+}
 
 export class V2Handler implements ProtocolVersionHandler {
     public static CUSTOM_JSON_ID = "wise";

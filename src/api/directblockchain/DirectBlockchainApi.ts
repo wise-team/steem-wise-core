@@ -87,7 +87,23 @@ export class DirectBlockchainApi extends Api {
     }
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return new Promise<SteemOperationNumber>((resolve, reject) => {
+            const steemCallback = function(error: Error | undefined, result: { id: string, block_num: number, trx_num: number }): void {
+                if (error) reject(error);
+                else {
+                    resolve(new SteemOperationNumber(result.block_num, result.trx_num, operations.length - 1));
+                }
+            };
+
+            steem.broadcast.send(
+                {
+                    extensions: [],
+                    operations: operations
+                },
+                {posting: this.postingWif},
+                steemCallback
+            );
+        });
     }
 }
 
