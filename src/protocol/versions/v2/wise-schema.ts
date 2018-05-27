@@ -1,6 +1,6 @@
 /* tslint:disable class-name */
 
-import { wise_rule } from "./rules.schema";
+import { wise_rule } from "./rules-schema";
 
 export type wise_operation =
             wise_send_voteorder_operation
@@ -10,15 +10,6 @@ export type wise_operation =
 export type wise_send_voteorder_operation = ["v2:send_voteorder", wise_send_voteorder];
 export type wise_set_rules_operation = ["v2:set_rules", wise_set_rules];
 export type wise_confirm_vote_operation = ["v2:confirm_vote", wise_confirm_vote];
-
-export const wise_send_voteorder_descriptor: string = "v2:send_voteorder";
-export const wise_set_rules_descriptor: string = "v2:set_rules";
-export const wise_confirm_vote_descriptor: string = "v2:confirm_vote";
-export const wise_descriptors = [
-    wise_send_voteorder_descriptor,
-    wise_set_rules_descriptor,
-    wise_confirm_vote_descriptor
-];
 
 export interface wise_confirm_vote {
     voter: string;
@@ -48,7 +39,18 @@ export interface wise_send_voteorder {
     weight: number;
 }
 
-export { wise_rule } from "./rules.schema";
+export class WiseConstants {
+    public static wise_send_voteorder_descriptor: string = "v2:send_voteorder";
+    public static wise_set_rules_descriptor: string = "v2:set_rules";
+    public static wise_confirm_vote_descriptor: string = "v2:confirm_vote";
+    public static wise_descriptors: string [] = [
+        WiseConstants.wise_send_voteorder_descriptor,
+        WiseConstants.wise_set_rules_descriptor,
+        WiseConstants.wise_confirm_vote_descriptor
+    ];
+}
+
+export { wise_rule } from "./rules-schema";
 
 // TODO voting_power of delegator rule
 // TODO weight rule (per rule & per delegator)
