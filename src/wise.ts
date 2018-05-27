@@ -119,7 +119,7 @@ export class Wise {
         }).then((steemOps: [string, object][]) => { return new Promise<[string, object][]>((resolve, reject) => {
             if (skipValidation) resolve(steemOps);
             else this.validateVoteorder(delegator, this.username, voteorder, SteemOperationNumber.FUTURE,
-                (error: Error | undefined, result: ValidationError | true) => {
+                (error: Error | undefined, result: undefined | ValidationError | true) => {
                     if (error) reject(error);
                     else if (result !== true) reject(result);
                     else resolve(steemOps);
@@ -168,9 +168,12 @@ export class Wise {
      * @param proggressCallback — a proggress callback
      */ // TODO test
     public validateVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
-        callback: (error: Error | undefined, result: ValidationError | true) => void,
-        proggressCallback: ProggressCallback = function(msg, percent) {}): void => {
-            new Validator(this.api, this.protocol).validate(delegator, voter, voteorder, callback, proggressCallback);
+        callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
+        proggressCallback?: ProggressCallback): void => {
+            const v = new Validator(this.api, this.protocol);
+            if (proggressCallback) v.withProggressCallback(proggressCallback);
+
+            v.validate(delegator, voter, voteorder, atMoment, callback);
     }
 
     /**

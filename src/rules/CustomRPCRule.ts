@@ -2,6 +2,8 @@ import { Rule } from "./Rule";
 import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
 import { ValidationError } from "../validation/ValidationError";
 import { ValidationContext } from "../validation/ValidationContext";
+import { Promise } from "bluebird";
+import { SendVoteorder } from "../protocol/SendVoteorder";
 
 export class CustomRPCRule extends Rule {
     public host: string;
@@ -22,12 +24,10 @@ export class CustomRPCRule extends Rule {
         return Rule.Type.CustomRPC;
     }
 
-    public validate (
-        op: SmartvotesOperation,
-        context: ValidationContext,
-        callback: (error: Error | undefined, result: ValidationError | true) => void
-    ): void {
-        throw new Error("Not implemented yet");
+    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<true> {
+        return new Promise((resolve, reject) => {
+            throw new Error("Not implemented yet"); // TODO
+        });
     }
 
 }
