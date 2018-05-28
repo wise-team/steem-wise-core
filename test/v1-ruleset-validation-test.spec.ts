@@ -6,7 +6,7 @@ import * as steem from "steem";
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
 import { _objectAssign } from "../src/util/util";
 import { smartvotes_voteorder } from "../src/protocol/versions/v1/votes.schema";
-import { SteemOperationNumber, Wise, DirectBlockchainApi, SendVoteorder, ValidationError } from "../src/wise";
+import { SteemOperationNumber, Wise, DirectBlockchainApi, SendVoteorder, ValidationError, AuthorsRule, TagsRule } from "../src/wise";
 
 const voter = "guest123";
 const delegator = "steemprojects1";
@@ -70,68 +70,43 @@ describe("test/ruleset-validation.spec.ts", function() {
 
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (error) done(error);
-                else if (result === true) done(new Error("Should fail on inwalid weight: " + weight));
-                else done();
+                    else if (result === true) done(new Error("Should fail on invalid weight: " + weight));
+                    else done();
                 });
             });
         });
 
-        /*
+
         it("allows valid weight (2)", function(done) {
             this.timeout(10000);
             const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 2 });
 
             wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                if (error || result) done(error);
-                else done();
+                if (error) done(error);
+                else if (result === true) done();
+                else done(result);
             });
         });
 
         it("fails on nonexistent ruleset", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: "NonExistent" + Date.now() });
+            const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: "NonExistent" + Date.now() });
 
-            const validator: RulesValidator = new RulesValidator(steem, new SteemJsApiFactory(steem, 1000));
             wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                if (error && !result) done();
-                else done(new Error("Should fail on nonexistent ruleset"));
+                if (error) done(error);
+                else if (result === true) done(new Error("Should fail on nonexistent ruleset"));
+                else done();
             });
         });
 
         it("fails on different voter", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = validVoteorder;
+            const voteorder: SendVoteorder = validVoteorder;
 
-            const validator: RulesValidator = new RulesValidator(steem, new SteemJsApiFactory(steem, 1000));
-            wise.validateVoteorder("NonExistent-voter-" + Date.now(), voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                if (error && !result) done();
-                else done(new Error("Should fail on different voter"));
-            });
-        });
-
-        [
-            {ruleset: steemprojects1Rulesets.upvoteRequireTagSteemprojects, type: "flag", pass: false}, // fail
-            {ruleset: steemprojects1Rulesets.upvoteRequireTagSteemprojects, type: "upvote", pass: true}, // pass
-            {ruleset: steemprojects1Rulesets.flagRequireTagSteemprojects, type: "flag", pass: true}, // pass
-            {ruleset: steemprojects1Rulesets.flagRequireTagSteemprojects, type: "upvote", pass: false}, // fail
-            {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "flag", pass: true}, // pass
-            {ruleset: steemprojects1Rulesets.upvoteAndFlagRequireTagSteemprojects, type: "upvote", pass: true} // pass
-        ].forEach(function(voteorderCase) {
-            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " vote type [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + voteorderCase.ruleset.action + ", tested=" + voteorderCase.type + "]", function(done) {
-                this.timeout(10000);
-                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, type: voteorderCase.type });
-
-                const validator: RulesValidator = new RulesValidator(steem, new SteemJsApiFactory(steem, 1000));
-                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                    if (voteorderCase.pass) {
-                        if (error || !result) done(error);
-                        else done();
-                    }
-                    else {
-                        if (error && !result) done();
-                        else done(new Error("Should fail on disallowed vote mode"));
-                    }
-                });
+            wise.validateVoteorder(delegator, "NonExistent-voter-" + Date.now(), voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                if (error) done(error);
+                else if (result === true) done(new Error("Should fail on different voter"));
+                else done();
             });
         });
 
@@ -155,19 +130,20 @@ describe("test/ruleset-validation.spec.ts", function() {
                 permlink: "game-that-i-fall-in-love-with-as-developer",
                 pass: true} // pass
         ].forEach(function(voteorderCase) {
-            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + (voteorderCase.ruleset.rules[0] as smartvotes_rule_authors).authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
+            it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + (voteorderCase.ruleset.rules[0] as AuthorsRule).authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
                 this.timeout(25000);
-                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
 
-                const validator: RulesValidator = new RulesValidator(steem, new SteemJsApiFactory(steem, 1000));
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (voteorderCase.pass) {
-                        if (error || !result) done(error);
-                        else done();
+                        if (error) done(error);
+                        else if (result === true) done();
+                        else done(result);
                     }
                     else {
-                        if (error && !result) done();
-                        else done(new Error("Should fail on disallowed author"));
+                        if (error) done(error);
+                        else if (result === true) done(new Error("Should fail on disallowed author"));
+                        else done();
                     }
                 });
             });
@@ -209,25 +185,28 @@ describe("test/ruleset-validation.spec.ts", function() {
                 pass: false} // it has no one of the required tags => fail
         ].forEach(function(voteorderCase) {
             it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " tags [ruleset=\"" + voteorderCase.ruleset.name + "\","
-            + " mode=" + (voteorderCase.ruleset.rules[0] as smartvotes_rule_tags).mode + ", tags=" + (voteorderCase.ruleset.rules[0] as smartvotes_rule_tags).tags.join() + ","
+            + " mode=" + (voteorderCase.ruleset.rules[0] as TagsRule).mode + ", tags=" + (voteorderCase.ruleset.rules[0] as TagsRule).tags.join() + ","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(20000);
-                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
 
-                const validator: RulesValidator = new RulesValidator(steem, new SteemJsApiFactory(steem, 1000));
+
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (voteorderCase.pass) {
-                        if (error || !result) done(error);
-                        else done();
+                        if (error) done(error);
+                        else if (result === true) done();
+                        else done(result);
                     }
                     else {
-                        if (error && !result) done();
-                        else done(new Error("Should fail on disallowed tag"));
+                        if (error) done(error);
+                        else if (result === true) done(new Error("Should fail on disallowed tag"));
+                        else done();
                     }
                 });
             });
         });
 
+        /*
         [
             {ruleset: steemprojects1Rulesets.upvoteTwoRulesJoined, author: "cryptoctopus",
                 permlink: "steemprojects-com-a-project-we-should-all-care-about-suggestions",
@@ -242,7 +221,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             it((voteorderCase.pass ? "passes when all rules fulfilled" : "fails when not all rules fulfilled") + " [ruleset=\"" + voteorderCase.ruleset.name + "\","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
                 new RulesValidator(steem, new SteemJsApiFactory(steem, 1000)).validateVoteOrder(voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (voteorderCase.pass) {
                         if (error || !result) done(error);
@@ -259,7 +238,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         it("fails on non existing post", function(done) {
             this.timeout(10000);
             const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder,
-                { ruleset_name: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
+                { rulesetName: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
                     author: "noisy", permlink: "Non-existing-post" + (rulesetMomentForValidation) }); // author is correct, but post doesnt exist => fail
             (new RulesValidator(steem, new SteemJsApiFactory(steem, 1000))).validateVoteOrder(voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                 if (error && !result) done();
@@ -278,7 +257,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("allows too high weight", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 3 });
+            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 3 });
             new RulesValidator(steem, new SteemJsApiFactory(steem, 1000)).validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationError | undefined) {
                 if (error || result) done(error);
                 else done();
@@ -288,7 +267,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         [-1, 0, undefined, NaN, Infinity].forEach(function(weight) {
             it("fails on invald weight type (" + weight + ")", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { ruleset_name: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
+                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
                 new RulesValidator(steem, new SteemJsApiFactory(steem, 1000)).validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (error && !result) done();
                     else done(new Error("Should fail on invald weight (" + weight + ")"));
