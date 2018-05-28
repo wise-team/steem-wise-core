@@ -3,7 +3,7 @@ import { SmartvotesOperation } from "../../SmartvotesOperation";
 
 import * as ajv from "ajv";
 import * as schemaJSON from "./smartvotes.schema.json";
-import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_ruleset, smartvotes_command_send_voteorder } from "./smartvotes.schema";
+import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_ruleset, smartvotes_command_send_voteorder, smartvotes_command_confirm_votes } from "./smartvotes.schema";
 import { SendVoteorder, isSendVoteorder } from "../../SendVoteorder";
 import { SetRules, isSetRules } from "../../SetRules";
 import { Rule } from "../../../rules/Rule";
@@ -14,7 +14,7 @@ import { SteemOperation } from "../../../blockchain/SteemOperation";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
-import { isConfirmVote } from "../../ConfirmVote";
+import { isConfirmVote, ConfirmVote } from "../../ConfirmVote";
 
 export class V1Handler implements ProtocolVersionHandler {
     public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
@@ -47,6 +47,9 @@ export class V1Handler implements ProtocolVersionHandler {
         }
         else if (smartvotesOp.name == "send_voteorder") {
             return this.transformSendVoteorder(op, smartvotesOp, sender);
+        }
+        else if (smartvotesOp.name == "confirm_votes") {
+            return this.transformConfirmVotes(op, smartvotesOp, sender);
         }
         else return undefined;
     }
@@ -134,6 +137,35 @@ export class V1Handler implements ProtocolVersionHandler {
 
             command: cmd
         } as EffectuatedSmartvotesOperation];
+    }
+
+    private transformConfirmVotes(op: SteemOperation, smartvotesOp: smartvotes_command_confirm_votes, sender: string): EffectuatedSmartvotesOperation [] {
+        const out: EffectuatedSmartvotesOperation [] = [];
+
+        for (let i = 0; i < smartvotesOp.voteorders.length; i++) {
+            const confirmation = smartvotesOp.voteorders[i];
+
+            const cmd: ConfirmVote = {
+                voteorderTxId: confirmation.transaction_id,
+                accepted: !confirmation.invalid,
+                msg: ""
+            };
+
+            out.push({
+                block_num: op.block_num,
+                transaction_num: op.transaction_num,
+                transaction_id: op.transaction_id,
+                operation_num: op.operation_num,
+                timestamp: op.timestamp,
+
+                voter: "unknown",
+                delegator: sender,
+
+                command: cmd
+            } as EffectuatedSmartvotesOperation);
+        }
+
+        return out;
     }
 
     public serializeToBlockchain(op: SmartvotesOperation): [string, object][] {
