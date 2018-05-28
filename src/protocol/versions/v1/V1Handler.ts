@@ -15,6 +15,7 @@ import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { isConfirmVote, ConfirmVote } from "../../ConfirmVote";
+import { WeightRule } from "../../../rules/WeightRule";
 
 export class V1Handler implements ProtocolVersionHandler {
     public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
@@ -114,6 +115,11 @@ export class V1Handler implements ProtocolVersionHandler {
                 rules.push(new CustomRPCRule(rule.rpc_host, rule.rpc_port, rule.rpc_path, rule.rpc_method));
             }
         }
+
+        rules.push(new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT,
+            /*min: */(ruleset.action == "flag" || ruleset.action == "upvote+flag") ? (-1 * ruleset.total_weight) : 0,
+            /*max: */(ruleset.action == "upvote" || ruleset.action == "upvote+flag") ? (1 * ruleset.total_weight) : 0,
+        ));
 
         return {name: ruleset.name, rules: rules};
     }
