@@ -1,5 +1,6 @@
 import { Promise } from "bluebird";
 
+// TODO test
 export class OneTimePromise<T> {
     private started: boolean = false;
     private finishedWithError: boolean = false;
@@ -12,6 +13,7 @@ export class OneTimePromise<T> {
     /**
      * This is a Promise wrapper which allows the promise to be executed only once (any further execution returns prevoiusly loaded results)
      * @param timeout - timeout of waiting in milliseconds
+     *
      */
     public constructor(timeout: number) {
         this.timeout = timeout;

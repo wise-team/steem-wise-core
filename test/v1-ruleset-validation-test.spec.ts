@@ -206,7 +206,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             });
         });
 
-        /*
+
         [
             {ruleset: steemprojects1Rulesets.upvoteTwoRulesJoined, author: "cryptoctopus",
                 permlink: "steemprojects-com-a-project-we-should-all-care-about-suggestions",
@@ -221,15 +221,17 @@ describe("test/ruleset-validation.spec.ts", function() {
             it((voteorderCase.pass ? "passes when all rules fulfilled" : "fails when not all rules fulfilled") + " [ruleset=\"" + voteorderCase.ruleset.name + "\","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(10000);
-                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
-                new RulesValidator(steem, new SteemJsApiFactory(steem, 1000)).validateVoteOrder(voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (voteorderCase.pass) {
-                        if (error || !result) done(error);
-                        else done();
+                        if (error) done(error);
+                        else if (result === true) done();
+                        else done(result);
                     }
                     else {
-                        if (error && !result) done();
-                        else done(new Error("Should fail when not all rules are fulfilled"));
+                        if (error) done(error);
+                        else if (result === true) done(new Error("Should fail when not all rules are fulfilled"));
+                        else done();
                     }
                 });
             });
@@ -237,61 +239,16 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("fails on non existing post", function(done) {
             this.timeout(10000);
-            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder,
+            const voteorder: SendVoteorder = _objectAssign({}, validVoteorder,
                 { rulesetName: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
-                    author: "noisy", permlink: "Non-existing-post" + (rulesetMomentForValidation) }); // author is correct, but post doesnt exist => fail
-            (new RulesValidator(steem, new SteemJsApiFactory(steem, 1000))).validateVoteOrder(voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                if (error && !result) done();
-                else done(new Error("Should fail on non existing post"));
-            });
-        });
-
-        // TODO unit test custom_rpc
-        // TODO unit test total_weight
-        */
-    });
-
-/*
-    /*describe("RulesValidator.validatePotentialVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
-        this.retries(1);
-
-        it("allows too high weight", function(done) {
-            this.timeout(10000);
-            const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 3 });
-            new RulesValidator(steem, new SteemJsApiFactory(steem, 1000)).validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                if (error || result) done(error);
+                    author: "noisy", permlink: "Non-existing-post" + new Date() }); // author is correct, but post doesnt exist => fail
+            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                if (error) done();
+                else if (result === true) done(new Error("Should fail on non existing post"));
                 else done();
             });
         });
 
-        [-1, 0, undefined, NaN, Infinity].forEach(function(weight) {
-            it("fails on invald weight type (" + weight + ")", function(done) {
-                this.timeout(10000);
-                const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
-                new RulesValidator(steem, new SteemJsApiFactory(steem, 1000)).validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                    if (error && !result) done();
-                    else done(new Error("Should fail on invald weight (" + weight + ")"));
-                });
-            });
-        });
-    }); * / // disable because they are not moment-safe (rules of @steemprojects1 can change over time)
-
-    describe("RulesValidator.validateVoteOrder#proggressCallback [delegator=steemprojects1, voter=guest123]", function() {
-        let proggressCounter: number = 0;
-
-        it("calls proggressCallback at least 4 times", function(done) {
-            this.timeout(10000);
-
-            const voteorder = validVoteorder;
-            new RulesValidator(steem, new SteemJsApiFactory(steem, 1000)).validateVoteOrder(voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
-                if (error) done(error);
-                else {
-                    if (proggressCounter >= 4) done();
-                    else done(new Error("Proggress callback should be called at leas 4 times"));
-                }
-            }, function(msg: string, proggress: number) {
-                proggressCounter++;
-            });
-        });
-    });*/
+        // TODO unit test custom_rpc
+    });
 });
