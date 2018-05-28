@@ -1,3 +1,5 @@
+/test/tmp-test.ts
+
 # Credential files used for examples
 *.credentials.json
 

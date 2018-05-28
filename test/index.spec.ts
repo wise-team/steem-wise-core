@@ -76,21 +76,20 @@ describe("test/index.spec.ts", () => {
 
 
         describe("#validateOperation", () => {
+            it("rejects valid v1 operation (this is disabled version of protocol). It is handled, but it is not valid according to new protocol", () => {
+                const wise = new Wise("steemprojects1", new DisabledApi());
+                const obj = JSON.parse('["custom_json",{"required_auths":[],"required_posting_auths":["steemprojects1"],"id":"smartvote","json":"{\\"name\\":\\"send_voteorder\\",\\"voteorder\\":{\\"ruleset_name\\":\\"RulesetOneChangesContent\\",\\"delegator\\":\\"steemprojects2\\",\\"type\\":\\"upvote\\",\\"weight\\":10,\\"author\\":\\"pojan\\",\\"permlink\\":\\"how-to-install-free-cad-on-windows-mac-os-and-linux-and-what-is-free-cad\\"}}"}]');
+                console.log(obj);
+                expect(wise.validateOperation(obj)).to.be.false;
+            });
+
             /* tslint:disable:whitespace */
-            it("passes valid v1 operation", () => {
-
-            });
-
-            it("rejects invalid v1 operation", () => {
-
-            });
-
             const validV2Ops: [string, object][] = [
                 ["custom_json",{id:"wise",json:"[\"v2:send_voteorder\",{\"delegator\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
                 ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"weight\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":1000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}]
             ];
             validV2Ops.forEach((op: [string, object]) => {
-                it.only("passes valid v2 operation", () => {
+                it("passes valid v2 operation", () => {
                     const wise = new Wise("guest123", new DisabledApi());
                     expect(wise.validateOperation(op)).to.be.true;
                 });
@@ -105,7 +104,7 @@ describe("test/index.spec.ts", () => {
                 ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"weight\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":20000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}]
             ];
             invalidV2Ops.forEach((op: [string, object]) => {
-                it.only("rejects invalid v2 operation", () => {
+                it("rejects invalid v2 operation", () => {
                     const wise = new Wise("guest123", new DisabledApi());
                     expect(wise.validateOperation(op)).to.be.false;
                 });

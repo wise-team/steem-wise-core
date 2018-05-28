@@ -143,8 +143,15 @@ export class Wise {
             timestamp: new Date(),
             op: op
         };
+        return this.validateSteemOperation(so);
+    }
+
+    /**
+     * Validated if steem operation (object with blockchain data and timestamp) it is a valid smartvotes
+     * @param op — an steem operation object that implements SteemOperation interface
+     */ // TODO test
+     public validateSteemOperation = (so: SteemOperation): boolean => {
         const res = this.protocol.handleOrReject(so);
-        console.log(JSON.stringify(op) + " =>" + res);
         return res != undefined;
     }
 
