@@ -60,7 +60,7 @@ export class Wise {
      * @param rules — SetRules object
      * @param callback — a Callback
      * @param proggressCallback (optional) proggress callback — will receive proggress notifications (useful for UI)
-     */ // TODO test
+     */
     public sendRules = (voter: string, rules: SetRules,
         callback: (error: Error | undefined, result: SteemOperationNumber | undefined) => void,
         proggressCallback?: ProggressCallback
@@ -94,7 +94,7 @@ export class Wise {
      * @param callback — a callback
      * @param proggressCallback (optional)
      * @param skipValidation (optional)
-     */ // TODO test
+     */
     public sendVoteorder = (delegator: string, voteorder: SendVoteorder,
         callback: (error: Error | undefined, result: SteemOperationNumber | undefined) => void,
         proggressCallback?: ProggressCallback, skipValidation?: boolean): void => {
@@ -143,7 +143,9 @@ export class Wise {
             timestamp: new Date(),
             op: op
         };
-        return this.protocol.handleOrReject(so) != undefined;
+        const res = this.protocol.handleOrReject(so);
+        console.log(JSON.stringify(op) + " =>" + res);
+        return res != undefined;
     }
 
     /**
