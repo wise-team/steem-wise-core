@@ -118,7 +118,7 @@ export class Wise {
             else throw new Error("Operation object has invalid structure");
         }).then((steemOps: [string, object][]) => { return new Promise<[string, object][]>((resolve, reject) => {
             if (skipValidation) resolve(steemOps);
-            else this.validateVoteorder(delegator, this.username, voteorder, SteemOperationNumber.FUTURE,
+            else this.validatePotentialVoteorder(delegator, this.username, voteorder,
                 (error: Error | undefined, result: undefined | ValidationError | true) => {
                     if (error) reject(error);
                     else if (result !== true) reject(result);
@@ -183,6 +183,21 @@ export class Wise {
             if (proggressCallback) v.withProggressCallback(proggressCallback);
 
             v.validate(delegator, voter, voteorder, atMoment, callback);
+    }
+
+    /**
+     * Validates a potential Voteorder
+     * @param delegator — delegator username
+     * @param delegator — voter username
+     * @param voteorder - an SendVoteorder object
+     * @param atMoment — a moment in blockchain at which we are testing validity SteemOperationNumber
+     * @param callback — a callback. Note that result is a true if valid (=== true), or ValidationError (== true, but !== true). So you should always use triple comparison operator
+     * @param proggressCallback — a proggress callback
+     */ // TODO test
+     public validatePotentialVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder,
+        callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
+        proggressCallback?: ProggressCallback): void => {
+        this.validatePotentialVoteorder(delegator, voter, voteorder, callback, proggressCallback);
     }
 
     /**
