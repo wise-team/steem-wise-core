@@ -11,7 +11,7 @@ import { Api } from "../../src/api/Api";
 import { Protocol } from "../../src/protocol/Protocol";
 import { DirectBlockchainApi } from "../../src/api/directblockchain/DirectBlockchainApi";
 
-
+// TODO implement and use in tests
 export class FakeApi extends Api {
     private data: [string, any];
     public constructor() {

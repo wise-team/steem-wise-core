@@ -18,6 +18,7 @@ import { OperationNumberFilter } from "../../chainable/filters/OperationNumberFi
 import { ToSmartvotesOperationTransformer } from "../../chainable/transformers/ToSmartvotesOperationTransformer";
 import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
 import { VoterFilter } from "./VoterFilter";
+import { PrechainedSupplier } from "../../chainable/PrechainedSupplier";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -84,6 +85,12 @@ export class DirectBlockchainApi extends Api {
 
     public streamSince(moment: SteemOperationNumber): ChainableSupplier<SteemOperation, any> {
         throw new Error("Not implemented yet");
+        /*return new PrechainedSupplier<SteemOperation>(new SteemJsAccountHistorySupplier(this.steem, this.username), (supplier: ChainableSupplier<SteemOperation, any>) => {
+            const limiterMoment = moment
+            return supplier
+                .chain(new OperationNumberFilter("<_solveOpInTrxBug", moment))
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()); // this is limiter (restricts lookup to the period of smartvotes presence);
+        });*/ // this is more complicated (it has to seamlessly join the head).
     }
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
@@ -106,7 +113,6 @@ export class DirectBlockchainApi extends Api {
         });
     }
 }
-
 
 
 
