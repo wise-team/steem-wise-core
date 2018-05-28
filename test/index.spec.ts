@@ -10,7 +10,7 @@ import { Mutex } from "./util/Semaphore";
 
 describe("test/index.spec.ts", () => {
     describe("Wise", function() {
-        this.timeout(60 * 1000);
+        this.timeout(30 * 1000);
 
         const username = "guest123";
         const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
