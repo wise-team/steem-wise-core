@@ -101,7 +101,6 @@ describe("test/api.spec.ts", function () {
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
                 return api.loadRulesets(delegator, voter, moment, wise.getProtocol())
                 .then(((r: SetRules) => {
-                    console.log(r);
                     expect(r.rulesets).to.be.an("array").with.length(0);
                 }));
             });

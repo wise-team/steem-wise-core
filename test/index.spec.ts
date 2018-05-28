@@ -79,7 +79,6 @@ describe("test/index.spec.ts", () => {
             it("rejects valid v1 operation (this is disabled version of protocol). It is handled, but it is not valid according to new protocol", () => {
                 const wise = new Wise("steemprojects1", new DisabledApi());
                 const obj = JSON.parse('["custom_json",{"required_auths":[],"required_posting_auths":["steemprojects1"],"id":"smartvote","json":"{\\"name\\":\\"send_voteorder\\",\\"voteorder\\":{\\"ruleset_name\\":\\"RulesetOneChangesContent\\",\\"delegator\\":\\"steemprojects2\\",\\"type\\":\\"upvote\\",\\"weight\\":10,\\"author\\":\\"pojan\\",\\"permlink\\":\\"how-to-install-free-cad-on-windows-mac-os-and-linux-and-what-is-free-cad\\"}}"}]');
-                console.log(obj);
                 expect(wise.validateOperation(obj)).to.be.false;
             });
 
