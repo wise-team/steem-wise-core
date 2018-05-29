@@ -14,6 +14,7 @@ export class Validator {
     private protocol: Protocol;
     private proggressCallback: ProggressCallback = (msg: string, proggress: number): void => {};
     private concurrency: number = 4;
+    private providedRulesets: EffectuatedSetRules | undefined = undefined;
 
     public constructor(api: Api, protocol: Protocol) {
         this.api = api;
@@ -31,7 +32,7 @@ export class Validator {
     }
 
     public provideRulesets(rulesets: EffectuatedSetRules) {
-        throw new Error("Not implemented yet");
+        this.providedRulesets = rulesets;
     }
 
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
@@ -40,7 +41,10 @@ export class Validator {
         const context = new ValidationContext(this.api, delegator, voter, voteorder);
 
         this.validateVoteorderObject(voteorder)
-        .then(() => this.api.loadRulesets(delegator, voter, atMoment, this.protocol))
+        .then(() => {
+            if (this.providedRulesets) return this.providedRulesets;
+            else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
+        })
         .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder))
         .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
         .then(() => {
