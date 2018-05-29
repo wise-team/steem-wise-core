@@ -18,8 +18,8 @@ import { Rule } from "../src/rules/Rule";
 describe("test/api.spec.ts", function () {
     this.timeout(10000);
 
-    const username = "steemprojects1";
-    const postingWif = "";
+    const username = "guest123";
+    const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 
     [
         new DirectBlockchainApi(username, postingWif),
@@ -106,11 +106,21 @@ describe("test/api.spec.ts", function () {
             });
         });
 
-        describe("#loadAllRulesets", () => {
-            it.skip("TODO write tests", () => {});
+        describe("#sendToBlockchain", () => {
+            it("Sends without error and returns non-zero SteemOperationNumber", () => {
+                return api.sendToBlockchain([["vote", {
+                    voter: "guest123",
+                    author: "noisy",
+                    permlink: "7nw1oeev",
+                    weight: 5000
+                }]])
+                .then((son: SteemOperationNumber) => {
+                    expect(son.blockNum).to.not.equal(0);
+                });
+            });
         });
 
-        describe("#sendToBlockchain", () => {
+        describe("#loadAllRulesets", () => {
             it.skip("TODO write tests", () => {});
         });
 
