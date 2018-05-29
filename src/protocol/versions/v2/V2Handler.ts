@@ -84,10 +84,8 @@ export class V2Handler implements ProtocolVersionHandler {
         }
 
         const out: EffectuatedSmartvotesOperation = {
-            block_num: op.block_num,
-            transaction_num: op.transaction_num,
+            moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
             transaction_id: op.transaction_id,
-            operation_num: op.operation_num,
             timestamp: op.timestamp,
 
             voter: (wiseOp[1] as wise_set_rules).voter,
@@ -121,10 +119,8 @@ export class V2Handler implements ProtocolVersionHandler {
             weight: wiseOp[1].weight
         };
         return [{
-            block_num: op.block_num,
-            transaction_num: op.transaction_num,
+            moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
             transaction_id: op.transaction_id,
-            operation_num: op.operation_num,
             timestamp: op.timestamp,
 
             voter: sender,
@@ -141,10 +137,8 @@ export class V2Handler implements ProtocolVersionHandler {
             msg: wiseOp[1].msg,
         };
         return [{
-            block_num: op.block_num,
-            transaction_num: op.transaction_num,
+            moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
             transaction_id: op.transaction_id,
-            operation_num: op.operation_num,
             timestamp: op.timestamp,
 
             voter: wiseOp[1].voter,

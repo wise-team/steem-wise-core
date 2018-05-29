@@ -1,12 +1,11 @@
 import { SetRules } from "./SetRules";
 import { SendVoteorder } from "./SendVoteorder";
 import { SmartvotesOperation } from "./SmartvotesOperation";
+import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 
 // TODO: introduce SteemOperationNumber
 export interface EffectuatedSmartvotesOperation extends SmartvotesOperation {
-    block_num: number;
-    transaction_num: number;
+    moment: SteemOperationNumber;
     transaction_id: string;
-    operation_num: number;
     timestamp: Date;
 }

@@ -80,10 +80,8 @@ export class V1Handler implements ProtocolVersionHandler {
             };
 
             out.push({
-                block_num: op.block_num,
-                transaction_num: op.transaction_num,
+                moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
                 transaction_id: op.transaction_id,
-                operation_num: op.operation_num,
                 timestamp: op.timestamp,
 
                 voter: rulesPerVoter[i][0],
@@ -132,10 +130,8 @@ export class V1Handler implements ProtocolVersionHandler {
             weight: smartvotesOp.voteorder.weight * (smartvotesOp.voteorder.type == "flag" ? -1 : 1)
         };
         return [{
-            block_num: op.block_num,
-            transaction_num: op.transaction_num,
+            moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
             transaction_id: op.transaction_id,
-            operation_num: op.operation_num,
             timestamp: op.timestamp,
 
             voter: sender,
@@ -158,10 +154,8 @@ export class V1Handler implements ProtocolVersionHandler {
             };
 
             out.push({
-                block_num: op.block_num,
-                transaction_num: op.transaction_num,
+                moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
                 transaction_id: op.transaction_id,
-                operation_num: op.operation_num,
                 timestamp: op.timestamp,
 
                 voter: "unknown",

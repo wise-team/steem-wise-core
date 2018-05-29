@@ -66,7 +66,7 @@ export class Synchronizer {
 
     private processOperation(op: EffectuatedSmartvotesOperation): Promise<void> {
         return new Promise((resolve, reject) => {
-            const currentOpNum = new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num);
+            const currentOpNum = op.moment;
             if (currentOpNum.isLesserOrEqual(this.lastProcessedOperationNum)) resolve();
             else {
                 if (op.delegator === this.delegator) {
@@ -81,7 +81,7 @@ export class Synchronizer {
     private updateRulesArray(op: EffectuatedSmartvotesOperation, cmd: SetRules): Promise<void> {
         return new Promise((resolve, reject) => {
             const es: EffectuatedSetRules = {
-                moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
+                moment: op.moment,
                 voter: op.voter,
                 rulesets: cmd.rulesets
             };
@@ -96,7 +96,7 @@ export class Synchronizer {
             const rules = this.determineRules(op, cmd);
             if (rules) {
                 v.provideRulesets(rules);
-                v.validate(this.delegator, op.voter, cmd, new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
+                v.validate(this.delegator, op.voter, cmd, op.moment,
                     (error: Error | undefined, result: true | ValidationError | undefined): void => {
                         if (error) reject(error);
                         else if (result === true) {
@@ -113,7 +113,7 @@ export class Synchronizer {
 
     private determineRules(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): EffectuatedSetRules | undefined {
         let out: EffectuatedSetRules | undefined = undefined;
-        const moment = new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num);
+        const moment = op.moment;
 
         for (let i = 0; i < this.rules.length; i++) {
             const r = this.rules[i];

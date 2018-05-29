@@ -118,7 +118,7 @@ export class DirectBlockchainApi extends Api {
                 .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
                     const out: EffectuatedSetRules = {
                         rulesets: (item.command as SetRules).rulesets,
-                        moment: new SteemOperationNumber(item.block_num, item.transaction_num, item.operation_num),
+                        moment: item.moment,
                         voter: item.voter
                     };
                     allRules.push(out);
@@ -151,7 +151,7 @@ export class DirectBlockchainApi extends Api {
                 .chain(new ChainableLimiter(1))
                 .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
                     noResult = false;
-                    resolve(new SteemOperationNumber(item.block_num, item.transaction_num, item.operation_num));
+                    resolve(item.moment);
 
                     return false;
                 }))
