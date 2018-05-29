@@ -78,7 +78,7 @@ describe("test/api.spec.ts", function () {
                         receivedRuleset.rules.forEach(rule => {
                             if (rule.type() == Rule.Type.Weight) {
                                 expect((rule as WeightRule).max).to.be.equal(1);
-                                expect((rule as WeightRule).max).to.be.equal(0);
+                                expect((rule as WeightRule).min).to.be.equal(0);
                             }
                         });
                     }
@@ -106,10 +106,19 @@ describe("test/api.spec.ts", function () {
             });
         });
 
-        describe("#streamSince", () => {
+        describe("#loadAllRulesets", () => {
             it.skip("TODO write tests", () => {});
         });
+
         describe("#sendToBlockchain", () => {
+            it.skip("TODO write tests", () => {});
+        });
+
+        describe("#getLastConfirmationMoment", () => {
+            it.skip("TODO write tests", () => {});
+        });
+
+        describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {
             it.skip("TODO write tests", () => {});
         });
     }));
