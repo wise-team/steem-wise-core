@@ -63,7 +63,6 @@ export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
     if (r.rule === "weight") {
         let mode: WeightRule.Mode;
         if (r.mode === "single_vote_weight") mode = WeightRule.Mode.SINGLE_VOTE_WEIGHT;
-        else if (r.mode === "votes_per_day") mode = WeightRule.Mode.VOTES_PER_DAY;
         else return undefined;
 
         return new WeightRule(mode, r.min, r.max);
@@ -96,7 +95,6 @@ export const wise_rule_encode = (r: Rule): wise_rule => {
     if (r.type() === Rule.Type.Weight) {
         let mode: wise_rule_weight_mode;
         if ((r as WeightRule).mode === WeightRule.Mode.SINGLE_VOTE_WEIGHT) mode = "single_vote_weight";
-        else if ((r as WeightRule).mode === WeightRule.Mode.VOTES_PER_DAY) mode = "votes_per_day";
         else throw new Error("Unknown mode of weight rule");
 
         const out: wise_rule_weight = {

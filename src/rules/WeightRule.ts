@@ -27,9 +27,6 @@ export class WeightRule extends Rule {
             if (this.mode === WeightRule.Mode.SINGLE_VOTE_WEIGHT) {
                 resolve(voteorder.weight >= this.min && voteorder.weight <= this.max);
             }
-            else if (this.mode === WeightRule.Mode.VOTES_PER_DAY) {
-                throw new Error("Not implemented yet"); // TODO
-            }
             else throw new Error("Unknown WeightRule.mode");
         });
     }
@@ -38,6 +35,6 @@ export class WeightRule extends Rule {
 
 export namespace WeightRule {
     export enum Mode {
-        SINGLE_VOTE_WEIGHT, VOTES_PER_DAY
+        SINGLE_VOTE_WEIGHT
     }
 }
