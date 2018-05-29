@@ -1,14 +1,17 @@
 import { SteemPost } from "../blockchain/SteemPost";
-import { SetRules } from "../protocol/SetRules";
+import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { ChainableSupplier } from "../chainable/Chainable";
 import { SteemOperation } from "../blockchain/SteemOperation";
 import { Protocol } from "../protocol/Protocol";
+import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 
 export abstract class Api {
     public abstract name(): string;
     public abstract loadPost(author: string, permlink: string): Promise<SteemPost>;
     public abstract loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules>;
-    public abstract streamSince(moment: SteemOperationNumber): ChainableSupplier<SteemOperation, any>;
+    public abstract loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []>;
     public abstract sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber>;
+    public abstract getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber>;
+    public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []>;
 }

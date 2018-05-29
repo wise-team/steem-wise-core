@@ -6,7 +6,7 @@ import { ProggressCallback } from "../ProggressCallback";
 import { Promise } from "bluebird";
 import { ValidationContext } from "./ValidationContext";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
-import { SetRules } from "../protocol/SetRules";
+import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { Rule } from "../rules/Rule";
 
 export class Validator {
@@ -30,6 +30,9 @@ export class Validator {
         return this;
     }
 
+    public provideRulesets(rulesets: EffectuatedSetRules) {
+        throw new Error("Not implemented yet");
+    }
 
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
         callback: (error: Error | undefined, result: undefined | ValidationError | true) => void) => {

@@ -2,7 +2,7 @@ import { Promise } from "bluebird";
 import * as steem from "steem";
 
 import { SteemPost } from "../../blockchain/SteemPost";
-import { SetRules } from "../../protocol/SetRules";
+import { SetRules, EffectuatedSetRules } from "../../protocol/SetRules";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
 import { ChainableSupplier, ChainableFilter, ChainableTransformer, SimpleTaker } from "../../chainable/Chainable";
 import { SteemOperation } from "../../blockchain/SteemOperation";
@@ -83,16 +83,6 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    public streamSince(moment: SteemOperationNumber): ChainableSupplier<SteemOperation, any> {
-        throw new Error("Not implemented yet");
-        /*return new PrechainedSupplier<SteemOperation>(new SteemJsAccountHistorySupplier(this.steem, this.username), (supplier: ChainableSupplier<SteemOperation, any>) => {
-            const limiterMoment = moment
-            return supplier
-                .chain(new OperationNumberFilter("<_solveOpInTrxBug", moment))
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()); // this is limiter (restricts lookup to the period of smartvotes presence);
-        });*/ // this is more complicated (it has to seamlessly join the head).
-    }
-
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
         return new Promise<SteemOperationNumber>((resolve, reject) => {
             const steemCallback = function(error: Error | undefined, result: { id: string, block_num: number, trx_num: number }): void {
@@ -111,6 +101,18 @@ export class DirectBlockchainApi extends Api {
                 steemCallback
             );
         });
+    }
+
+    public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
+
+    }
+
+    public getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
+
+    }
+
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {
+        
     }
 }
 

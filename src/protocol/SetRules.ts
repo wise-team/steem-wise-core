@@ -1,12 +1,18 @@
 import { Rule } from "../rules/Rule";
 import { SendVoteorder } from "./SendVoteorder";
 import { ConfirmVote } from "./ConfirmVote";
+import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 
 export interface SetRules {
     rulesets: {
         name: string;
         rules: Rule [];
     } [];
+}
+
+export interface EffectuatedSetRules extends SetRules {
+    moment: SteemOperationNumber;
+    voter: string;
 }
 
 /**

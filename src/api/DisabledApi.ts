@@ -1,14 +1,14 @@
 import { Promise } from "bluebird";
 
 import { SteemPost } from "../blockchain/SteemPost";
-import { SetRules } from "../protocol/SetRules";
+import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { ChainableSupplier } from "../chainable/Chainable";
 import { SteemOperation } from "../blockchain/SteemOperation";
 import { Api } from "./Api";
 import { Protocol } from "../protocol/Protocol";
 import { DirectBlockchainApi } from "./directblockchain/DirectBlockchainApi";
-import axios from "axios";
+import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 
 export class DisabledApi extends Api {
     public constructor() {
@@ -27,11 +27,19 @@ export class DisabledApi extends Api {
         return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
 
-    public streamSince(moment: SteemOperationNumber): ChainableSupplier<SteemOperation, any> {
-        throw new Error("This api is disabled");
+    public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
+        return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
 
-    public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
+    public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
+        return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
+    }
+
+    public getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
+        return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
+    }
+
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
 }
