@@ -8,6 +8,7 @@ import { ValidationContext } from "./ValidationContext";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { Rule } from "../rules/Rule";
+import { ImposedRules } from "../rules/ImposedRules";
 
 export class Validator {
     private api: Api;
@@ -45,7 +46,8 @@ export class Validator {
             if (this.providedRulesets) return this.providedRulesets;
             else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
         })
-        .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder))
+        .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
+        .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules())) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
         .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
         .then(() => {
             callback(undefined, true);
