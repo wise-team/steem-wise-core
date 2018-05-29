@@ -45,7 +45,7 @@ export class Synchronizer {
         if (!notifierCallback(undefined, "Loading block", new SteemOperationNumber(blockNum, 0, 0))) return;
 
         Promise.resolve(true)
-        .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum))
+        .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
         .mapSeries((op: EffectuatedSmartvotesOperation) => {
             return this.processOperation(op);
         })

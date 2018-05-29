@@ -167,13 +167,89 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {
-        
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+        return new Promise((resolve, reject) => {
+            this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => {
+                if (error) reject(error);
+                else {
+                    const block = block_ as Block;
+                    resolve(this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, block, protocol));
+                }
+            });
+        });
+    }
+
+    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, block: Block, protocol: Protocol): EffectuatedSmartvotesOperation [] {
+        let out: EffectuatedSmartvotesOperation [] = [];
+
+        const block_num = block.transactions[0].ref_block_num;
+        const timestampUtc = block.timestamp;
+        for (let transaction_num = 0; transaction_num < block.transactions.length; transaction_num++) {
+            const transaction = block.transactions[transaction_num];
+
+            for (let operation_num = 0; operation_num < transaction.operations.length; operation_num++) {
+                const operation: Operation = {
+                    block_num: block_num,
+                    transaction_num: transaction_num,
+                    transaction_id: transaction.transaction_id,
+                    operation_num: operation_num,
+                    timestamp: new Date(timestampUtc + "Z" /* this is UTC date */),
+                    op: transaction.operations[operation_num]
+                };
+                out = out.concat(this.getWiseOperationsRelatedToDelegatorInBlock_processOperation(delegator, operation, protocol));
+            }
+        }
+
+        return out;
+    }
+
+    private getWiseOperationsRelatedToDelegatorInBlock_processOperation(delegator: string, operation: Operation, protocol: Protocol): EffectuatedSmartvotesOperation [] {
+        const out: EffectuatedSmartvotesOperation [] = [];
+        const steemOp: SteemOperation = {
+            block_num: operation.block_num,
+            transaction_num: operation.transaction_num,
+            transaction_id: operation.transaction_id,
+            operation_num: operation.transaction_num,
+            timestamp: new Date(operation.timestamp + "Z"), // this is UTC time (Z marks it so that it can be converted to local time properly)
+            op: operation.op
+        };
+        const handleResult = protocol.handleOrReject(steemOp);
+
+        if (handleResult) {
+            for (let i = 0; i < handleResult.length; i++) {
+                const wiseOp: EffectuatedSmartvotesOperation = handleResult[i];
+                if (wiseOp.delegator === delegator) out.push(wiseOp);
+            }
+        }
+
+        return out;
     }
 }
 
 
+export interface Block {
+    block_id: string;
+    previous: string;
+    timestamp: string;
+    transactions: Transaction [];
+    [x: string]: any; // allows other properties
+}
 
+export interface Transaction {
+    ref_block_num: number;
+    transaction_id: string;
+    operations: [string, object] [];
+    [x: string]: any; // allows other properties
+}
+
+export interface Operation {
+    block_num: number;
+    transaction_num: number;
+    transaction_id: string;
+    operation_num: number;
+    timestamp: Date;
+    op: [string, object];
+}
 
 
 
