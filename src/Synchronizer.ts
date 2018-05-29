@@ -29,6 +29,7 @@ export class Synchronizer {
     }
 
     public runLoop(since: SteemOperationNumber, notifierCallback: (error: Error | undefined, message: string, moment: SteemOperationNumber) => boolean) {
+        this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
         .then(((rules: EffectuatedSetRules []) => {
             this.rules = rules;

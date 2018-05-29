@@ -52,7 +52,7 @@ export class DirectBlockchainApi extends Api {
     public loadRulesets(delegator: string, voter: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
         return new Promise((resolve, reject) => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
-            if (typeof voter === "undefined" || voter.length == 0) throw new Error("Delegator must not be empty");
+            if (typeof voter === "undefined" || voter.length == 0) throw new Error("Voter must not be empty");
 
             const loadedRulesets: SetRules [] = [];
 
@@ -103,12 +103,68 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
+    public loadAllRulesets(delegator: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
+        return new Promise((resolve, reject) => {
+            if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
+            const allRules: EffectuatedSetRules [] = [];
+            new SteemJsAccountHistorySupplier(this.steem, delegator)
+            .branch((historySupplier) => {
+                historySupplier
+                .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
+                .chain(new ToSmartvotesOperationTransformer(protocol))
+                .chain(new SmartvotesOperationTypeFilter<EffectuatedSmartvotesOperation>(SmartvotesOperationTypeFilter.OperationType.SetRules))
+                .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
+                    const out: EffectuatedSetRules = {
+                        rulesets: (item.command as SetRules).rulesets,
+                        moment: new SteemOperationNumber(item.block_num, item.transaction_num, item.operation_num),
+                        voter: item.voter
+                    };
+                    allRules.push(out);
+
+                    return true;
+                }))
+                .catch((error: Error) => {
+                    reject(error);
+
+                    return false;
+                });
+            })
+            .start(() => {
+                resolve(allRules);
+            });
+        });
     }
 
-    public getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
+    public getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
+        return new Promise((resolve, reject) => {
+            if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
+            let noResult = true;
+            new SteemJsAccountHistorySupplier(this.steem, delegator)
+            .branch((historySupplier) => {
+                historySupplier
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
+                .chain(new ToSmartvotesOperationTransformer(protocol))
+                .chain(new SmartvotesOperationTypeFilter<EffectuatedSmartvotesOperation>(SmartvotesOperationTypeFilter.OperationType.ConfirmVote))
+                .chain(new ChainableLimiter(1))
+                .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
+                    noResult = false;
+                    resolve(new SteemOperationNumber(item.block_num, item.transaction_num, item.operation_num));
+
+                    return false;
+                }))
+                .catch((error: Error) => {
+                    reject(error);
+
+                    return false;
+                });
+            })
+            .start(() => {
+                if (noResult) resolve(V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT);
+            });
+        });
     }
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {

@@ -12,6 +12,6 @@ export abstract class Api {
     public abstract loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules>;
     public abstract loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []>;
     public abstract sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber>;
-    public abstract getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber>;
+    public abstract getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber>;
     public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []>;
 }
