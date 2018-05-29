@@ -26,6 +26,8 @@ export interface VoteorderAtMoment {
   voteorder: smartvotes_voteorder;
 }
 
+export const delegator: string = "steemprojects2";
+
 export const previousArtifactoryInvalidVoteorders: VoteorderAtMoment [] = [
           {
             voter: "guest123",

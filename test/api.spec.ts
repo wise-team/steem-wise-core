@@ -8,7 +8,7 @@ import { DirectBlockchainApi } from "../src/api/directblockchain/DirectBlockchai
 import { WiseRESTApi } from "../src/api/WiseRESTApi";
 import { SteemPost } from "../src/blockchain/SteemPost";
 import { SteemOperationNumber } from "../src/blockchain/SteemOperationNumber";
-import { SetRules } from "../src/protocol/SetRules";
+import { SetRules, EffectuatedSetRules } from "../src/protocol/SetRules";
 import { WeightRule } from "../src/rules/WeightRule";
 import { TagsRule } from "../src/rules/TagsRule";
 
@@ -130,7 +130,28 @@ describe("test/api.spec.ts", function () {
         });
 
         describe("#loadAllRulesets", () => {
-            it.skip("TODO write tests", () => {});
+            it.only("Loads properly all rulesets from protocol-v1-testing-sequence", () => {
+                const requiredRulesets: { ruleset: v1TestingSequence.RulesetsAtMoment, found: boolean } [] = [
+                    { ruleset: v1TestingSequence.stage1_0_Rulesets, found: false },
+                    { ruleset: v1TestingSequence.stage2_1_Rulesets, found: false },
+                    // { ruleset: v1TestingSequence.stage3_0_Rulesets, found: false } // this is an v1 reseting set_rules. There is no easy way to port it to V2.
+                ];
+
+                return api.loadAllRulesets(v1TestingSequence.delegator, v1TestingSequence.stage3_1_SyncConfirmationMoment, wise.getProtocol())
+                .then((result: EffectuatedSetRules []) => {
+                    for (const sr of result) {
+                        for (let i = 0; i < requiredRulesets.length; i++) {
+                            if (sr.moment.isEqual_solveOpInTrxBug(requiredRulesets[i].ruleset.opNum)) {
+                                requiredRulesets[i].found = true;
+                            }
+                        }
+                    }
+
+                    for (let i = 0; i < requiredRulesets.length; i++) {
+                        expect(requiredRulesets[i].found, "requiredRulesets[" + i + "].found").to.be.true;
+                    }
+                });
+            });
         });
 
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {
