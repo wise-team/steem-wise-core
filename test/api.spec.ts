@@ -120,11 +120,16 @@ describe("test/api.spec.ts", function () {
             });
         });
 
-        describe("#loadAllRulesets", () => {
-            it.skip("TODO write tests", () => {});
+        describe("#getLastConfirmationMoment", () => {
+            it("Returns correct last confirmation moment of steemprojects3", () => {
+                return api.getLastConfirmationMoment("steemprojects3", wise.getProtocol())
+                .then((son: SteemOperationNumber) => {
+                    expect(son.blockNum).to.be.gte(22485801);
+                });
+            });
         });
 
-        describe("#getLastConfirmationMoment", () => {
+        describe("#loadAllRulesets", () => {
             it.skip("TODO write tests", () => {});
         });
 
