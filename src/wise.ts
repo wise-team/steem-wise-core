@@ -197,7 +197,7 @@ export class Wise {
      public validatePotentialVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder,
         callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
         proggressCallback?: ProggressCallback): void => {
-        this.validatePotentialVoteorder(delegator, voter, voteorder, callback, proggressCallback);
+        this.validateVoteorder(delegator, voter, voteorder, SteemOperationNumber.FUTURE, callback, proggressCallback);
     }
 
     /**
