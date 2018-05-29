@@ -14,6 +14,7 @@ import { TagsRule } from "../src/rules/TagsRule";
 
 import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
 import { Rule } from "../src/rules/Rule";
+import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
 
 describe("test/api.spec.ts", function () {
     this.timeout(10000);
@@ -23,7 +24,7 @@ describe("test/api.spec.ts", function () {
 
     [
         new DirectBlockchainApi(username, postingWif),
-        new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
+        // new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
     ]
     .forEach((api: Api) => describe("api " + api.name(), () => {
         const wise = new Wise(username, api);
@@ -130,7 +131,7 @@ describe("test/api.spec.ts", function () {
         });
 
         describe("#loadAllRulesets", () => {
-            it.only("Loads properly all rulesets from protocol-v1-testing-sequence", () => {
+            it("Loads properly all rulesets from protocol-v1-testing-sequence", () => {
                 const requiredRulesets: { ruleset: v1TestingSequence.RulesetsAtMoment, found: boolean } [] = [
                     { ruleset: v1TestingSequence.stage1_0_Rulesets, found: false },
                     { ruleset: v1TestingSequence.stage2_1_Rulesets, found: false },
@@ -155,7 +156,35 @@ describe("test/api.spec.ts", function () {
         });
 
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {
-            it.skip("TODO write tests", () => {});
+            it("Loads only wise operation from block 22,485,801", () => {
+                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", 22485801, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(1);
+                    expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
+                    expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22485801);
+                    expect(ops[0].moment.transactionNum, "ops[0] transaction_num").to.equal(38);
+                    expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
+                });
+            });
+
+            it("Loads wise operations sent by voter but refering to delegator", () => {
+                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", 22484096, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(1);
+                    console.log(ops[0].moment.blockNum);
+                    expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22484096);
+                    expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
+                    expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
+                    expect(ops[0].voter, "ops[0].voter").to.equal("guest123");
+                });
+            });
+
+            it("Does not load operations sent as a voter", () => {
+                return api.getWiseOperationsRelatedToDelegatorInBlock("guest123", 22484096, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(0);
+                });
+            });
         });
     }));
 

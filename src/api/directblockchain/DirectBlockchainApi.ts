@@ -173,16 +173,16 @@ export class DirectBlockchainApi extends Api {
                 if (error) reject(error);
                 else {
                     const block = block_ as Block;
-                    resolve(this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, block, protocol));
+                    resolve(this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, protocol));
                 }
             });
         });
     }
 
-    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, block: Block, protocol: Protocol): EffectuatedSmartvotesOperation [] {
+    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: Block, protocol: Protocol): EffectuatedSmartvotesOperation [] {
         let out: EffectuatedSmartvotesOperation [] = [];
 
-        const block_num = block.transactions[0].ref_block_num;
+        const block_num = blockNum;
         const timestampUtc = block.timestamp;
         for (let transaction_num = 0; transaction_num < block.transactions.length; transaction_num++) {
             const transaction = block.transactions[transaction_num];
@@ -209,7 +209,7 @@ export class DirectBlockchainApi extends Api {
             block_num: operation.block_num,
             transaction_num: operation.transaction_num,
             transaction_id: operation.transaction_id,
-            operation_num: operation.transaction_num,
+            operation_num: operation.operation_num,
             timestamp: new Date(operation.timestamp + "Z"), // this is UTC time (Z marks it so that it can be converted to local time properly)
             op: operation.op
         };
