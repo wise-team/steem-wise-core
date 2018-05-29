@@ -48,7 +48,6 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemOperat
     }
 
     private loadFrom(from: number) {
-        // TODO load only operations present after introduction of smartvotes
         // Sometimes at the end of account history "from" can be lower than 1000. In that case we should set limit to "from". It will simply load operations including the oldest one.
         const batchLimit = (from === -1 ? this.batchSize : Math.min(this.batchSize, from));
 

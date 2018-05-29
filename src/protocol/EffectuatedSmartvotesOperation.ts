@@ -3,7 +3,6 @@ import { SendVoteorder } from "./SendVoteorder";
 import { SmartvotesOperation } from "./SmartvotesOperation";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 
-// TODO: introduce SteemOperationNumber
 export interface EffectuatedSmartvotesOperation extends SmartvotesOperation {
     moment: SteemOperationNumber;
     transaction_id: string;

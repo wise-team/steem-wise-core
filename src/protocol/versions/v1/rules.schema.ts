@@ -23,7 +23,6 @@ export interface smartvotes_ruleset {
      * Total weight of all votes that a voter can cast daily.
      * Eg.: 10000 means a single 100% vote, or twenty 5% votes.
      * If you want to allow a voter to cast two 100% votes, total_weight should be a sum: 20000.
-     * // TODO: rename to max_weight. And add next rule rule_weight
      */
     total_weight: number;
 
