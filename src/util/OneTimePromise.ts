@@ -19,13 +19,17 @@ export class OneTimePromise<T> {
         this.timeout = timeout;
     }
 
-    public execute(promise: Promise<T>): Promise<T> {
+    /**
+     * Executes the promiseReturningFn only on the first call of execute
+     * @param promiseReturningFn — Remember that when you call a function that returns a promise, the executor starts executing. That is why you have to pass an function here
+     */
+    public execute(promiseReturningFn: () => Promise<T>): Promise<T> {
         return new Promise((resolve, reject) => {
             if (this.finishedWithError) reject(this.error);
             else if (this.finishedWithResult) resolve(this.result);
             else if (!this.started || this.timeCounter > this.timeout) {
                 this.started = true;
-                return promise.then((result: T) => {
+                return promiseReturningFn().then((result: T) => {
                     this.result = result;
                     this.finishedWithResult = true;
                     resolve(result);

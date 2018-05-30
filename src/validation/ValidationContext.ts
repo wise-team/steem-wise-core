@@ -23,18 +23,18 @@ export class ValidationContext {
     }
 
     public getPost(): Promise<SteemPost> {
-        return this.postLoader.execute(this.api.loadPost(this.voteorder.author, this.voteorder.permlink));
+        return this.postLoader.execute(() => this.api.loadPost(this.voteorder.author, this.voteorder.permlink));
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
-        return this.dgpLoader.execute(this.api.getDynamicGlobalProperties());
+        return this.dgpLoader.execute(() => this.api.getDynamicGlobalProperties());
     }
 
     public getVoterInfo(): Promise<AccountInfo> {
-        return this.voterInfoLoader.execute(this.api.getAccountInfo(this.voter));
+        return this.voterInfoLoader.execute(() => this.api.getAccountInfo(this.voter));
     }
 
     public getDelegatorInfo(): Promise<AccountInfo> {
-        return this.delegatorInfoLoader.execute(this.api.getAccountInfo(this.delegator));
+        return this.delegatorInfoLoader.execute(() => this.api.getAccountInfo(this.delegator));
     }
 }
