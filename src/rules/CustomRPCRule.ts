@@ -26,7 +26,7 @@ export class CustomRPCRule extends Rule {
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<true> {
         return new Promise((resolve, reject) => {
-            throw new Error("Not implemented yet"); // TODO
+            throw new ValidationError("CustomRPC rule is not yet implemented"); // TODO
         });
     }
 

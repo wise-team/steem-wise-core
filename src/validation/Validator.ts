@@ -47,7 +47,7 @@ export class Validator {
             else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
         })
         .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
-        .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules())) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
+        .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules(delegator, voter))) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
         .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
         .then(() => {
             callback(undefined, true);
