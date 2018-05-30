@@ -238,7 +238,7 @@ export class DirectBlockchainApi extends Api {
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
         return new Promise((resolve, reject) => {
-            this.steem.api.getAccount((error: Error, result: AccountInfo []) => {
+            this.steem.api.getAccounts([username], (error: Error, result: AccountInfo []) => {
                 if (error) reject(error);
                 else {
                     if (result.length > 0) {
