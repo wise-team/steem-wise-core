@@ -10,10 +10,9 @@ export class ValidationContext {
     private delegator: string;
     private voter: string;
     private voteorder: SendVoteorder;
-    private postLoader = new OneTimePromise<SteemPost>(100 * 1000);
-    private dgpLoader = new OneTimePromise<DynamicGlobalProperties>(100 * 1000);
-    private voterInfoLoader = new OneTimePromise<AccountInfo>(100 * 1000);
-    private delegatorInfoLoader = new OneTimePromise<AccountInfo>(100 * 1000);
+    private postLoader = new OneTimePromise<SteemPost>(10 * 1000);
+    private dgpLoader = new OneTimePromise<DynamicGlobalProperties>(10 * 1000);
+    private accountInfoLoaders: [string, OneTimePromise<AccountInfo>][] = [];
 
     public constructor(api: Api, delegator: string, voter: string, voteorder: SendVoteorder) {
         this.api = api;
@@ -30,11 +29,15 @@ export class ValidationContext {
         return this.dgpLoader.execute(() => this.api.getDynamicGlobalProperties());
     }
 
-    public getVoterInfo(): Promise<AccountInfo> {
-        return this.voterInfoLoader.execute(() => this.api.getAccountInfo(this.voter));
-    }
-
-    public getDelegatorInfo(): Promise<AccountInfo> {
-        return this.delegatorInfoLoader.execute(() => this.api.getAccountInfo(this.delegator));
+    public getAccountInfo(username: string): Promise<AccountInfo> {
+        for (let i = 0; i < this.accountInfoLoaders.length; i++) {
+            const loaderTuple = this.accountInfoLoaders[i];
+            if (loaderTuple[0] === username) {
+                return loaderTuple[1].execute(() => this.api.getAccountInfo(this.voter));
+            }
+        }
+        const loader = new OneTimePromise<AccountInfo>(10 * 1000);
+        this.accountInfoLoaders.push([username, loader]);
+        return loader.execute(() => this.api.getAccountInfo(this.voter));
     }
 }
