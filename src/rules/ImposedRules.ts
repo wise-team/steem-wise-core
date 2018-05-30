@@ -11,8 +11,8 @@ import { BlockchainConfig } from "../blockchain/BlockchainConfig";
 export class ImposedRules {
     public static getImposedRules(delegator: string, voter: string): Rule [] {
         return [
-            new ImposedRules.NoDustRule(voter),
-            new ImposedRules.NoDustRule(delegator)
+            // new ImposedRules.NoDustRule(voter),
+            // new ImposedRules.NoDustRule(delegator)
         ];
     }
 }
