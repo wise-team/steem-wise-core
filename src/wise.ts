@@ -210,6 +210,14 @@ export class Wise {
         new Synchronizer(this.api, this.protocol, this.username).runLoop(since, notifierCallback);
     }
 
+    // TODO comment
+    // TODO test
+     public getLastConfirmationMoment = (callback: (error: Error | undefined, result: undefined | SteemOperationNumber) => void): void => {
+        this.api.getLastConfirmationMoment(this.username, this.getProtocol())
+        .then((son: SteemOperationNumber) => callback(undefined, son))
+        .catch((error: Error) => callback(error, undefined));
+    }
+
     /**
      * Returns current protocol
      */
