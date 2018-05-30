@@ -16,6 +16,6 @@ export abstract class Api {
     public abstract sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber>;
     public abstract getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber>;
     public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []>;
-    public abstract getDynamicGlobalProperties(): Promise<DynamicGlobalProperties>; // TODO test
-    public abstract geyAccountInfo(): Promise<AccountInfo>; // TODO test
+    public abstract getDynamicGlobalProperties(): Promise<DynamicGlobalProperties>;
+    public abstract getAccountInfo(username: string): Promise<AccountInfo>;
 }

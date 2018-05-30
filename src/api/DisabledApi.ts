@@ -9,6 +9,8 @@ import { Api } from "./Api";
 import { Protocol } from "../protocol/Protocol";
 import { DirectBlockchainApi } from "./directblockchain/DirectBlockchainApi";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
+import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
+import { AccountInfo } from "../blockchain/AccountInfo";
 
 export class DisabledApi extends Api {
     public constructor() {
@@ -40,6 +42,14 @@ export class DisabledApi extends Api {
     }
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {
+        return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
+    }
+
+    public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+        return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
+    }
+
+    public getAccountInfo(username: string): Promise<AccountInfo> {
         return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
 }

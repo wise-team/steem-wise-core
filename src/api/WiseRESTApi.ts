@@ -10,6 +10,8 @@ import { Protocol } from "../protocol/Protocol";
 import { DirectBlockchainApi } from "./directblockchain/DirectBlockchainApi";
 import axios from "axios";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
+import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
+import { AccountInfo } from "../blockchain/AccountInfo";
 
 export class WiseRESTApi extends Api {
     public static NOISY_ENDPOINT_HOST: string = "//to-be-launched/";
@@ -50,5 +52,13 @@ export class WiseRESTApi extends Api {
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+    }
+
+    public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+        return this.directBlockchainApi.getDynamicGlobalProperties();
+    }
+
+    public getAccountInfo(username: string): Promise<AccountInfo> {
+        return this.directBlockchainApi.getAccountInfo(username);
     }
 }

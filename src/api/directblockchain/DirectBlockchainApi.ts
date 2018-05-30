@@ -19,6 +19,8 @@ import { ToSmartvotesOperationTransformer } from "../../chainable/transformers/T
 import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
 import { VoterFilter } from "./VoterFilter";
 import { PrechainedSupplier } from "../../chainable/PrechainedSupplier";
+import { DynamicGlobalProperties } from "../../blockchain/DynamicGlobalProperties";
+import { AccountInfo } from "../../blockchain/AccountInfo";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -169,7 +171,7 @@ export class DirectBlockchainApi extends Api {
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => {
-            this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => {
+            this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => { // TODO would it be better to use RPC method get_ops_in_block?
                 if (error) reject(error);
                 else {
                     const block = block_ as Block;
@@ -223,6 +225,29 @@ export class DirectBlockchainApi extends Api {
         }
 
         return out;
+    }
+
+    public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+        return new Promise((resolve, reject) => {
+            this.steem.api.getDynamicGlobalProperties((error: Error, result: DynamicGlobalProperties) => {
+                if (error) reject(error);
+                else resolve(result);
+            });
+        });
+    }
+
+    public getAccountInfo(username: string): Promise<AccountInfo> {
+        return new Promise((resolve, reject) => {
+            this.steem.api.getAccount((error: Error, result: AccountInfo []) => {
+                if (error) reject(error);
+                else {
+                    if (result.length > 0) {
+                        resolve(result[0]);
+                    }
+                    else throw new Error("No such account found");
+                }
+            });
+        });
     }
 }
 
