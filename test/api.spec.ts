@@ -15,6 +15,8 @@ import { TagsRule } from "../src/rules/TagsRule";
 import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
 import { Rule } from "../src/rules/Rule";
 import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
+import { DynamicGlobalProperties } from "../src/blockchain/DynamicGlobalProperties";
+import { AccountInfo } from "../src/blockchain/AccountInfo";
 
 describe("test/api.spec.ts", function () {
     this.timeout(10000);
@@ -171,7 +173,6 @@ describe("test/api.spec.ts", function () {
                 return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", 22484096, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
-                    console.log(ops[0].moment.blockNum);
                     expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22484096);
                     expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
                     expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
@@ -183,6 +184,41 @@ describe("test/api.spec.ts", function () {
                 return api.getWiseOperationsRelatedToDelegatorInBlock("guest123", 22484096, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length(0);
+                });
+            });
+        });
+
+        describe("#getDynamicGlobalProperties", () => {
+            it("returns dynamic global properties without error", () => {
+                return api.getDynamicGlobalProperties()
+                .then((dgp: DynamicGlobalProperties) => {
+                    expect(dgp.head_block_number, "head_block_number").to.be.greaterThan(22484096);
+                    expect(dgp.vote_power_reserve_rate, "vote_power_reserve_rate").to.be.greaterThan(0);
+                    expect(new Date(dgp.time + "Z").getTime(), "time").to.be.closeTo(new Date().getTime(), 1000 * 10 /* 10 seconds */);
+                });
+            });
+        });
+
+        describe("#getAccountInfo", () => {
+            it.only("returns account info without error", () => {
+                return api.getAccountInfo("guest123")
+                .then((info: AccountInfo) => {
+                    expect(info.name, "name").to.be.equal("guest123");
+                    expect(info.voting_power, "voting_power").to.be.greaterThan(0);
+
+                    expect(info.vesting_shares, "vesting_shares").to.match(/^([0-9]+)\.([0-9]+)\ VESTS$/);
+                    expect(parseFloat(info.vesting_shares.replace(" VESTS", "")), "vesting_shares")
+                        .to.be.a("number").greaterThan(0.0);
+
+                    expect(info.delegated_vesting_shares, "delegated_vesting_shares").to.match(/^([0-9]+)\.([0-9]+)\ VESTS$/);
+                    expect(parseFloat(info.delegated_vesting_shares.replace(" VESTS", "")), "delegated_vesting_shares")
+                        .to.be.a("number").gte(0.0);
+
+                    expect(info.received_vesting_shares, "received_vesting_shares").to.match(/^([0-9]+)\.([0-9]+)\ VESTS$/);
+                    expect(parseFloat(info.received_vesting_shares.replace(" VESTS", "")), "received_vesting_shares")
+                        .to.be.a("number").gte(0.0);
+
+                    expect(new Date(info.last_vote_time + "Z").getTime(), "last_vote_time").to.be.gte(new Date("2018-05-30T12:25:36").getTime());
                 });
             });
         });
