@@ -28,6 +28,11 @@ class WiseConstants {
     ];
 }
 
+const aajv: ajv.Ajv = new ajv();
+aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
+
+const validate = aajv.compile(schemaJSON);
+
 export class V2Handler implements ProtocolVersionHandler {
     public static CUSTOM_JSON_ID = "wise";
 
@@ -55,10 +60,7 @@ export class V2Handler implements ProtocolVersionHandler {
     }
 
     private validateJSON = (input: object): boolean => {
-        const aajv: ajv.Ajv = new ajv();
-        aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
-
-        const validate = aajv.compile(schemaJSON);
+        
         return validate(input) as boolean;
     }
 

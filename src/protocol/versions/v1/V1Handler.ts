@@ -17,6 +17,10 @@ import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { isConfirmVote, ConfirmVote } from "../../ConfirmVote";
 import { WeightRule } from "../../../rules/WeightRule";
 
+const aajv: ajv.Ajv = new ajv();
+aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
+const validate = aajv.compile(schemaJSON);
+
 export class V1Handler implements ProtocolVersionHandler {
     public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
 
@@ -35,10 +39,6 @@ export class V1Handler implements ProtocolVersionHandler {
     }
 
     private validateJSON(input: object): boolean {
-        const aajv: ajv.Ajv = new ajv();
-        aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
-
-        const validate = aajv.compile(schemaJSON);
         return validate(input) as boolean;
     }
 
