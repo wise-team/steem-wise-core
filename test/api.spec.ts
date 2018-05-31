@@ -172,7 +172,7 @@ describe("test/api.spec.ts", function () {
                     expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
                     expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22485801);
                     expect(ops[0].moment.transactionNum, "ops[0] transaction_num").to.equal(38);
-                    expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
+                    if (api.name() !== "FakeApi") expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
                 });
             });
 
@@ -181,7 +181,7 @@ describe("test/api.spec.ts", function () {
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
                     expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22484096);
-                    expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
+                    if (api.name() !== "FakeApi")  expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
                     expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
                     expect(ops[0].voter, "ops[0].voter").to.equal("guest123");
                 });
