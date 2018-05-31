@@ -148,3 +148,12 @@ export class FakeApi extends Api {
         });
     }
 }
+
+export namespace FakeApi {
+    export interface Dataset {
+        posts: SteemPost [];
+        dynamicGlobalProperties: DynamicGlobalProperties;
+        accounts: AccountInfo [];
+        operations: SteemOperation [];
+    }
+}
