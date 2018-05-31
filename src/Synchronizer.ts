@@ -31,11 +31,12 @@ export class Synchronizer {
     public runLoop(since: SteemOperationNumber, notifierCallback: (error: Error | undefined, message: string, moment: SteemOperationNumber) => boolean) {
         this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
-        .then(((rules: EffectuatedSetRules []) => {
+        .then((rules: EffectuatedSetRules []) => {
             this.rules = rules;
             this.processBlock(since.blockNum, notifierCallback);
-        }))
+        })
         .catch((error: Error) => {
+            notifierCallback(error, "", this.lastProcessedOperationNum);
             console.error("Synchronizer loop terminated due to error");
             console.error(error);
         });
