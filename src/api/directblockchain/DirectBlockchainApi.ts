@@ -45,7 +45,7 @@ export class DirectBlockchainApi extends Api {
         return new Promise((resolve, reject) => {
             this.steem.api.getContent(author, permlink, function(error: Error, result: any) {
                 if (error) reject(error);
-                else if (result.id == 0) reject(new Error("This post does not exist"));
+                else if (result.author.length === 0) reject(new Error("The post (@" + author + "/" + permlink + ") does not exist"));
                 else resolve(result as SteemPost);
             });
         });
