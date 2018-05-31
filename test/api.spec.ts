@@ -1,11 +1,14 @@
 import { assert, expect } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
+import * as fs from "fs";
+import * as path from "path";
 
-import { Wise } from "../src/wise";
+import { Wise, SteemOperation } from "../src/wise";
 import { Api } from "../src/api/Api";
 import { DirectBlockchainApi } from "../src/api/directblockchain/DirectBlockchainApi";
 import { WiseRESTApi } from "../src/api/WiseRESTApi";
+import { FakeApi } from "../src/api/FakeApi";
 import { SteemPost } from "../src/blockchain/SteemPost";
 import { SteemOperationNumber } from "../src/blockchain/SteemOperationNumber";
 import { SetRules, EffectuatedSetRules } from "../src/protocol/SetRules";
@@ -24,11 +27,15 @@ describe("test/api.spec.ts", function () {
     const username = "guest123";
     const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 
-    [
+    const fake: FakeApi.Dataset = JSON.parse(fs.readFileSync(__dirname + "/data/fake-blockchain.json", "UTF-8"));
+
+    const apis: Api [] = [
         new DirectBlockchainApi(username, postingWif),
+        new FakeApi(fake.posts, fake.dynamicGlobalProperties, fake.accounts, fake.operations)
         // new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
-    ]
-    .forEach((api: Api) => describe("api " + api.name(), () => {
+    ];
+
+    apis.forEach((api: Api) => describe("api " + api.name(), () => {
         const wise = new Wise(username, api);
         /**
          * Test post loading for each api
@@ -200,7 +207,7 @@ describe("test/api.spec.ts", function () {
         });
 
         describe("#getAccountInfo", () => {
-            it.only("returns account info without error", () => {
+            it("returns account info without error", () => {
                 return api.getAccountInfo("guest123")
                 .then((info: AccountInfo) => {
                     expect(info.name, "name").to.be.equal("guest123");
