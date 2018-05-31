@@ -14,7 +14,7 @@ import { AccountInfo } from "../../src/blockchain/AccountInfo";
 import { isConfirmVote } from "../protocol/ConfirmVote";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 
-// TODO implement and use in tests
+// TODO very slow. Examine why (maybe DirecrBlokchain could also be speeded up)
 export class FakeApi extends Api {
     private posts: SteemPost [];
     private operations: SteemOperation [];
@@ -49,8 +49,11 @@ export class FakeApi extends Api {
 
     public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
         return this.loadAllRulesets(delegator, at, protocol).then((rulesets: EffectuatedSetRules []) => {
-            return rulesets.filter((ruleset: EffectuatedSetRules) => ruleset.voter == voter)
-            .reduce((result: EffectuatedSetRules, ruleset: EffectuatedSetRules) => {
+            const votersRulesets: EffectuatedSetRules[] =  rulesets
+                .filter((ruleset: EffectuatedSetRules) => ruleset.voter == voter);
+
+            if (votersRulesets.length == 0) return { rulesets: [] } as SetRules;
+            else return votersRulesets.reduce((result: EffectuatedSetRules, ruleset: EffectuatedSetRules) => {
                 if (ruleset.moment.isGreaterThan(result.moment)) return ruleset;
                 else return result;
             });
@@ -136,7 +139,10 @@ export class FakeApi extends Api {
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
-        return new Promise((resolve, reject) => resolve(this.dynamicGlobalProperties));
+        return new Promise((resolve, reject) => {
+            this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
+            resolve(this.dynamicGlobalProperties);
+        });
     }
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
