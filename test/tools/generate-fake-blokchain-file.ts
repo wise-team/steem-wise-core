@@ -36,6 +36,7 @@ const postLinks: [string, string][] = [
     ["nmax83", "steemprojects-com-sebuah-proyek-yang-seharusnya-kita-semua-peduli-tentang-saran-e78b56ef99562"],
     ["tanata", "man-of-steel"],
     ["noisy", "public-and-private-keys-how-to-generate-all-steem-user-s-keys-from-master-password-without-a-steemit-website-being-offline"],
+    ["phgnomo", "steem-project-of-the-week-1-get-on-steem"],
 ];
 
 let posts: SteemPost [] = [];

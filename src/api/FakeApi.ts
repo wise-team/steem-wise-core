@@ -30,6 +30,10 @@ export class FakeApi extends Api {
         this.operations = operations;
     }
 
+    public static fromDataset(dataset: FakeApi.Dataset): FakeApi {
+        return new FakeApi(dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.operations);
+    }
+
     public name(): string {
         return "FakeApi";
     }

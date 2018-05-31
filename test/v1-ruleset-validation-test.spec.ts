@@ -2,11 +2,13 @@ import { expect } from "chai";
 import "mocha";
 
 import * as steem from "steem";
+import * as fs from "fs";
 
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
 import { _objectAssign } from "../src/util/util";
 import { smartvotes_voteorder } from "../src/protocol/versions/v1/votes.schema";
 import { SteemOperationNumber, Wise, DirectBlockchainApi, SendVoteorder, ValidationError, AuthorsRule, TagsRule } from "../src/wise";
+import { FakeApi } from "../src/api/FakeApi";
 
 const voter = "guest123";
 const delegator = "steemprojects1";
@@ -23,7 +25,7 @@ describe("test/ruleset-validation.spec.ts", function() {
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
         this.retries(1);
 
-        const wise = new Wise(voter, new DirectBlockchainApi(voter, ""));
+        const wise = new Wise(voter, FakeApi.fromDataset(JSON.parse(fs.readFileSync(__dirname + "/data/fake-blockchain.json", "UTF-8")) as FakeApi.Dataset));
 
         it("passes valid voteorder", function(done) {
             this.timeout(10000);
