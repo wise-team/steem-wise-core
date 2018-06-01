@@ -24,6 +24,7 @@ import { V2Handler } from "./protocol/versions/v2/V2Handler";
  * TODO unit tests
  * TODO update packages
  * TODO npm audit, snyk audit
+ * // TODO run mocha unit tests in browser (selenium?)
  */
 
 /**

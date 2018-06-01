@@ -1,51 +1,38 @@
 // TODO test Synchronizator with FakeApi
 
 import { expect, assert } from "chai";
-import { Promise } from "bluebird";
+import * as Bluebird from "bluebird";
+import * as _ from "lodash";
 import "mocha";
 
 import { Wise, SteemOperationNumber, SendVoteorder } from "../src/wise";
-import { FakeApi } from "./util/FakeApi";
 import { SteemPost } from "../src/blockchain/SteemPost";
+import { FakeApi } from "../src/api/FakeApi";
+import { Util } from "../src/util/util";
+
+import * as fakeDataset_ from "./data/fake-blockchain.json";
+const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
 /**
  * Setup
  */
 const voter = "voter123";
 const delegator = "delegator456";
-const delegatorWise = new Wise(delegator, new FakeApi());
-const voterWise = new Wise(delegator, new FakeApi());
+const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
+const delegatorWise = new Wise(delegator, fakeApi);
+const voterWise = new Wise(delegator, fakeApi);
 let syncRunning = true;
-
-/**
- * Fake posts
- */
-const posts: SteemPost [] = [
-    {
-        id: 1,
-        author: "a1",
-        permlink: "p1",
-        category: "cat1",
-        title: "title1",
-        body: "body1",
-        json_metadata: JSON.stringify({tags: ["tag1", "tag2"]}),
-        last_update: "",
-        created: "",
-        active: "",
-        last_payout: ""
-    }
-];
 
 /**
  * Testing sequence
  */
-const sequence: ([string, () => Promise<void>])[] = [];
+const sequence: ([string, () => Bluebird<void>])[] = [];
 
 sequence.push(["delegator starts synchronization", () => {
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
         delegatorWise.runSynchronizerLoop(new SteemOperationNumber(0, 0, 0), (error: Error | undefined, message: string, moment: SteemOperationNumber): boolean => {
             if (error) {
-                reject();
+                reject(error);
                 return false;
             }
             else {
@@ -57,12 +44,13 @@ sequence.push(["delegator starts synchronization", () => {
 }]);
 
 sequence.push(["voter sends voteorder before rules", () => {
-    return new Promise<SteemOperationNumber>((resolve, reject) => {
+    return new Bluebird<SteemOperationNumber>((resolve, reject) => {
         const skipValidation = true;
+        const post: SteemPost = Util.definedOrThrow(_.sample(fakeDataset.posts), new Error("post is undefined"));
         const vo: SendVoteorder = {
             rulesetName: "",
-            author: posts[0].author,
-            permlink: posts[0].permlink,
+            author: post.author,
+            permlink: post.permlink,
             weight: 10000
         };
         voterWise.sendVoteorder(delegator, vo, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
@@ -76,7 +64,7 @@ sequence.push(["voter sends voteorder before rules", () => {
 }]);
 
 sequence.push(["Stop sync", () => {
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
         syncRunning = false;
         resolve();
     });
@@ -88,7 +76,10 @@ sequence.push(["Stop sync", () => {
 describe("test/index.spec.ts", () => {
     describe("Synchronizer", function() {
         it("Synchronizes everything perfectly", () => {
-            return Promise.resolve(sequence).mapSeries((item: [string, () => Promise<void>]) => item[1]());
+            return Bluebird.resolve(sequence).mapSeries((item: [string, () => Bluebird<void>]) => {
+                console.log(item[0] + ":>");
+                item[1]();
+            });
         });
     });
 });

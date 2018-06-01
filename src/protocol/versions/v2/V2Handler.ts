@@ -60,7 +60,6 @@ export class V2Handler implements ProtocolVersionHandler {
     }
 
     private validateJSON = (input: object): boolean => {
-        
         return validate(input) as boolean;
     }
 

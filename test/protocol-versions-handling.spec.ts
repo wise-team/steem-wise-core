@@ -1,10 +1,14 @@
 import { expect, assert } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
-import * as fs from "fs";
-import * as path from "path";
 
-import { Wise } from "../src/wise";
+import * as v1ValidOperations_ from "./data/operations/v1-valid.operations.json";
+const v1ValidOperations: SteemOperation [] = v1ValidOperations_ as any as SteemOperation [];
+
+import * as v1InvalidOperations_ from "./data/operations/v1-invalid.operations.json";
+const v1InvalidOperations: SteemOperation [] = v1InvalidOperations_ as any as SteemOperation [];
+
+import { Wise, SteemOperation } from "../src/wise";
 import { DisabledApi } from "../src/api/DisabledApi";
 
 
@@ -15,19 +19,15 @@ describe("test/protocol-versions-handling.spec.ts", function() {
         const wise = new Wise("", new DisabledApi());
         const protocol = wise.getProtocol();
 
-        const allValidOperations = JSON.parse(fs.readFileSync(__dirname + "/data/operations/v1-valid.operations.json", "UTF-8"));
-
         it ("Validates all previously valid V1 (smartvote) operations as valid", () => {
-            for (const op of allValidOperations) {
+            for (const op of v1ValidOperations) {
                 const result = wise.validateSteemOperation(op);
                 expect(result).to.be.true;
             }
         });
 
-        const allInvalidOperations = JSON.parse(fs.readFileSync(__dirname + "/data/operations/v1-invalid.operations.json", "UTF-8"));
-
         it ("Validates all previously invalid V1 (smartvote) operations as valid", () => {
-            for (const op of allInvalidOperations) {
+            for (const op of v1InvalidOperations) {
                 const result = wise.validateSteemOperation(op);
                 expect(result).to.be.false;
             }

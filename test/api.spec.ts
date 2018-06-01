@@ -1,8 +1,9 @@
 import { assert, expect } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
-import * as fs from "fs";
-import * as path from "path";
+
+import * as fakeDataset_ from "./data/fake-blockchain.json";
+const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
 import { Wise, SteemOperation } from "../src/wise";
 import { Api } from "../src/api/Api";
@@ -27,11 +28,9 @@ describe("test/api.spec.ts", function () {
     const username = "guest123";
     const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 
-    const fake: FakeApi.Dataset = JSON.parse(fs.readFileSync(__dirname + "/data/fake-blockchain.json", "UTF-8"));
-
     const apis: Api [] = [
         new DirectBlockchainApi(username, postingWif),
-        new FakeApi(fake.posts, fake.dynamicGlobalProperties, fake.accounts, fake.operations)
+        FakeApi.fromDataset(fakeDataset)
         // new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
     ];
 

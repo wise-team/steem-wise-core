@@ -2,10 +2,11 @@ import { expect } from "chai";
 import "mocha";
 
 import * as steem from "steem";
-import * as fs from "fs";
+import * as fakeDataset_ from "./data/fake-blockchain.json";
+const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
-import { _objectAssign } from "../src/util/util";
+import { Util } from "../src/util/util";
 import { smartvotes_voteorder } from "../src/protocol/versions/v1/votes.schema";
 import { SteemOperationNumber, Wise, DirectBlockchainApi, SendVoteorder, ValidationError, AuthorsRule, TagsRule } from "../src/wise";
 import { FakeApi } from "../src/api/FakeApi";
@@ -25,7 +26,7 @@ describe("test/ruleset-validation.spec.ts", function() {
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
         this.retries(1);
 
-        const wise = new Wise(voter, FakeApi.fromDataset(JSON.parse(fs.readFileSync(__dirname + "/data/fake-blockchain.json", "UTF-8")) as FakeApi.Dataset));
+        const wise = new Wise(voter, FakeApi.fromDataset(fakeDataset));
 
         it("passes valid voteorder", function(done) {
             this.timeout(10000);
@@ -55,7 +56,7 @@ describe("test/ruleset-validation.spec.ts", function() {
                 this.timeout(500);
                 const propChanger: any = {};
                 propChanger[prop] = "";
-                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, propChanger);
+                const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, propChanger);
 
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (error) done(error);
@@ -68,7 +69,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         [-1, 0, undefined, NaN, 3, 10000, Infinity].forEach(function(weight) {
             it("fails on invald weight (" + weight + ")", function(done) {
                 this.timeout(10000);
-                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
+                const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
 
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (error) done(error);
@@ -81,7 +82,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("allows valid weight (2)", function(done) {
             this.timeout(10000);
-            const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 2 });
+            const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 2 });
 
             wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                 if (error) done(error);
@@ -92,7 +93,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("fails on nonexistent ruleset", function(done) {
             this.timeout(10000);
-            const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: "NonExistent" + Date.now() });
+            const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: "NonExistent" + Date.now() });
 
             wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                 if (error) done(error);
@@ -134,7 +135,7 @@ describe("test/ruleset-validation.spec.ts", function() {
         ].forEach(function(voteorderCase) {
             it((voteorderCase.pass ? "passes on allowed" : "fails on disallowed") + " author [ruleset=\"" + voteorderCase.ruleset.name + "\", allowed=" + (voteorderCase.ruleset.rules[0] as AuthorsRule).authors.join() + ", tested=" + voteorderCase.author + "]", function(done) {
                 this.timeout(25000);
-                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
 
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (voteorderCase.pass) {
@@ -190,7 +191,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             + " mode=" + (voteorderCase.ruleset.rules[0] as TagsRule).mode + ", tags=" + (voteorderCase.ruleset.rules[0] as TagsRule).tags.join() + ","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(20000);
-                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
 
 
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
@@ -223,7 +224,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             it((voteorderCase.pass ? "passes when all rules fulfilled" : "fails when not all rules fulfilled") + " [ruleset=\"" + voteorderCase.ruleset.name + "\","
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(10000);
-                const voteorder: SendVoteorder = _objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
+                const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
                     if (voteorderCase.pass) {
                         if (error) done(error);
@@ -241,7 +242,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
         it("fails on non existing post", function(done) {
             this.timeout(10000);
-            const voteorder: SendVoteorder = _objectAssign({}, validVoteorder,
+            const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder,
                 { rulesetName: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
                     author: "noisy", permlink: "Non-existing-post" + new Date() }); // author is correct, but post doesnt exist => fail
             wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
