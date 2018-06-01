@@ -1,10 +1,12 @@
+import { Promise } from "bluebird";
+import * as _ from "lodash";
+
 import { Api } from "./api/Api";
 import { Protocol } from "./protocol/Protocol";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { SimpleTaker } from "./chainable/Chainable";
 import { SteemOperation } from "./blockchain/SteemOperation";
 import { SetRules, EffectuatedSetRules, isSetRules } from "./protocol/SetRules";
-import { Promise } from "bluebird";
 import { EffectuatedSmartvotesOperation } from "./protocol/EffectuatedSmartvotesOperation";
 import { isConfirmVote, ConfirmVote } from "./protocol/ConfirmVote";
 import { isSendVoteorder, SendVoteorder } from "./protocol/SendVoteorder";
@@ -19,32 +21,35 @@ export class Synchronizer {
     private api: Api;
     private protocol: Protocol;
     private delegator: string;
-    private rules: EffectuatedSetRules [] = [];
+    private notifier: Synchronizer.NotifierCallback;
 
+    private isRunning = true;
+    private rules: EffectuatedSetRules [] = [];
     private lastProcessedOperationNum: SteemOperationNumber = new SteemOperationNumber(0, 0, 0);
 
-    public constructor(api: Api, protocol: Protocol, delegator: string) {
+    public constructor(api: Api, protocol: Protocol, delegator: string, notifier: Synchronizer.NotifierCallback) {
         this.api = api;
         this.protocol = protocol;
         this.delegator = delegator;
+        this.notifier = notifier;
     }
 
-    public runLoop(since: SteemOperationNumber, notifierCallback: (error: Error | undefined, message: string, moment: SteemOperationNumber) => boolean) {
+    public runLoop(since: SteemOperationNumber) {
         this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
         .then((rules: EffectuatedSetRules []) => {
             this.rules = rules;
-            this.processBlock(since.blockNum, notifierCallback);
+            this.processBlock(since.blockNum);
         })
         .catch((error: Error) => {
-            notifierCallback(error, "", this.lastProcessedOperationNum);
+            this.notifier(error, { type: Synchronizer.EventType.UnhandledError,
+                 error: error, moment: this.lastProcessedOperationNum, message: "Unhandled error in synchronizer loop: " + error.message });
         });
     }
 
-    private processBlock(blockNum: number, notifierCallback: (error: Error | undefined, message: string, moment: SteemOperationNumber) => boolean) {
-        if (!notifierCallback(undefined, "Loading block " + blockNum, new SteemOperationNumber(blockNum, 0, 0))) {
-            return;
-        }
+    private processBlock(blockNum: number) {
+        this.notify(undefined, { type: Synchronizer.EventType.StartBlockProcessing, blockNum: blockNum, message: "Start processing block " + blockNum });
+        if (!this.isRunning) return;
 
         Promise.resolve(true)
         .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
@@ -52,11 +57,14 @@ export class Synchronizer {
             return this.processOperation(op);
         })
         .then(() => {
-            if (notifierCallback(undefined, "Finished processing block", this.lastProcessedOperationNum))
-                this.processBlock(blockNum + 1, notifierCallback);
+            this.notify(undefined, { type: Synchronizer.EventType.EndBlockProcessing, blockNum: blockNum, message: "End processing block " + blockNum });
+            if (this.isRunning) this.processBlock(blockNum + 1);
         }, (error: Error) => {
-            if (notifierCallback(error, "Got error. Reloading the same block in 3 seconds.", this.lastProcessedOperationNum)) {
-                setTimeout(() => this.processBlock(blockNum, notifierCallback), 3000);
+            this.notify(undefined, { type: Synchronizer.EventType.ReversibleError,
+                error: error, moment: this.lastProcessedOperationNum, message: " Reversible error: " + error.message + ". Retrying in 3 seconds..." });
+
+                if (this.isRunning) {
+                setTimeout(() => this.processBlock(blockNum), 3000);
             }
         });
     }
@@ -154,7 +162,12 @@ export class Synchronizer {
 
         opsToSend.push(["vote", voteOp]);
 
-        return this.api.sendToBlockchain(opsToSend).then(() => {});
+        this.notify(undefined, { type: Synchronizer.EventType.VoteorderPassed, voteorder: cmd, moment: op.moment, message: "Voteorder passed" });
+
+        return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
+            this.notify(undefined, { type: Synchronizer.EventType.OperarionsPushed,
+            operations: opsToSend, moment: moment, message: "Sent operations to blockchain: " + _.join(opsToSend.map(op => op[0]), ",")});
+        });
     }
 
     private rejectVoteorder(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder, msg: string): Promise<void> {
@@ -170,9 +183,94 @@ export class Synchronizer {
         };
         const opsToSend: [string, object][] = this.protocol.serializeToBlockchain(wiseOp);
 
-        return this.api.sendToBlockchain(opsToSend).then(() => {});
+        this.notify(undefined, { type: Synchronizer.EventType.VoteorderRejected, voteorder: cmd, moment: op.moment, message: "Voteorder rejected: " + msg, validationError: undefined });
+
+        return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
+            this.notify(undefined, { type: Synchronizer.EventType.OperarionsPushed,
+            operations: opsToSend, moment: moment, message: "Sent operations to blockchain: " + _.join(opsToSend.map(op => op[0]), ",")});
+        });
+    }
+
+    private notify(error: Error | undefined, event: Synchronizer.Event) {
+        this.isRunning = this.notifier(error, event);
     }
 }
+
+export namespace Synchronizer {
+    export interface NotifierCallback {
+        (error: Error | undefined, event: Synchronizer.Event): boolean;
+    }
+
+    export enum EventType {
+        StartBlockProcessing = "start-block-processing",
+        EndBlockProcessing = "end-block-processing",
+        OperarionsPushed = "operations-pushed",
+        VoteorderRejected = "voteorder-rejected",
+        VoteorderPassed = "voteordr-passed",
+        ReversibleError = "reversible-error",
+        UnhandledError = "unhandled-error"
+
+    }
+
+    export type Event = Synchronizer.StartBlockProcessingEvent
+                      | Synchronizer.EndBlockProcessingEvent
+                      | OperarionsPushedEvent
+                      | VoteorderRejected
+                      | VoteorderPassed
+                      | ReversibleErrorEvent
+                      | UnhandledErrorEvent
+                      ;
+
+    export interface StartBlockProcessingEvent {
+        type: EventType.StartBlockProcessing;
+        blockNum: number;
+        message: string;
+    }
+
+    export interface EndBlockProcessingEvent {
+        type: EventType.EndBlockProcessing;
+        blockNum: number;
+        message: string;
+    }
+
+    export interface OperarionsPushedEvent {
+        type: EventType.OperarionsPushed;
+        operations: [string, object][];
+        moment: SteemOperationNumber;
+        message: string;
+    }
+
+    export interface VoteorderRejected {
+        type: EventType.VoteorderRejected;
+        voteorder: SendVoteorder;
+        moment: SteemOperationNumber;
+        validationError: ValidationError | undefined;
+        message: string;
+    }
+
+    export interface VoteorderPassed {
+        type: EventType.VoteorderPassed;
+        voteorder: SendVoteorder;
+        moment: SteemOperationNumber;
+        message: string;
+    }
+
+    export interface ReversibleErrorEvent {
+        type: EventType.ReversibleError;
+        moment: SteemOperationNumber;
+        error: Error;
+        message: string;
+    }
+
+    export interface UnhandledErrorEvent {
+        type: EventType.UnhandledError;
+        moment: SteemOperationNumber;
+        error: Error;
+        message: string;
+    }
+}
+
+
 
 interface VoteOperation {
     voter: string;

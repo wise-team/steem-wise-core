@@ -11,6 +11,7 @@ import { FakeApi } from "../src/api/FakeApi";
 import { Util } from "../src/util/util";
 
 import * as fakeDataset_ from "./data/fake-blockchain.json";
+import { Synchronizer } from "../src/Synchronizer";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
 /**
@@ -87,8 +88,10 @@ describe("test/index.spec.ts", () => {
         let synchronizationPromise: Promise<void>;
         it("Starts synchronization without error", () => {
             const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
-                delegatorWise.runSynchronizerLoop(new SteemOperationNumber(fakeApi.getCurrentBlockNum(), 0, 0), (error: Error | undefined, message: string, moment: SteemOperationNumber): boolean => {
-                    console.log(message);
+                delegatorWise.runSynchronizerLoop(new SteemOperationNumber(fakeApi.getCurrentBlockNum(), 0, 0),
+                    (error: Error | undefined, event: Synchronizer.Event): boolean => {
+                    console.log(event.message);
+
                     if (error) {
                         reject(error);
                         return false;
