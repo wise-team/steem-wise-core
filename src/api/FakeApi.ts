@@ -42,7 +42,7 @@ export class FakeApi extends Api {
         return new Promise<SteemPost>((resolve, reject) => {
             for (let i = 0; i < this.posts.length; i++) {
                 if (this.posts[i].author === author && this.posts[i].permlink === permlink) {
-                    resolve(this.posts[i]);
+                    setTimeout(() => resolve(this.posts[i]), 10);
                     return;
                 }
             }
@@ -79,7 +79,7 @@ export class FakeApi extends Api {
                 };
                 this.operations.push(steemOp);
             }
-            resolve(new SteemOperationNumber(blockNum, 0, operations.length - 1));
+            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operations.length - 1)), 10);
         });
     }
 
@@ -106,13 +106,13 @@ export class FakeApi extends Api {
                     }
                 }
             }
-            resolve(result);
+            setTimeout(() => resolve(result), 10);
         });
     }
 
     public getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
         return new Promise((resolve, reject) => {
-            resolve(
+            setTimeout(() => resolve(
                 this.operations
                 .map((op: SteemOperation) => protocol.handleOrReject(op))
                 .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => (!!handledOrRejected))
@@ -124,13 +124,13 @@ export class FakeApi extends Api {
                     if (current.isGreaterThan(newest)) return current;
                     else return newest;
                 }, V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT)
-            );
+            ), 10);
         });
     }
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => {
-            resolve(
+            setTimeout(() => resolve(
                 this.operations
                 .filter ((op: SteemOperation) => op.block_num === blockNum)
                 .map((op: SteemOperation) => protocol.handleOrReject(op))
@@ -138,23 +138,23 @@ export class FakeApi extends Api {
                 .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
                 .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
                 .filter((effSop: EffectuatedSmartvotesOperation) => effSop.delegator === delegator)
-            );
+            ), 10);
         });
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
         return new Promise((resolve, reject) => {
             this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
-            resolve(this.dynamicGlobalProperties);
+            setTimeout(() => resolve(this.dynamicGlobalProperties), 10);
         });
     }
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
         return new Promise((resolve, reject) => {
-            resolve(
+            setTimeout(() => resolve(
                 this.accounts.filter((info: AccountInfo) => info.name === username)
                 [0]
-            );
+            ), 10);
         });
     }
 }
