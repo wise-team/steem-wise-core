@@ -11,10 +11,12 @@
   "dependencies": {
     "@types/axios": "^0.14.0",
     "@types/bluebird": "^3.5.20",
+    "@types/lodash": "^4.14.109",
     "ajv": "^6.4.0",
     "axios": "^0.18.0",
     "bluebird": "^3.5.1",
     "jayson": "^2.0.5",
+    "lodash": "^4.17.10",
     "setprototypeof": "^1.1.0",
     "steem": "^0.7.1"
   },
