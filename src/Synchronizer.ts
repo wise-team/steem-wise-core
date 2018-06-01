@@ -38,13 +38,13 @@ export class Synchronizer {
         })
         .catch((error: Error) => {
             notifierCallback(error, "", this.lastProcessedOperationNum);
-            console.error("Synchronizer loop terminated due to error");
-            console.error(error);
         });
     }
 
     private processBlock(blockNum: number, notifierCallback: (error: Error | undefined, message: string, moment: SteemOperationNumber) => boolean) {
-        if (!notifierCallback(undefined, "Loading block", new SteemOperationNumber(blockNum, 0, 0))) return;
+        if (!notifierCallback(undefined, "Loading block " + blockNum, new SteemOperationNumber(blockNum, 0, 0))) {
+            return;
+        }
 
         Promise.resolve(true)
         .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
@@ -52,14 +52,9 @@ export class Synchronizer {
             return this.processOperation(op);
         })
         .then(() => {
-            this.processBlock(blockNum + 1, notifierCallback);
-        })
-        .then(() => {
-            if (!notifierCallback(undefined, "Finished processing block", this.lastProcessedOperationNum)) throw new Error(this.synchronizationStoppedMsg);
-        })
-        .catch((error: Error) => {
-            if (error.message === this.synchronizationStoppedMsg) return;
-
+            if (notifierCallback(undefined, "Finished processing block", this.lastProcessedOperationNum))
+                this.processBlock(blockNum + 1, notifierCallback);
+        }, (error: Error) => {
             if (notifierCallback(error, "Got error. Reloading the same block in 3 seconds.", this.lastProcessedOperationNum)) {
                 setTimeout(() => this.processBlock(blockNum, notifierCallback), 3000);
             }
@@ -69,13 +64,17 @@ export class Synchronizer {
     private processOperation(op: EffectuatedSmartvotesOperation): Promise<void> {
         return new Promise((resolve, reject) => {
             const currentOpNum = op.moment;
-            if (currentOpNum.isLesserOrEqual(this.lastProcessedOperationNum)) resolve();
+            const lastProcessedOperationNum = this.lastProcessedOperationNum;
+            this.lastProcessedOperationNum = currentOpNum;
+
+            if (currentOpNum.isLesserOrEqual(lastProcessedOperationNum)) resolve();
             else {
                 if (op.delegator === this.delegator) {
                     if (isSetRules(op.command)) this.updateRulesArray(op, op.command).then(() => resolve()).catch((error: Error) => reject(error));
                     else if (isSendVoteorder(op.command)) this.processVoteorder(op, op.command).then(() => resolve()).catch((error: Error) => reject(error));
+                    else resolve();
                 }
-                this.lastProcessedOperationNum = currentOpNum;
+                else resolve();
             }
         });
     }
