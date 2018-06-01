@@ -176,6 +176,14 @@ describe("test/api.spec.ts", function () {
                 });
             });
 
+            it("Returns empty array if no operations are present", () => {
+                const blockNum = 1;
+                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(0);
+                });
+            });
+
             it("Loads wise operations sent by voter but refering to delegator", () => {
                 return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", 22484096, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
@@ -193,6 +201,8 @@ describe("test/api.spec.ts", function () {
                     expect(ops).to.be.an("array").with.length(0);
                 });
             });
+
+            it.skip("Waits for future block", () => {});
         });
 
         describe("#getDynamicGlobalProperties", () => {
