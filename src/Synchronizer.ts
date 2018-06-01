@@ -12,6 +12,7 @@ import { Validator } from "./validation/Validator";
 import { ValidationError } from "./validation/ValidationError";
 import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 
+// TODO proper error handling (separate errors that should be reported to ConfirmVotes and Reversible errors [eg. network errors])
 export class Synchronizer {
     private synchronizationStoppedMsg: string = "Synchronization stopped";
 
@@ -97,16 +98,16 @@ export class Synchronizer {
             const rules = this.determineRules(op, cmd);
             if (rules) {
                 v.provideRulesets(rules);
-                v.validate(this.delegator, op.voter, cmd, op.moment,
-                    (error: Error | undefined, result: true | ValidationError | undefined): void => {
-                        if (error) reject(error);
-                        else if (result === true) {
-                            this.voteAndConfirm(op, cmd).then(() => resolve()).catch((error: Error) => reject(error));
-                        }
-                        else {
-                            this.rejectVoteorder(op, cmd, (result as ValidationError).message).then(() => resolve()).catch((error: Error) => reject(error));
-                        }
-                    });
+                v.validate(this.delegator, op.voter, cmd, op.moment)
+                .then((result: ValidationError | true) => {
+                    if (result === true) {
+                        this.voteAndConfirm(op, cmd).then(() => resolve()).catch((error: Error) => reject(error));
+                    }
+                    else {
+                        this.rejectVoteorder(op, cmd, (result as ValidationError).message).then(() => resolve()).catch((error: Error) => reject(error));
+                    }
+                })
+                .catch((error: Error) => reject(error));
             }
             else this.rejectVoteorder(op, cmd, "There is no ruleset for you").then(() => resolve()).catch((error: Error) => reject(error));
         });

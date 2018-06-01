@@ -55,6 +55,29 @@ export class Wise {
         }
     }
 
+    // TODO comment
+    public sendRulesAsync = (voter: string, rules: SetRules, proggressCallback?: ProggressCallback
+    ): Promise<SteemOperationNumber> => {
+        // TODO proggress callback
+
+        const smOp: SmartvotesOperation = {
+            voter: voter,
+            delegator: this.username,
+            command: rules
+        };
+
+        return new Promise<[string, object][]>((resolve, reject) => {
+            const steemOps: [string, object][] = this.protocol.serializeToBlockchain(smOp);
+            if (steemOps.length !== 1) reject(new Error("SetRules should be a single blockchain operation"));
+            else resolve(steemOps);
+        })
+        .then((steemOps: [string, object][]) => {
+            if (this.validateOperation(steemOps[0])) return (steemOps);
+            else throw new Error("Operation object has invalid structure");
+        })
+        .then((steemOps: [string, object][]) => this.api.sendToBlockchain(steemOps));
+    }
+
     /**
      * Sends rulesets.
      * @param voter — voter for whom these rulesets are empowered.
@@ -66,24 +89,7 @@ export class Wise {
         callback: (error: Error | undefined, result: SteemOperationNumber | undefined) => void,
         proggressCallback?: ProggressCallback
     ): void => {
-        // TODO proggress callback
-
-        const smOp: SmartvotesOperation = {
-            voter: voter,
-            delegator: this.username,
-            command: rules
-        };
-
-        new Promise<[string, object][]>((resolve, reject) => {
-            const steemOps: [string, object][] = this.protocol.serializeToBlockchain(smOp);
-            if (steemOps.length !== 1) reject(new Error("SetRules should be a single blockchain operation"));
-            else resolve(steemOps);
-        })
-        .then((steemOps: [string, object][]) => {
-            if (this.validateOperation(steemOps[0])) return (steemOps);
-            else throw new Error("Operation object has invalid structure");
-        })
-        .then((steemOps: [string, object][]) => this.api.sendToBlockchain(steemOps))
+        this.sendRulesAsync(voter, rules, proggressCallback)
         .then((son: SteemOperationNumber) => callback(undefined, son))
         .catch(error => callback(error, undefined));
     }
@@ -96,6 +102,39 @@ export class Wise {
      * @param proggressCallback (optional)
      * @param skipValidation (optional)
      */
+    public sendVoteorderAsync = (delegator: string, voteorder: SendVoteorder,
+        proggressCallback?: ProggressCallback, skipValidation?: boolean): Promise<SteemOperationNumber> => {
+
+        // TODO proggress callback
+
+        const smOp: SmartvotesOperation = {
+            voter: this.username,
+            delegator: delegator,
+            command: voteorder
+        };
+
+        return new Promise<[string, object][]>((resolve, reject) => {
+            const steemOps: [string, object][] = this.protocol.serializeToBlockchain(smOp);
+            if (steemOps.length !== 1) reject(new Error("An voteorder should be a single blockchain operation"));
+            else resolve(steemOps);
+        })
+        .then((steemOps: [string, object][]) => {
+            if (skipValidation) return steemOps;
+            else if (this.validateOperation(steemOps[0])) return steemOps;
+            else throw new Error("Operation object has invalid structure");
+        }).then((steemOps: [string, object][]) => { return new Promise<[string, object][]>((resolve, reject) => {
+            if (skipValidation) resolve(steemOps);
+            else this.validatePotentialVoteorder(delegator, this.username, voteorder,
+                (error: Error | undefined, result: undefined | ValidationError | true) => {
+                    if (error) reject(error);
+                    else if (result !== true) reject(result);
+                    else resolve(steemOps);
+                });
+        }); })
+        .then((steemOps: [string, object][]) => this.api.sendToBlockchain(steemOps));
+    }
+
+    // TODO comment
     public sendVoteorder = (delegator: string, voteorder: SendVoteorder,
         callback: (error: Error | undefined, result: SteemOperationNumber | undefined) => void,
         proggressCallback?: ProggressCallback, skipValidation?: boolean): void => {
@@ -162,8 +201,13 @@ export class Wise {
      * @param atMoment — a moment in blockchain
      * @param callback — a callback
      */ // TODO test
+    public getRulesetsAsync = (delegator: string, atMoment: SteemOperationNumber): Promise<SetRules> => {
+        return this.api.loadRulesets(delegator, this.username, atMoment, this.protocol);
+    }
+
+    // TODO comment
     public getRulesets = (delegator: string, atMoment: SteemOperationNumber, callback: (error: Error | undefined, result: SetRules | undefined) => void): void => {
-        this.api.loadRulesets(delegator, this.username, atMoment, this.protocol)
+        this.getRulesetsAsync(delegator, atMoment)
         .then((rules: SetRules) => callback(undefined, rules))
         .catch(error => callback(error, undefined));
     }
@@ -177,13 +221,20 @@ export class Wise {
      * @param callback — a callback. Note that result is a true if valid (=== true), or ValidationError (== true, but !== true). So you should always use triple comparison operator
      * @param proggressCallback — a proggress callback
      */ // TODO test
-    public validateVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
-        callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
-        proggressCallback?: ProggressCallback): void => {
+    public validateVoteorderAsync = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
+        proggressCallback?: ProggressCallback): Promise<ValidationError | true> => {
             const v = new Validator(this.api, this.protocol);
             if (proggressCallback) v.withProggressCallback(proggressCallback);
 
-            v.validate(delegator, voter, voteorder, atMoment, callback);
+            return v.validate(delegator, voter, voteorder, atMoment);
+    }
+
+    public validateVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
+        callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
+        proggressCallback?: ProggressCallback): void => {
+            this.validateVoteorderAsync(delegator, voter, voteorder, atMoment, proggressCallback)
+            .then((result: ValidationError | true) => callback(undefined, result))
+            .catch((error: Error) => callback(error, undefined));
     }
 
     /**
@@ -195,7 +246,13 @@ export class Wise {
      * @param callback — a callback. Note that result is a true if valid (=== true), or ValidationError (== true, but !== true). So you should always use triple comparison operator
      * @param proggressCallback — a proggress callback
      */ // TODO test
-     public validatePotentialVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder,
+     public validatePotentialVoteorderAsync = (delegator: string, voter: string, voteorder: SendVoteorder,
+        proggressCallback?: ProggressCallback): Promise<ValidationError | true> => {
+        return this.validateVoteorderAsync(delegator, voter, voteorder, SteemOperationNumber.FUTURE, proggressCallback);
+    }
+
+    // TODO comment
+    public validatePotentialVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder,
         callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
         proggressCallback?: ProggressCallback): void => {
         this.validateVoteorder(delegator, voter, voteorder, SteemOperationNumber.FUTURE, callback, proggressCallback);
@@ -213,9 +270,15 @@ export class Wise {
 
     // TODO comment
     // TODO test
-     public getLastConfirmationMoment = (callback: (error: Error | undefined, result: undefined | SteemOperationNumber) => void): void => {
-        this.api.getLastConfirmationMoment(this.username, this.getProtocol())
-        .then((son: SteemOperationNumber) => callback(undefined, son))
+     public getLastConfirmationMomentAsync = (): Promise<undefined | SteemOperationNumber> => {
+        return this.api.getLastConfirmationMoment(this.username, this.getProtocol());
+    }
+
+    // TODO comment
+    // TODO test
+    public getLastConfirmationMoment = (callback: (error: Error | undefined, result: undefined | SteemOperationNumber) => void): void => {
+        this.getLastConfirmationMomentAsync()
+        .then((son: SteemOperationNumber | undefined) => callback(undefined, son))
         .catch((error: Error) => callback(error, undefined));
     }
 

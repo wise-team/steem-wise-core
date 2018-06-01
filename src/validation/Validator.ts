@@ -36,12 +36,11 @@ export class Validator {
         this.providedRulesets = rulesets;
     }
 
-    public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
-        callback: (error: Error | undefined, result: undefined | ValidationError | true) => void) => {
+    public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationError | true> => {
 
         const context = new ValidationContext(this.api, delegator, voter, voteorder);
 
-        this.validateVoteorderObject(voteorder)
+        return this.validateVoteorderObject(voteorder)
         .then(() => {
             if (this.providedRulesets) return this.providedRulesets;
             else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
@@ -49,12 +48,9 @@ export class Validator {
         .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
         .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules(delegator, voter))) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
         .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
-        .then(() => {
-            callback(undefined, true);
-        })
-        .catch(error => {
-            if ((error as ValidationError).validationError) callback(undefined, error);
-            else callback(error, undefined);
+        .then((): true => true, (error: Error): ValidationError => {
+            if ((error as ValidationError).validationError) return error as ValidationError;
+            else throw error;
         });
 
     }
