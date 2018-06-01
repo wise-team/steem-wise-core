@@ -20,7 +20,7 @@ const voter = "voter123";
 const delegator = "delegator456";
 const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
 const delegatorWise = new Wise(delegator, fakeApi);
-const voterWise = new Wise(delegator, fakeApi);
+const voterWise = new Wise(voter, fakeApi);
 let syncRunning = true;
 
 /**
@@ -68,7 +68,7 @@ sequence.push(["Delegator sets rules for voter", () => {
     .then((son: SteemOperationNumber) => {
         expect(son.blockNum).to.be.greaterThan(0);
     })
-    .then(() => Promise.delay(100))
+    .then(() => Promise.delay(50))
     .then(() => {
         return voterWise.getRulesetsAsync(delegator, SteemOperationNumber.FUTURE);
     })
