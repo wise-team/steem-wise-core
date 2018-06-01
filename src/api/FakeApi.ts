@@ -20,6 +20,7 @@ export class FakeApi extends Api {
     private operations: SteemOperation [];
     private dynamicGlobalProperties: DynamicGlobalProperties;
     private accounts: AccountInfo [];
+    private currentBlock = 0;
 
     public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], operations: SteemOperation []) {
         super();
@@ -28,6 +29,7 @@ export class FakeApi extends Api {
         this.dynamicGlobalProperties = dynamicGlobalProperties;
         this.accounts = accounts;
         this.operations = operations;
+        this.currentBlock = this.operations.map(op => op.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0);
     }
 
     public static fromDataset(dataset: FakeApi.Dataset): FakeApi {
@@ -66,7 +68,7 @@ export class FakeApi extends Api {
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
         return new Promise((resolve, reject) => {
-            const blockNum = this.operations[this.operations.length - 1].block_num;
+            const blockNum = this.currentBlock + 1;
             for (let i = 0; i < operations.length; i++) {
                 const op = operations[i];
                 const steemOp: SteemOperation = {
@@ -78,6 +80,7 @@ export class FakeApi extends Api {
                     op: op
                 };
                 this.operations.push(steemOp);
+                this.currentBlock = blockNum;
             }
             setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operations.length - 1)), 10);
         });
@@ -130,7 +133,16 @@ export class FakeApi extends Api {
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => {
-            setTimeout(() => resolve(
+            if (blockNum > this.currentBlock + 1) reject(new Error("Cannot get block that has number greater than next block (blockNum must be <= this.currentBlockNum+1)"));
+            let awaitBlock: (thenFn: () => void) => void = () => {};
+            awaitBlock = (thenFn: () => void) => {
+                if (blockNum <= this.currentBlock) thenFn();
+                else {
+                    setTimeout(() => awaitBlock(thenFn), 10);
+                }
+            };
+
+            setTimeout(() => awaitBlock(() => resolve(
                 this.operations
                 .filter ((op: SteemOperation) => op.block_num === blockNum)
                 .map((op: SteemOperation) => protocol.handleOrReject(op))
@@ -138,7 +150,7 @@ export class FakeApi extends Api {
                 .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
                 .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
                 .filter((effSop: EffectuatedSmartvotesOperation) => effSop.delegator === delegator)
-            ), 10);
+            )), 5);
         });
     }
 
@@ -156,6 +168,15 @@ export class FakeApi extends Api {
                 [0]
             ), 10);
         });
+    }
+
+    public getCurrentBlockNum(): number {
+        return this.currentBlock;
+    }
+
+    public pushFakeBlock(): Promise<SteemOperationNumber> {
+        const op: [string, object] = ["fake", {}];
+        return this.sendToBlockchain([op]);
     }
 }
 
