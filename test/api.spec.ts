@@ -1,6 +1,7 @@
 import { assert, expect } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
+import * as _ from "lodash";
 
 import * as fakeDataset_ from "./data/fake-blockchain.json";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
@@ -241,7 +242,23 @@ describe("test/api.spec.ts", function () {
                 });
             });
 
-            it.skip("Waits for future block", () => {});
+            it.only("Waits for future block", function () {
+                this.timeout(20000);
+
+                let blockNum: number;
+                for (const api of apis) if (api.name() === "FakeApi") _.times(2, (num) => setTimeout(() => (api as FakeApi).pushFakeBlock(), 200 * num));
+
+                return api.getDynamicGlobalProperties()
+                .then((dgp: DynamicGlobalProperties) => {
+                    blockNum = dgp.head_block_number;
+                })
+                .then(() => api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum, wise.getProtocol()))
+                .then(() => blockNum++)
+                .then(() => api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum, wise.getProtocol()))
+                .then(() => blockNum++)
+                .then(() => api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum, wise.getProtocol()))
+                .then(() => {});
+            });
         });
 
         describe("#getDynamicGlobalProperties", () => {

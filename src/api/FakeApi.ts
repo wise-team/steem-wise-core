@@ -1,4 +1,5 @@
 import * as Promise from "bluebird";
+import * as _ from "lodash";
 
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules, isSetRules } from "../../src/protocol/SetRules";
@@ -160,7 +161,8 @@ export class FakeApi extends Api {
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
         return new Promise((resolve, reject) => {
             this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
-            setTimeout(() => resolve(this.dynamicGlobalProperties), 4);
+            this.dynamicGlobalProperties.head_block_number = this.currentBlock;
+            setTimeout(() => resolve(_.cloneDeep(this.dynamicGlobalProperties)), 4);
         });
     }
 
