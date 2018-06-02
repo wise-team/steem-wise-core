@@ -22,7 +22,7 @@ export class Util {
         return to;
     }
 
-    public static definedOrThrow = <T> (input: T | undefined, error: Error): T => {
+    public static definedOrThrow = <T> (input: T | undefined, error: Error = new Error("Undefined")): T => {
         if (input) return input;
         else throw error;
     };

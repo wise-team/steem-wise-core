@@ -34,7 +34,7 @@ export class Synchronizer {
         this.notifier = notifier;
     }
 
-    public runLoop(since: SteemOperationNumber) {
+    public runLoop(since: SteemOperationNumber): Synchronizer {
         this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
         .then((rules: EffectuatedSetRules []) => {
@@ -45,28 +45,32 @@ export class Synchronizer {
             this.notifier(error, { type: Synchronizer.EventType.UnhandledError,
                  error: error, moment: this.lastProcessedOperationNum, message: "Unhandled error in synchronizer loop: " + error.message });
         });
+
+        return this;
+    }
+
+    public stop(): void {
+        this.isRunning = false;
     }
 
     private processBlock(blockNum: number) {
         this.notify(undefined, { type: Synchronizer.EventType.StartBlockProcessing, blockNum: blockNum, message: "Start processing block " + blockNum });
-        if (!this.isRunning) return;
+        this.continueIfRunning(() =>
+            Promise.resolve(true)
+            .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
+            .mapSeries((op: EffectuatedSmartvotesOperation) => {
+                return this.processOperation(op);
+            })
+            .then(() => {
+                this.notify(undefined, { type: Synchronizer.EventType.EndBlockProcessing, blockNum: blockNum, message: "End processing block " + blockNum });
+                this.continueIfRunning(() => this.processBlock(blockNum + 1));
+            }, (error: Error) => {
+                this.notify(undefined, { type: Synchronizer.EventType.ReversibleError,
+                    error: error, moment: this.lastProcessedOperationNum, message: " Reversible error: " + error.message + ". Retrying in 3 seconds..." });
 
-        Promise.resolve(true)
-        .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
-        .mapSeries((op: EffectuatedSmartvotesOperation) => {
-            return this.processOperation(op);
-        })
-        .then(() => {
-            this.notify(undefined, { type: Synchronizer.EventType.EndBlockProcessing, blockNum: blockNum, message: "End processing block " + blockNum });
-            if (this.isRunning) this.processBlock(blockNum + 1);
-        }, (error: Error) => {
-            this.notify(undefined, { type: Synchronizer.EventType.ReversibleError,
-                error: error, moment: this.lastProcessedOperationNum, message: " Reversible error: " + error.message + ". Retrying in 3 seconds..." });
-
-                if (this.isRunning) {
-                setTimeout(() => this.processBlock(blockNum), 3000);
-            }
-        });
+                this.continueIfRunning(() => setTimeout(() => this.processBlock(blockNum), 3000));
+            })
+        );
     }
 
     private processOperation(op: EffectuatedSmartvotesOperation): Promise<void> {
@@ -141,6 +145,17 @@ export class Synchronizer {
     }
 
     private voteAndConfirm(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): Promise<void> {
+        const opsToSend: [string, object][] = [];
+
+        const voteOp: VoteOperation = {
+            voter: this.delegator,
+            author: cmd.author,
+            permlink: cmd.permlink,
+            weight: cmd.weight
+        };
+
+        opsToSend.push(["vote", voteOp]);
+
         const confirmCmd: ConfirmVote = {
             voteorderTxId: op.transaction_id,
             accepted: true,
@@ -151,16 +166,7 @@ export class Synchronizer {
             delegator: this.delegator,
             command: confirmCmd
         };
-        const opsToSend: [string, object][] = this.protocol.serializeToBlockchain(wiseOp);
-
-        const voteOp: VoteOperation = {
-            voter: this.delegator,
-            author: cmd.author,
-            permlink: cmd.permlink,
-            weight: cmd.weight
-        };
-
-        opsToSend.push(["vote", voteOp]);
+        opsToSend.push(...this.protocol.serializeToBlockchain(wiseOp));
 
         this.notify(undefined, { type: Synchronizer.EventType.VoteorderPassed, voteorder: cmd, moment: op.moment, message: "Voteorder passed" });
 
@@ -192,13 +198,20 @@ export class Synchronizer {
     }
 
     private notify(error: Error | undefined, event: Synchronizer.Event) {
-        this.isRunning = this.notifier(error, event);
+        this.notifier(error, event);
+    }
+
+    private continueIfRunning(fn: () => void) {
+        if (this.isRunning) fn();
+        else {
+            this.notify(undefined, { type: Synchronizer.EventType.SynchronizationStop, moment: this.lastProcessedOperationNum });
+        }
     }
 }
 
 export namespace Synchronizer {
     export interface NotifierCallback {
-        (error: Error | undefined, event: Synchronizer.Event): boolean;
+        (error: Error | undefined, event: Synchronizer.Event): void;
     }
 
     export enum EventType {
@@ -208,7 +221,8 @@ export namespace Synchronizer {
         VoteorderRejected = "voteorder-rejected",
         VoteorderPassed = "voteordr-passed",
         ReversibleError = "reversible-error",
-        UnhandledError = "unhandled-error"
+        UnhandledError = "unhandled-error",
+        SynchronizationStop = "synchronization-stop"
 
     }
 
@@ -219,6 +233,7 @@ export namespace Synchronizer {
                       | VoteorderPassed
                       | ReversibleErrorEvent
                       | UnhandledErrorEvent
+                      | SynchronizationStopEvent
                       ;
 
     export interface StartBlockProcessingEvent {
@@ -267,6 +282,11 @@ export namespace Synchronizer {
         moment: SteemOperationNumber;
         error: Error;
         message: string;
+    }
+
+    export interface SynchronizationStopEvent {
+        type: EventType.SynchronizationStop;
+        moment: SteemOperationNumber;
     }
 }
 

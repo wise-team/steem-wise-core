@@ -37,6 +37,7 @@ const postLinks: [string, string][] = [
     ["tanata", "man-of-steel"],
     ["noisy", "public-and-private-keys-how-to-generate-all-steem-user-s-keys-from-master-password-without-a-steemit-website-being-offline"],
     ["phgnomo", "steem-project-of-the-week-1-get-on-steem"],
+    ["perduta", "do-you-feel-connected-to-your-home-country"],
 ];
 
 let posts: SteemPost [] = [];

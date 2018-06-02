@@ -21,6 +21,7 @@ export class FakeApi extends Api {
     private dynamicGlobalProperties: DynamicGlobalProperties;
     private accounts: AccountInfo [];
     private currentBlock = 0;
+    private pushedOperations: SteemOperation [] = [];
 
     public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], operations: SteemOperation []) {
         super();
@@ -44,12 +45,12 @@ export class FakeApi extends Api {
         return new Promise<SteemPost>((resolve, reject) => {
             for (let i = 0; i < this.posts.length; i++) {
                 if (this.posts[i].author === author && this.posts[i].permlink === permlink) {
-                    setTimeout(() => resolve(this.posts[i]), 10);
+                    setTimeout(() => resolve(this.posts[i]), 4);
                     return;
                 }
             }
 
-            reject(new Error("No such post"));
+            reject(new Error("No such post @" + author + "/" + permlink));
         });
     }
 
@@ -80,9 +81,10 @@ export class FakeApi extends Api {
                     op: op
                 };
                 this.operations.push(steemOp);
+                this.pushedOperations.push(steemOp);
                 this.currentBlock = blockNum;
             }
-            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operations.length - 1)), 10);
+            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operations.length - 1)), 4);
         });
     }
 
@@ -109,7 +111,7 @@ export class FakeApi extends Api {
                     }
                 }
             }
-            setTimeout(() => resolve(result), 10);
+            setTimeout(() => resolve(result), 4);
         });
     }
 
@@ -127,7 +129,7 @@ export class FakeApi extends Api {
                     if (current.isGreaterThan(newest)) return current;
                     else return newest;
                 }, V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT)
-            ), 10);
+            ), 4);
         });
     }
 
@@ -138,7 +140,7 @@ export class FakeApi extends Api {
             awaitBlock = (thenFn: () => void) => {
                 if (blockNum <= this.currentBlock) thenFn();
                 else {
-                    setTimeout(() => awaitBlock(thenFn), 10);
+                    setTimeout(() => awaitBlock(thenFn), 4);
                 }
             };
 
@@ -157,7 +159,7 @@ export class FakeApi extends Api {
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
         return new Promise((resolve, reject) => {
             this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
-            setTimeout(() => resolve(this.dynamicGlobalProperties), 10);
+            setTimeout(() => resolve(this.dynamicGlobalProperties), 4);
         });
     }
 
@@ -166,7 +168,7 @@ export class FakeApi extends Api {
             setTimeout(() => resolve(
                 this.accounts.filter((info: AccountInfo) => info.name === username)
                 [0]
-            ), 10);
+            ), 4);
         });
     }
 
@@ -177,6 +179,13 @@ export class FakeApi extends Api {
     public pushFakeBlock(): Promise<SteemOperationNumber> {
         const op: [string, object] = ["fake", {}];
         return this.sendToBlockchain([op]);
+    }
+
+    /**
+     * Returns all operations that were pushed using #sentToBlockchain() after initialization of FakeApi.
+     */
+    public getPushedOperations(): SteemOperation [] {
+        return this.pushedOperations;
     }
 }
 

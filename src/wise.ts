@@ -264,8 +264,8 @@ export class Wise {
      * @param since - where to start sinchronization
      * @param notifierCallback - a callback which is notified every time an event occurs. It should return true to continue synchronization, or false if to stop it.
      */ // TODO test
-    public runSynchronizerLoop = (since: SteemOperationNumber, notifierCallback: Synchronizer.NotifierCallback): void => {
-        new Synchronizer(this.api, this.protocol, this.username, notifierCallback).runLoop(since);
+    public runSynchronizerLoop = (since: SteemOperationNumber, notifierCallback: Synchronizer.NotifierCallback): Synchronizer => {
+        return new Synchronizer(this.api, this.protocol, this.username, notifierCallback).runLoop(since);
     }
 
     // TODO comment
