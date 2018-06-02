@@ -13,6 +13,7 @@ import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalPrope
 import { AccountInfo } from "../../src/blockchain/AccountInfo";
 import { isConfirmVote } from "../protocol/ConfirmVote";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
+import { NotFoundException } from "../util/NotFoundException";
 
 // TODO very slow. Examine why (maybe DirecrBlokchain could also be speeded up)
 export class FakeApi extends Api {
@@ -50,7 +51,7 @@ export class FakeApi extends Api {
                 }
             }
 
-            reject(new Error("No such post @" + author + "/" + permlink));
+            reject(new NotFoundException("No such post @" + author + "/" + permlink));
         });
     }
 
@@ -165,10 +166,9 @@ export class FakeApi extends Api {
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
         return new Promise((resolve, reject) => {
-            setTimeout(() => resolve(
-                this.accounts.filter((info: AccountInfo) => info.name === username)
-                [0]
-            ), 4);
+            const result = this.accounts.filter((info: AccountInfo) => info.name === username);
+            if (result.length === 0) setTimeout(() => reject(new NotFoundException("Account " + username + " does not exist")), 4);
+            else setTimeout(() => resolve(result[0]), 4);
         });
     }
 

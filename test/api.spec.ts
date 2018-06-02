@@ -99,7 +99,7 @@ describe("test/api.spec.ts", function () {
                 }));
             });
 
-            /*it("returns no rules for non existing delegator", () => { // TODO or throw? decide which better
+            it("returns no rules for non existing delegator", () => {
                 const delegator = "nonexistent-" + Date.now();
                 const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
@@ -109,7 +109,7 @@ describe("test/api.spec.ts", function () {
                 }));
             });
 
-            it("returns no rules for non existing voter", () => { // TODO or throw? decide which better
+            it("returns no rules for non existing voter", () => {
                 const delegator = v1TestingSequence.stage1_0_RulesetsUsername;
                 const voter = "nonexistent-" + Date.now();
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
@@ -117,9 +117,9 @@ describe("test/api.spec.ts", function () {
                 .then(((r: SetRules) => {
                     expect(r.rulesets).to.be.an("array").with.length(0);
                 }));
-            });*/
+            });
 
-            it("throws NotFoundException if delegator does not exist", (done) => {
+            /*it("throws NotFoundException if delegator does not exist", (done) => {
                 const delegator = "nonexistent-" + Date.now();
                 const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
@@ -141,7 +141,7 @@ describe("test/api.spec.ts", function () {
                     if ((e as NotFoundException).notFoundException) done();
                     else done(e);
                 });
-            });
+            });*/
         });
 
         describe("#sendToBlockchain", () => {
@@ -191,7 +191,7 @@ describe("test/api.spec.ts", function () {
                 });
             });
 
-            it("throws NotFoundException if delegator does not exist", (done) => {
+            /*it("throws NotFoundException if delegator does not exist", (done) => {
                 const delegator = "nonexistent-" + Date.now();
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
                 api.loadAllRulesets(delegator, moment, wise.getProtocol())
@@ -200,7 +200,7 @@ describe("test/api.spec.ts", function () {
                     if ((e as NotFoundException).notFoundException) done();
                     else done(e);
                 });
-            });
+            });*/
         });
 
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {

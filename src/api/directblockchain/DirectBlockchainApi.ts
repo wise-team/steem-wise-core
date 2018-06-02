@@ -21,6 +21,7 @@ import { VoterFilter } from "./VoterFilter";
 import { PrechainedSupplier } from "../../chainable/PrechainedSupplier";
 import { DynamicGlobalProperties } from "../../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../../blockchain/AccountInfo";
+import { NotFoundException } from "../../util/NotFoundException";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -45,7 +46,7 @@ export class DirectBlockchainApi extends Api {
         return new Promise((resolve, reject) => {
             this.steem.api.getContent(author, permlink, function(error: Error, result: any) {
                 if (error) reject(error);
-                else if (result.author.length === 0) reject(new Error("The post (@" + author + "/" + permlink + ") does not exist"));
+                else if (result.author.length === 0) reject(new NotFoundException("The post (@" + author + "/" + permlink + ") does not exist"));
                 else resolve(result as SteemPost);
             });
         });
@@ -244,7 +245,7 @@ export class DirectBlockchainApi extends Api {
                     if (result.length > 0) {
                         resolve(result[0]);
                     }
-                    else throw new Error("No such account found");
+                    else reject(new NotFoundException("Account " + username + " does not exist"));
                 }
             });
         });
