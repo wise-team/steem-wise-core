@@ -175,8 +175,18 @@ export class DirectBlockchainApi extends Api {
             this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => { // TODO would it be better to use RPC method get_ops_in_block?
                 if (error) reject(error);
                 else {
-                    const block = block_ as Block;
-                    resolve(this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, protocol));
+                    if (!block_) {
+                        setTimeout(() =>
+                            this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, protocol)
+                            .then((result: EffectuatedSmartvotesOperation []) => { resolve(result); }, e => { reject(e); })
+                        , 1500);
+                    }
+                    else {
+                        const block = block_ as Block;
+                        resolve(
+                            this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, protocol)
+                        );
+                    }
                 }
             });
         });

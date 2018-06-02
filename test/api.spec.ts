@@ -243,7 +243,7 @@ describe("test/api.spec.ts", function () {
             });
 
             it.only("Waits for future block", function () {
-                this.timeout(20000);
+                this.timeout(30000);
 
                 let blockNum: number;
                 for (const api of apis) if (api.name() === "FakeApi") _.times(2, (num) => setTimeout(() => (api as FakeApi).pushFakeBlock(), 200 * num));
