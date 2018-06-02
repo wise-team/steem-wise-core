@@ -1,6 +1,6 @@
 import { Rule } from "./Rule";
 import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
-import { ValidationError } from "../validation/ValidationError";
+import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SteemPost } from "../blockchain/SteemPost";
 import { SendVoteorder } from "../protocol/SendVoteorder";
@@ -30,7 +30,7 @@ export class TagsRule extends Rule {
                     for (let i = 0; i < postMetadata.tags.length; i++) {
                         const tag = postMetadata.tags[i];
                         if (this.tags.indexOf(tag) === -1)
-                                reject(new ValidationError("Tag " + tag + " is not on the allowed tags list [" + this.tags.join() + "]."));
+                                reject(new ValidationException("Tag " + tag + " is not on the allowed tags list [" + this.tags.join() + "]."));
                     }
                     resolve(true);
                 }
@@ -38,7 +38,7 @@ export class TagsRule extends Rule {
                     for (let i = 0; i < postMetadata.tags.length; i++) {
                         const tag = postMetadata.tags[i];
                         if (this.tags.indexOf(tag) !== -1)
-                                reject(new ValidationError("Tag " + tag + " is on the denied tags list [" + this.tags.join() + "]."));
+                                reject(new ValidationException("Tag " + tag + " is on the denied tags list [" + this.tags.join() + "]."));
                     }
                     resolve(true);
                 }
@@ -46,7 +46,7 @@ export class TagsRule extends Rule {
                     for (let i = 0; i < this.tags.length; i++) {
                         const tag = this.tags[i];
                         if (postMetadata.tags.indexOf(tag) === -1)
-                            reject(new ValidationError("The post tags [" + postMetadata.tags.join() + "] does not include " + tag + "."));
+                            reject(new ValidationException("The post tags [" + postMetadata.tags.join() + "] does not include " + tag + "."));
                     }
                     resolve(true);
                 }
@@ -58,9 +58,9 @@ export class TagsRule extends Rule {
                             return;
                         }
                     }
-                    reject(new ValidationError("None of the tags [" + postMetadata.tags.join() + "] is on the \"require\" tags list [" + this.tags.join() + "]."));
+                    reject(new ValidationException("None of the tags [" + postMetadata.tags.join() + "] is on the \"require\" tags list [" + this.tags.join() + "]."));
                 }
-                else reject(new ValidationError("Unknown mode in tags this."));
+                else reject(new ValidationException("Unknown mode in tags this."));
             });
         });
     }

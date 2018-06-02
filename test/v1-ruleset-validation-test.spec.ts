@@ -8,7 +8,7 @@ const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
 import { Util } from "../src/util/util";
 import { smartvotes_voteorder } from "../src/protocol/versions/v1/votes.schema";
-import { SteemOperationNumber, Wise, DirectBlockchainApi, SendVoteorder, ValidationError, AuthorsRule, TagsRule } from "../src/wise";
+import { SteemOperationNumber, Wise, DirectBlockchainApi, SendVoteorder, ValidationException, AuthorsRule, TagsRule } from "../src/wise";
 import { FakeApi } from "../src/api/FakeApi";
 
 const voter = "guest123";
@@ -33,7 +33,7 @@ describe("test/ruleset-validation.spec.ts", function() {
 
             const voteorder = validVoteorder;
 
-            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                 if (error) done(error);
                 else if (result !== true) done(result);
                 else done();
@@ -44,7 +44,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             this.timeout(100);
             const voteorder = JSON.parse("{}") as SendVoteorder;
 
-            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                 if (error) done(error);
                 else if (result === true) done(new Error("Should fail on empty voteorder"));
                 else done();
@@ -58,7 +58,7 @@ describe("test/ruleset-validation.spec.ts", function() {
                 propChanger[prop] = "";
                 const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, propChanger);
 
-                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                     if (error) done(error);
                     else if (result === true) done(new Error("Should fail on empty property " + prop));
                     else done();
@@ -71,7 +71,7 @@ describe("test/ruleset-validation.spec.ts", function() {
                 this.timeout(10000);
                 const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
 
-                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                     if (error) done(error);
                     else if (result === true) done(new Error("Should fail on invalid weight: " + weight));
                     else done();
@@ -84,7 +84,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             this.timeout(10000);
             const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 2 });
 
-            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                 if (error) done(error);
                 else if (result === true) done();
                 else done(result);
@@ -95,7 +95,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             this.timeout(10000);
             const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: "NonExistent" + Date.now() });
 
-            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                 if (error) done(error);
                 else if (result === true) done(new Error("Should fail on nonexistent ruleset"));
                 else done();
@@ -106,7 +106,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             this.timeout(10000);
             const voteorder: SendVoteorder = validVoteorder;
 
-            wise.validateVoteorder(delegator, "NonExistent-voter-" + Date.now(), voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+            wise.validateVoteorder(delegator, "NonExistent-voter-" + Date.now(), voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                 if (error) done(error);
                 else if (result === true) done(new Error("Should fail on different voter"));
                 else done();
@@ -137,7 +137,7 @@ describe("test/ruleset-validation.spec.ts", function() {
                 this.timeout(25000);
                 const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
 
-                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                     if (voteorderCase.pass) {
                         if (error) done(error);
                         else if (result === true) done();
@@ -194,7 +194,7 @@ describe("test/ruleset-validation.spec.ts", function() {
                 const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
 
 
-                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                     if (voteorderCase.pass) {
                         if (error) done(error);
                         else if (result === true) done();
@@ -225,7 +225,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             + " post=@" + voteorderCase.author + "/" + voteorderCase.permlink + "]", function(done) {
                 this.timeout(10000);
                 const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: voteorderCase.ruleset.name, author: voteorderCase.author, permlink: voteorderCase.permlink });
-                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+                wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                     if (voteorderCase.pass) {
                         if (error) done(error);
                         else if (result === true) done();
@@ -245,7 +245,7 @@ describe("test/ruleset-validation.spec.ts", function() {
             const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder,
                 { rulesetName: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
                     author: "noisy", permlink: "Non-existing-post" + new Date() }); // author is correct, but post doesnt exist => fail
-            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationError | undefined) {
+            wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                 if (error) done();
                 else if (result === true) done(new Error("Should fail on non existing post"));
                 else done();

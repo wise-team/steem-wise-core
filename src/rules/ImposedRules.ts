@@ -5,7 +5,7 @@ import { SendVoteorder } from "../protocol/SendVoteorder";
 import { ValidationContext } from "../validation/ValidationContext";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
-import { ValidationError } from "../validation/ValidationError";
+import { ValidationException } from "../validation/ValidationException";
 import { BlockchainConfig } from "../blockchain/BlockchainConfig";
 
 export class ImposedRules {
@@ -51,23 +51,23 @@ export namespace ImposedRules {
 
                 const regenerated_power = (BlockchainConfig.STEEM_100_PERCENT * elapsed_seconds) / BlockchainConfig.STEEM_VOTE_REGENERATION_SECONDS;
                 const current_power = Math.min(accountInfo.voting_power + regenerated_power, BlockchainConfig.STEEM_100_PERCENT);
-                if (current_power <= 0) throw new ValidationError("Account " + this.voter + " currently does not have voting power.");
+                if (current_power <= 0) throw new ValidationException("Account " + this.voter + " currently does not have voting power.");
 
                 const abs_weight = Math.abs( voteorder.weight );
 
                 let used_power = ((current_power * abs_weight) / BlockchainConfig.STEEM_100_PERCENT) * (60 * 60 * 24);
 
                 const max_vote_denom = votes_per_regeneration_period * BlockchainConfig.STEEM_VOTE_REGENERATION_SECONDS;
-                if (max_vote_denom <= 0) throw new ValidationError("Account " + this.voter + ": max_vote_denom = " + max_vote_denom);
+                if (max_vote_denom <= 0) throw new ValidationException("Account " + this.voter + ": max_vote_denom = " + max_vote_denom);
 
                 used_power = (used_power + max_vote_denom - 1) / max_vote_denom;
-                if (max_vote_denom <= 0) throw new ValidationError("Account " + this.voter + " does not have enough power to vote.");
+                if (max_vote_denom <= 0) throw new ValidationException("Account " + this.voter + " does not have enough power to vote.");
 
                 let abs_rshares    = (voter_effective_vesting_shares * used_power) / (BlockchainConfig.STEEM_100_PERCENT);
 
                 abs_rshares -= BlockchainConfig.STEEM_VOTE_DUST_THRESHOLD;
                 abs_rshares = Math.max(0, abs_rshares);
-                if (abs_rshares <= BlockchainConfig.STEEM_VOTE_DUST_THRESHOLD) throw new ValidationError("Account " + this.voter + ": Voting weight is too small, please accumulate more voting power or steem power.");
+                if (abs_rshares <= BlockchainConfig.STEEM_VOTE_DUST_THRESHOLD) throw new ValidationException("Account " + this.voter + ": Voting weight is too small, please accumulate more voting power or steem power.");
 
                 return true;
             });
@@ -79,7 +79,7 @@ export namespace ImposedRules {
 
         private vestsToFloat(vests: string) {
             const unitIndex = vests.indexOf(" VESTS");
-            if (unitIndex === -1) throw new ValidationError("Got vests in bad format");
+            if (unitIndex === -1) throw new ValidationException("Got vests in bad format");
             else {
                 return parseFloat(vests.substring(0, unitIndex));
             }

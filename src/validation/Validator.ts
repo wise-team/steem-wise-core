@@ -1,5 +1,5 @@
 import { Api } from "../api/Api";
-import { ValidationError } from "./ValidationError";
+import { ValidationException } from "./ValidationException";
 import { Protocol } from "../protocol/Protocol";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { ProggressCallback } from "../ProggressCallback";
@@ -36,7 +36,7 @@ export class Validator {
         this.providedRulesets = rulesets;
     }
 
-    public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationError | true> => {
+    public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> => {
 
         const context = new ValidationContext(this.api, delegator, voter, voteorder);
 
@@ -48,8 +48,8 @@ export class Validator {
         .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
         .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules(delegator, voter))) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
         .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
-        .then((): true => true, (error: Error): ValidationError => {
-            if ((error as ValidationError).validationError) return error as ValidationError;
+        .then((): true => true, (error: Error | ValidationException): ValidationException => {
+            if ((error as ValidationException).validationException) return error as ValidationException;
             else throw error;
         });
 
@@ -57,13 +57,13 @@ export class Validator {
 
     private validateVoteorderObject = (voteorder: SendVoteorder): Promise<void> => {
         return new Promise(function(resolve, reject) {
-            if (typeof voteorder === "undefined") throw new ValidationError("Voteorder must not be empty");
-            if (typeof voteorder.rulesetName === "undefined" || voteorder.rulesetName.length == 0) throw new ValidationError("Ruleset_name must not be empty");
-            if (typeof voteorder.author === "undefined" || voteorder.author.length == 0) throw new ValidationError("Author must not be empty");
-            if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) throw new ValidationError("Permlink must not be empty");
-            if (typeof voteorder.weight === "undefined" || isNaN(voteorder.weight)) throw new ValidationError("Weight must not be empty");
-            if (voteorder.weight <= 0) throw new ValidationError("Weight must be greater than zero");
-            if (voteorder.weight > 10000) throw new ValidationError("Weight must be lesser or equal 10000");
+            if (typeof voteorder === "undefined") throw new ValidationException("Voteorder must not be empty");
+            if (typeof voteorder.rulesetName === "undefined" || voteorder.rulesetName.length == 0) throw new ValidationException("Ruleset_name must not be empty");
+            if (typeof voteorder.author === "undefined" || voteorder.author.length == 0) throw new ValidationException("Author must not be empty");
+            if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) throw new ValidationException("Permlink must not be empty");
+            if (typeof voteorder.weight === "undefined" || isNaN(voteorder.weight)) throw new ValidationException("Weight must not be empty");
+            if (voteorder.weight <= 0) throw new ValidationException("Weight must be greater than zero");
+            if (voteorder.weight > 10000) throw new ValidationException("Weight must be lesser or equal 10000");
             resolve();
         });
     }
@@ -77,7 +77,7 @@ export class Validator {
                     return;
                 }
             }
-            throw new ValidationError("Delegator had no such ruleset (name=" + voteorder.rulesetName + ") at specified datetime.");
+            throw new ValidationException("Delegator had no such ruleset (name=" + voteorder.rulesetName + ") at specified datetime.");
         });
     }
 
@@ -94,7 +94,7 @@ export class Validator {
             .then(function(values: any []) { // is this check redundant?
                 const validityArray: boolean [] = values as boolean [];
                 for (const i in validityArray) {
-                    if (!validityArray[i]) throw new ValidationError("Rule validation failed");
+                    if (!validityArray[i]) throw new ValidationException("Rule validation failed");
                 }
             })
             .then(function() { resolve(); })

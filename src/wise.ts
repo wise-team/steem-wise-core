@@ -12,7 +12,7 @@ import { ProggressCallback } from "./ProggressCallback";
 import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 import { SetRules } from "./protocol/SetRules";
 import { SteemOperation } from "./blockchain/SteemOperation";
-import { ValidationError } from "./validation/ValidationError";
+import { ValidationException } from "./validation/ValidationException";
 import { Validator } from "./validation/Validator";
 import { Synchronizer } from "./Synchronizer";
 import { V2Handler } from "./protocol/versions/v2/V2Handler";
@@ -125,7 +125,7 @@ export class Wise {
         }).then((steemOps: [string, object][]) => { return new Promise<[string, object][]>((resolve, reject) => {
             if (skipValidation) resolve(steemOps);
             else this.validatePotentialVoteorder(delegator, this.username, voteorder,
-                (error: Error | undefined, result: undefined | ValidationError | true) => {
+                (error: Error | undefined, result: undefined | ValidationException | true) => {
                     if (error) reject(error);
                     else if (result !== true) reject(result);
                     else resolve(steemOps);
@@ -159,7 +159,7 @@ export class Wise {
         }).then((steemOps: [string, object][]) => { return new Promise<[string, object][]>((resolve, reject) => {
             if (skipValidation) resolve(steemOps);
             else this.validatePotentialVoteorder(delegator, this.username, voteorder,
-                (error: Error | undefined, result: undefined | ValidationError | true) => {
+                (error: Error | undefined, result: undefined | ValidationException | true) => {
                     if (error) reject(error);
                     else if (result !== true) reject(result);
                     else resolve(steemOps);
@@ -218,11 +218,11 @@ export class Wise {
      * @param delegator — voter username
      * @param voteorder - an SendVoteorder object
      * @param atMoment — a moment in blockchain at which we are testing validity SteemOperationNumber
-     * @param callback — a callback. Note that result is a true if valid (=== true), or ValidationError (== true, but !== true). So you should always use triple comparison operator
+     * @param callback — a callback. Note that result is a true if valid (=== true), or ValidationException (== true, but !== true). So you should always use triple comparison operator
      * @param proggressCallback — a proggress callback
      */ // TODO test
     public validateVoteorderAsync = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
-        proggressCallback?: ProggressCallback): Promise<ValidationError | true> => {
+        proggressCallback?: ProggressCallback): Promise<ValidationException | true> => {
             const v = new Validator(this.api, this.protocol);
             if (proggressCallback) v.withProggressCallback(proggressCallback);
 
@@ -230,10 +230,10 @@ export class Wise {
     }
 
     public validateVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
-        callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
+        callback: (error: Error | undefined, result: undefined | ValidationException | true) => void,
         proggressCallback?: ProggressCallback): void => {
             this.validateVoteorderAsync(delegator, voter, voteorder, atMoment, proggressCallback)
-            .then((result: ValidationError | true) => callback(undefined, result))
+            .then((result: ValidationException | true) => callback(undefined, result))
             .catch((error: Error) => callback(error, undefined));
     }
 
@@ -243,17 +243,17 @@ export class Wise {
      * @param delegator — voter username
      * @param voteorder - an SendVoteorder object
      * @param atMoment — a moment in blockchain at which we are testing validity SteemOperationNumber
-     * @param callback — a callback. Note that result is a true if valid (=== true), or ValidationError (== true, but !== true). So you should always use triple comparison operator
+     * @param callback — a callback. Note that result is a true if valid (=== true), or ValidationException (== true, but !== true). So you should always use triple comparison operator
      * @param proggressCallback — a proggress callback
      */ // TODO test
      public validatePotentialVoteorderAsync = (delegator: string, voter: string, voteorder: SendVoteorder,
-        proggressCallback?: ProggressCallback): Promise<ValidationError | true> => {
+        proggressCallback?: ProggressCallback): Promise<ValidationException | true> => {
         return this.validateVoteorderAsync(delegator, voter, voteorder, SteemOperationNumber.FUTURE, proggressCallback);
     }
 
     // TODO comment
     public validatePotentialVoteorder = (delegator: string, voter: string, voteorder: SendVoteorder,
-        callback: (error: Error | undefined, result: undefined | ValidationError | true) => void,
+        callback: (error: Error | undefined, result: undefined | ValidationException | true) => void,
         proggressCallback?: ProggressCallback): void => {
         this.validateVoteorder(delegator, voter, voteorder, SteemOperationNumber.FUTURE, callback, proggressCallback);
     }
@@ -309,6 +309,6 @@ export { TagsRule } from "./rules/TagsRule";
 export { CustomRPCRule } from "./rules/CustomRPCRule";
 export { WeightRule } from "./rules/WeightRule";
 
-export { ValidationError } from "./validation/ValidationError";
+export { ValidationException } from "./validation/ValidationException";
 
 export { ProggressCallback } from "./ProggressCallback";

@@ -1,6 +1,6 @@
 import { Rule } from "./Rule";
 import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
-import { ValidationError } from "../validation/ValidationError";
+import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
@@ -26,7 +26,7 @@ export class CustomRPCRule extends Rule {
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<true> {
         return new Promise((resolve, reject) => {
-            throw new ValidationError("CustomRPC rule is not yet implemented"); // TODO
+            throw new ValidationException("CustomRPC rule is not yet implemented"); // TODO
         });
     }
 

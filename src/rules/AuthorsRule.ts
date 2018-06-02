@@ -2,7 +2,7 @@ import { Promise } from "bluebird";
 
 import { Rule } from "./Rule";
 import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
-import { ValidationError } from "../validation/ValidationError";
+import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { SteemPost } from "../blockchain/SteemPost";
@@ -28,10 +28,10 @@ export class AuthorsRule extends Rule {
                 const authorIsOnList: boolean = (this.authors.indexOf(post.author) !== -1);
                 if (this.mode == AuthorsRule.Mode.ALLOW) {
                     if (authorIsOnList) resolve(true);
-                    else reject(new ValidationError("Author of the post is not on the allow list."));
+                    else reject(new ValidationException("Author of the post is not on the allow list."));
                 }
                 else {
-                    if (authorIsOnList) reject(new ValidationError("Author of the post is on the deny list."));
+                    if (authorIsOnList) reject(new ValidationException("Author of the post is on the deny list."));
                     else resolve(true);
                 }
             });

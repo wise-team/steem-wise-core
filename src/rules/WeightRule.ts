@@ -1,6 +1,6 @@
 import { Rule } from "./Rule";
 import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
-import { ValidationError } from "../validation/ValidationError";
+import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
