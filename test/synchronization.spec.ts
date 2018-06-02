@@ -3,7 +3,7 @@ import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
 
-import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule } from "../src/wise";
+import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule } from "../src/wise";
 import { SteemPost } from "../src/blockchain/SteemPost";
 import { FakeApi } from "../src/api/FakeApi";
 import { Util } from "../src/util/util";
@@ -43,7 +43,7 @@ describe("test/index.spec.ts", () => {
                     if (event.type === Synchronizer.EventType.SynchronizationStop) {
                         resolve();
                     }
-                    console.log(event);
+                    // console.log(event);
 
                     if (error) {
                         reject(error);
@@ -68,7 +68,7 @@ describe("test/index.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(25))
+            .then(() => Promise.delay(20))
             .then(() => {
                 const lastOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
                 const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastOp));
@@ -101,7 +101,7 @@ describe("test/index.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(25))
+            .then(() => Promise.delay(20))
             .then(() => {
                 return voterWise.getRulesetsAsync(delegator, SteemOperationNumber.FUTURE);
             })
@@ -128,10 +128,9 @@ describe("test/index.spec.ts", () => {
         validVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends valid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator passes them", () => {
             return voterWise.sendVoteorderAsync(delegator, voteorder)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(25))
+            .then(() => Promise.delay(20))
             .then(() => {
                 const lastPushedOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
-                console.log(lastPushedOp);
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedOp));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(isConfirmVote(lastHandledOp.command)).to.be.true;
@@ -154,9 +153,10 @@ describe("test/index.spec.ts", () => {
             }
         ];
         invalidVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends invalid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator rejects them", () => {
-            return voterWise.sendVoteorderAsync(delegator, voteorder)
+            const skipValidation = true;
+            return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(25))
+            .then(() => Promise.delay(20))
             .then(() => {
                 const lastPushedOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedOp));
@@ -166,24 +166,87 @@ describe("test/index.spec.ts", () => {
             });
         }));
 
-        it.skip("Delegator changes rules", () => {
-            return Promise.resolve();
+        it("Delegator changes rules", () => {
+            const sendRules: SetRules = {
+                rulesets: [
+                    {
+                        name: "RulesetOneChangesContent",
+                        rules: [
+                            new TagsRule(TagsRule.Mode.REQUIRE, ["steemprojects"]),
+                            new AuthorsRule(AuthorsRule.Mode.DENY, ["noisy"]),
+                            new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 10)
+                        ]
+                    }
+                ]
+            };
+            return delegatorWise.sendRulesAsync(voter, sendRules)
+            .then((son: SteemOperationNumber) => {
+                expect(son.blockNum).to.be.greaterThan(0);
+            })
+            .then(() => Promise.delay(20))
+            .then(() => {
+                return voterWise.getRulesetsAsync(delegator, SteemOperationNumber.FUTURE);
+            })
+            .then((gotRules: SetRules) => {
+                expect(gotRules.rulesets).to.be.an("array").with.length(sendRules.rulesets.length);
+                sendRules.rulesets.forEach((gotRule, i) => expect(gotRule.name).to.be.equal(sendRules.rulesets[i].name));
+            });
         });
 
-        it.skip("Voter sends valid and invalid voteorders", () => {
-            return Promise.resolve();
-        });
+        const previouslyValidNowInvalidVoteorders = validVoteorders1;
+        previouslyValidNowInvalidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends previously valid (but now invalid) voteorder (ruleset= " + voteorder.rulesetName + ") and delegator rejects them", () => {
+            const skipValidation = true;
+            return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
+            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
+            .then(() => Promise.delay(20))
+            .then(() => {
+                const lastPushedOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
+                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedOp));
+                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+                expect(isConfirmVote(lastHandledOp.command)).to.be.true;
+                expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
+            });
+        }));
 
-        it.skip("Delegator passes valid voteorders", () => {
-            return Promise.resolve();
-        });
+        const previouslyInalidNowValidVoteorders: SendVoteorder [] = [
+            {
+                rulesetName: "RulesetOneChangesContent",
+                author: "pojan",
+                permlink: "how-to-install-free-cad-on-windows-mac-os-and-linux-and-what-is-free-cad",
+                weight: 1
+            }
+        ];
+        previouslyInalidNowValidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends now valid (but previously invalid) voteorder (rulesetName= " + voteorder.rulesetName + ") and delegator passes them", () => {
+            return voterWise.sendVoteorderAsync(delegator, voteorder)
+            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
+            .then(() => Promise.delay(20))
+            .then(() => {
+                const lastPushedOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
+                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedOp));
+                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+                expect(isConfirmVote(lastHandledOp.command)).to.be.true;
+                expect((lastHandledOp.command as ConfirmVote).accepted).to.be.true;
+            });
+        }));
 
-        it.skip("Delegator rejects invalid voteorders", () => {
-            return Promise.resolve();
-        });
+        it("Delegator rejects nonexistent post with negative confirmation but without error", () => {
+            const voteorder: SendVoteorder = {
+                rulesetName: "RulesetOneChangesContent",
+                author: "perduta",
+                permlink: "nonexistentPost-" + Date.now(),
+                weight: 5
+            };
 
-        it.skip("Delegator rejects nonexistent post with negative confirmation but without error", () => {
-            return Promise.resolve();
+            return voterWise.sendVoteorderAsync(delegator, voteorder)
+            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
+            .then(() => Promise.delay(20))
+            .then(() => {
+                const lastPushedOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
+                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedOp));
+                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+                expect(isConfirmVote(lastHandledOp.command)).to.be.true;
+                expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
+            });
         });
 
         it("Stops synchronization properly", () => {
