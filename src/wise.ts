@@ -312,3 +312,4 @@ export { WeightRule } from "./rules/WeightRule";
 export { ValidationException } from "./validation/ValidationException";
 
 export { ProggressCallback } from "./ProggressCallback";
+export { NotFoundException } from "./util/NotFoundException";
