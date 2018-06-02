@@ -21,6 +21,7 @@ import { Rule } from "../src/rules/Rule";
 import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
 import { DynamicGlobalProperties } from "../src/blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../src/blockchain/AccountInfo";
+import { NotFoundException } from "../src/util/NotFoundException";
 
 describe("test/api.spec.ts", function () {
     this.timeout(10000);
@@ -53,9 +54,13 @@ describe("test/api.spec.ts", function () {
                     });
             });
 
-            it("fails on nonexistent post", (done) => {
-                api.loadPost("noisy", "nonexistent-permlink-" + new Date())
-                    .then((result) => done(new Error("Should fail on nonexistent post. Got some data instead.")), () => done());
+            it("throws NotFoundException on nonexistent post", (done) => {
+                api.loadPost("noisy", "nonexistent-permlink-" + Date.now())
+                .then((result) => done(new Error("Should fail on nonexistent post. Got some data instead.")))
+                .catch((e: Error) => {
+                    if ((e as NotFoundException).notFoundException) done();
+                    else done(e);
+                });
             });
         });
 
@@ -94,8 +99,8 @@ describe("test/api.spec.ts", function () {
                 }));
             });
 
-            it("returns no rules for non existing delegator", () => { // TODO or throw? decide which better
-                const delegator = "nonexistent-" + new Date();
+            /*it("returns no rules for non existing delegator", () => { // TODO or throw? decide which better
+                const delegator = "nonexistent-" + Date.now();
                 const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
                 return api.loadRulesets(delegator, voter, moment, wise.getProtocol())
@@ -106,12 +111,36 @@ describe("test/api.spec.ts", function () {
 
             it("returns no rules for non existing voter", () => { // TODO or throw? decide which better
                 const delegator = v1TestingSequence.stage1_0_RulesetsUsername;
-                const voter = "nonexistent-" + new Date();
+                const voter = "nonexistent-" + Date.now();
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
                 return api.loadRulesets(delegator, voter, moment, wise.getProtocol())
                 .then(((r: SetRules) => {
                     expect(r.rulesets).to.be.an("array").with.length(0);
                 }));
+            });*/
+
+            it("throws NotFoundException if delegator does not exist", (done) => {
+                const delegator = "nonexistent-" + Date.now();
+                const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
+                const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
+                api.loadRulesets(delegator, voter, moment, wise.getProtocol())
+                .then((result) => done(new Error("Should fail on nonexistent delegator. Got some data instead.")))
+                .catch((e: Error) => {
+                    if ((e as NotFoundException).notFoundException) done();
+                    else done(e);
+                });
+            });
+
+            it("throws NotFoundException if voter does not exist", (done) => {
+                const delegator = v1TestingSequence.stage1_0_RulesetsUsername;
+                const voter = "nonexistent-" + Date.now();
+                const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
+                api.loadRulesets(delegator, voter, moment, wise.getProtocol())
+                .then((result) => done(new Error("Should fail on nonexistent voter. Got some data instead.")))
+                .catch((e: Error) => {
+                    if ((e as NotFoundException).notFoundException) done();
+                    else done(e);
+                });
             });
         });
 
@@ -159,6 +188,17 @@ describe("test/api.spec.ts", function () {
                     for (let i = 0; i < requiredRulesets.length; i++) {
                         expect(requiredRulesets[i].found, "requiredRulesets[" + i + "].found").to.be.true;
                     }
+                });
+            });
+
+            it("throws NotFoundException if delegator does not exist", (done) => {
+                const delegator = "nonexistent-" + Date.now();
+                const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
+                api.loadAllRulesets(delegator, moment, wise.getProtocol())
+                .then((result) => done(new Error("Should fail on nonexistent delegator. Got some data instead.")))
+                .catch((e: Error) => {
+                    if ((e as NotFoundException).notFoundException) done();
+                    else done(e);
                 });
             });
         });
@@ -235,6 +275,15 @@ describe("test/api.spec.ts", function () {
                         .to.be.a("number").gte(0.0);
 
                     expect(new Date(info.last_vote_time + "Z").getTime(), "last_vote_time").to.be.gte(new Date("2018-05-30T12:25:36").getTime());
+                });
+            });
+
+            it("throws NotFoundException if account does not exist", (done) => {
+                api.getAccountInfo("nonexistent-" + Date.now())
+                .then((result) => done(new Error("Should fail on nonexistent account. Got some data instead.")))
+                .catch((e: Error) => {
+                    if ((e as NotFoundException).notFoundException) done();
+                    else done(e);
                 });
             });
         });
