@@ -1,4 +1,5 @@
 import { Promise } from "bluebird";
+import * as _ from "lodash";
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { ChainableSupplier } from "./chainable/Chainable";
@@ -10,12 +11,13 @@ import { Api } from "./api/Api";
 import { SendVoteorder } from "./protocol/SendVoteorder";
 import { ProggressCallback } from "./ProggressCallback";
 import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
-import { SetRules } from "./protocol/SetRules";
+import { SetRules, EffectuatedSetRules } from "./protocol/SetRules";
 import { SteemOperation } from "./blockchain/SteemOperation";
 import { ValidationException } from "./validation/ValidationException";
 import { Validator } from "./validation/Validator";
 import { Synchronizer } from "./Synchronizer";
 import { V2Handler } from "./protocol/versions/v2/V2Handler";
+import { RulesUpdater } from "./RulesUpdater";
 
 /**
  * TODO blockchain input sanitization (prevent malicious json)
@@ -166,7 +168,7 @@ export class Wise {
      * @param atMoment — a moment in blockchain
      * @param callback — a callback
      */ // TODO test
-    public getRulesetsAsync = (delegator: string, atMoment: SteemOperationNumber): Promise<SetRules> => {
+    public getRulesetsAsync = (delegator: string, atMoment: SteemOperationNumber = SteemOperationNumber.FUTURE): Promise<SetRules> => {
         return this.api.loadRulesets(delegator, this.username, atMoment, this.protocol);
     }
 
@@ -175,6 +177,24 @@ export class Wise {
         this.getRulesetsAsync(delegator, atMoment)
         .then((rules: SetRules) => callback(undefined, rules))
         .catch(error => callback(error, undefined));
+    }
+
+    // TODO comment
+    public updateRulesIfChangedAsync = (rules: { voter: string, rules: SetRules } [], proggressCallback: ProggressCallback= () => {}): Promise<SteemOperationNumber | true> => {
+        return RulesUpdater.updateRulesIfChanged(this.api, this.protocol, this.username, rules, proggressCallback);
+    }
+
+    // TODO comment
+    public updateRulesIfChanged = (rules: { voter: string, rules: SetRules } [], callback: (error: Error | undefined, result: SteemOperationNumber | true | undefined) => void, proggressCallback: ProggressCallback= () => {}): Promise<void> => {
+        return this.updateRulesIfChangedAsync(rules, proggressCallback)
+        .then(
+            (result: SteemOperationNumber | true) => {
+                callback(undefined, result);
+            },
+            (error: Error) => {
+                callback(error, undefined);
+            }
+        );
     }
 
     /**
