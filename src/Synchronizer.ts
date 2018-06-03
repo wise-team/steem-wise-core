@@ -16,7 +16,7 @@ import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 
 // TODO proper error handling (separate errors that should be reported to ConfirmVotes and Reversible errors [eg. network errors])
 export class Synchronizer {
-    private synchronizationStoppedMsg: string = "Synchronization stopped";
+    private timeoutMs = 9000;
 
     private api: Api;
     private protocol: Protocol;
@@ -32,6 +32,10 @@ export class Synchronizer {
         this.protocol = protocol;
         this.delegator = delegator;
         this.notifier = notifier;
+    }
+
+    public setTimeout(timeoutMs: number) {
+        this.timeoutMs = timeoutMs;
     }
 
     public runLoop(since: SteemOperationNumber): Synchronizer {
@@ -61,9 +65,12 @@ export class Synchronizer {
             .mapSeries((op: EffectuatedSmartvotesOperation) => {
                 return this.processOperation(op);
             })
+            .timeout(this.timeoutMs, new Error("Timeout (> " + this.timeoutMs + "ms while processing operations)"))
             .then(() => {
                 this.notify(undefined, { type: Synchronizer.EventType.EndBlockProcessing, blockNum: blockNum, message: "End processing block " + blockNum });
-                this.continueIfRunning(() => this.processBlock(blockNum + 1));
+                this.continueIfRunning(() =>
+                    this.processBlock(blockNum + 1)
+                );
             }, (error: Error) => {
                 this.notify(undefined, { type: Synchronizer.EventType.ReversibleError,
                     error: error, moment: this.lastProcessedOperationNum, message: " Reversible error: " + error.message + ". Retrying in 3 seconds..." });
