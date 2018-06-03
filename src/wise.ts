@@ -112,26 +112,17 @@ export class Wise {
             delegator: delegator,
             command: voteorder
         };
-
-        return new Promise<[string, object][]>((resolve, reject) => {
-            const steemOps: [string, object][] = this.protocol.serializeToBlockchain(smOp);
-            if (steemOps.length !== 1) reject(new Error("An voteorder should be a single blockchain operation"));
-            else resolve(steemOps);
+        let steemOps: [string, object][];
+        return Promise.resolve().then(() => {
+            steemOps = this.protocol.serializeToBlockchain(smOp);
+            if (steemOps.length !== 1) throw new Error("An voteorder should be a single blockchain operation");
         })
-        .then((steemOps: [string, object][]) => {
-            if (skipValidation) return steemOps;
-            else if (this.validateOperation(steemOps[0])) return steemOps;
-            else throw new Error("Operation object has invalid structure");
-        }).then((steemOps: [string, object][]) => { return new Promise<[string, object][]>((resolve, reject) => {
-            if (skipValidation) resolve(steemOps);
-            else this.validatePotentialVoteorder(delegator, this.username, voteorder,
-                (error: Error | undefined, result: undefined | ValidationException | true) => {
-                    if (error) reject(error);
-                    else if (result !== true) reject(result);
-                    else resolve(steemOps);
-                });
-        }); })
-        .then((steemOps: [string, object][]) => this.api.sendToBlockchain(steemOps));
+        .then(() => {
+            if (!skipValidation && !this.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
+        }).then(() => {
+            if (!skipValidation) this.validatePotentialVoteorderAsync(delegator, this.username, voteorder);
+        })
+        .then(() => this.api.sendToBlockchain(steemOps));
     }
 
     // TODO comment
@@ -139,35 +130,9 @@ export class Wise {
         callback: (error: Error | undefined, result: SteemOperationNumber | undefined) => void,
         proggressCallback?: ProggressCallback, skipValidation?: boolean): void => {
 
-        // TODO proggress callback
-
-        const smOp: SmartvotesOperation = {
-            voter: this.username,
-            delegator: delegator,
-            command: voteorder
-        };
-
-        new Promise<[string, object][]>((resolve, reject) => {
-            const steemOps: [string, object][] = this.protocol.serializeToBlockchain(smOp);
-            if (steemOps.length !== 1) reject(new Error("An voteorder should be a single blockchain operation"));
-            else resolve(steemOps);
-        })
-        .then((steemOps: [string, object][]) => {
-            if (skipValidation) return steemOps;
-            else if (this.validateOperation(steemOps[0])) return steemOps;
-            else throw new Error("Operation object has invalid structure");
-        }).then((steemOps: [string, object][]) => { return new Promise<[string, object][]>((resolve, reject) => {
-            if (skipValidation) resolve(steemOps);
-            else this.validatePotentialVoteorder(delegator, this.username, voteorder,
-                (error: Error | undefined, result: undefined | ValidationException | true) => {
-                    if (error) reject(error);
-                    else if (result !== true) reject(result);
-                    else resolve(steemOps);
-                });
-        }); })
-        .then((steemOps: [string, object][]) => this.api.sendToBlockchain(steemOps))
-        .then((son: SteemOperationNumber) => callback(undefined, son))
-        .catch(error => callback(error, undefined));
+        this.sendVoteorderAsync(delegator, voteorder, proggressCallback)
+        .then((result: SteemOperationNumber) => callback(undefined, result))
+        .catch((error: Error) => callback(error, undefined));
     }
 
     /**

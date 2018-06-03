@@ -37,7 +37,7 @@ let synchronizer: Synchronizer;
 
 describe("test/synchronization.spec.ts", () => {
     describe("Synchronizer", function() {
-        this.timeout(15000);
+        this.timeout(2000);
         let synchronizationPromise: Promise<void>;
         it("Starts synchronization without error", () => {
             const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
@@ -53,6 +53,7 @@ describe("test/synchronization.spec.ts", () => {
                         synchronizer.stop();
                     }
                 });
+                synchronizer.setTimeout(200);
             });
             synchronizationPromise = synchronizationPromiseReturner();
         });
@@ -131,13 +132,13 @@ describe("test/synchronization.spec.ts", () => {
         validVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends valid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator passes them", () => {
             return voterWise.sendVoteorderAsync(delegator, voteorder)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(25))
             .then(() => {
                 const lastPushedOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedOp));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
-                expect(isConfirmVote(lastHandledOp.command)).to.be.true;
-                expect((lastHandledOp.command as ConfirmVote).accepted).to.be.true;
+                expect(isConfirmVote(lastHandledOp.command), "isConfirmVote").to.be.true;
+                expect((lastHandledOp.command as ConfirmVote).accepted, "accepted").to.be.true;
             });
         }));
 
@@ -155,6 +156,7 @@ describe("test/synchronization.spec.ts", () => {
                 weight: 1
             }
         ];
+
         invalidVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends invalid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator rejects them", () => {
             const skipValidation = true;
             return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)

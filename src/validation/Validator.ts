@@ -48,8 +48,12 @@ export class Validator {
             })
             .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
             .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules(delegator, voter))) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
-            .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
-            .then(() => resolve(true), (error: Error | ValidationException) => {
+            .then((rules: Rule []) => {
+                return this.validateRules(rules, voteorder, context);
+            })
+            .then(() => {
+                resolve(true);
+            }, (error: Error | ValidationException) => {
                 if ((error as ValidationException).validationException) {
                     resolve(error as ValidationException);
                 }
@@ -88,7 +92,8 @@ export class Validator {
     }
 
     private validateRules = (rules: Rule [], voteorder: SendVoteorder, context: ValidationContext): Promise<void> => {
-        return new Promise((resolve, reject) => {
+        return Promise.resolve()
+        .then(() => {
             const validatorPromiseReturners: (() => Promise<void>) [] = [];
             for (let i = 0; i < rules.length; i++) {
                 const rule = rules[i];
@@ -96,8 +101,8 @@ export class Validator {
                     return rule.validate(voteorder, context);
                 });
             }
-            Promise.resolve(validatorPromiseReturners)
-            .map((returner: () => Promise<void []>) => { return returner(); }, { concurrency: this.concurrency });
-        });
+            return validatorPromiseReturners;
+        }).map((returner: () => Promise<void []>) => { return returner(); }, { concurrency: this.concurrency })
+        .then(() => {});
     }
 }
