@@ -31,7 +31,7 @@ export interface wise_rule_weight {
      */
     max: number;
 }
-export type wise_rule_weight_mode = "single_vote_weight" | "votes_per_day";
+export type wise_rule_weight_mode = "single_vote_weight";
 
 
 export interface wise_rule_authors {

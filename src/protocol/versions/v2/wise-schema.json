@@ -221,7 +221,10 @@
                     "type": "integer"
                 },
                 "mode": {
-                    "$ref": "#/definitions/wise_rule_weight_mode"
+                    "enum": [
+                        "single_vote_weight"
+                    ],
+                    "type": "string"
                 },
                 "rule": {
                     "enum": [
@@ -237,13 +240,6 @@
                 "rule"
             ],
             "type": "object"
-        },
-        "wise_rule_weight_mode": {
-            "enum": [
-                "single_vote_weight",
-                "votes_per_day"
-            ],
-            "type": "string"
         },
         "wise_send_voteorder": {
             "properties": {
