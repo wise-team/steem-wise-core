@@ -255,7 +255,6 @@ export class Wise {
     }
 }
 
-export default Wise;
 
 export { Api } from "./api/Api";
 export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
@@ -266,8 +265,9 @@ export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 
 export { Protocol } from "./protocol/Protocol";
 export { SendVoteorder } from "./protocol/SendVoteorder";
-export { SetRules } from "./protocol/SetRules";
+export { SetRules, EffectuatedSetRules } from "./protocol/SetRules";
 export { SmartvotesOperation } from "./protocol/SmartvotesOperation";
+export { EffectuatedSmartvotesOperation } from "./protocol/EffectuatedSmartvotesOperation";
 
 export { AuthorsRule } from "./rules/AuthorsRule";
 export { TagsRule } from "./rules/TagsRule";
@@ -280,3 +280,5 @@ export { ProggressCallback } from "./ProggressCallback";
 export { NotFoundException } from "./util/NotFoundException";
 
 export * from "./protocol/versions/v2/wise-schema";
+
+export default Wise;
