@@ -240,15 +240,15 @@ describe("test/ruleset-validation.spec.ts", function() {
             });
         });
 
-        it("fails on non existing post", function(done) {
+        it("throws NoSuchPost on non existing post", function(done) {
             this.timeout(10000);
             const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder,
                 { rulesetName: steemprojects1Rulesets.upvoteAllowAuthorNoisy.name,
                     author: "noisy", permlink: "Non-existing-post" + Date.now() }); // author is correct, but post doesnt exist => fail
             wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
-                if (error) done();
+                if ((error as ValidationException).validationException) done();
                 else if (result === true) done(new Error("Should fail on non existing post"));
-                else done();
+                else done(error);
             });
         });
 

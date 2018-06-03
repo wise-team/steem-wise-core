@@ -9,6 +9,7 @@ import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { Rule } from "../rules/Rule";
 import { ImposedRules } from "../rules/ImposedRules";
+import { NotFoundException } from "../util/NotFoundException";
 
 export class Validator {
     private api: Api;
@@ -37,20 +38,25 @@ export class Validator {
     }
 
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> => {
-
         const context = new ValidationContext(this.api, delegator, voter, voteorder);
 
-        return this.validateVoteorderObject(voteorder)
-        .then(() => {
-            if (this.providedRulesets) return this.providedRulesets;
-            else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
-        })
-        .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
-        .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules(delegator, voter))) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
-        .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
-        .then((): true => true, (error: Error | ValidationException): ValidationException => {
-            if ((error as ValidationException).validationException) return error as ValidationException;
-            else throw error;
+        return new Promise<ValidationException | true>((resolve, reject) => {
+            this.validateVoteorderObject(voteorder)
+            .then(() => {
+                if (this.providedRulesets) return this.providedRulesets;
+                else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
+            })
+            .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
+            .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules(delegator, voter))) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
+            .then((rules: Rule []) => this.validateRules(rules, voteorder, context))
+            .then(() => resolve(true), (error: Error | ValidationException) => {
+                if ((error as ValidationException).validationException) {
+                    resolve(error as ValidationException);
+                }
+                else {
+                    reject(error);
+                }
+            });
         });
 
     }
@@ -83,22 +89,15 @@ export class Validator {
 
     private validateRules = (rules: Rule [], voteorder: SendVoteorder, context: ValidationContext): Promise<void> => {
         return new Promise((resolve, reject) => {
-            const validatorPromiseReturners: (() => Promise<boolean>) [] = [];
+            const validatorPromiseReturners: (() => Promise<void>) [] = [];
             for (let i = 0; i < rules.length; i++) {
                 const rule = rules[i];
                 validatorPromiseReturners.push(() => {
                     return rule.validate(voteorder, context);
                 });
             }
-            Promise.map(validatorPromiseReturners, (returner: () => Promise<boolean[]>) => { return returner(); }, { concurrency: this.concurrency })
-            .then(function(values: any []) { // is this check redundant?
-                const validityArray: boolean [] = values as boolean [];
-                for (const i in validityArray) {
-                    if (!validityArray[i]) throw new ValidationException("Rule validation failed");
-                }
-            })
-            .then(function() { resolve(); })
-            .catch(error => { reject(error); });
+            Promise.resolve(validatorPromiseReturners)
+            .map((returner: () => Promise<void []>) => { return returner(); }, { concurrency: this.concurrency });
         });
     }
 }

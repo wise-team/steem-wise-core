@@ -27,7 +27,7 @@ export namespace ImposedRules {
             this.voter = voter;
         }
 
-        public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<true> {
+        public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
             return context.getDynamicGlobalProperties()
             .then((dynamicGlobalProperties: DynamicGlobalProperties): Promise<{dynamicGlobalProperties: DynamicGlobalProperties, accountInfo: AccountInfo}> => {
                 return new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ export namespace ImposedRules {
                     .catch((error: Error) => reject(error));
                 });
             })
-            .then((input: {dynamicGlobalProperties: DynamicGlobalProperties, accountInfo: AccountInfo}): true => {
+            .then((input: {dynamicGlobalProperties: DynamicGlobalProperties, accountInfo: AccountInfo}): void => {
                 const accountInfo = input.accountInfo;
                 const dynamicGlobalProperties = input.dynamicGlobalProperties;
 
@@ -68,8 +68,6 @@ export namespace ImposedRules {
                 abs_rshares -= BlockchainConfig.STEEM_VOTE_DUST_THRESHOLD;
                 abs_rshares = Math.max(0, abs_rshares);
                 if (abs_rshares <= BlockchainConfig.STEEM_VOTE_DUST_THRESHOLD) throw new ValidationException("Account " + this.voter + ": Voting weight is too small, please accumulate more voting power or steem power.");
-
-                return true;
             });
         }
 

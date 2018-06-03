@@ -4,6 +4,7 @@ import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SteemPost } from "../blockchain/SteemPost";
 import { SendVoteorder } from "../protocol/SendVoteorder";
+import { NotFoundException } from "../util/NotFoundException";
 import { Promise } from "bluebird";
 
 export class TagsRule extends Rule {
@@ -21,8 +22,8 @@ export class TagsRule extends Rule {
         return Rule.Type.Tags;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<true> {
-        return context.getPost().then((post: SteemPost): Promise<true> => {
+    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        return context.getPost().then((post: SteemPost): Promise<void> => {
             return new Promise((resolve, reject) => {
                 const postMetadata: SteemPost.JSONMetadata = JSON.parse(post.json_metadata) as SteemPost.JSONMetadata;
 
@@ -32,7 +33,7 @@ export class TagsRule extends Rule {
                         if (this.tags.indexOf(tag) === -1)
                                 reject(new ValidationException("Tag " + tag + " is not on the allowed tags list [" + this.tags.join() + "]."));
                     }
-                    resolve(true);
+                    resolve();
                 }
                 else if (this.mode === TagsRule.Mode.DENY) { // deny mode (none of post tags can be on this list)
                     for (let i = 0; i < postMetadata.tags.length; i++) {
@@ -40,7 +41,7 @@ export class TagsRule extends Rule {
                         if (this.tags.indexOf(tag) !== -1)
                                 reject(new ValidationException("Tag " + tag + " is on the denied tags list [" + this.tags.join() + "]."));
                     }
-                    resolve(true);
+                    resolve();
                 }
                 else if (this.mode === TagsRule.Mode.REQUIRE) { // the post should have all of the specified tags
                     for (let i = 0; i < this.tags.length; i++) {
@@ -48,13 +49,13 @@ export class TagsRule extends Rule {
                         if (postMetadata.tags.indexOf(tag) === -1)
                             reject(new ValidationException("The post tags [" + postMetadata.tags.join() + "] does not include " + tag + "."));
                     }
-                    resolve(true);
+                    resolve();
                 }
                 else if (this.mode === TagsRule.Mode.ANY) { // the post should have at least one of the specified tags
                     for (let i = 0; i < this.tags.length; i++) {
                         const tag = this.tags[i];
                         if (postMetadata.tags.indexOf(tag) !== -1) {
-                            resolve(true);
+                            resolve();
                             return;
                         }
                     }
@@ -62,6 +63,10 @@ export class TagsRule extends Rule {
                 }
                 else reject(new ValidationException("Unknown mode in tags this."));
             });
+        })
+        .catch((e: Error) => {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
         });
     }
 

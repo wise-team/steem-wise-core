@@ -108,17 +108,23 @@ export class Synchronizer {
             const v = new Validator(this.api, this.protocol);
             const rules = this.determineRules(op, cmd);
             if (rules) {
-                v.provideRulesets(rules);
-                v.validate(this.delegator, op.voter, cmd, op.moment)
-                .then((result: ValidationException | true) => {
-                    if (result === true) {
-                        this.voteAndConfirm(op, cmd).then(() => resolve()).catch((error: Error) => reject(error));
-                    }
-                    else {
-                        this.rejectVoteorder(op, cmd, (result as ValidationException).message).then(() => resolve()).catch((error: Error) => reject(error));
-                    }
-                })
-                .catch((error: Error) => reject(error));
+                try {
+                    v.provideRulesets(rules);
+                    v.validate(this.delegator, op.voter, cmd, op.moment)
+                    .then((result: ValidationException | true) => {
+                        if (result === true) {
+                            this.voteAndConfirm(op, cmd).then(() => resolve()).catch((error: Error) => reject(error));
+                        }
+                        else {
+                            this.rejectVoteorder(op, cmd, (result as ValidationException).message).then(() => resolve()).catch((error: Error) => reject(error));
+                        }
+                    })
+                    .catch((error: Error) => {
+                        this.rejectVoteorder(op, cmd, error.message).then(() => resolve()).catch((error: Error) => reject(error));
+                    });
+                } catch (error) {
+                    this.rejectVoteorder(op, cmd, error.message).then(() => resolve()).catch((error: Error) => reject(error));
+                }
             }
             else this.rejectVoteorder(op, cmd, "There is no ruleset for you").then(() => resolve()).catch((error: Error) => reject(error));
         });

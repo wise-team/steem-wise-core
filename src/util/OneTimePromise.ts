@@ -25,7 +25,9 @@ export class OneTimePromise<T> {
      */
     public execute(promiseReturningFn: () => Promise<T>): Promise<T> {
         return new Promise((resolve, reject) => {
-            if (this.finishedWithError) reject(this.error);
+            if (this.finishedWithError) {
+                setTimeout(() => reject(this.error), 4);
+            }
             else if (this.finishedWithResult) resolve(this.result);
             else if (!this.started || this.timeCounter > this.timeout) {
                 this.started = true;
@@ -37,17 +39,20 @@ export class OneTimePromise<T> {
                 .catch((error: Error) => {
                     this.error = error;
                     this.finishedWithError = true;
-                    reject(error);
+                    setTimeout(() => reject(this.error), 4);
                 });
             }
             else {
                 this.awaitResult(resolve, reject);
             }
         });
+
     }
 
     private awaitResult(resolve: (result: T | undefined) => void, reject: (error: Error | undefined) => void) {
-        if (this.finishedWithError) reject(this.error);
+        if (this.finishedWithError) {
+            setTimeout(() => reject(this.error), 4);
+        }
         else if (this.finishedWithResult) resolve(this.result);
         else {
             setTimeout(() => {

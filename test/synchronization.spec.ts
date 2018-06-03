@@ -3,7 +3,7 @@ import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
 
-import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule } from "../src/wise";
+import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException } from "../src/wise";
 import { SteemPost } from "../src/blockchain/SteemPost";
 import { FakeApi } from "../src/api/FakeApi";
 import { Util } from "../src/util/util";
@@ -15,6 +15,9 @@ import * as fakeDataset_ from "./data/fake-blockchain.json";
 import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
+Promise.onPossiblyUnhandledRejection(function(error){
+    throw error;
+});
 
 /**
  * Setup
@@ -32,7 +35,7 @@ const voterWise = new Wise(voter, fakeApi);
  */
 let synchronizer: Synchronizer;
 
-describe("test/index.spec.ts", () => {
+describe("test/synchronization.spec.ts", () => {
     describe("Synchronizer", function() {
         this.timeout(15000);
         let synchronizationPromise: Promise<void>;
@@ -237,15 +240,22 @@ describe("test/index.spec.ts", () => {
                 weight: 5
             };
 
-            return voterWise.sendVoteorderAsync(delegator, voteorder)
+            const skipValidation = true;
+            return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(20), (e: Error) => {
+                if ((e as ValidationException).validationException) throw new Error("ValidationException present at send");
+                else throw e;
+            })
             .then(() => {
                 const lastPushedOp = Util.definedOrThrow(_.last(fakeApi.getPushedOperations()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedOp));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(isConfirmVote(lastHandledOp.command)).to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
+            }, (e: Error) => {
+                if ((e as ValidationException).validationException) throw new Error("Should not throw ValidationException, but pass it");
+                else throw e;
             });
         });
 

@@ -13,7 +13,7 @@ export abstract class Rule {
     public abstract validate (
         voteorder: SendVoteorder,
         context: ValidationContext,
-    ): Promise<true>; // throws ValidationException
+    ): Promise<void>; // throws ValidationException
 
     public abstract type(): Rule.Type;
 }
