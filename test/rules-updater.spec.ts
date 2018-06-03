@@ -49,7 +49,7 @@ describe("test/rules-updater.spec.ts", () => {
             }
         ];
         it("Sets initial rules", () => {
-            return delegatorWise.updateRulesIfChangedAsync(rules0)
+            return delegatorWise.diffAndUpdateRulesAsync(rules0)
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
@@ -73,7 +73,7 @@ describe("test/rules-updater.spec.ts", () => {
 
         it("Does not update same rules", () => {
             return Promise.delay(10)
-            .then(() => delegatorWise.updateRulesIfChangedAsync(rules0))
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules0))
             .then((result: SteemOperationNumber | true) => {
                 expect(result === true, "rules were not updated").to.be.true;
             });
@@ -97,7 +97,7 @@ describe("test/rules-updater.spec.ts", () => {
 
         it("Updates on added new voter", () => {
             return Promise.delay(10)
-            .then(() => delegatorWise.updateRulesIfChangedAsync(rules1))
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules1))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
@@ -114,7 +114,7 @@ describe("test/rules-updater.spec.ts", () => {
         const rules2 = _.slice(_.cloneDeep(rules1), 1); // remove first element
         it("Updates on removed voter", () => {
             return Promise.delay(10)
-            .then(() => delegatorWise.updateRulesIfChangedAsync(rules2))
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules2))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
@@ -130,7 +130,7 @@ describe("test/rules-updater.spec.ts", () => {
         (rules3[rules3.length - 1].rules.rulesets[0].rules[0] as WeightRule).max = 50;
         it("Updates on modified weight rule numbered property", () => {
             return Promise.delay(10)
-            .then(() => delegatorWise.updateRulesIfChangedAsync(rules3))
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules3))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
@@ -148,7 +148,7 @@ describe("test/rules-updater.spec.ts", () => {
         (rules4[rules4.length - 1].rules.rulesets[0].rules[1] as TagsRule).mode = TagsRule.Mode.DENY;
         it("Updates on modified tags rule enum property", () => {
             return Promise.delay(10)
-            .then(() => delegatorWise.updateRulesIfChangedAsync(rules4))
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules4))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
@@ -166,7 +166,7 @@ describe("test/rules-updater.spec.ts", () => {
         (rules5[rules5.length - 1].rules.rulesets[0].rules[1] as TagsRule).tags.push("sometag");
         it("Updates on modified tags array", () => {
             return Promise.delay(10)
-            .then(() => delegatorWise.updateRulesIfChangedAsync(rules5))
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules5))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
@@ -188,7 +188,7 @@ describe("test/rules-updater.spec.ts", () => {
         const rules6 = _.cloneDeep(rules5);
         it("Does not update on same but deeply cloned rules", () => {
             return Promise.delay(10)
-            .then(() => delegatorWise.updateRulesIfChangedAsync(rules6))
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules6))
             .then((result: SteemOperationNumber | true) => {
                 expect(result === true, "rules were not updated").to.be.true;
             });

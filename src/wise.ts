@@ -180,13 +180,13 @@ export class Wise {
     }
 
     // TODO comment
-    public updateRulesIfChangedAsync = (rules: { voter: string, rules: SetRules } [], proggressCallback: ProggressCallback= () => {}): Promise<SteemOperationNumber | true> => {
+    public diffAndUpdateRulesAsync = (rules: { voter: string, rules: SetRules } [], proggressCallback: ProggressCallback= () => {}): Promise<SteemOperationNumber | true> => {
         return RulesUpdater.updateRulesIfChanged(this.api, this.protocol, this.username, rules, proggressCallback);
     }
 
     // TODO comment
-    public updateRulesIfChanged = (rules: { voter: string, rules: SetRules } [], callback: (error: Error | undefined, result: SteemOperationNumber | true | undefined) => void, proggressCallback: ProggressCallback= () => {}): Promise<void> => {
-        return this.updateRulesIfChangedAsync(rules, proggressCallback)
+    public diffAndUpdateRules = (rules: { voter: string, rules: SetRules } [], callback: (error: Error | undefined, result: SteemOperationNumber | true | undefined) => void, proggressCallback: ProggressCallback= () => {}): Promise<void> => {
+        return this.diffAndUpdateRulesAsync(rules, proggressCallback)
         .then(
             (result: SteemOperationNumber | true) => {
                 callback(undefined, result);
