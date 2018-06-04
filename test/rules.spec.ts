@@ -146,7 +146,7 @@ describe("test/util.spec.ts", () => {
         });
     });
 
-    describe.only("RulePrototyper", () => {
+    describe("RulePrototyper", () => {
         it ("Unserialized rules are equal to serialized after prototyping", () => {
             const rulesPrimary: Rule [] = [
                 new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 100),
