@@ -1,6 +1,7 @@
 import { expect, assert } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
+import * as _ from "lodash";
 
 import { DirectBlockchainApi, Wise, SteemOperationNumber } from "../src/wise";
 import { DisabledApi } from "../src/api/DisabledApi";
@@ -54,7 +55,16 @@ describe("test/index.spec.ts", () => {
                     });
             });
 
-            it("refuses to send invalid voteorder", (done) => {
+            it.only("quickly fails to send voteorder with invalid structure", function (done) {
+                this.timeout(100);
+                const structChanged = _.set(_.cloneDeep(data.sendVoteorder_valid.voteorder), "weight", "string instead of number");
+                wise.sendVoteorder(data.sendVoteorder_valid.delegator, structChanged, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
+                    if (error) done();
+                    else done(new Error("Inconsistent state: no error and no result"));
+                });
+            });
+
+            it.only("refuses to send invalid voteorder", (done) => {
                 wise.sendVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
                     if (error) done();
                     else done(new Error("Inconsistent state: no error and no result"));
@@ -64,11 +74,22 @@ describe("test/index.spec.ts", () => {
 
 
         describe("#sendVoteorderAsync", () => {
-            it("[async] sends valid voteorder", () => {
+            it("sends valid voteorder", () => {
                 return wise.sendVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder);
             });
 
-            it("[async] refuses to send invalid voteorder", () => {
+            it.only("quickly fails to send voteorder with invalid structure", function () {
+                this.timeout(100);
+                const structChanged = _.set(_.cloneDeep(data.sendVoteorder_valid.voteorder), "weight", "string instead of number");
+                return wise.sendVoteorderAsync(data.sendVoteorder_valid.delegator, structChanged)
+                .then(() => {
+                    throw new Error("Should fail on invalid voteorder");
+                }, () => {
+                    // it is ok
+                });
+            });
+
+            it.only("refuses to send invalid voteorder", () => {
                 return wise.sendVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_valid.voteorder)
                 .then(() => {
                     throw new Error("Should fail on invalid voteorder");
