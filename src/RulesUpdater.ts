@@ -2,7 +2,7 @@ import * as _ from "lodash";
 
 import { Api } from "./api/Api";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
-import { SetRules, EffectuatedSetRules } from "./protocol/SetRules";
+import { SetRules, EffectuatedSetRules, SetRulesForVoter } from "./protocol/SetRules";
 import { Protocol } from "./protocol/Protocol";
 import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 import { ProggressCallback } from "./ProggressCallback";
@@ -11,7 +11,7 @@ import { Util } from "./util/util";
 
 export class RulesUpdater {
     public static updateRulesIfChanged(api: Api, protocol: Protocol, delegator: string,
-            newRules: { voter: string, rules: SetRules } [], proggressCallback: ProggressCallback): Promise<SteemOperationNumber | true> {
+            newRules: SetRulesForVoter [], proggressCallback: ProggressCallback): Promise<SteemOperationNumber | true> {
         return api.loadAllRulesets(delegator, SteemOperationNumber.FUTURE, protocol)
         .then((currentRules: EffectuatedSetRules []) => { // remove rules that were overwritten
             if (currentRules.length == 0) return [];
@@ -32,13 +32,13 @@ export class RulesUpdater {
 
             const concatedRules = _.concat(
                 currentRules.map(r => [r.voter, { current: r, updated: undefined }] as [string, RulesByVoterValue]),
-                newRules.map(r => [r.voter, { current: undefined, updated: r.rules }] as [string, RulesByVoterValue])
+                newRules.map(r => [r.voter, { current: undefined, updated: r }] as [string, RulesByVoterValue])
             );
 
 
             const rulesByVoter: RulesByVoter = _.concat(
                 currentRules.map(r => [r.voter, { current: r, updated: undefined }] as [string, RulesByVoterValue]),
-                newRules.map(r => [r.voter, { current: undefined, updated: r.rules }] as [string, RulesByVoterValue])
+                newRules.map(r => [r.voter, { current: undefined, updated: r }] as [string, RulesByVoterValue])
             ).reduce((obj: RulesByVoter, elem: [string, RulesByVoterValue]): RulesByVoter => {
                 /*if (obj[elem[0]]) (obj[elem[0]] as object []).push(elem[1]);
                 else obj[]

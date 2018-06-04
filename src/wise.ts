@@ -11,7 +11,7 @@ import { Api } from "./api/Api";
 import { SendVoteorder } from "./protocol/SendVoteorder";
 import { ProggressCallback } from "./ProggressCallback";
 import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
-import { SetRules, EffectuatedSetRules } from "./protocol/SetRules";
+import { SetRules, EffectuatedSetRules, SetRulesForVoter } from "./protocol/SetRules";
 import { SteemOperation } from "./blockchain/SteemOperation";
 import { ValidationException } from "./validation/ValidationException";
 import { Validator } from "./validation/Validator";
@@ -186,12 +186,12 @@ export class Wise {
     }
 
     // TODO comment
-    public diffAndUpdateRulesAsync = (rules: { voter: string, rules: SetRules } [], proggressCallback: ProggressCallback= () => {}): Promise<SteemOperationNumber | true> => {
+    public diffAndUpdateRulesAsync = (rules: SetRulesForVoter [], proggressCallback: ProggressCallback= () => {}): Promise<SteemOperationNumber | true> => {
         return RulesUpdater.updateRulesIfChanged(this.api, this.protocol, this.username, rules, proggressCallback);
     }
 
     // TODO comment
-    public diffAndUpdateRules = (rules: { voter: string, rules: SetRules } [], callback: (error: Error | undefined, result: SteemOperationNumber | true | undefined) => void, proggressCallback: ProggressCallback= () => {}): Promise<void> => {
+    public diffAndUpdateRules = (rules: SetRulesForVoter [], callback: (error: Error | undefined, result: SteemOperationNumber | true | undefined) => void, proggressCallback: ProggressCallback= () => {}): Promise<void> => {
         return this.diffAndUpdateRulesAsync(rules, proggressCallback)
         .then(
             (result: SteemOperationNumber | true) => {
@@ -291,7 +291,7 @@ export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 
 export { Protocol } from "./protocol/Protocol";
 export { SendVoteorder } from "./protocol/SendVoteorder";
-export { SetRules, EffectuatedSetRules } from "./protocol/SetRules";
+export { SetRules, SetRulesForVoter, EffectuatedSetRules } from "./protocol/SetRules";
 export { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 export { EffectuatedSmartvotesOperation } from "./protocol/EffectuatedSmartvotesOperation";
 

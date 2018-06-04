@@ -10,9 +10,12 @@ export interface SetRules {
     } [];
 }
 
-export interface EffectuatedSetRules extends SetRules {
-    moment: SteemOperationNumber;
+export interface SetRulesForVoter extends SetRules {
     voter: string;
+}
+
+export interface EffectuatedSetRules extends SetRulesForVoter {
+    moment: SteemOperationNumber;
 }
 
 /**
