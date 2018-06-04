@@ -3,7 +3,7 @@ import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
 
-import { DirectBlockchainApi, Wise, SteemOperationNumber } from "../src/wise";
+import { DirectBlockchainApi, Wise, SteemOperationNumber, ValidationException } from "../src/wise";
 import { DisabledApi } from "../src/api/DisabledApi";
 
 import * as data from "./data/index.data";
@@ -135,6 +135,76 @@ describe("test/index.spec.ts", () => {
             });
             /* tslint:enable:whitespace */
         });
+
+
+        describe("#validateVoteorder", () => {
+            it.only("passes valid voteorder", (done) => {
+                wise.validateVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE, (error: Error | undefined, result: true | ValidationException | undefined) => {
+                    if (error) done(error);
+                    else if (result === true) done();
+                    else done(result);
+                });
+            });
+
+            it.only("fails on rules not fulfilled", (done) => {
+                return wise.validateVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE, (error: Error | undefined, result: true | ValidationException | undefined) => {
+                    if (error) done(error);
+                    else if (result === true) done(new Error("Should mark as invalid"));
+                    else done();
+                });
+            });
+        });
+
+
+        describe("#validateVoteorderAsync", () => {
+            it.only("passes valid voteorder", () => {
+                return wise.validateVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE);
+            });
+
+            it.only("fails on rules not fulfilled", () => {
+                return wise.validateVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE)
+                .then(() => {
+                    throw new Error("Should fail on invalid voteorder");
+                }, () => {
+                    // it is ok
+                });
+            });
+        });
+
+
+        describe("#validatePotentialVoteorder", () => {
+            it.only("passes valid voteorder", (done) => {
+                wise.validatePotentialVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: true | ValidationException | undefined) => {
+                    if (error) done(error);
+                    else if (result === true) done();
+                    else done(result);
+                });
+            });
+
+            it.only("fails on rules not fulfilled", (done) => {
+                return wise.validatePotentialVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: true | ValidationException | undefined) => {
+                    if (error) done(error);
+                    else if (result === true) done(new Error("Should mark as invalid"));
+                    else done();
+                });
+            });
+        });
+
+
+        describe("#validatePotentialVoteorderAsync", () => {
+            it.only("passes valid voteorder", () => {
+                return wise.validatePotentialVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder);
+            });
+
+            it.only("fails on rules not fulfilled", () => {
+                return wise.validatePotentialVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_valid.voteorder)
+                .then(() => {
+                    throw new Error("Should fail on invalid voteorder");
+                }, () => {
+                    // it is ok
+                });
+            });
+        });
     });
 
 
@@ -144,7 +214,7 @@ describe("test/index.spec.ts", () => {
         it("allows too high weight", function(done) {
             this.timeout(10000);
             const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: 3 });
-            wise.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationException | undefined) {
+            wise.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationException | undefined | undefined) {
                 if (error || result) done(error);
                 else done();
             });
@@ -154,7 +224,7 @@ describe("test/index.spec.ts", () => {
             it("fails on invald weight type (" + weight + ")", function(done) {
                 this.timeout(10000);
                 const voteorder: smartvotes_voteorder = _objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
-                wise.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationException | undefined) {
+                wise.validatePotentialVoteOrder(voter, voteorder, function(error: Error | undefined, result: true | ValidationException | undefined | undefined) {
                     if (error && !result) done();
                     else done(new Error("Should fail on invald weight (" + weight + ")"));
                 });
@@ -169,7 +239,7 @@ describe("test/index.spec.ts", () => {
             this.timeout(10000);
 
             const voteorder = validVoteorder;
-            wise.validateVoteorder(voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
+            wise.validateVoteorder(voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined | undefined) {
                 if (error) done(error);
                 else {
                     if (proggressCounter >= 4) done();
