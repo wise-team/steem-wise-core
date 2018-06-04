@@ -122,7 +122,8 @@ export class Wise {
         .then(() => {
             if (!skipValidation && !this.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
         }).then(() => {
-            if (!skipValidation) this.validatePotentialVoteorderAsync(delegator, this.username, voteorder);
+            if (!skipValidation) return this.validatePotentialVoteorderAsync(delegator, this.username, voteorder).then(() => {});
+            else return Promise.resolve();
         })
         .then(() => this.api.sendToBlockchain(steemOps));
     }

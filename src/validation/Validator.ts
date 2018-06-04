@@ -43,7 +43,7 @@ export class Validator {
         return new Promise<ValidationException | true>((resolve, reject) => {
             this.validateVoteorderObject(voteorder)
             .then(() => {
-                if (this.providedRulesets) return this.providedRulesets;
+                if (this.providedRulesets) return Promise.resolve(this.providedRulesets);
                 else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
             })
             .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)

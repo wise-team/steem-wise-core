@@ -22,7 +22,7 @@ export abstract class Chainable<FROM, TO, IMPLEMENTERCLASS extends Chainable<FRO
     }
 
     protected give(error: Error | undefined, item: TO | undefined): boolean {
-        if (this.downstreamChainables.length == 0) throw new Error("There are no downstream chainables in this chainable");
+        if (this.downstreamChainables.length == 0) return false;
 
         // slice copies object references into the new array. Both the original and new array refer to the same object.
         const frozenDownstream: Chainable<TO, any, any> [] = this.downstreamChainables.slice();
