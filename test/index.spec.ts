@@ -33,6 +33,12 @@ describe("test/index.spec.ts", () => {
             });
         });
 
+        describe("#sendRulesAsync", () => {
+            it("sends valid rules without error", () => {
+                return wise.sendRulesAsync(data.sendRules_valid.voter, data.sendRules_valid.rules);
+            });
+        });
+
 
         describe("#sendVoteorder", () => {
             it("sends valid voteorder", (done) => {
@@ -50,11 +56,24 @@ describe("test/index.spec.ts", () => {
 
             it("refuses to send invalid voteorder", (done) => {
                 wise.sendVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
-                    if (error) done(error);
-                    else {
-                        if (result) done();
-                        else done(new Error("Inconsistent state: no error and no result"));
-                    }
+                    if (error) done();
+                    else done(new Error("Inconsistent state: no error and no result"));
+                });
+            });
+        });
+
+
+        describe("#sendVoteorderAsync", () => {
+            it("[async] sends valid voteorder", () => {
+                return wise.sendVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder);
+            });
+
+            it("[async] refuses to send invalid voteorder", () => {
+                return wise.sendVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_valid.voteorder)
+                .then(() => {
+                    throw new Error("Should fail on invalid voteorder");
+                }, () => {
+                    // it is ok
                 });
             });
         });
