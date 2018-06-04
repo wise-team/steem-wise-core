@@ -182,5 +182,32 @@ describe("test/rules-updater.spec.ts", () => {
                 expect(result === true, "rules were not updated").to.be.true;
             });
         });
+
+        const rules7 = JSON.parse(JSON.stringify(_.cloneDeep(rules6)));
+        it("Does not update unchanged unprototyped rules object", () => {
+            return Promise.delay(10)
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules7))
+            .then((result: SteemOperationNumber | true) => {
+                expect(result === true, "rules were not updated").to.be.true;
+            });
+        });
+
+        const rules8 = JSON.parse(JSON.stringify(_.cloneDeep(rules0))); // copy of rules0
+        it("Correctly appends prototype to unprototyped rules and updates them", () => {
+            return Promise.delay(10)
+            .then(() => delegatorWise.diffAndUpdateRulesAsync(rules8))
+            .then((result: SteemOperationNumber | true) => {
+                expect(result !== true, "rules were actually updated").to.be.true;
+                expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
+            })
+            .then(() => Promise.delay(10))
+            .then(() => voterAWise.getRulesetsAsync(delegator))
+            .then((rules: SetRules) => {
+                expect(rules.rulesets).to.be.an("array").with.length(1);
+                expect(rules.rulesets[0].name).to.be.equal("a");
+                expect(rules.rulesets).to.deep.equal(rules0[0].rulesets);
+                expect(_.isEqual(rules.rulesets, rules0[0].rulesets), "_.isEqual").to.be.true;
+            });
+        });
     });
 });

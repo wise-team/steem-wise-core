@@ -8,6 +8,7 @@ import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 import { ProggressCallback } from "./ProggressCallback";
 import { Promise } from "bluebird";
 import { Util } from "./util/util";
+import { RulePrototyper } from "./rules/RulePrototyper";
 
 export class RulesUpdater {
     public static updateRulesIfChanged(api: Api, protocol: Protocol, delegator: string,
@@ -30,11 +31,12 @@ export class RulesUpdater {
             type RulesByVoterValue = { current: SetRules|undefined, updated: SetRules|undefined }; // { voter: string, rulesets: SetRules, updated: boolean };
             type RulesByVoter = { [voter: string]: RulesByVoterValue };
 
-            const concatedRules = _.concat(
-                currentRules.map(r => [r.voter, { current: r, updated: undefined }] as [string, RulesByVoterValue]),
-                newRules.map(r => [r.voter, { current: undefined, updated: r }] as [string, RulesByVoterValue])
-            );
-
+            // ensure each Rule has prototype in newRules
+            newRules.forEach((srfv: SetRulesForVoter) => srfv.rulesets.forEach(
+                rulesInRuleset => rulesInRuleset.rules.forEach(
+                    (rule, index) => rulesInRuleset.rules[index] = RulePrototyper.fromUnprototypedRule(rule)
+                )
+            ));
 
             const rulesByVoter: RulesByVoter = _.concat(
                 currentRules.map(r => [r.voter, { current: r, updated: undefined }] as [string, RulesByVoterValue]),

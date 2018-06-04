@@ -6,6 +6,7 @@ import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 
 export class WeightRule extends Rule {
+    public rule: string = Rule.Type.Weight;
     public min: number;
     public max: number;
     public mode: WeightRule.Mode;
@@ -37,6 +38,6 @@ export class WeightRule extends Rule {
 
 export namespace WeightRule {
     export enum Mode {
-        SINGLE_VOTE_WEIGHT = "SINGLE_VOTE_WEIGHT"
+        SINGLE_VOTE_WEIGHT = "single_vote_weight"
     }
 }

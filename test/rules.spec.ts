@@ -1,11 +1,13 @@
 import { expect, assert } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
-import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule } from "../src/wise";
+import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, WeightRule, CustomRPCRule } from "../src/wise";
 
 import * as fakeDataset_ from "./data/fake-blockchain.json";
 import { FakeApi } from "../src/api/FakeApi";
 import { ValidationContext } from "../src/validation/ValidationContext";
+import { Rule } from "../src/rules/Rule";
+import { RulePrototyper } from "../src/rules/RulePrototyper";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
 const delegator = "noisy";
@@ -141,6 +143,33 @@ describe("test/util.spec.ts", () => {
             return rule.validate(voteorder, context)
             .then(() => { throw new Error("Should fail"); },
                   (e: Error) => { expect((e as ValidationException).validationException).to.be.true; });
+        });
+    });
+
+    describe.only("RulePrototyper", () => {
+        it ("Unserialized rules are equal to serialized after prototyping", () => {
+            const rulesPrimary: Rule [] = [
+                new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 100),
+                new AuthorsRule(AuthorsRule.Mode.DENY, ["1"]),
+                new AuthorsRule(AuthorsRule.Mode.ALLOW, []),
+                new AuthorsRule(AuthorsRule.Mode.ALLOW, ["1"]),
+                new AuthorsRule(AuthorsRule.Mode.ALLOW, ["1", "2"]),
+                new TagsRule(TagsRule.Mode.ALLOW, ["1", "2"]),
+                new TagsRule(TagsRule.Mode.DENY, ["1", "2"]),
+                new TagsRule(TagsRule.Mode.REQUIRE, ["1", "2"]),
+                new TagsRule(TagsRule.Mode.ANY, ["1", "2"]),
+                new CustomRPCRule("a", 2, "c", "d")
+            ];
+
+            const rulesUnprototyped = JSON.parse(JSON.stringify(rulesPrimary));
+            const rulesPrototyped = rulesUnprototyped.map((rule: Rule) => RulePrototyper.fromUnprototypedRule(rule));
+
+            rulesPrototyped.forEach((rule: Rule) => expect(rule).to.have.property("validate"));
+
+            expect(rulesUnprototyped).to.not.equal(rulesPrimary);
+            expect(rulesUnprototyped).to.not.deep.equal(rulesPrimary);
+
+            expect(rulesPrototyped).to.deep.equal(rulesPrimary);
         });
     });
 

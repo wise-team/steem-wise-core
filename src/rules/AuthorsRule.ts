@@ -9,6 +9,7 @@ import { SteemPost } from "../blockchain/SteemPost";
 import { NotFoundException } from "../util/NotFoundException";
 
 export class AuthorsRule extends Rule {
+    public rule: string = Rule.Type.Authors;
     public authors: string [];
     public mode: AuthorsRule.Mode;
 
@@ -47,7 +48,7 @@ export class AuthorsRule extends Rule {
 
 export namespace AuthorsRule {
     export enum Mode {
-        ALLOW = "ALLOW",
-        DENY = "DENY"
+        ALLOW = "allow",
+        DENY = "deny"
     }
 }

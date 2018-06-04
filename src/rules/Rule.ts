@@ -4,6 +4,7 @@ import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 
 export abstract class Rule {
+    public rule: string = "not-set-in-inheriting-class";
     /**
      * Validates a voteorder.
      * @param voteorder — a voteorder
@@ -20,9 +21,9 @@ export abstract class Rule {
 
 export namespace Rule {
     export enum Type {
-        Authors = "Authors",
-        Weight = "Weight",
-        CustomRPC = "CustomRPC",
-        Tags = "Tags"
+        Tags = "tags",
+        Authors = "authors",
+        Weight = "weight",
+        CustomRPC = "custom_rpc",
     }
 }

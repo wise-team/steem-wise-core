@@ -6,6 +6,7 @@ import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 
 export class CustomRPCRule extends Rule {
+    public rule: string = Rule.Type.CustomRPC;
     public host: string;
     public port: number;
     public path: string;

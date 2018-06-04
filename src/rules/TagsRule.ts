@@ -8,6 +8,7 @@ import { NotFoundException } from "../util/NotFoundException";
 import { Promise } from "bluebird";
 
 export class TagsRule extends Rule {
+    public rule: string = Rule.Type.Tags;
     public tags: string [];
     public mode: TagsRule.Mode;
 
@@ -56,7 +57,7 @@ export class TagsRule extends Rule {
                     }
                     throw new ValidationException("None of the tags [" + postMetadata.tags.join() + "] is on the \"require\" tags list [" + this.tags.join() + "].");
                 }
-                else throw new ValidationException("Unknown mode in tags this.");
+                else throw new ValidationException("Unknown mode in tags.");
         })
         .catch((e: Error) => {
             if ((e as NotFoundException).notFoundException) throw new Error(e.message);
@@ -68,9 +69,9 @@ export class TagsRule extends Rule {
 
 export namespace TagsRule {
     export enum Mode {
-        ALLOW = "ALLOW",
-        DENY = "DENY",
-        ANY = "ANY",
-        REQUIRE = "REQUIRE"
+        ALLOW = "allow",
+        DENY = "deny",
+        ANY = "any",
+        REQUIRE = "require"
     }
 }
