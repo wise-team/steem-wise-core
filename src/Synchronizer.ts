@@ -217,7 +217,7 @@ export class Synchronizer {
     private continueIfRunning(fn: () => void) {
         if (this.isRunning) fn();
         else {
-            this.notify(undefined, { type: Synchronizer.EventType.SynchronizationStop, moment: this.lastProcessedOperationNum });
+            this.notify(undefined, { type: Synchronizer.EventType.SynchronizationStop, moment: this.lastProcessedOperationNum, message: "Synchronization stopped" });
         }
     }
 }
@@ -300,6 +300,7 @@ export namespace Synchronizer {
     export interface SynchronizationStopEvent {
         type: EventType.SynchronizationStop;
         moment: SteemOperationNumber;
+        message: string;
     }
 }
 

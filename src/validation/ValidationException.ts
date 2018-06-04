@@ -1,5 +1,4 @@
-import setPrototypeOf = require("setprototypeof");
-
+import { setPrototypeOf } from "../util/setprototypeof";
 
 export class ValidationException extends Error {
     public validationException: true = true;

@@ -13,7 +13,6 @@
     "axios": "^0.18.0",
     "bluebird": "^3.5.1",
     "lodash": "^4.17.10",
-    "setprototypeof": "^1.1.0",
     "steem": "^0.7.1"
   },
   "devDependencies": {

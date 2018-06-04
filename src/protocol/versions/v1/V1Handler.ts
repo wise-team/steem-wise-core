@@ -2,7 +2,6 @@ import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
 import { SmartvotesOperation } from "../../SmartvotesOperation";
 
 import * as ajv from "ajv";
-import * as schemaJSON from "./smartvotes.schema.json";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_ruleset, smartvotes_command_send_voteorder, smartvotes_command_confirm_votes } from "./smartvotes.schema";
 import { SendVoteorder, isSendVoteorder } from "../../SendVoteorder";
 import { SetRules, isSetRules } from "../../SetRules";
@@ -19,7 +18,7 @@ import { WeightRule } from "../../../rules/WeightRule";
 
 const aajv: ajv.Ajv = new ajv();
 aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
-const validate = aajv.compile(schemaJSON);
+const validate = aajv.compile(require("./smartvotes.schema.json"));
 
 export class V1Handler implements ProtocolVersionHandler {
     public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);

@@ -1,5 +1,4 @@
-import setPrototypeOf = require("setprototypeof");
-
+import { setPrototypeOf } from "./setprototypeof";
 
 export class NotFoundException extends Error {
     public notFoundException: true = true;
