@@ -54,7 +54,7 @@ describe("test/index.spec.ts", () => {
                     });
             });
 
-            it.only("quickly fails to send voteorder with invalid structure", function (done) {
+            it("quickly fails to send voteorder with invalid structure", function (done) {
                 this.timeout(100);
                 const structChanged = _.set(_.cloneDeep(data.sendVoteorder_valid.voteorder), "weight", "string instead of number");
                 wise.sendVoteorder(data.sendVoteorder_valid.delegator, structChanged, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
@@ -63,7 +63,7 @@ describe("test/index.spec.ts", () => {
                 });
             });
 
-            it.only("refuses to send invalid voteorder", (done) => {
+            it("refuses to send invalid voteorder", (done) => {
                 wise.sendVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voteorder, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
                     if (error) done();
                     else done(new Error("Inconsistent state: no error and no result"));
@@ -77,7 +77,7 @@ describe("test/index.spec.ts", () => {
                 return wise.sendVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder);
             });
 
-            it.only("quickly fails to send voteorder with invalid structure", function () {
+            it("quickly fails to send voteorder with invalid structure", function () {
                 this.timeout(100);
                 const structChanged = _.set(_.cloneDeep(data.sendVoteorder_valid.voteorder), "weight", "string instead of number");
                 return wise.sendVoteorderAsync(data.sendVoteorder_valid.delegator, structChanged)
@@ -88,7 +88,7 @@ describe("test/index.spec.ts", () => {
                 });
             });
 
-            it.only("refuses to send invalid voteorder", () => {
+            it("refuses to send invalid voteorder", () => {
                 return wise.sendVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voteorder)
                 .then(() => {
                     throw new Error("Should fail on invalid voteorder");
@@ -137,7 +137,7 @@ describe("test/index.spec.ts", () => {
 
 
         describe("#validateVoteorder", () => {
-            it.only("passes valid voteorder", (done) => {
+            it("passes valid voteorder", (done) => {
                 wise.validateVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE, (error: Error | undefined, result: true | ValidationException | undefined) => {
                     if (error) done(error);
                     else if (result === true) done();
@@ -145,7 +145,7 @@ describe("test/index.spec.ts", () => {
                 });
             });
 
-            it.only("fails on rules not fulfilled", (done) => {
+            it("fails on rules not fulfilled", (done) => {
                 return wise.validateVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder, SteemOperationNumber.FUTURE, (error: Error | undefined, result: true | ValidationException | undefined) => {
                     if (error) done(error);
                     else if (result === true) done(new Error("Should mark as invalid"));
@@ -156,11 +156,11 @@ describe("test/index.spec.ts", () => {
 
 
         describe("#validateVoteorderAsync", () => {
-            it.only("passes valid voteorder", () => {
+            it("passes valid voteorder", () => {
                 return wise.validateVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE);
             });
 
-            it.only("fails on rules not fulfilled", () => {
+            it("fails on rules not fulfilled", () => {
                 return wise.validateVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder, SteemOperationNumber.FUTURE)
                 .then((result: ValidationException | true) => {
                     if (result === true) throw new Error("Should fail");
@@ -170,7 +170,7 @@ describe("test/index.spec.ts", () => {
 
 
         describe("#validatePotentialVoteorder", () => {
-            it.only("passes valid voteorder", (done) => {
+            it("passes valid voteorder", (done) => {
                 wise.validatePotentialVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: true | ValidationException | undefined) => {
                     if (error) done(error);
                     else if (result === true) done();
@@ -178,7 +178,7 @@ describe("test/index.spec.ts", () => {
                 });
             });
 
-            it.only("fails on rules not fulfilled", (done) => {
+            it("fails on rules not fulfilled", (done) => {
                 return wise.validatePotentialVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder, (error: Error | undefined, result: true | ValidationException | undefined) => {
                     if (error) done(error);
                     else if (result === true) done(new Error("Should mark as invalid"));
@@ -189,11 +189,11 @@ describe("test/index.spec.ts", () => {
 
 
         describe("#validatePotentialVoteorderAsync", () => {
-            it.only("passes valid voteorder", () => {
+            it("passes valid voteorder", () => {
                 return wise.validatePotentialVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder);
             });
 
-            it.only("fails on rules not fulfilled", () => {
+            it("fails on rules not fulfilled", () => {
                 return wise.validatePotentialVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder)
                 .then((result: ValidationException | true) => {
                     if (result === true) throw new Error("Should fail");
