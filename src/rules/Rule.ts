@@ -20,6 +20,9 @@ export abstract class Rule {
 
 export namespace Rule {
     export enum Type {
-        Authors, Weight, CustomRPC, Tags
+        Authors = "Authors",
+        Weight = "Weight",
+        CustomRPC = "CustomRPC",
+        Tags = "Tags"
     }
 }

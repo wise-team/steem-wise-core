@@ -47,6 +47,7 @@ export class AuthorsRule extends Rule {
 
 export namespace AuthorsRule {
     export enum Mode {
-        ALLOW, DENY
+        ALLOW = "ALLOW",
+        DENY = "DENY"
     }
 }

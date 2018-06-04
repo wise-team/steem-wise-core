@@ -74,6 +74,9 @@ export class TagsRule extends Rule {
 
 export namespace TagsRule {
     export enum Mode {
-        ALLOW, DENY, ANY, REQUIRE
+        ALLOW = "ALLOW",
+        DENY = "DENY",
+        ANY = "ANY",
+        REQUIRE = "REQUIRE"
     }
 }

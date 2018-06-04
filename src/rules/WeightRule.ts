@@ -37,6 +37,6 @@ export class WeightRule extends Rule {
 
 export namespace WeightRule {
     export enum Mode {
-        SINGLE_VOTE_WEIGHT
+        SINGLE_VOTE_WEIGHT = "SINGLE_VOTE_WEIGHT"
     }
 }
