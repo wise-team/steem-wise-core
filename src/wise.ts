@@ -105,7 +105,7 @@ export class Wise {
      * @param skipValidation (optional)
      */
     public sendVoteorderAsync = (delegator: string, voteorder: SendVoteorder,
-        proggressCallback?: ProggressCallback, skipValidation?: boolean): Promise<SteemOperationNumber> => {
+        proggressCallback: ProggressCallback = () => {}, skipValidation: boolean = false): Promise<SteemOperationNumber> => {
 
         // TODO proggress callback
 
@@ -115,15 +115,20 @@ export class Wise {
             command: voteorder
         };
         let steemOps: [string, object][];
-        return Promise.resolve().then(() => {
+        return Promise.resolve()
+        .then(() => {
             steemOps = this.protocol.serializeToBlockchain(smOp);
             if (steemOps.length !== 1) throw new Error("An voteorder should be a single blockchain operation");
         })
         .then(() => {
-            if (!skipValidation && !this.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
+            if (skipValidation) return;
+            else if (!this.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
         }).then(() => {
-            if (!skipValidation) return this.validatePotentialVoteorderAsync(delegator, this.username, voteorder).then(() => {});
-            else return Promise.resolve();
+            if (skipValidation) return Promise.resolve();
+            else return this.validatePotentialVoteorderAsync(delegator, this.username, voteorder)
+            .then((result: ValidationException | true) => {
+                if (result !== true) throw new Error("Validation error: " + result.message);
+             });
         })
         .then(() => this.api.sendToBlockchain(steemOps));
     }
@@ -131,7 +136,7 @@ export class Wise {
     // TODO comment
     public sendVoteorder = (delegator: string, voteorder: SendVoteorder,
         callback: (error: Error | undefined, result: SteemOperationNumber | undefined) => void,
-        proggressCallback?: ProggressCallback, skipValidation?: boolean): void => {
+        proggressCallback: ProggressCallback = () => {}, skipValidation: boolean = false): void => {
 
         this.sendVoteorderAsync(delegator, voteorder, proggressCallback)
         .then((result: SteemOperationNumber) => callback(undefined, result))
