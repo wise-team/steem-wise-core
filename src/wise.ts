@@ -305,6 +305,8 @@ export { ValidationException } from "./validation/ValidationException";
 export { ProggressCallback } from "./ProggressCallback";
 export { NotFoundException } from "./util/NotFoundException";
 
+export { Synchronizer } from "./Synchronizer";
+
 export * from "./protocol/versions/v2/wise-schema";
 
 export default Wise;
