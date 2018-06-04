@@ -295,6 +295,7 @@ export { SetRules, SetRulesForVoter, EffectuatedSetRules } from "./protocol/SetR
 export { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 export { EffectuatedSmartvotesOperation } from "./protocol/EffectuatedSmartvotesOperation";
 
+export { Rule } from "./rules/Rule";
 export { AuthorsRule } from "./rules/AuthorsRule";
 export { TagsRule } from "./rules/TagsRule";
 export { CustomRPCRule } from "./rules/CustomRPCRule";
