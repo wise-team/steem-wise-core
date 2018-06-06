@@ -27,7 +27,7 @@ export class WeightRule extends Rule {
         return new Promise((resolve, reject) => {
             if (this.mode === WeightRule.Mode.SINGLE_VOTE_WEIGHT) {
                 if (voteorder.weight < this.min) throw new ValidationException("Weight is too low (" + voteorder.weight + " < " + this.min + ")");
-                else if (voteorder.weight > this.max) throw new ValidationException("Weight is too high (" + voteorder.weight + " > " + this.min + ")");
+                else if (voteorder.weight > this.max) throw new ValidationException("Weight is too high (" + voteorder.weight + " > " + this.max + ")");
                 else resolve();
             }
             else throw new Error("Unknown WeightRule.mode");
