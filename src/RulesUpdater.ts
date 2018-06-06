@@ -54,15 +54,19 @@ export class RulesUpdater {
             _.forOwn(rulesByVoter, (situation: RulesByVoterValue, voter: string, object: RulesByVoter) => {
                 if (situation.current && !situation.updated && situation.current.rulesets.length > 0 /* if length == 0 it means that the rules were voided */) {
                     // delete rules
+                    proggressCallback("Planning updating rules: rules for " + voter + " will be voided.", 0);
                     operationsToPerform.push(RulesUpdater.sendRules(voter, delegator, { rulesets: [] }));
                 }
                 else if (!situation.current && situation.updated) {
                     // create rules
+                    proggressCallback("Planning updating rules: rules for " + voter + " will be created: " + JSON.stringify(situation.updated), 0);
                     operationsToPerform.push(RulesUpdater.sendRules(voter, delegator, situation.updated));
                 }
                 else if (situation.current && situation.updated) {
                     // compare rules, send if differ
                     if (RulesUpdater.diffRules(situation.current, situation.updated)) {
+                        proggressCallback("Planning updating rules: rules for " + voter + " will be updated: current="
+                                + JSON.stringify(situation.current) + ", new=" + JSON.stringify(situation.updated), 0);
                         operationsToPerform.push(RulesUpdater.sendRules(voter, delegator, situation.updated));
                     }
                 }
@@ -77,7 +81,12 @@ export class RulesUpdater {
                 return Promise.resolve(operationsToPerform).mapSeries((op: SmartvotesOperation, index) => {
                     const num = index + 1;
                     proggressCallback("Updating rules: Sending operation " + num + "/" + operationsToPerform.length + "...", (num / operationsToPerform.length));
-                    return api.sendToBlockchain(protocol.serializeToBlockchain(op));
+                    return api.sendToBlockchain(protocol.serializeToBlockchain(op))
+                    .then(moment => {
+                        proggressCallback("Updating rules: Sent operation " + num + "/" + operationsToPerform.length
+                            + " (" + moment + ")", ((num + 1) / operationsToPerform.length));
+                        return moment;
+                    });
                 })
                 .then((moments: SteemOperationNumber []): SteemOperationNumber => {
                     proggressCallback("Done updating rules.", 1);
