@@ -1,17 +1,15 @@
 # Steem WISE (core library)
 
-[![Known Vulnerabilities](https://snyk.io/test/github/noisy-witness/steem-wise-core/badge.svg?targetFile=package.json)](https://snyk.io/test/github/noisy-witness/steem-wise-core?targetFile=package.json)
-
 Vote delegation system for STEEM blockchain: common library for browser & node.
 
 Currently, it is used by the following tools:
 
-- [steem-smartvotes-cli](https://github.com/Jblew/steem-smartvotes-cli) — CLI tool for vote delegators
-- [steem-smartvotes-voter-page](https://github.com/Jblew/steem-smartvotes-voter-page) — Simple HTML page that allows a voter to vote on behalf of a delegator. 
+- [steem-wise-cli](https://github.com/noisy-witness/steem-wise-cli) — CLI tool for vote delegators
+- [steem-wise-voter-page](https://github.com/noisy-witness/steem-wise-voter-page) — Simple HTML page that allows a voter to vote on behalf of a delegator. 
 
 Online tools:
 
-- [Voter page](https://noisy-witness.github.io/steem-smartvotes-voter-page) — you can vote using this page
+- [Voter page](https://noisy-witness.github.io/steem-wise-voter-page) — you can vote using this page
 
 
 
@@ -41,7 +39,7 @@ WISE can also boost your voting earnings: If you delegate your votes to a profes
 
 If you have read preceding paragraphs, you see, that the voter is a most important part of this ecosystem. You may think — what will be my profit if I become a voter? In fact, it will not only boost your prestige & significance in the community but also allows you to earn money for being an early curator (you have to remember about early voter penalty for the first 30 minutes). Benefits of using WISE as a voter:
 
-- Prestige & significance — power makes you noticeable. You can use it to build your personal brand and gain followers. You can become a tag curator if many people delegate you a smartvote.
+- Prestige & significance — power makes you noticeable. You can use it to build your personal brand and gain followers. You can become a tag curator if many people delegate you a WISEvote.
 - First curator reward — you can vote with your vote first & then vote as a delegator (which often will be a whale or a big group of minnow delegators). This makes your vote more rewarded.
 
 
@@ -73,8 +71,6 @@ let voteorder = {
 voterWise.sendVoteorderAsync(delegator, voteorder)
 .then(moment => console.log("Voteorder sent in block " + moment.blockNum))
 .catch(error => console.error(error));
-
-
 ```
 
 
@@ -86,15 +82,29 @@ voterWise.sendVoteorderAsync(delegator, voteorder)
 - a **delegator** — a person who allows someone to use his/her vote by specific criteria.
 - a **voter** — a person who votes on behalf of a delegator
 
+
+
 ### Blockchain transactions
 
 For safe and reliable communication WISE simply puts all operations on Steem blockchain. It is done using **custom_json** operation. Syntax and allowed operations are defined in **/protocol/versions/[vX]** dirs. Definitions are written in Typescript and then converted into json-schema.
+
+
+
+
 
 ## More resources on voting in Steem
 
 - [steemit.com/steem/@dantheman/curation-rewards-and-voting-incentive](https://steemit.com/steem/@dantheman/curation-rewards-and-voting-incentive)
 - [steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards](https://steemit.com/utopian-io/@nationalpark/how-to-maximize-steem-voting-rewards)
 - [steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters](https://steemit.com/steem/@abit/new-curation-reward-algorithm-huge-penalty-to-early-voters)
+
+
+
+## Like the project? Let @noisy-witness become your favourite witness!
+
+If you use & appreciate our software — you can easily support us. Just cast a vote for "noisy-witness" on your steem account. You can do it here: [https://steemit.com/~witnesses](https://steemit.com/~witnesses).
+
+
 
 ## Thank you
 
