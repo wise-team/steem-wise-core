@@ -236,6 +236,43 @@ describe("test/util.spec.ts", () => {
 
             expect(rulesPrototyped).to.deep.equal(rulesPrimary);
         });
+
+        const rulesForReprototypingTest: [Rule, string] [] = [
+            [new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 100), "min"],
+            [new AuthorsRule(AuthorsRule.Mode.DENY, ["perduta"]), "authors"],
+            [new TagsRule(TagsRule.Mode.DENY, ["steemit"]), "tags"],
+            [new CustomRPCRule("a", 2, "c", "d"), "host"]
+        ];
+        rulesForReprototypingTest.forEach((rulePair, index) =>  it("Validation quickly fails if reprototyped rule misses a property (" + rulePair[0].type() + ")", function () {
+            this.timeout(100);
+            const vo: SendVoteorder = {
+                weight: 10,
+                author: "noisy",
+                permlink: "dear-whales-please-consider-declining-all-comment-rewards-by-default-in-settings-5-reasons-to-do-that",
+                rulesetName: ""
+            };
+
+            return Promise.resolve().then(() => {
+                const rulePrimary = rulePair[0];
+                const propertyToOmit = rulePair[1];
+
+                const omitedRule = _.omit(rulePrimary, propertyToOmit);
+                expect(omitedRule).to.not.equal(rulePrimary);
+                expect(omitedRule).to.not.deep.equal(rulePrimary);
+
+                const ruleOmitedUnprototyped = JSON.parse(JSON.stringify(omitedRule));
+                expect(ruleOmitedUnprototyped).to.not.equal(omitedRule);
+                expect(ruleOmitedUnprototyped).to.not.deep.equal(omitedRule);
+
+                const ruleOmitedReprototyped = RulePrototyper.fromUnprototypedRule(ruleOmitedUnprototyped);
+                expect(ruleOmitedReprototyped).to.not.equal(rulePrimary);
+                expect(ruleOmitedReprototyped).to.not.deep.equal(rulePrimary);
+                expect(ruleOmitedReprototyped).to.have.property("validate");
+
+                return ruleOmitedReprototyped.validate(vo, new ValidationContext(fakeApi, delegator, voter, vo))
+                .then(() => { throw new Error("Should fail"); }, (e) => {});
+            });
+        }));
     });
 
     // TODO test CustomRPCRule

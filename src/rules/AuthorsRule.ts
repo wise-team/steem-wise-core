@@ -25,7 +25,12 @@ export class AuthorsRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return context.getPost()
+        return Promise.resolve()
+        .then(() => {
+            if (!this.mode) throw new ValidationException("Authors rule: mode is missing");
+            if (!this.authors) throw new ValidationException("Authors rule: authors are missing");
+        })
+        .then(() => context.getPost())
         .then((post: SteemPost): Promise<void> => {
             return new Promise((resolve, reject) => {
                 const authorIsOnList: boolean = (this.authors.indexOf(post.author) !== -1);

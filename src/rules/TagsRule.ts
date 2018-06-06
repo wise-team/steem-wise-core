@@ -24,7 +24,13 @@ export class TagsRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return context.getPost().then((post: SteemPost) => {
+        return Promise.resolve()
+        .then(() => {
+            if (!this.mode) throw new ValidationException("Tags rule: mode is missing");
+            if (!this.tags) throw new ValidationException("Tags rule: tags are missing");
+        })
+        .then(() => context.getPost())
+        .then((post: SteemPost) => {
                 const postMetadata: SteemPost.JSONMetadata = JSON.parse(post.json_metadata) as SteemPost.JSONMetadata;
 
                 if (this.mode === TagsRule.Mode.ALLOW) { // allow mode (every post tag must be within this list)
