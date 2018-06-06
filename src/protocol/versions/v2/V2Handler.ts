@@ -188,12 +188,15 @@ export class V2Handler implements ProtocolVersionHandler {
         }
         else throw new Error("Unknown type of command");
 
-        return [["custom_json", {
+        const completeOp: [string, object] = ["custom_json", {
             id: V2Handler.CUSTOM_JSON_ID,
             json: JSON.stringify(jsonObj),
             required_auths: [],
             required_posting_auths: [ senderUsername ]
-        } as CustomJsonOperation]];
+        } as CustomJsonOperation];
+
+        validate(completeOp);
+        return [ completeOp ];
     }
 
     private serializeRuleset = (r: { name: string, rules: Rule [] }): [string, wise_rule []] => {
