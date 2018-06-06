@@ -17,7 +17,7 @@ const voter = "perduta";
 const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
 
-describe("test/util.spec.ts", () => {
+describe("test/rules.spec.ts", () => {
     describe("AuthorsRule", function() {
         it("AllowMode: passes allowed author", () => {
             const rule = new AuthorsRule(AuthorsRule.Mode.ALLOW, ["noisy", "perduta"]);
@@ -242,8 +242,7 @@ describe("test/util.spec.ts", () => {
             [new TagsRule(TagsRule.Mode.DENY, ["steemit"]), "tags"],
             [new CustomRPCRule("a", 2, "c", "d"), "host"]
         ];
-        rulesForReprototypingTest.forEach((rulePair, index) =>  it("Validation quickly fails if reprototyped rule misses a property (" + rulePair[0].type() + ")", function () {
-            this.timeout(100);
+        rulesForReprototypingTest.forEach((rulePair, index) =>  it("Reprototyping fails if reprototyped rule misses a property (" + rulePair[0].type() + ")", () => {
             const vo: SendVoteorder = {
                 weight: 10,
                 author: "noisy",
@@ -263,13 +262,16 @@ describe("test/util.spec.ts", () => {
                 expect(ruleOmitedUnprototyped).to.not.equal(omitedRule);
                 expect(ruleOmitedUnprototyped).to.not.deep.equal(omitedRule);
 
-                const ruleOmitedReprototyped = RulePrototyper.fromUnprototypedRule(ruleOmitedUnprototyped);
-                expect(ruleOmitedReprototyped).to.not.equal(rulePrimary);
-                expect(ruleOmitedReprototyped).to.not.deep.equal(rulePrimary);
-                expect(ruleOmitedReprototyped).to.have.property("validate");
-
-                return ruleOmitedReprototyped.validate(vo, new ValidationContext(fakeApi, delegator, voter, vo))
-                .then(() => { throw new Error("Should fail"); }, (e) => {});
+                let hadThrown: boolean = false;
+                try {
+                    const ruleOmitedReprototyped = RulePrototyper.fromUnprototypedRule(ruleOmitedUnprototyped);
+                    expect(ruleOmitedReprototyped).to.not.equal(rulePrimary);
+                    expect(ruleOmitedReprototyped).to.not.deep.equal(rulePrimary);
+                    expect(ruleOmitedReprototyped).to.have.property("validate");
+                } catch (e) {
+                    hadThrown = true;
+                }
+                expect(hadThrown, "RulePrototyper.fromUnprototypedRule should throw").to.be.true;
             });
         }));
     });

@@ -5,6 +5,7 @@ import { TagsRule } from "./TagsRule";
 import { AuthorsRule } from "./AuthorsRule";
 import { WeightRule } from "./WeightRule";
 import { CustomRPCRule } from "./CustomRPCRule";
+import { ValidationException } from "../validation/ValidationException";
 
 export class RulePrototyper {
     public static fromUnprototypedRule(unprototyped: Rule): Rule {
@@ -21,11 +22,14 @@ export class RulePrototyper {
         else if (unprototyped.rule === Rule.Type.CustomRPC) {
             return RulePrototyper.prototypeRule(new CustomRPCRule("", 0, "", ""), unprototyped);
         }
-        else throw new Error("There is no rule with this type (rule=" + unprototyped.rule + ")");
+        else throw new ValidationException("There is no rule with this type (rule=" + unprototyped.rule + ")");
     }
 
-    private static prototypeRule<T extends Rule>(prototyperObj: T, unprototypedObj: object): T {
-        prototyperObj.getRequiredProperties().forEach(prop => _.unset(prototyperObj, prop));
-        return _.merge(prototyperObj, prototyperObj, unprototypedObj);
+    private static prototypeRule<T extends Rule>(prototyperRule: T, unprototypedObj: object): T {
+        prototyperRule.getRequiredProperties().forEach((prop) => {
+            if (!unprototypedObj.hasOwnProperty(prop))
+                throw new ValidationException("Rule (" + prototyperRule.type() + ") does not have required property " + prop);
+        });
+        return _.merge(prototyperRule, prototyperRule, unprototypedObj);
     }
 }
