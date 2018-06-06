@@ -17,6 +17,7 @@ export abstract class Rule {
     ): Promise<void>; // throws ValidationException
 
     public abstract type(): Rule.Type;
+    public abstract getRequiredProperties(): string [];
 }
 
 export namespace Rule {

@@ -31,4 +31,7 @@ export class CustomRPCRule extends Rule {
         });
     }
 
+    public getRequiredProperties(): string [] {
+        return ["host", "port", "path", "method"];
+    }
 }

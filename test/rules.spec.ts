@@ -232,9 +232,8 @@ describe("test/util.spec.ts", () => {
             rulesPrototyped.forEach((rule: Rule) => expect(rule).to.have.property("validate"));
 
             expect(rulesUnprototyped).to.not.equal(rulesPrimary);
-            expect(rulesUnprototyped).to.not.deep.equal(rulesPrimary);
-
-            expect(rulesPrototyped).to.deep.equal(rulesPrimary);
+            expect(rulesUnprototyped, "rulesUnprototyped").to.not.deep.equal(rulesPrimary, "rulesPrimary");
+            expect(rulesPrototyped, "rulesPrototyped").to.deep.equal(rulesPrimary, "rulesPrimary");
         });
 
         const rulesForReprototypingTest: [Rule, string] [] = [

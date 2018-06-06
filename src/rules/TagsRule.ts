@@ -71,6 +71,9 @@ export class TagsRule extends Rule {
         });
     }
 
+    public getRequiredProperties(): string [] {
+        return ["tags", "mode"];
+    }
 }
 
 export namespace TagsRule {

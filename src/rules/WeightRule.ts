@@ -39,6 +39,10 @@ export class WeightRule extends Rule {
             else throw new Error("Unknown WeightRule.mode");
         });
     }
+
+    public getRequiredProperties(): string [] {
+        return ["mode", "min", "max"];
+    }
 }
 
 export namespace WeightRule {

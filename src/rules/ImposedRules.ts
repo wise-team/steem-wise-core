@@ -82,5 +82,9 @@ export namespace ImposedRules {
                 return parseFloat(vests.substring(0, unitIndex));
             }
         }
+
+        public getRequiredProperties(): string [] {
+            return [];
+        }
     }
 }

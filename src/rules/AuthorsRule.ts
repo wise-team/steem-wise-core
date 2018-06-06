@@ -49,6 +49,10 @@ export class AuthorsRule extends Rule {
             else throw e;
         });
     }
+
+    public getRequiredProperties(): string [] {
+        return ["authors", "mode"];
+    }
 }
 
 export namespace AuthorsRule {
