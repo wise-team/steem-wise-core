@@ -273,6 +273,9 @@
         },
         "wise_set_rules": {
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "rulesets": {
                     "items": {
                         "additionalItems": {

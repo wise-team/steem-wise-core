@@ -20,6 +20,7 @@ export interface wise_confirm_vote {
 
 export interface wise_set_rules {
     voter: string;
+    description?: string;
     rulesets: [string, wise_rule []][];
 }
 
