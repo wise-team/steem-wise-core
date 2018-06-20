@@ -1,8 +1,7 @@
 var fs = require("fs");
-var smartvotesLib = require("../../dist/steem-smartvotes.js");
+var wiseLib = require("../../dist/wise.js");
 /**
- * Note that smartvotesLib is a module namespace. To access main class use *steemsmartvotes.SteemSmartvotes*.
- * #validateJson() is a static method of the class.
+ * Note that wiseLib is a module namespace. To access main class use *wise.Wise*.
  */
 
 /**
@@ -33,21 +32,21 @@ function loadCredentials(callback) {
 }
 
 function sendVoteorder(credentials) {
-    var vote = {
-        ruleset_name: "test_ruleset",
-        author: "steemit",
-        permlink: "firstpost",
-        delegator: "steemprojects1",
-        weight: 10000,
-        type: "upvote"
+    const delegator = "steemprojects3"
+    const voteorder = {
+        rulesetName: "Vote WISEly",
+        author: "noisy",
+        permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+        weight: 20
     };
 
-    var smartvotes = new smartvotesLib.SteemSmartvotes(credentials.username, credentials.postingWif);
-    smartvotes.sendVoteOrder(vote, function(error) {
+    const api = new wiseLib.DirectBlockchainApi(credentials.username, credentials.postingWif);
+    const wise = new wiseLib.Wise(credentials.username, api);
+    wise.sendVoteorder(delegator, voteorder, function(error, result) {
         if(error) {
             console.error(error);
             return;
         }
-        console.log("Vote sent. You can see it on: https://steemd.com/@"+credentials.username);
+        console.log("Voteorder sent. You can see it on: https://steemd.com/@"+credentials.username+", or on: https://steemd.com/b/" + result.blockNum);
     });
 }

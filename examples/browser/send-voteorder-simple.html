@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Steem WISE send voteorder</title>
+</head>
+<body>
+<h1>Steem WISE send voteorder</h1>
+<p id="result">Sending voteorder...</p>
+
+<!-- UNPKG is a CDN for NPM packages -->
+<script src="https://unpkg.com/steem-wise-core@0.17.10/dist/browser/wise.min.js"></script>
+<script type="text/javascript">
+    window.onload = function() {
+        const voter = "steemprojects1";
+        const postingKeyWif = "";
+
+        const delegator = "steemprojects3";
+        const voteorder = {
+            rulesetName: "Vote WISEly",
+            author: "noisy",
+            permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
+            weight: 20
+        };
+
+        console.log("Loading wise...");
+        const api = new wise.DirectBlockchainApi(voter, postingKeyWif);
+        const wiseObj = new wise.Wise(voter, api);
+
+        console.log("Sending voteorder...");
+        wiseObj.sendVoteorder(delegator, voteorder, function(error, result) {
+            if(error) {
+                console.error(error);
+                document.getElementById("result").innerHTML = "Error: " + error.message;
+            } 
+            else {
+                const msg = "Voteorder sent. You can see it on: https://steemd.com/@" + voter
+                    + ", or on: https://steemd.com/b/" + result.blockNum;
+                console.log(msg);
+                document.getElementById("result").innerHTML = "Success: " + msg;
+                    
+            }
+        });
+    };
+</script>
+</body>
+</html>
