@@ -285,6 +285,7 @@ export class Wise {
 export { Api } from "./api/Api";
 export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
 export { WiseRESTApi } from "./api/WiseRESTApi";
+export { DisabledApi } from "./api/DisabledApi";
 
 export { SteemOperation } from "./blockchain/SteemOperation";
 export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
