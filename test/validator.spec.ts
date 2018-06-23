@@ -1,0 +1,63 @@
+import { expect, assert } from "chai";
+import { Promise } from "bluebird";
+import "mocha";
+import * as _ from "lodash";
+
+import { Validator } from "../src/validation/Validator";
+import { ValidationContext } from "../src/validation/ValidationContext";
+import { Rule } from "../src/rules/Rule";
+import { RulePrototyper } from "../src/rules/RulePrototyper";
+
+import { FakeApi } from "../src/api/FakeApi";
+import * as fakeDataset_ from "./data/fake-blockchain.json";
+import { Wise, SteemOperationNumber, SendVoteorder, ValidationException } from "../src/wise";
+const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+
+const delegator = "noisy";
+const voter = "perduta";
+const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
+const wise = new Wise(voter, fakeApi);
+
+describe("test/validator.spec.ts", () => {
+    describe("Validator", () => {
+        const validator = new Validator(fakeApi, wise.getProtocol());
+        validator.provideRulesets({
+            voter: voter,
+            moment: new SteemOperationNumber(0, 0, 0),
+            rulesets: [{ name: "ruleset", rules: [] }]
+        });
+
+        it("allows weight=0", () => {
+            const vo: SendVoteorder = {
+                rulesetName: "ruleset",
+                weight: 0,
+                author: "nonexistent",
+                permlink: "nonexistent"
+            };
+            return validator.validate(delegator, voter, vo, SteemOperationNumber.FUTURE)
+            .then((result: ValidationException | true) => expect(result).to.deep.equal(true));
+        });
+
+        it("allows weight=10000", () => {
+            const vo: SendVoteorder = {
+                rulesetName: "ruleset",
+                weight: 10000,
+                author: "nonexistent",
+                permlink: "nonexistent"
+            };
+            return validator.validate(delegator, voter, vo, SteemOperationNumber.FUTURE)
+            .then((result: ValidationException | true) => expect(result).to.deep.equal(true));
+        });
+
+        it("allows weight=-10000", () => {
+            const vo: SendVoteorder = {
+                rulesetName: "ruleset",
+                weight: -10000,
+                author: "nonexistent",
+                permlink: "nonexistent"
+            };
+            return validator.validate(delegator, voter, vo, SteemOperationNumber.FUTURE)
+            .then((result: ValidationException | true) => expect(result).to.deep.equal(true));
+        });
+    });
+});

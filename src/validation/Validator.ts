@@ -72,7 +72,7 @@ export class Validator {
             if (typeof voteorder.author === "undefined" || voteorder.author.length == 0) throw new ValidationException("Author must not be empty");
             if (typeof voteorder.permlink === "undefined" || voteorder.permlink.length == 0) throw new ValidationException("Permlink must not be empty");
             if (typeof voteorder.weight === "undefined" || isNaN(voteorder.weight)) throw new ValidationException("Weight must not be empty");
-            if (voteorder.weight <= 0) throw new ValidationException("Weight must be greater than zero");
+            if (voteorder.weight < -10000) throw new ValidationException("Weight must be greater or equal -10000");
             if (voteorder.weight > 10000) throw new ValidationException("Weight must be lesser or equal 10000");
             resolve();
         });

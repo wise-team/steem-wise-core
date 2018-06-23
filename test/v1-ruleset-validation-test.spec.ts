@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import "mocha";
-
+import * as _ from "lodash";
 import * as steem from "steem";
+
 import * as fakeDataset_ from "./data/fake-blockchain.json";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
@@ -54,9 +55,7 @@ describe("test/v1-ruleset-validation-test.spec.ts", function() {
         ["rulesetName", "author", "permlink", "weight"].forEach(function(prop: string) {
             it("fails on empty " + prop, function(done) {
                 this.timeout(500);
-                const propChanger: any = {};
-                propChanger[prop] = "";
-                const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, propChanger);
+                const voteorder: SendVoteorder = _.omit(_.cloneDeep(validVoteorder), [prop]) as SendVoteorder;
 
                 wise.validateVoteorder(delegator, voter, voteorder, rulesetMomentForValidation, function(error: Error | undefined, result: true | ValidationException | undefined) {
                     if (error) done(error);
@@ -66,7 +65,7 @@ describe("test/v1-ruleset-validation-test.spec.ts", function() {
             });
         });
 
-        [-1, 0, undefined, NaN, 3, 200, Infinity].forEach(function(weight) {
+        [-10001, 100001, undefined, NaN, 3, 200, Infinity].forEach(function(weight) {
             it("fails on invald weight (" + weight + ")", function(done) {
                 this.timeout(200);
                 const voteorder: SendVoteorder = Util.objectAssign({}, validVoteorder, { rulesetName: steemprojects1Rulesets.upvoteNoRulesMaxWeight2.name, weight: weight });
