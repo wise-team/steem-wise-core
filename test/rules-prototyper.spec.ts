@@ -8,7 +8,7 @@ import { ValidationContext } from "../src/validation/ValidationContext";
 import { Rule } from "../src/rules/Rule";
 import { RulePrototyper } from "../src/rules/RulePrototyper";
 
-describe("test/rules.spec.ts", () => {
+describe("test/rules-prototyper.spec.ts", () => {
     describe("RulesPrototyper", () => {
         it ("Unserialized rules are equal to serialized after prototyping", () => {
             const rulesPrimary: Rule [] = [
