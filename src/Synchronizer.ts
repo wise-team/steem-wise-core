@@ -38,12 +38,13 @@ export class Synchronizer {
         this.timeoutMs = timeoutMs;
     }
 
+    // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
     public runLoop(since: SteemOperationNumber): Synchronizer {
         this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
         .then((rules: EffectuatedSetRules []) => {
             this.rules = rules;
-            this.processBlock(since.blockNum);
+            this.processBlock(since.blockNum); // the loop is started
         })
         .catch((error: Error) => {
             this.notifier(error, { type: Synchronizer.EventType.UnhandledError,
@@ -54,86 +55,86 @@ export class Synchronizer {
     }
 
     public stop(): void {
+        // when isRunning=false, continueIfRunning() will not call it's callback parameter
         this.isRunning = false;
     }
 
     private processBlock(blockNum: number) {
         this.notify(undefined, { type: Synchronizer.EventType.StartBlockProcessing, blockNum: blockNum, message: "Start processing block " + blockNum });
         this.continueIfRunning(() =>
-            Promise.resolve(true)
+            Promise.resolve()
             .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
-            .mapSeries((op: EffectuatedSmartvotesOperation) => {
-                return this.processOperation(op);
-            })
+            .mapSeries((op: EffectuatedSmartvotesOperation) =>
+                this.processOperation(op)
+            )
             .timeout(this.timeoutMs, new Error("Timeout (> " + this.timeoutMs + "ms while processing operations)"))
+            // when timeout occurs an error is thrown. It is then catched few lines below
+            // (already processed operations will not be processed second time, as is described below).
             .then(() => {
                 this.notify(undefined, { type: Synchronizer.EventType.EndBlockProcessing, blockNum: blockNum, message: "End processing block " + blockNum });
-                this.continueIfRunning(() =>
-                    this.processBlock(blockNum + 1)
+                this.continueIfRunning(() => // loop continues only if synchronizer wasn't stopped
+                    this.processBlock(blockNum + 1) // loop occurs here through recursion
                 );
             }, (error: Error) => {
                 this.notify(undefined, { type: Synchronizer.EventType.ReversibleError,
                     error: error, moment: this.lastProcessedOperationNum, message: " Reversible error: " + error.message + ". Retrying in 3 seconds..." });
-
+                // note that operations are processed only if currentOpNum > this.lastProcessedOperationNum,
+                // so if block processing is retried — already processed operations will not be processed second time
                 this.continueIfRunning(() => setTimeout(() => this.processBlock(blockNum), 3000));
             })
         );
     }
 
     private processOperation(op: EffectuatedSmartvotesOperation): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return Promise.resolve().then(() => {
             const currentOpNum = op.moment;
-            const lastProcessedOperationNum = this.lastProcessedOperationNum;
-            this.lastProcessedOperationNum = currentOpNum;
-
-            if (currentOpNum.isLesserOrEqual(lastProcessedOperationNum)) resolve();
-            else {
+            if (currentOpNum.isGreaterThan(this.lastProcessedOperationNum)) {
                 if (op.delegator === this.delegator) {
-                    if (isSetRules(op.command)) this.updateRulesArray(op, op.command).then(() => resolve()).catch((error: Error) => reject(error));
-                    else if (isSendVoteorder(op.command)) this.processVoteorder(op, op.command).then(() => resolve()).catch((error: Error) => reject(error));
-                    else resolve();
+                    if (isSetRules(op.command)) {
+                        return this.updateRulesArray(op, op.command);
+                    }
+                    else if (isSendVoteorder(op.command)) {
+                        return this.processVoteorder(op, op.command);
+                    }
+                    // configmVote does not need to be processed
                 }
-                else resolve();
             }
-        });
+        })
+        .then(() => this.lastProcessedOperationNum = op.moment).then(() => {}); // update lastProcessedOperation
     }
 
+    // update preoaded rules to keep them up-to-date without calling blockchain every voteorder
     private updateRulesArray(op: EffectuatedSmartvotesOperation, cmd: SetRules): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return Promise.resolve().then(() => {
             const es: EffectuatedSetRules = {
                 moment: op.moment,
                 voter: op.voter,
                 rulesets: cmd.rulesets
             };
             this.rules.push(es);
-            resolve();
         });
     }
 
     private processVoteorder(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const v = new Validator(this.api, this.protocol);
-            const rules = this.determineRules(op, cmd);
-            if (rules) {
-                try {
-                    v.provideRulesets(rules);
-                    v.validate(this.delegator, op.voter, cmd, op.moment)
-                    .then((result: ValidationException | true) => {
-                        if (result === true) {
-                            this.voteAndConfirm(op, cmd).then(() => resolve()).catch((error: Error) => reject(error));
-                        }
-                        else {
-                            this.rejectVoteorder(op, cmd, (result as ValidationException).message).then(() => resolve()).catch((error: Error) => reject(error));
-                        }
-                    })
-                    .catch((error: Error) => {
-                        this.rejectVoteorder(op, cmd, error.message).then(() => resolve()).catch((error: Error) => reject(error));
-                    });
-                } catch (error) {
-                    this.rejectVoteorder(op, cmd, error.message).then(() => resolve()).catch((error: Error) => reject(error));
-                }
+        const rules = this.determineRules(op, cmd);
+        if (!rules) return this.rejectVoteorder(op, cmd, "There is no ruleset for you");
+
+        const v = new Validator(this.api, this.protocol);
+        // provide already loaded rulesets (there is no need to call blockchain for them every single voteorder)
+        v.provideRulesets(rules);
+
+        return v.validate(this.delegator, op.voter, cmd, op.moment)
+        .then((result: ValidationException | true) => {
+            if (result === true) {
+                return this.voteAndConfirm(op, cmd);
             }
-            else this.rejectVoteorder(op, cmd, "There is no ruleset for you").then(() => resolve()).catch((error: Error) => reject(error));
+            else {
+                return this.rejectVoteorder(op, cmd, (result as ValidationException).message);
+            }
+        })
+        .catch((error: Error) => {
+            if (error.name === "FetchError") throw error;
+            else this.rejectVoteorder(op, cmd, error.message);
         });
     }
 
