@@ -112,6 +112,8 @@ export class Synchronizer {
                 rulesets: cmd.rulesets
             };
             this.rules.push(es);
+            this.notify(undefined, { type: Synchronizer.EventType.RulesUpdated, moment: op.moment,
+                message: "Change of rules on blockchain. Local rules were updated." });
         });
     }
 
@@ -182,7 +184,7 @@ export class Synchronizer {
         };
         opsToSend.push(...this.protocol.serializeToBlockchain(wiseOp));
 
-        this.notify(undefined, { type: Synchronizer.EventType.VoteorderPassed, voteorder: cmd, moment: op.moment, message: "Voteorder passed" });
+        this.notify(undefined, { type: Synchronizer.EventType.VoteorderPassed, voteorder: cmd, moment: op.moment, voter: op.voter, message: "Voteorder passed" });
 
         return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
             this.notify(undefined, { type: Synchronizer.EventType.OperarionsPushed,
@@ -203,7 +205,7 @@ export class Synchronizer {
         };
         const opsToSend: [string, object][] = this.protocol.serializeToBlockchain(wiseOp);
 
-        this.notify(undefined, { type: Synchronizer.EventType.VoteorderRejected, voteorder: cmd, moment: op.moment, message: "Voteorder rejected: " + msg, validationException: undefined });
+        this.notify(undefined, { type: Synchronizer.EventType.VoteorderRejected, voteorder: cmd, moment: op.moment, voter: op.voter, message: "Voteorder rejected: " + msg, validationException: undefined });
 
         return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
             this.notify(undefined, { type: Synchronizer.EventType.OperarionsPushed,
@@ -236,15 +238,17 @@ export namespace Synchronizer {
         VoteorderPassed = "voteordr-passed",
         ReversibleError = "reversible-error",
         UnhandledError = "unhandled-error",
-        SynchronizationStop = "synchronization-stop"
+        SynchronizationStop = "synchronization-stop",
+        RulesUpdated = "rules-updated"
 
     }
 
-    export type Event = Synchronizer.StartBlockProcessingEvent
-                      | Synchronizer.EndBlockProcessingEvent
+    export type Event = StartBlockProcessingEvent
+                      | EndBlockProcessingEvent
                       | OperarionsPushedEvent
                       | VoteorderRejected
                       | VoteorderPassed
+                      | RulesUpdatedEvent
                       | ReversibleErrorEvent
                       | UnhandledErrorEvent
                       | SynchronizationStopEvent
@@ -269,9 +273,16 @@ export namespace Synchronizer {
         message: string;
     }
 
+    export interface RulesUpdatedEvent {
+        type: EventType.RulesUpdated;
+        moment: SteemOperationNumber;
+        message: string;
+    }
+
     export interface VoteorderRejected {
         type: EventType.VoteorderRejected;
         voteorder: SendVoteorder;
+        voter: string;
         moment: SteemOperationNumber;
         validationException: ValidationException | undefined;
         message: string;
@@ -280,6 +291,7 @@ export namespace Synchronizer {
     export interface VoteorderPassed {
         type: EventType.VoteorderPassed;
         voteorder: SendVoteorder;
+        voter: string;
         moment: SteemOperationNumber;
         message: string;
     }
