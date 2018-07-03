@@ -16,7 +16,7 @@ import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
 
 // TODO proper error handling (separate errors that should be reported to ConfirmVotes and Reversible errors [eg. network errors])
 export class Synchronizer {
-    private timeoutMs = 9000;
+    private timeoutMs = 12000;
 
     private api: Api;
     private protocol: Protocol;
@@ -304,7 +304,7 @@ export namespace Synchronizer {
     }
 }
 
-
+// TODO emit RulesChangedEvent
 
 interface VoteOperation {
     voter: string;
