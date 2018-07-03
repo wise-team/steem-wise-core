@@ -1,12 +1,14 @@
-import { expect, assert } from "chai";
+// 3rd party imports
+import { expect } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
 
-import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, WeightRule, CustomRPCRule } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
+// wise imports
+import { AuthorsRule, SendVoteorder, TagsRule, WeightRule, CustomRPCRule } from "../src/wise";
 import { Rule } from "../src/rules/Rule";
 import { RulePrototyper } from "../src/rules/RulePrototyper";
+
 
 describe("test/rules-prototyper.spec.ts", () => {
     describe("RulesPrototyper", () => {

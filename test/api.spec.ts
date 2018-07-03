@@ -1,34 +1,35 @@
+// 3rd party imports
 import { assert, expect } from "chai";
-import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
 
-import * as fakeDataset_ from "./data/fake-blockchain.json";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
-
-import { Wise, SteemOperation } from "../src/wise";
+// wise imports
+import { Wise } from "../src/wise";
 import { Api } from "../src/api/Api";
 import { DirectBlockchainApi } from "../src/api/directblockchain/DirectBlockchainApi";
-import { WiseRESTApi } from "../src/api/WiseRESTApi";
 import { FakeApi } from "../src/api/FakeApi";
 import { SteemPost } from "../src/blockchain/SteemPost";
 import { SteemOperationNumber } from "../src/blockchain/SteemOperationNumber";
 import { SetRules, EffectuatedSetRules } from "../src/protocol/SetRules";
 import { WeightRule } from "../src/rules/WeightRule";
-import { TagsRule } from "../src/rules/TagsRule";
-
-import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
 import { Rule } from "../src/rules/Rule";
 import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
 import { DynamicGlobalProperties } from "../src/blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../src/blockchain/AccountInfo";
 import { NotFoundException } from "../src/util/NotFoundException";
 
+
+/* PREPARE TESTING DATASETS */
+import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
+import * as fakeDataset_ from "./data/fake-blockchain.json";
+const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+
+/* CONFIG */
+const username = "guest123";
+const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
+
 describe("test/api.spec.ts", function () {
     this.timeout(10000);
-
-    const username = "guest123";
-    const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 
     const apis: Api [] = [
         new DirectBlockchainApi(username, postingWif),
@@ -119,30 +120,6 @@ describe("test/api.spec.ts", function () {
                     expect(r.rulesets).to.be.an("array").with.length(0);
                 }));
             });
-
-            /*it("throws NotFoundException if delegator does not exist", (done) => {
-                const delegator = "nonexistent-" + Date.now();
-                const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
-                const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
-                api.loadRulesets(delegator, voter, moment, wise.getProtocol())
-                .then((result) => done(new Error("Should fail on nonexistent delegator. Got some data instead.")))
-                .catch((e: Error) => {
-                    if ((e as NotFoundException).notFoundException) done();
-                    else done(e);
-                });
-            });
-
-            it("throws NotFoundException if voter does not exist", (done) => {
-                const delegator = v1TestingSequence.stage1_0_RulesetsUsername;
-                const voter = "nonexistent-" + Date.now();
-                const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
-                api.loadRulesets(delegator, voter, moment, wise.getProtocol())
-                .then((result) => done(new Error("Should fail on nonexistent voter. Got some data instead.")))
-                .catch((e: Error) => {
-                    if ((e as NotFoundException).notFoundException) done();
-                    else done(e);
-                });
-            });*/
         });
 
         describe("#sendToBlockchain", () => {
@@ -191,17 +168,6 @@ describe("test/api.spec.ts", function () {
                     }
                 });
             });
-
-            /*it("throws NotFoundException if delegator does not exist", (done) => {
-                const delegator = "nonexistent-" + Date.now();
-                const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
-                api.loadAllRulesets(delegator, moment, wise.getProtocol())
-                .then((result) => done(new Error("Should fail on nonexistent delegator. Got some data instead.")))
-                .catch((e: Error) => {
-                    if ((e as NotFoundException).notFoundException) done();
-                    else done(e);
-                });
-            });*/
         });
 
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {

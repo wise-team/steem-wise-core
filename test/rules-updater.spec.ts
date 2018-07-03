@@ -1,14 +1,19 @@
-import { expect, assert } from "chai";
+// 3rd party imports
+import { expect } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
-import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, WeightRule, SteemOperationNumber, SetRules, SetRulesForVoter } from "../src/wise";
 
+// wise imports
+import { AuthorsRule, Wise, TagsRule, WeightRule, SteemOperationNumber, SetRules, SetRulesForVoter } from "../src/wise";
+import { FakeApi } from "../src/api/FakeApi";
+
+
+/* PREPARE TESTING DATASETS */
 import * as fakeDataset_ from "./data/fake-blockchain.json";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
-import { FakeApi } from "../src/api/FakeApi";
-
+/* CONFIG */
 const delegator = "nonexistent-delegator-" + Date.now();
 const voterA = "nonexistent-voter-a-" + Date.now();
 const voterB = "nonexistent-voter-b-" + Date.now();

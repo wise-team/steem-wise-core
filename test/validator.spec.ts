@@ -1,22 +1,23 @@
-import { expect, assert } from "chai";
-import { Promise } from "bluebird";
+// 3rd party imports
+import { expect } from "chai";
 import "mocha";
-import * as _ from "lodash";
 
+// wise imports
 import { Validator } from "../src/validation/Validator";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { Rule } from "../src/rules/Rule";
-import { RulePrototyper } from "../src/rules/RulePrototyper";
-
-import { FakeApi } from "../src/api/FakeApi";
-import * as fakeDataset_ from "./data/fake-blockchain.json";
 import { Wise, SteemOperationNumber, SendVoteorder, ValidationException } from "../src/wise";
+import { FakeApi } from "../src/api/FakeApi";
+
+
+/* PREPARE TESTING DATASETS */
+import * as fakeDataset_ from "./data/fake-blockchain.json";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
+/* CONFIG */
 const delegator = "noisy";
 const voter = "perduta";
 const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
+
 
 describe("test/validator.spec.ts", () => {
     describe("Validator", () => {

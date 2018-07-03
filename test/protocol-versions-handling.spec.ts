@@ -1,15 +1,17 @@
-import { expect, assert } from "chai";
-import { Promise } from "bluebird";
+// 3rd party imports
+import { expect } from "chai";
 import "mocha";
 
-import * as v1ValidOperations_ from "./data/operations/v1-valid.operations.json";
-const v1ValidOperations: SteemOperation [] = v1ValidOperations_ as any as SteemOperation [];
-
-import * as v1InvalidOperations_ from "./data/operations/v1-invalid.operations.json";
-const v1InvalidOperations: SteemOperation [] = v1InvalidOperations_ as any as SteemOperation [];
-
+// wise imports
 import { Wise, SteemOperation } from "../src/wise";
 import { DisabledApi } from "../src/api/DisabledApi";
+
+
+/* PREPARE TESTING DATASETS */
+import * as v1ValidOperations_ from "./data/operations/v1-valid.operations.json";
+const v1ValidOperations: SteemOperation [] = v1ValidOperations_ as any as SteemOperation [];
+import * as v1InvalidOperations_ from "./data/operations/v1-invalid.operations.json";
+const v1InvalidOperations: SteemOperation [] = v1InvalidOperations_ as any as SteemOperation [];
 
 
 describe("test/protocol-versions-handling.spec.ts", function() {

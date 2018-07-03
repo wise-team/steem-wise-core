@@ -1,17 +1,18 @@
+// 3rd party imports
 import { expect } from "chai";
 import "mocha";
 import { Promise } from "bluebird";
-
 import * as steem from "steem";
 
-import { Chainable, SimpleTaker } from "../src/chainable/Chainable";
+// wise imports
+import { SimpleTaker } from "../src/chainable/Chainable";
 import { SteemOperationNumber, SteemOperation, Wise } from "../src/wise";
 import { SteemJsAccountHistorySupplier } from "../src/api/directblockchain/SteemJsAccountHistorySupplier";
 import { OperationNumberFilter } from "../src/chainable/filters/OperationNumberFilter";
 import { ToSmartvotesOperationTransformer } from "../src/chainable/transformers/ToSmartvotesOperationTransformer";
 import { DisabledApi } from "../src/api/DisabledApi";
 import { ChainableLimiter } from "../src/chainable/limiters/ChainableLimiter";
-import { CustomJsonOperation } from "../src/blockchain/CustomJsonOperation";
+
 
 describe("test/chainable.spec.ts", () => {
     describe("SteemJsAccountHistorySupplier", () => {

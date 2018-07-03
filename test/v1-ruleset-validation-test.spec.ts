@@ -1,17 +1,19 @@
-import { expect } from "chai";
+// 3rd party imports
 import "mocha";
 import * as _ from "lodash";
-import * as steem from "steem";
 
+// wise imports
+import { Util } from "../src/util/util";
+import { SteemOperationNumber, Wise, SendVoteorder, ValidationException, AuthorsRule, TagsRule } from "../src/wise";
+import { FakeApi } from "../src/api/FakeApi";
+
+
+/* PREPARE TESTING DATASETS */
+import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
 import * as fakeDataset_ from "./data/fake-blockchain.json";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
-import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
-import { Util } from "../src/util/util";
-import { smartvotes_voteorder } from "../src/protocol/versions/v1/votes.schema";
-import { SteemOperationNumber, Wise, DirectBlockchainApi, SendVoteorder, ValidationException, AuthorsRule, TagsRule } from "../src/wise";
-import { FakeApi } from "../src/api/FakeApi";
-
+/* CONFIG */
 const voter = "guest123";
 const delegator = "steemprojects1";
 const validVoteorder: SendVoteorder = {
@@ -20,8 +22,8 @@ const validVoteorder: SendVoteorder = {
     permlink: "what-we-can-say-about-steem-users-based-on-traffic-generated-to-steemprojects-com-after-being-3-days-on-top-of-trending-page",
     weight: 1,
 };
-
 const rulesetMomentForValidation: SteemOperationNumber = new SteemOperationNumber(22144059, 32, 0).addTransactions(1); // Moment just after tx_id = 7fe4a1a4efadb1230c41c2c865df15d91eb3c452
+
 
 describe("test/v1-ruleset-validation-test.spec.ts", function() {
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {

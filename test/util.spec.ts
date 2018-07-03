@@ -1,8 +1,10 @@
-import { expect, assert } from "chai";
+// 3rd party imports
 import { Promise } from "bluebird";
 import "mocha";
 
+// wise imports
 import { OneTimePromise } from "../src/util/OneTimePromise";
+
 
 describe("test/util.spec.ts", () => {
     describe("OneTimePromise", function() {

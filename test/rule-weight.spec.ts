@@ -1,21 +1,23 @@
-import { expect, assert } from "chai";
-import { Promise } from "bluebird";
+// 3rd party imports
 import "mocha";
 import * as _ from "lodash";
 
-import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, WeightRule, CustomRPCRule } from "../src/wise";
+// wise imports
+import { SendVoteorder, Wise, WeightRule } from "../src/wise";
 import { ValidationContext } from "../src/validation/ValidationContext";
-import { Rule } from "../src/rules/Rule";
-import { RulePrototyper } from "../src/rules/RulePrototyper";
-
 import { FakeApi } from "../src/api/FakeApi";
+
+
+/* PREPARE TESTING DATASETS */
 import * as fakeDataset_ from "./data/fake-blockchain.json";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
+/* CONFIG */
 const delegator = "noisy";
 const voter = "perduta";
 const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
+
 
 describe("test/rule-weight.spec.ts", () => {
     describe("WeightRule", () => {

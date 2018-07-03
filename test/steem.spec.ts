@@ -1,7 +1,11 @@
+// 3rd party imports
 import { expect } from "chai";
 import "mocha";
 import * as steem from "steem";
+
+// wise imports
 import { BlockchainConfig } from "../src/blockchain/BlockchainConfig";
+
 
 describe("test/steem.spec.ts", () => {
     describe("account_history_api.get_account_history", () => {
