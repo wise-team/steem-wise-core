@@ -96,16 +96,9 @@ export class Wise {
         .catch(error => callback(error, undefined));
     }
 
-    /**
-     * Sends a voteorder
-     * @param delegator — delegator username
-     * @param voteorder — SendVoteorder object
-     * @param callback — a callback
-     * @param proggressCallback (optional)
-     * @param skipValidation (optional)
-     */
-    public sendVoteorderAsync = (delegator: string, voteorder: SendVoteorder,
-        proggressCallback: ProggressCallback = () => {}, skipValidation: boolean = false): Promise<SteemOperationNumber> => {
+    // TODO comment // TODO test
+    public generateVoteorderCustomJSONAsync = (delegator: string, voteorder: SendVoteorder,
+        proggressCallback: ProggressCallback = () => {}, skipValidation: boolean = false): Promise<[string, object][]> => {
 
         // TODO proggress callback
 
@@ -130,7 +123,22 @@ export class Wise {
                 if (result !== true) throw new Error("Validation error: " + result.message);
              });
         })
-        .then(() => this.api.sendToBlockchain(steemOps));
+        .then(() => steemOps);
+    }
+
+    /**
+     * Sends a voteorder
+     * @param delegator — delegator username
+     * @param voteorder — SendVoteorder object
+     * @param callback — a callback
+     * @param proggressCallback (optional)
+     * @param skipValidation (optional)
+     */
+    public sendVoteorderAsync = (delegator: string, voteorder: SendVoteorder,
+        proggressCallback: ProggressCallback = () => {}, skipValidation: boolean = false): Promise<SteemOperationNumber> => {
+
+        return this.generateVoteorderCustomJSONAsync(delegator, voteorder, proggressCallback, skipValidation)
+        .then((steemOps) => this.api.sendToBlockchain(steemOps));
     }
 
     // TODO comment
