@@ -201,5 +201,16 @@ describe("test/index.spec.ts", () => {
                 });
             });
         });
+
+        describe("#generateVoteorderCustomJSONAsync", () => {
+            it.only("generated weight is a number, not a string", () => {
+                return wise.generateVoteorderCustomJSONAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder, () => {}, true)
+                .then((ops: { [key: string]: any } []) => {
+                    expect(ops).to.be.an("array").with.length(1);
+                    const customJsonObj: { [key: string]: any } [] = JSON.parse(ops[0][1].json);
+                    expect(customJsonObj[1].weight).to.be.a("number").that.is.greaterThan(0).and.not.be.a("string");
+                });
+            });
+        });
     });
 });
