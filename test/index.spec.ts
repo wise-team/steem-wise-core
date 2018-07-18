@@ -203,7 +203,7 @@ describe("test/index.spec.ts", () => {
         });
 
         describe("#generateVoteorderCustomJSONAsync", () => {
-            it.only("generated weight is a number, not a string", () => {
+            it("generated weight is a number, not a string", () => {
                 return wise.generateVoteorderCustomJSONAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder, () => {}, true)
                 .then((ops: { [key: string]: any } []) => {
                     expect(ops).to.be.an("array").with.length(1);
