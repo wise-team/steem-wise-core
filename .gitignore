@@ -9,6 +9,9 @@
 # Intelij IDEA IDEs
 /.idea/
 
+# VS Code
+/.vscode
+
 ## Node
 /dist
 /node_modules
