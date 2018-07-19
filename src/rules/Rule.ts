@@ -16,8 +16,13 @@ export abstract class Rule {
         context: ValidationContext,
     ): Promise<void>; // throws ValidationException
 
+    /**
+     * Validates an unprototyped rule object. It checks weather it has all required properties,
+     * if modes are correct, and so on.
+     */
+    public abstract validateRuleObject(unprototypedRule: any): void; // throws a ValidationException
+
     public abstract type(): Rule.Type;
-    public abstract getRequiredProperties(): string [];
 }
 
 export namespace Rule {
