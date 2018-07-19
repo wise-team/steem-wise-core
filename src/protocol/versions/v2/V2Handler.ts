@@ -30,7 +30,7 @@ class WiseConstants {
 const aajv: ajv.Ajv = new ajv();
 aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
 
-const validate = aajv.compile(require("./wise.schema.json"));
+const validate = aajv.compile(require("./wise-schema.json"));
 
 export class V2Handler implements ProtocolVersionHandler {
     public static CUSTOM_JSON_ID = "wise";
