@@ -28,6 +28,7 @@ export interface wise_rule_weight {
     max: number;
 }
 
+
 export function wise_rule_weight_encode(rule: WeightRule): wise_rule_weight {
     const out: wise_rule_weight = {
         rule: "weight",
