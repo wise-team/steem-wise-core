@@ -27,8 +27,8 @@ export class WeightRule extends Rule {
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         return Promise.resolve()
+        .then(() => this.validateRuleObject(this))
         .then(() => {
-            this.validateRuleObject(this)
             if (voteorder.weight < this.min) throw new ValidationException("Weight is too low (" + voteorder.weight + " < " + this.min + ")");
             else if (voteorder.weight > this.max) throw new ValidationException("Weight is too high (" + voteorder.weight + " > " + this.max + ")");
         });

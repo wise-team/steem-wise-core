@@ -1,8 +1,9 @@
+import { Promise } from "bluebird";
+import * as _ from "lodash";
+
 import { Rule } from "./Rule";
-import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
-import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 
 export class CustomRPCRule extends Rule {
@@ -31,7 +32,9 @@ export class CustomRPCRule extends Rule {
         });
     }
 
-    public getRequiredProperties(): string [] {
-        return ["host", "port", "path", "method"];
+    public validateRuleObject(unprototypedObj: any) {
+        ["host", "port", "path", "method"].forEach(prop => {
+            if (!_.has(unprototypedObj, prop)) throw new ValidationException("CustomRPCRule: property " + prop + " is missing");
+        });
     }
 }

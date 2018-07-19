@@ -83,8 +83,8 @@ export namespace ImposedRules {
             }
         }
 
-        public getRequiredProperties(): string [] {
-            return [];
+        public validateRuleObject(unprototypedObj: any) {
+            throw new Error("This rule should not be prototyped.");
         }
     }
 }

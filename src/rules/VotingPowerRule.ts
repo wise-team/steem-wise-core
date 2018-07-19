@@ -1,4 +1,5 @@
 import { Promise } from "bluebird";
+import * as _ from "lodash";
 
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
@@ -25,10 +26,7 @@ export class VotingPowerRule extends Rule {
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         return Promise.resolve()
-        .then(() => {
-            if (!this.mode) throw new ValidationException("Voting power rule: mode is missing");
-            if (!this.value) throw new ValidationException("Voting power rule: value is missing");
-        })
+        .then(() => this.validateRuleObject(this))
         .then(() => context.getAccountInfo(context.getDelegatorUsername()))
         .then((delegatorAccount: AccountInfo) => {
             if (!delegatorAccount) throw new Error("Delegator account info is undefined");
@@ -55,8 +53,12 @@ export class VotingPowerRule extends Rule {
         });
     }
 
-    public getRequiredProperties(): string [] {
-        return ["value", "mode"];
+    public validateRuleObject(unprototypedObj: any) {
+        ["value", "mode"].forEach(prop => {
+            if (!_.has(unprototypedObj, prop)) throw new ValidationException("VotingPowerRule: property " + prop + " is missing");
+        });
+        if (_.includes([VotingPowerRule.Mode.MORE_THAN, VotingPowerRule.Mode.LESS_THAN, VotingPowerRule.Mode.EQUAL], unprototypedObj.mode))
+            throw new ValidationException("VotingPowerRule: unknown mode " + unprototypedObj.mode);
     }
 }
 

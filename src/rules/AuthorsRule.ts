@@ -1,7 +1,7 @@
 import { Promise } from "bluebird";
+import * as _ from "lodash";
 
 import { Rule } from "./Rule";
-import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
@@ -26,10 +26,7 @@ export class AuthorsRule extends Rule {
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         return Promise.resolve()
-        .then(() => {
-            if (!this.mode) throw new ValidationException("Authors rule: mode is missing");
-            if (!this.authors) throw new ValidationException("Authors rule: authors are missing");
-        })
+        .then(() => this.validateRuleObject(this))
         .then(() => context.getPost())
         .then((post: SteemPost): Promise<void> => {
             return new Promise((resolve, reject) => {
@@ -50,8 +47,12 @@ export class AuthorsRule extends Rule {
         });
     }
 
-    public getRequiredProperties(): string [] {
-        return ["authors", "mode"];
+    public validateRuleObject(unprototypedObj: any) {
+        ["authors", "mode"].forEach(prop => {
+            if (!_.has(unprototypedObj, prop)) throw new ValidationException("AuthorsRule: property " + prop + " is missing");
+        });
+        if (_.includes([AuthorsRule.Mode.ALLOW, AuthorsRule.Mode.DENY], unprototypedObj.mode))
+            throw new ValidationException("AuthorsRule: unknown mode " + unprototypedObj.mode);
     }
 }
 

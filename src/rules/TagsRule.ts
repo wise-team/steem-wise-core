@@ -1,11 +1,12 @@
+import { Promise } from "bluebird";
+import * as _ from "lodash";
+
 import { Rule } from "./Rule";
-import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SteemPost } from "../blockchain/SteemPost";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { NotFoundException } from "../util/NotFoundException";
-import { Promise } from "bluebird";
 
 export class TagsRule extends Rule {
     public rule: string = Rule.Type.Tags;
@@ -25,10 +26,7 @@ export class TagsRule extends Rule {
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         return Promise.resolve()
-        .then(() => {
-            if (!this.mode) throw new ValidationException("Tags rule: mode is missing");
-            if (!this.tags) throw new ValidationException("Tags rule: tags are missing");
-        })
+        .then(() => this.validateRuleObject(this))
         .then(() => context.getPost())
         .then((post: SteemPost) => {
                 const postMetadata: SteemPost.JSONMetadata = JSON.parse(post.json_metadata) as SteemPost.JSONMetadata;
@@ -71,8 +69,12 @@ export class TagsRule extends Rule {
         });
     }
 
-    public getRequiredProperties(): string [] {
-        return ["tags", "mode"];
+    public validateRuleObject(unprototypedObj: any) {
+        ["tags", "mode"].forEach(prop => {
+            if (!_.has(unprototypedObj, prop)) throw new ValidationException("TagsRule: property " + prop + " is missing");
+        });
+        if (_.includes([TagsRule.Mode.ALLOW, TagsRule.Mode.DENY, TagsRule.Mode.ANY, TagsRule.Mode.REQUIRE], unprototypedObj.mode))
+            throw new ValidationException("TagsRule: unknown mode " + unprototypedObj.mode);
     }
 }
 
