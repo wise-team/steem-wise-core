@@ -51,7 +51,7 @@ export class AuthorsRule extends Rule {
         ["authors", "mode"].forEach(prop => {
             if (!_.has(unprototypedObj, prop)) throw new ValidationException("AuthorsRule: property " + prop + " is missing");
         });
-        if (_.includes([AuthorsRule.Mode.ALLOW, AuthorsRule.Mode.DENY], unprototypedObj.mode))
+        if (!_.includes([AuthorsRule.Mode.ALLOW, AuthorsRule.Mode.DENY], unprototypedObj.mode))
             throw new ValidationException("AuthorsRule: unknown mode " + unprototypedObj.mode);
     }
 }

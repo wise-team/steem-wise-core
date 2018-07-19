@@ -73,7 +73,7 @@ export class TagsRule extends Rule {
         ["tags", "mode"].forEach(prop => {
             if (!_.has(unprototypedObj, prop)) throw new ValidationException("TagsRule: property " + prop + " is missing");
         });
-        if (_.includes([TagsRule.Mode.ALLOW, TagsRule.Mode.DENY, TagsRule.Mode.ANY, TagsRule.Mode.REQUIRE], unprototypedObj.mode))
+        if (!_.includes([TagsRule.Mode.ALLOW, TagsRule.Mode.DENY, TagsRule.Mode.ANY, TagsRule.Mode.REQUIRE], unprototypedObj.mode))
             throw new ValidationException("TagsRule: unknown mode " + unprototypedObj.mode);
     }
 }

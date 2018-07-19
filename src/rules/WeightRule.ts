@@ -35,7 +35,7 @@ export class WeightRule extends Rule {
     }
 
     public validateRuleObject(unprototypedObj: any) {
-        ["mode", "min", "max"].forEach(prop => {
+        ["min", "max"].forEach(prop => {
             if (!_.has(unprototypedObj, prop)) throw new ValidationException("WeightRule: property " + prop + " is missing");
         });
         if (Math.abs(unprototypedObj.min) > 10000)

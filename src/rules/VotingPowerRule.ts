@@ -57,7 +57,7 @@ export class VotingPowerRule extends Rule {
         ["value", "mode"].forEach(prop => {
             if (!_.has(unprototypedObj, prop)) throw new ValidationException("VotingPowerRule: property " + prop + " is missing");
         });
-        if (_.includes([VotingPowerRule.Mode.MORE_THAN, VotingPowerRule.Mode.LESS_THAN, VotingPowerRule.Mode.EQUAL], unprototypedObj.mode))
+        if (!_.includes([VotingPowerRule.Mode.MORE_THAN, VotingPowerRule.Mode.LESS_THAN, VotingPowerRule.Mode.EQUAL], unprototypedObj.mode))
             throw new ValidationException("VotingPowerRule: unknown mode " + unprototypedObj.mode);
     }
 }
