@@ -5,20 +5,16 @@ import "mocha";
 import * as _ from "lodash";
 
 // wise imports
-import { AuthorsRule, Wise, TagsRule, WeightRule, SteemOperationNumber, SetRules, SetRulesForVoter } from "../src/wise";
+import { AuthorsRule, Wise, TagsRule, WeightRule, SteemOperationNumber, SetRules, SetRulesForVoter, Api } from "../src/wise";
 import { FakeApi } from "../src/api/FakeApi";
-
-
-/* PREPARE TESTING DATASETS */
-import * as fakeDataset_ from "./data/fake-blockchain.json";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+import { FakeWiseFactory } from "./util/FakeWiseFactory";
 
 /* CONFIG */
 const delegator = "nonexistent-delegator-" + Date.now();
 const voterA = "nonexistent-voter-a-" + Date.now();
 const voterB = "nonexistent-voter-b-" + Date.now();
 const voterC = "nonexistent-voter-c-" + Date.now();
-const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
+const fakeApi: Api = FakeWiseFactory.buildFakeApi();
 
 const delegatorWise = new Wise(delegator, fakeApi);
 const voterAWise = new Wise(voterA, fakeApi);

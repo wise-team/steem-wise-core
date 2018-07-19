@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import "mocha";
 
 // wise imports
-import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException } from "../src/wise";
+import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api } from "../src/wise";
 import { SteemPost } from "../src/blockchain/SteemPost";
 import { FakeApi } from "../src/api/FakeApi";
 import { Util } from "../src/util/util";
@@ -14,9 +14,8 @@ import { isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */
-import * as fakeDataset_ from "./data/fake-blockchain.json";
 import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+import { FakeWiseFactory } from "./util/FakeWiseFactory";
 
 Promise.onPossiblyUnhandledRejection(function(error) {
     throw error;
@@ -27,9 +26,10 @@ Promise.onPossiblyUnhandledRejection(function(error) {
  */
 const voter = "voter123";
 const delegator = "delegator456";
+const fakeDataset = FakeWiseFactory.loadDataset();
 const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
-const delegatorWise = new Wise(delegator, fakeApi);
-const voterWise = new Wise(voter, fakeApi);
+const delegatorWise = new Wise(delegator, fakeApi as object as Api);
+const voterWise = new Wise(voter, fakeApi as object as Api);
 
 
 

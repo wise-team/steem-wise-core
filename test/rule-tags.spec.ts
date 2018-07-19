@@ -3,19 +3,15 @@ import { expect } from "chai";
 import "mocha";
 
 // wise imports
-import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule } from "../src/wise";
+import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, Api } from "../src/wise";
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeApi } from "../src/api/FakeApi";
-
-
-/* PREPARE TESTING DATASETS */
-import * as fakeDataset_ from "./data/fake-blockchain.json";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+import { FakeWiseFactory } from "./util/FakeWiseFactory";
 
 /* CONFIG */
 const delegator = "noisy";
 const voter = "perduta";
-const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
+const fakeApi: Api = FakeWiseFactory.buildFakeApi();
 const wise = new Wise(voter, fakeApi);
 
 

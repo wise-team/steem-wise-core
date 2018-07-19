@@ -21,8 +21,7 @@ import { NotFoundException } from "../src/util/NotFoundException";
 
 /* PREPARE TESTING DATASETS */
 import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
-import * as fakeDataset_ from "./data/fake-blockchain.json";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+import { FakeWiseFactory } from "./util/FakeWiseFactory";
 
 /* CONFIG */
 const username = "guest123";
@@ -33,7 +32,7 @@ describe("test/api.spec.ts", function () {
 
     const apis: Api [] = [
         new DirectBlockchainApi(username, postingWif),
-        FakeApi.fromDataset(fakeDataset)
+        FakeWiseFactory.buildFakeApi()
         // new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
     ];
 
