@@ -3,11 +3,16 @@ import { WeightRule } from "../../../rules/WeightRule";
 import { TagsRule } from "../../../rules/TagsRule";
 import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
+import { VotingPowerRule } from "../../../rules/VotingPowerRule";
 
 
 /* tslint:disable class-name */
 
-export type wise_rule = wise_rule_weight | wise_rule_tags | wise_rule_authors | wise_rule_custom_rpc;
+export type wise_rule = wise_rule_weight
+                      | wise_rule_tags
+                      | wise_rule_authors
+                      | wise_rule_voting_power
+                      | wise_rule_custom_rpc;
 
 export interface wise_rule_weight {
     rule: "weight";
@@ -50,6 +55,14 @@ export interface wise_rule_tags {
 export type wise_rule_tags_mode = "allow" | "deny" | "any" | "require";
 
 
+export interface wise_rule_voting_power {
+    rule: "voting_power";
+    mode: wise_rule_voting_power_mode;
+    value: number;
+}
+export type wise_rule_voting_power_mode = "more_than" | "less_than" | "equal";
+
+
 export interface wise_rule_custom_rpc {
     rule: "custom_rpc";
     host: string;
@@ -84,6 +97,15 @@ export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
         else return undefined;
 
         return new AuthorsRule(mode, r.authors);
+    }
+    else if (r.rule === "voting_power") {
+        let mode: VotingPowerRule.Mode;
+        if (r.mode === "more_than") mode = VotingPowerRule.Mode.MORE_THAN;
+        else if (r.mode === "less_than") mode = VotingPowerRule.Mode.LESS_THAN;
+        else if (r.mode === "equal") mode = VotingPowerRule.Mode.EQUAL;
+        else return undefined;
+
+        return new VotingPowerRule(mode, r.value);
     }
     else if (r.rule === "custom_rpc") {
         return new CustomRPCRule(r.host, r.port, r.path, r.method);
@@ -130,6 +152,20 @@ export const wise_rule_encode = (r: Rule): wise_rule => {
             rule: "tags",
             mode: mode,
             tags: (r as TagsRule).tags
+        };
+        return out;
+    }
+    else if (r.type() === Rule.Type.VotingPower) {
+        let mode: wise_rule_voting_power_mode;
+        if ((r as VotingPowerRule).mode === VotingPowerRule.Mode.MORE_THAN) mode = "more_than";
+        else if ((r as VotingPowerRule).mode === VotingPowerRule.Mode.LESS_THAN) mode = "less_than";
+        else if ((r as VotingPowerRule).mode === VotingPowerRule.Mode.EQUAL) mode = "equal";
+        else throw new Error("Unknown mode of voting power rule");
+
+        const out: wise_rule_voting_power = {
+            rule: "voting_power",
+            mode: mode,
+            value: (r as VotingPowerRule).value
         };
         return out;
     }

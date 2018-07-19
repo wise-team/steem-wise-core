@@ -26,5 +26,6 @@ export namespace Rule {
         Authors = "authors",
         Weight = "weight",
         CustomRPC = "custom_rpc",
+        VotingPower = "voting_power",
     }
 }
