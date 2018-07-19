@@ -309,6 +309,7 @@ export { AuthorsRule } from "./rules/AuthorsRule";
 export { TagsRule } from "./rules/TagsRule";
 export { CustomRPCRule } from "./rules/CustomRPCRule";
 export { WeightRule } from "./rules/WeightRule";
+export { VotingPowerRule } from "./rules/VotingPowerRule";
 
 export { ValidationException } from "./validation/ValidationException";
 
