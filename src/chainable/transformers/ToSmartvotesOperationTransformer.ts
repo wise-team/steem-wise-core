@@ -1,8 +1,6 @@
-import { ChainableTransformer } from "../../chainable/Chainable";
+import { ChainableTransformer } from "../Chainable";
 import { SteemOperation } from "../../blockchain/SteemOperation";
-import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
 import { Protocol } from "../../protocol/Protocol";
-import { SmartvotesOperation } from "../../protocol/SmartvotesOperation";
 import { EffectuatedSmartvotesOperation } from "../../protocol/EffectuatedSmartvotesOperation";
 
 export class ToSmartvotesOperationTransformer extends ChainableTransformer<SteemOperation, EffectuatedSmartvotesOperation, ToSmartvotesOperationTransformer> {

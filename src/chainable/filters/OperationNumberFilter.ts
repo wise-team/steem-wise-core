@@ -1,4 +1,4 @@
-import { ChainableFilter } from "../../chainable/Chainable";
+import { ChainableFilter } from "../Chainable";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
 import { SteemOperation } from "../../blockchain/SteemOperation";
 
