@@ -207,6 +207,7 @@
             "type": "string"
         },
         "wise_rule_voting_power": {
+            "description": "This rule checks vorting_power of the delegator. Available modes are: more_than, less_than and egual.",
             "properties": {
                 "mode": {
                     "$ref": "#/definitions/wise_rule_voting_power_mode"
@@ -218,6 +219,7 @@
                     "type": "string"
                 },
                 "value": {
+                    "description": "Voting power of the delegator in steem_percent. 100% = 10'000 and 0% = 0. Percentage is multiplied by 100.",
                     "type": "number"
                 }
             },
@@ -235,6 +237,37 @@
                 "more_than"
             ],
             "type": "string"
+        },
+        "wise_rule_weight": {
+            "properties": {
+                "max": {
+                    "description": "Maximal upvote weight (0 = disable upvote, 10000 = full upvote)",
+                    "maximum": 10000,
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "min": {
+                    "description": "Minimal flag weight (-10000 = full flag, 0 = disable flag)",
+                    "maximum": 0,
+                    "minimum": -10000,
+                    "type": "integer"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "rule": {
+                    "enum": [
+                        "weight"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "max",
+                "min",
+                "rule"
+            ],
+            "type": "object"
         },
         "wise_send_voteorder": {
             "properties": {
@@ -282,84 +315,7 @@
                                     "items": {
                                         "anyOf": [
                                             {
-                                                "properties": {
-                                                    "max": {
-                                                        "description": "Maximal upvote weight (0 = disable upvote, 10000 = full upvote)",
-                                                        "maximum": 10000,
-                                                        "minimum": 0,
-                                                        "type": "integer"
-                                                    },
-                                                    "min": {
-                                                        "description": "Minimal flag weight (-10000 = full flag, 0 = disable flag)",
-                                                        "maximum": 0,
-                                                        "minimum": -10000,
-                                                        "type": "integer"
-                                                    },
-                                                    "mode": {
-                                                        "enum": [
-                                                            "single_vote_weight"
-                                                        ],
-                                                        "type": "string"
-                                                    },
-                                                    "rule": {
-                                                        "enum": [
-                                                            "weight"
-                                                        ],
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "max",
-                                                    "min",
-                                                    "mode",
-                                                    "rule"
-                                                ],
-                                                "type": "object"
-                                            },
-                                            {
-                                                "properties": {
-                                                    "max": {
-                                                        "description": "Maximal upvote weight (0 = disable upvote, 10000 = full upvote)",
-                                                        "maximum": 10000,
-                                                        "minimum": 0,
-                                                        "type": "integer"
-                                                    },
-                                                    "min": {
-                                                        "description": "Minimal flag weight (-10000 = full flag, 0 = disable flag)",
-                                                        "maximum": 0,
-                                                        "minimum": -10000,
-                                                        "type": "integer"
-                                                    },
-                                                    "mode": {
-                                                        "enum": [
-                                                            "multiple_votes_weight"
-                                                        ],
-                                                        "type": "string"
-                                                    },
-                                                    "period": {
-                                                        "enum": [
-                                                            "days",
-                                                            "hours",
-                                                            "minutes",
-                                                            "seconds"
-                                                        ],
-                                                        "type": "string"
-                                                    },
-                                                    "rule": {
-                                                        "enum": [
-                                                            "weight"
-                                                        ],
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "max",
-                                                    "min",
-                                                    "mode",
-                                                    "period",
-                                                    "rule"
-                                                ],
-                                                "type": "object"
+                                                "$ref": "#/definitions/wise_rule_weight"
                                             },
                                             {
                                                 "$ref": "#/definitions/wise_rule_tags"
@@ -387,84 +343,7 @@
                                 "items": {
                                     "anyOf": [
                                         {
-                                            "properties": {
-                                                "max": {
-                                                    "description": "Maximal upvote weight (0 = disable upvote, 10000 = full upvote)",
-                                                    "maximum": 10000,
-                                                    "minimum": 0,
-                                                    "type": "integer"
-                                                },
-                                                "min": {
-                                                    "description": "Minimal flag weight (-10000 = full flag, 0 = disable flag)",
-                                                    "maximum": 0,
-                                                    "minimum": -10000,
-                                                    "type": "integer"
-                                                },
-                                                "mode": {
-                                                    "enum": [
-                                                        "single_vote_weight"
-                                                    ],
-                                                    "type": "string"
-                                                },
-                                                "rule": {
-                                                    "enum": [
-                                                        "weight"
-                                                    ],
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "max",
-                                                "min",
-                                                "mode",
-                                                "rule"
-                                            ],
-                                            "type": "object"
-                                        },
-                                        {
-                                            "properties": {
-                                                "max": {
-                                                    "description": "Maximal upvote weight (0 = disable upvote, 10000 = full upvote)",
-                                                    "maximum": 10000,
-                                                    "minimum": 0,
-                                                    "type": "integer"
-                                                },
-                                                "min": {
-                                                    "description": "Minimal flag weight (-10000 = full flag, 0 = disable flag)",
-                                                    "maximum": 0,
-                                                    "minimum": -10000,
-                                                    "type": "integer"
-                                                },
-                                                "mode": {
-                                                    "enum": [
-                                                        "multiple_votes_weight"
-                                                    ],
-                                                    "type": "string"
-                                                },
-                                                "period": {
-                                                    "enum": [
-                                                        "days",
-                                                        "hours",
-                                                        "minutes",
-                                                        "seconds"
-                                                    ],
-                                                    "type": "string"
-                                                },
-                                                "rule": {
-                                                    "enum": [
-                                                        "weight"
-                                                    ],
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "max",
-                                                "min",
-                                                "mode",
-                                                "period",
-                                                "rule"
-                                            ],
-                                            "type": "object"
+                                            "$ref": "#/definitions/wise_rule_weight"
                                         },
                                         {
                                             "$ref": "#/definitions/wise_rule_tags"
