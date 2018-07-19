@@ -10,8 +10,7 @@ import { FakeApi } from "../src/api/FakeApi";
 
 /* PREPARE TESTING DATASETS */
 import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
-import * as fakeDataset_ from "./data/fake-blockchain.json";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+import { FakeWiseFactory } from "./util/FakeWiseFactory";
 
 /* CONFIG */
 const voter = "guest123";
@@ -29,7 +28,7 @@ describe("test/v1-ruleset-validation-test.spec.ts", function() {
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
         this.retries(1);
 
-        const wise = new Wise(voter, FakeApi.fromDataset(fakeDataset));
+        const wise = new Wise(voter, FakeWiseFactory.buildFakeApi());
 
         it("passes valid voteorder", function(done) {
             this.timeout(200);

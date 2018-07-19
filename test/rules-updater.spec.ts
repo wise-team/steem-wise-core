@@ -30,7 +30,7 @@ describe("test/rules-updater.spec.ts", () => {
                 rulesets: [{
                     name: "a",
                     rules: [
-                        new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 100),
+                        new WeightRule(0, 100),
                         new TagsRule(TagsRule.Mode.REQUIRE, ["steemprojects"])
                     ]
                 }]
@@ -83,7 +83,7 @@ describe("test/rules-updater.spec.ts", () => {
                 rulesets: [{
                     name: "c",
                     rules: [
-                        new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 100),
+                        new WeightRule(0, 100),
                         new TagsRule(TagsRule.Mode.REQUIRE, ["steemprojects"])
                     ]
                 }]

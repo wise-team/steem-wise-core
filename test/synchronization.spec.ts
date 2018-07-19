@@ -92,14 +92,14 @@ describe("test/synchronization.spec.ts", () => {
                         name: "RulesetOneChangesContent",
                         rules: [
                             new AuthorsRule(AuthorsRule.Mode.ALLOW, ["noisy"]),
-                            new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 2000)
+                            new WeightRule(0, 2000)
                         ]
                     },
                     {
                         name: "RulesetTwoWillBeRemoved",
                         rules: [
                             new AuthorsRule(AuthorsRule.Mode.ALLOW, ["perduta"]),
-                            new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 2000)
+                            new WeightRule(0, 2000)
                         ]
                     }
                 ]
@@ -182,7 +182,7 @@ describe("test/synchronization.spec.ts", () => {
                         rules: [
                             new TagsRule(TagsRule.Mode.REQUIRE, ["steemprojects"]),
                             new AuthorsRule(AuthorsRule.Mode.DENY, ["noisy"]),
-                            new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 10)
+                            new WeightRule(0, 10)
                         ]
                     }
                 ]

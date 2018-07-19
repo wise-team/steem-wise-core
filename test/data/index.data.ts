@@ -8,7 +8,7 @@ export const sendRules_valid = {
             {
                 name: "test_purpose_ruleset",
                 rules: [
-                    new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, 0, 1000),
+                    new WeightRule(0, 1000),
                     new TagsRule(TagsRule.Mode.REQUIRE, ["steemprojects"])
                 ]
             }
