@@ -33,11 +33,19 @@ export class ValidationContext {
         for (let i = 0; i < this.accountInfoLoaders.length; i++) {
             const loaderTuple = this.accountInfoLoaders[i];
             if (loaderTuple[0] === username) {
-                return loaderTuple[1].execute(() => this.api.getAccountInfo(this.voter));
+                return loaderTuple[1].execute(() => this.api.getAccountInfo(username));
             }
         }
         const loader = new OneTimePromise<AccountInfo>(10 * 1000);
         this.accountInfoLoaders.push([username, loader]);
-        return loader.execute(() => this.api.getAccountInfo(this.voter));
+        return loader.execute(() => this.api.getAccountInfo(username));
+    }
+
+    public getDelegatorUsername(): string {
+        return this.delegator;
+    }
+
+    public getVoterUsername(): string {
+        return this.voter;
     }
 }
