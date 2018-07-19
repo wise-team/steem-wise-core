@@ -113,7 +113,7 @@ export class V1Handler implements ProtocolVersionHandler {
             }
         }
 
-        rules.push(new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT,
+        rules.push(new WeightRule(
             /*min: */(ruleset.action == "flag" || ruleset.action == "upvote+flag") ? (-1 * ruleset.total_weight) : 0,
             /*max: */(ruleset.action == "upvote" || ruleset.action == "upvote+flag") ? (1 * ruleset.total_weight) : 0,
         ));

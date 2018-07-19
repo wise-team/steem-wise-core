@@ -1,12 +1,12 @@
+/* tslint:disable class-name */
+
 import { Rule } from "../../../rules/Rule";
 import { WeightRule } from "../../../rules/WeightRule";
 import { TagsRule } from "../../../rules/TagsRule";
 import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
 import { VotingPowerRule } from "../../../rules/VotingPowerRule";
-
-
-/* tslint:disable class-name */
+import { wise_rule_weight, wise_rule_weight_decode, wise_rule_weight_encode } from "./rules/rule-weight-schema";
 
 export type wise_rule = wise_rule_weight
                       | wise_rule_tags
@@ -14,29 +14,6 @@ export type wise_rule = wise_rule_weight
                       | wise_rule_voting_power
                       | wise_rule_custom_rpc;
 
-export interface wise_rule_weight {
-    rule: "weight";
-    mode: wise_rule_weight_mode;
-
-    /**
-     * Minimal flag weight (-10000 = full flag, 0 = disable flag)
-     *
-     * @minimum -10000
-     * @maximum 0
-     * @TJS-type integer
-     */
-    min: number;
-
-    /**
-     * Maximal upvote weight (0 = disable upvote, 10000 = full upvote)
-     *
-     * @minimum 0
-     * @maximum 10000
-     * @TJS-type integer
-     */
-    max: number;
-}
-export type wise_rule_weight_mode = "single_vote_weight";
 
 
 export interface wise_rule_authors {
@@ -55,9 +32,16 @@ export interface wise_rule_tags {
 export type wise_rule_tags_mode = "allow" | "deny" | "any" | "require";
 
 
+/**
+ * This rule checks vorting_power of the delegator. Available modes are: more_than, less_than and egual.
+ */
 export interface wise_rule_voting_power {
     rule: "voting_power";
     mode: wise_rule_voting_power_mode;
+
+    /**
+     * Voting power of the delegator in steem_percent. 100% = 10'000 and 0% = 0. Percentage is multiplied by 100.
+     */
     value: number;
 }
 export type wise_rule_voting_power_mode = "more_than" | "less_than" | "equal";
@@ -74,11 +58,7 @@ export interface wise_rule_custom_rpc {
 
 export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
     if (r.rule === "weight") {
-        let mode: WeightRule.Mode;
-        if (r.mode === "single_vote_weight") mode = WeightRule.Mode.SINGLE_VOTE_WEIGHT;
-        else return undefined;
-
-        return new WeightRule(mode, r.min, r.max);
+        return wise_rule_weight_decode(r as wise_rule_weight);
     }
     else if (r.rule === "tags") {
         let mode: TagsRule.Mode;
@@ -115,17 +95,7 @@ export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
 
 export const wise_rule_encode = (r: Rule): wise_rule => {
     if (r.type() === Rule.Type.Weight) {
-        let mode: wise_rule_weight_mode;
-        if ((r as WeightRule).mode === WeightRule.Mode.SINGLE_VOTE_WEIGHT) mode = "single_vote_weight";
-        else throw new Error("Unknown mode of weight rule");
-
-        const out: wise_rule_weight = {
-            rule: "weight",
-            mode: mode,
-            min: (r as WeightRule).min,
-            max: (r as WeightRule).max
-        };
-        return out;
+        return wise_rule_weight_encode(r as WeightRule);
     }
     else if (r.type() === Rule.Type.Authors) {
         let mode: wise_rule_authors_mode;

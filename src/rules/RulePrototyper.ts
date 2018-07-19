@@ -8,6 +8,9 @@ import { CustomRPCRule } from "./CustomRPCRule";
 import { ValidationException } from "../validation/ValidationException";
 import { VotingPowerRule } from "./VotingPowerRule";
 
+/**
+ * This is a rule prototyper. Prototyping is done when rules are loaded from json file.
+ */
 export class RulePrototyper {
     public static fromUnprototypedRule(unprototyped: Rule): Rule {
         /* if rule implements validate, it means that it already had prototype */
@@ -20,7 +23,7 @@ export class RulePrototyper {
             return RulePrototyper.prototypeRule(new AuthorsRule(AuthorsRule.Mode.ALLOW, []), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.Weight) {
-            return RulePrototyper.prototypeRule(new WeightRule(WeightRule.Mode.SINGLE_VOTE_WEIGHT, undefined, 0, 0), unprototyped);
+            return RulePrototyper.prototypeRule(new WeightRule(0, 0), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.VotingPower) {
             return RulePrototyper.prototypeRule(new VotingPowerRule(VotingPowerRule.Mode.MORE_THAN, 0), unprototyped);
