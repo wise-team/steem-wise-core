@@ -17,5 +17,11 @@ export abstract class Api {
     public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []>;
     public abstract getDynamicGlobalProperties(): Promise<DynamicGlobalProperties>;
     public abstract getAccountInfo(username: string): Promise<AccountInfo>; // throws NotFoundException
+
+    /**
+     * Returns WISE operations related to given username that are newer than until.
+     * @param username - steem username
+     * @param until — the oldest date to search for operations.
+     */
     public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []>; // TODO test
 }

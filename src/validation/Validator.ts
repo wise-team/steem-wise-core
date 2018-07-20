@@ -38,7 +38,7 @@ export class Validator {
     }
 
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> => {
-        const context = new ValidationContext(this.api, delegator, voter, voteorder);
+        const context = new ValidationContext(this.api, this.protocol, delegator, voter, voteorder);
 
         return new Promise<ValidationException | true>((resolve, reject) => {
             this.validateVoteorderObject(voteorder)

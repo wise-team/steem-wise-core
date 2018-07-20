@@ -4,9 +4,12 @@ import { Api } from "../api/Api";
 import { OneTimePromise } from "../util/OneTimePromise";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
+import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
+import { Protocol } from "../protocol/Protocol";
 
 export class ValidationContext {
     private api: Api;
+    private protocol: Protocol;
     private delegator: string;
     private voter: string;
     private voteorder: SendVoteorder;
@@ -14,8 +17,9 @@ export class ValidationContext {
     private dgpLoader = new OneTimePromise<DynamicGlobalProperties>(10 * 1000);
     private accountInfoLoaders: [string, OneTimePromise<AccountInfo>][] = [];
 
-    public constructor(api: Api, delegator: string, voter: string, voteorder: SendVoteorder) {
+    public constructor(api: Api, protocol: Protocol, delegator: string, voter: string, voteorder: SendVoteorder) {
         this.api = api;
+        this.protocol = protocol;
         this.delegator = delegator;
         this.voter = voter;
         this.voteorder = voteorder;
@@ -47,5 +51,14 @@ export class ValidationContext {
 
     public getVoterUsername(): string {
         return this.voter;
+    }
+
+    /**
+     * Returns WISE operations related to given username that are newer than until.
+     * @param username - steem username
+     * @param until — the oldest date to search for operations.
+     */
+    public getWiseOperations(username: string, until: Date): Promise<EffectuatedSmartvotesOperation []> {
+        return this.api.getWiseOperations(username, until, this.protocol);
     }
 }
