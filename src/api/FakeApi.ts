@@ -4,11 +4,9 @@ import * as _ from "lodash";
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules, isSetRules } from "../../src/protocol/SetRules";
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
-import { ChainableSupplier } from "../../src/chainable/Chainable";
 import { SteemOperation } from "../../src/blockchain/SteemOperation";
 import { Api } from "../../src/api/Api";
 import { Protocol } from "../../src/protocol/Protocol";
-import { DirectBlockchainApi } from "../../src/api/directblockchain/DirectBlockchainApi";
 import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
 import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../../src/blockchain/AccountInfo";
@@ -171,6 +169,32 @@ export class FakeApi extends Api {
             const result = this.accounts.filter((info: AccountInfo) => info.name === username);
             if (result.length === 0) setTimeout(() => reject(new NotFoundException("Account " + username + " does not exist")), 4);
             else setTimeout(() => resolve(result[0]), 4);
+        });
+    }
+
+    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+        return new Promise((resolve, reject) => {
+            const result: EffectuatedSmartvotesOperation [] = [];
+            for (let i = 0; i < this.operations.length; i++) {
+                const op = this.operations[i];
+                const handleResult = protocol.handleOrReject(op);
+                if (handleResult) {
+                    for (let j = 0; j < handleResult.length; j++) {
+                        const effSo = handleResult[j];
+                        if ((effSo.delegator === username && isConfirmVote(effSo.command))
+                         || (effSo.voter === username)) {
+                            // (up) fake blockchain does not provide
+                            // information on who pushed the operation to blockchain,
+                            // so this hacky way is the only way to get this information.
+                            // fortunately FakeApi is only used for unit testing.
+                            if (effSo.timestamp.getTime() >= (until.getTime() / 1000)) {
+                                result.push(effSo);
+                            }
+                        }
+                    }
+                }
+            }
+            setTimeout(() => resolve(result), 4);
         });
     }
 
