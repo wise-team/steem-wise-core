@@ -1,8 +1,6 @@
 import { SteemPost } from "../blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
-import { ChainableSupplier } from "../chainable/Chainable";
-import { SteemOperation } from "../blockchain/SteemOperation";
 import { Protocol } from "../protocol/Protocol";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
@@ -19,4 +17,5 @@ export abstract class Api {
     public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []>;
     public abstract getDynamicGlobalProperties(): Promise<DynamicGlobalProperties>;
     public abstract getAccountInfo(username: string): Promise<AccountInfo>; // throws NotFoundException
+    public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []>; // TODO test
 }
