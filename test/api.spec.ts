@@ -269,6 +269,47 @@ describe("test/api.spec.ts", function () {
                 });
             });
         });
+
+        describe("getWiseOperations", () => {
+            it("Loads only wise operation that are newer than until", () => {
+                const until = new Date("2018-06-05T12:00:00");
+                const username = "guest123";
+                return api.getWiseOperations(username, until, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length.gte(1);
+                    ops.forEach(op => expect(op.timestamp.getTime()).to.be.greaterThan(until.getTime()));
+                    expect(ops[0].delegator === username || ops[0].voter === username).to.be.true;
+                    expect(ops[0].moment.transactionNum, "ops[0] transaction_num").to.be.a("number").that.is.gte(0);
+                });
+            });
+
+            it("Returns empty array if no operations are present", () => {
+                const until = new Date("2010-01-01T00:00:00"); // date before steem
+                const username = "guest123";
+                return api.getWiseOperations(username, until, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(0);
+                });
+            });
+
+            it("Loads wise operations sent by voter but refering to delegator", () => {
+                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", 22484096, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(1);
+                    expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22484096);
+                    if (api.name() !== "FakeApi")  expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
+                    expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
+                    expect(ops[0].voter, "ops[0].voter").to.equal("guest123");
+                });
+            });
+
+            it("Does not load operations sent as a voter", () => {
+                return api.getWiseOperationsRelatedToDelegatorInBlock("guest123", 22484096, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(0);
+                });
+            });
+        });
     }));
 
     describe("Temporarily test here v2 rules loading", () => {
