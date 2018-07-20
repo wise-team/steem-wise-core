@@ -28,6 +28,9 @@ export class RulePrototyper {
         else if (unprototyped.rule === Rule.Type.VotingPower) {
             return RulePrototyper.prototypeRule(new VotingPowerRule(VotingPowerRule.Mode.MORE_THAN, 0), unprototyped);
         }
+        else if (unprototyped.rule === Rule.Type.WeightForPeriod) {
+            return RulePrototyper.prototypeRule(new WeightForPeriodRule(), unprototyped);
+        }
         else if (unprototyped.rule === Rule.Type.CustomRPC) {
             return RulePrototyper.prototypeRule(new CustomRPCRule("", 0, "", ""), unprototyped);
         }

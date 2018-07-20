@@ -1,5 +1,4 @@
 import { WeightRule } from "../../../../rules/WeightRule";
-import { wise_rule_decode } from "../rules-schema";
 
 /* tslint:disable class-name */
 

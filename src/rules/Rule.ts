@@ -30,6 +30,7 @@ export namespace Rule {
         Tags = "tags",
         Authors = "authors",
         Weight = "weight",
+        WeightForPeriod = "weight_for_period",
         CustomRPC = "custom_rpc",
         VotingPower = "voting_power",
     }
