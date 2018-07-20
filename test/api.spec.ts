@@ -291,24 +291,6 @@ describe("test/api.spec.ts", function () {
                     expect(ops).to.be.an("array").with.length(0);
                 });
             });
-
-            it("Loads wise operations sent by voter but refering to delegator", () => {
-                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", 22484096, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
-                    expect(ops).to.be.an("array").with.length(1);
-                    expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22484096);
-                    if (api.name() !== "FakeApi")  expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
-                    expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
-                    expect(ops[0].voter, "ops[0].voter").to.equal("guest123");
-                });
-            });
-
-            it("Does not load operations sent as a voter", () => {
-                return api.getWiseOperationsRelatedToDelegatorInBlock("guest123", 22484096, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
-                    expect(ops).to.be.an("array").with.length(0);
-                });
-            });
         });
     }));
 
