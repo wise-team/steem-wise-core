@@ -54,6 +54,10 @@ export class WiseRESTApi extends Api {
         return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 
+    public getWiseOperations(username: string, until: Date): Promise<EffectuatedSmartvotesOperation []> {
+        return Promise.reject(new Error("Not yet implemented"));
+    }
+
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
         return this.directBlockchainApi.getDynamicGlobalProperties();
     }

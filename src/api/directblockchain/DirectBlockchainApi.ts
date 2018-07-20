@@ -4,13 +4,11 @@ import * as steem from "steem";
 import { SteemPost } from "../../blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules } from "../../protocol/SetRules";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
-import { ChainableSupplier, ChainableFilter, ChainableTransformer, SimpleTaker } from "../../chainable/Chainable";
+import { SimpleTaker } from "../../chainable/Chainable";
 import { SteemOperation } from "../../blockchain/SteemOperation";
 import { Api } from "../Api";
 import { Protocol } from "../../protocol/Protocol";
-import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
 import { V1Handler } from "../../protocol/versions/v1/V1Handler";
-import { RawOperation } from "./RawOperation";
 import { SteemJsAccountHistorySupplier } from "./SteemJsAccountHistorySupplier";
 import { SmartvotesOperationTypeFilter } from "../../chainable/filters/SmartvotesOperationTypeFilter";
 import { EffectuatedSmartvotesOperation } from "../../protocol/EffectuatedSmartvotesOperation";
@@ -18,10 +16,10 @@ import { OperationNumberFilter } from "../../chainable/filters/OperationNumberFi
 import { ToSmartvotesOperationTransformer } from "../../chainable/transformers/ToSmartvotesOperationTransformer";
 import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
 import { VoterFilter } from "./VoterFilter";
-import { PrechainedSupplier } from "../../chainable/PrechainedSupplier";
 import { DynamicGlobalProperties } from "../../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../../blockchain/AccountInfo";
 import { NotFoundException } from "../../util/NotFoundException";
+import { DateLimiter } from "./DateLimiter";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -166,6 +164,33 @@ export class DirectBlockchainApi extends Api {
             })
             .start(() => {
                 if (noResult) resolve(V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT);
+            });
+        });
+    }
+
+    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+        return new Promise((resolve, reject) => {
+            if (typeof username === "undefined" || username.length == 0) throw new Error("Username must not be empty");
+
+            const operations: EffectuatedSmartvotesOperation [] = [];
+            new SteemJsAccountHistorySupplier(this.steem, username)
+            .branch((historySupplier) => {
+                historySupplier
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
+                .chain(new DateLimiter(until))
+                .chain(new ToSmartvotesOperationTransformer(protocol))
+                .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
+                    operations.push(item);
+                    return true;
+                }))
+                .catch((error: Error) => {
+                    reject(error);
+
+                    return false;
+                });
+            })
+            .start(() => {
+                resolve(operations);
             });
         });
     }

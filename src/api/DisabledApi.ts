@@ -52,4 +52,8 @@ export class DisabledApi extends Api {
     public getAccountInfo(username: string): Promise<AccountInfo> {
         return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
+
+    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+        return Promise.reject(new Error("This api is disabled"));
+    }
 }

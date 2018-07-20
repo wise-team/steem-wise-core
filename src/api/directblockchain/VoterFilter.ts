@@ -1,8 +1,5 @@
 import { ChainableFilter } from "../../chainable/Chainable";
 import { SmartvotesOperation } from "../../protocol/SmartvotesOperation";
-import { isSetRules } from "../../protocol/SetRules";
-import { isSendVoteorder } from "../../protocol/SendVoteorder";
-import { isConfirmVote } from "../../protocol/ConfirmVote";
 
 export class VoterFilter extends ChainableFilter<SmartvotesOperation, VoterFilter> {
     private voter: string;
