@@ -5,7 +5,7 @@ import { SteemPost } from "../../blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules } from "../../protocol/SetRules";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
 import { SimpleTaker } from "../../chainable/Chainable";
-import { SteemOperation } from "../../blockchain/SteemOperation";
+import { SteemTransaction } from "../../blockchain/SteemTransaction";
 import { Api } from "../Api";
 import { Protocol } from "../../protocol/Protocol";
 import { V1Handler } from "../../protocol/versions/v1/V1Handler";
@@ -225,33 +225,28 @@ export class DirectBlockchainApi extends Api {
         for (let transaction_num = 0; transaction_num < block.transactions.length; transaction_num++) {
             const transaction = block.transactions[transaction_num];
 
-            for (let operation_num = 0; operation_num < transaction.operations.length; operation_num++) {
-                const operation: Operation = {
-                    block_num: block_num,
-                    transaction_num: transaction_num,
-                    transaction_id: transaction.transaction_id,
-                    operation_num: operation_num,
-                    timestamp: new Date(timestampUtc + "Z" /* this is UTC date */),
-                    op: transaction.operations[operation_num]
-                };
-                out = out.concat(this.getWiseOperationsRelatedToDelegatorInBlock_processOperation(delegator, operation, protocol));
-            }
+            out = out.concat(this.getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
+                delegator, blockNum, transaction_num, transaction,
+                new Date(timestampUtc + "Z" /* this is UTC date */), protocol
+            ));
         }
 
         return out;
     }
 
-    private getWiseOperationsRelatedToDelegatorInBlock_processOperation(delegator: string, operation: Operation, protocol: Protocol): EffectuatedSmartvotesOperation [] {
+    private getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
+        delegator: string, blockNum: number, transactionNum: number, transaction: Transaction,
+        timestamp: Date, protocol: Protocol
+    ): EffectuatedSmartvotesOperation [] {
         const out: EffectuatedSmartvotesOperation [] = [];
-        const steemOp: SteemOperation = {
-            block_num: operation.block_num,
-            transaction_num: operation.transaction_num,
-            transaction_id: operation.transaction_id,
-            operation_num: operation.operation_num,
-            timestamp: new Date(operation.timestamp + "Z"), // this is UTC time (Z marks it so that it can be converted to local time properly)
-            op: operation.op
+        const steemTx: SteemTransaction = {
+            block_num: blockNum,
+            transaction_num: transactionNum,
+            transaction_id: transaction.transaction_id,
+            timestamp: timestamp, // this is UTC time (Z marks it so that it can be converted to local time properly)
+            ops: transaction.operations
         };
-        const handleResult = protocol.handleOrReject(steemOp);
+        const handleResult = protocol.handleOrReject(steemTx);
 
         if (handleResult) {
             for (let i = 0; i < handleResult.length; i++) {
@@ -302,16 +297,3 @@ export interface Transaction {
     operations: [string, object] [];
     [x: string]: any; // allows other properties
 }
-
-export interface Operation {
-    block_num: number;
-    transaction_num: number;
-    transaction_id: string;
-    operation_num: number;
-    timestamp: Date;
-    op: [string, object];
-}
-
-
-
-

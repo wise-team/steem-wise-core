@@ -3,17 +3,17 @@ import { SmartvotesOperation } from "../../SmartvotesOperation";
 
 import * as ajv from "ajv";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_ruleset, smartvotes_command_send_voteorder, smartvotes_command_confirm_votes } from "./smartvotes.schema";
-import { SendVoteorder, isSendVoteorder } from "../../SendVoteorder";
-import { SetRules, isSetRules } from "../../SetRules";
+import { SendVoteorder } from "../../SendVoteorder";
+import { SetRules } from "../../SetRules";
 import { Rule } from "../../../rules/Rule";
 import { TagsRule } from "../../../rules/TagsRule";
 import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
-import { SteemOperation } from "../../../blockchain/SteemOperation";
+import { SteemTransaction } from "../../../blockchain/SteemTransaction";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
-import { isConfirmVote, ConfirmVote } from "../../ConfirmVote";
+import { ConfirmVote } from "../../ConfirmVote";
 import { WeightRule } from "../../../rules/WeightRule";
 
 const aajv: ajv.Ajv = new ajv();
@@ -23,25 +23,25 @@ const validate = aajv.compile(require("./smartvotes.schema.json"));
 export class V1Handler implements ProtocolVersionHandler {
     public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
 
-    public handleOrReject(op: SteemOperation): EffectuatedSmartvotesOperation [] | undefined {
-        if (op.block_num > 22710498) return undefined; // this protocol version is disabled for new transactions
+    public handleOrReject(transaction: SteemTransaction): EffectuatedSmartvotesOperation [] | undefined {
+        if (transaction.block_num > 22710498) return undefined; // this protocol version is disabled for new transactions
 
-        if (op.op[0] != "custom_json" || (op.op[1] as CustomJsonOperation).id != "smartvote") return undefined;
+        if (transaction.ops[0][0] != "custom_json" || (transaction.ops[0][1] as CustomJsonOperation).id != "smartvote") return undefined;
 
-        if ((op.op[1] as CustomJsonOperation).required_posting_auths.length != 1) return undefined; // must be authorized by single user
+        if ((transaction.ops[0][1] as CustomJsonOperation).required_posting_auths.length != 1) return undefined; // must be authorized by single user
 
-        const jsonObj = JSON.parse((op.op[1] as CustomJsonOperation).json);
+        const jsonObj = JSON.parse((transaction.ops[0][1] as CustomJsonOperation).json);
         if (!this.validateJSON(jsonObj)) return undefined;
 
         const smartvotesOp = jsonObj as smartvotes_operation;
-        return this.transform(op, smartvotesOp, (op.op[1] as CustomJsonOperation).required_posting_auths[0]);
+        return this.transform(transaction, smartvotesOp, (transaction.ops[0][1] as CustomJsonOperation).required_posting_auths[0]);
     }
 
     private validateJSON(input: object): boolean {
         return validate(input) as boolean;
     }
 
-    private transform(op: SteemOperation, smartvotesOp: smartvotes_operation, sender: string): EffectuatedSmartvotesOperation [] | undefined {
+    private transform(op: SteemTransaction, smartvotesOp: smartvotes_operation, sender: string): EffectuatedSmartvotesOperation [] | undefined {
         if (smartvotesOp.name == "set_rules") { // sort for every voter
             return this.transformSetRules(op, smartvotesOp, sender);
         }
@@ -54,7 +54,7 @@ export class V1Handler implements ProtocolVersionHandler {
         else return undefined;
     }
 
-    private transformSetRules(op: SteemOperation, smartvotesOp: smartvotes_command_set_rules, sender: string): EffectuatedSmartvotesOperation [] {
+    private transformSetRules(op: SteemTransaction, smartvotesOp: smartvotes_command_set_rules, sender: string): EffectuatedSmartvotesOperation [] {
         const rulesPerVoter: [string, {name: string, rules: Rule []}[]][] = [];
 
         for (let i = 0; i < smartvotesOp.rulesets.length; i++) {
@@ -79,7 +79,7 @@ export class V1Handler implements ProtocolVersionHandler {
             };
 
             out.push({
-                moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
+                moment: new SteemOperationNumber(op.block_num, op.transaction_num),
                 transaction_id: op.transaction_id,
                 timestamp: op.timestamp,
 
@@ -121,7 +121,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return {name: ruleset.name, rules: rules};
     }
 
-    private transformSendVoteorder(op: SteemOperation, smartvotesOp: smartvotes_command_send_voteorder, sender: string): EffectuatedSmartvotesOperation [] {
+    private transformSendVoteorder(op: SteemTransaction, smartvotesOp: smartvotes_command_send_voteorder, sender: string): EffectuatedSmartvotesOperation [] {
         const cmd: SendVoteorder = {
             rulesetName: smartvotesOp.voteorder.ruleset_name,
             permlink: smartvotesOp.voteorder.permlink,
@@ -129,7 +129,7 @@ export class V1Handler implements ProtocolVersionHandler {
             weight: smartvotesOp.voteorder.weight * (smartvotesOp.voteorder.type == "flag" ? -1 : 1)
         };
         return [{
-            moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
+            moment: new SteemOperationNumber(op.block_num, op.transaction_num),
             transaction_id: op.transaction_id,
             timestamp: op.timestamp,
 
@@ -140,7 +140,7 @@ export class V1Handler implements ProtocolVersionHandler {
         } as EffectuatedSmartvotesOperation];
     }
 
-    private transformConfirmVotes(op: SteemOperation, smartvotesOp: smartvotes_command_confirm_votes, sender: string): EffectuatedSmartvotesOperation [] {
+    private transformConfirmVotes(op: SteemTransaction, smartvotesOp: smartvotes_command_confirm_votes, sender: string): EffectuatedSmartvotesOperation [] {
         const out: EffectuatedSmartvotesOperation [] = [];
 
         for (let i = 0; i < smartvotesOp.voteorders.length; i++) {
@@ -153,7 +153,7 @@ export class V1Handler implements ProtocolVersionHandler {
             };
 
             out.push({
-                moment: new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num),
+                moment: new SteemOperationNumber(op.block_num, op.transaction_num),
                 transaction_id: op.transaction_id,
                 timestamp: op.timestamp,
 

@@ -3,7 +3,7 @@ import { expect } from "chai";
 import "mocha";
 
 // wise imports
-import { Wise, SteemOperation } from "../src/wise";
+import { Wise, SteemTransaction } from "../src/wise";
 import { DisabledApi } from "../src/api/DisabledApi";
 
 
@@ -23,16 +23,37 @@ describe("test/protocol-versions-handling.spec.ts", function() {
 
         it ("Validates all previously valid V1 (smartvote) operations as valid", () => {
             for (const op of v1ValidOperations) {
-                const result = wise.validateSteemOperation(op);
+                const result = wise.validateSteemTransaction(operationToTransaction(op));
                 expect(result).to.be.true;
             }
         });
 
         it ("Validates all previously invalid V1 (smartvote) operations as valid", () => {
             for (const op of v1InvalidOperations) {
-                const result = wise.validateSteemOperation(op);
+                const result = wise.validateSteemTransaction(operationToTransaction(op));
                 expect(result).to.be.false;
             }
         });
     });
 });
+
+
+
+interface SteemOperation {
+    block_num: number;
+    transaction_num: number;
+    transaction_id: string;
+    timestamp: Date;
+    op: [string, object];
+}
+
+function operationToTransaction(op: SteemOperation): SteemTransaction {
+    const tx: SteemTransaction = {
+        block_num: op.block_num,
+        transaction_num: op.transaction_num,
+        transaction_id: op.transaction_id,
+        timestamp: op.timestamp,
+        ops: [op.op]
+    };
+    return tx;
+}

@@ -6,7 +6,7 @@ import * as steem from "steem";
 
 // wise imports
 import { SimpleTaker } from "../src/chainable/Chainable";
-import { SteemOperationNumber, SteemOperation, Wise } from "../src/wise";
+import { SteemOperationNumber, SteemTransaction, Wise } from "../src/wise";
 import { SteemJsAccountHistorySupplier } from "../src/api/directblockchain/SteemJsAccountHistorySupplier";
 import { OperationNumberFilter } from "../src/chainable/filters/OperationNumberFilter";
 import { ToSmartvotesOperationTransformer } from "../src/chainable/transformers/ToSmartvotesOperationTransformer";
@@ -20,7 +20,7 @@ describe("test/chainable.spec.ts", () => {
             const wise = new Wise("steemprojects1", new DisabledApi());
             const protocol = wise.getProtocol();
 
-            const steemprojects1Operations: SteemOperation [] = [];
+            const steemprojects1Operations: SteemTransaction [] = [];
 
             before(function(done) {
                 this.timeout(15000);
@@ -30,7 +30,7 @@ describe("test/chainable.spec.ts", () => {
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
                     .chain(new ToSmartvotesOperationTransformer(protocol))
                     .chain(new ChainableLimiter(6))
-                    .chain(new SimpleTaker((item: SteemOperation): boolean => {
+                    .chain(new SimpleTaker((item: SteemTransaction): boolean => {
                         steemprojects1Operations.push(item);
                         return true;
                     }))
@@ -63,10 +63,10 @@ describe("test/chainable.spec.ts", () => {
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
-                    .chain(new SimpleTaker((rawOp: SteemOperation): boolean => {
-                        if (rawOp.op[0] !== "vote") return true;
+                    .chain(new SimpleTaker((rawTrx: SteemTransaction): boolean => {
+                        if (rawTrx.ops[0][0] !== "vote") return true;
 
-                        const vote: {permlink: string} = rawOp.op[1] as {permlink: string} ;
+                        const vote: {permlink: string} = rawTrx.ops[0][1] as {permlink: string} ;
 
                         const indexInSamples: number = realAndVirtual.indexOf(vote.permlink);
                         if (indexInSamples !== -1) {
@@ -111,10 +111,10 @@ describe("test/chainable.spec.ts", () => {
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
-                    .chain(new SimpleTaker((rawOp: SteemOperation): boolean => {
-                        if (rawOp.op[0] !== "vote") return true;
+                    .chain(new SimpleTaker((rawTrx: SteemTransaction): boolean => {
+                        if (rawTrx.ops[0][0] !== "vote") return true;
 
-                        const vote: {permlink: string} = rawOp.op[1] as {permlink: string};
+                        const vote: {permlink: string} = rawTrx.ops[0][1] as {permlink: string};
 
                         const indexInSamples: number = randomVoteOperationsInDescendingTimeOrder.indexOf(vote.permlink);
                         if (indexInSamples !== -1) {
@@ -151,24 +151,20 @@ describe("test/chainable.spec.ts", () => {
     });
 
     describe("OperationNumberFilter", () => {
-        it("returns only operations with number < (block=22202938, tx=14, op=1)", function(done) {
+        it("returns only operations with number < (block=22202938, tx=14)", function(done) {
             this.timeout(35000);
             new Promise((resolve, reject) => {
                 new SteemJsAccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1)))
-                    .chain(new SimpleTaker((rawOp: SteemOperation): boolean => {
-                        if (rawOp.block_num > 22202938) {
-                            reject(new Error("Operation outside of scope was passed: " + SteemOperationNumber.fromOperation(rawOp).toString()));
+                    .chain(new SimpleTaker((rawTrx: SteemTransaction): boolean => {
+                        if (rawTrx.block_num > 22202938) {
+                            reject(new Error("Operation outside of scope was passed: " + SteemOperationNumber.fromTransaction(rawTrx).toString()));
                             return false;
                         }
-                        else if (rawOp.block_num == 22202938 && rawOp.transaction_num > 14) {
-                            reject(new Error("Operation outside of scope was passed: " +  + SteemOperationNumber.fromOperation(rawOp).toString()));
-                            return false;
-                        }
-                        else if (rawOp.block_num == 22202938 && rawOp.transaction_num == 14 && rawOp.operation_num >= 1) {
-                            reject(new Error("Operation outside of scope was passed: " + SteemOperationNumber.fromOperation(rawOp).toString()));
+                        else if (rawTrx.block_num == 22202938 && rawTrx.transaction_num > 14) {
+                            reject(new Error("Operation outside of scope was passed: " +  + SteemOperationNumber.fromTransaction(rawTrx).toString()));
                             return false;
                         }
 

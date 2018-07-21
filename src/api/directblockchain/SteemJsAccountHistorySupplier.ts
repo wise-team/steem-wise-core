@@ -1,8 +1,8 @@
+import * as _ from "lodash";
 import { ChainableSupplier } from "../../chainable/Chainable";
-import { SteemOperation } from "../../blockchain/SteemOperation";
-import { RawOperation } from "./RawOperation";
+import { SteemTransaction } from "../../blockchain/SteemTransaction";
 
-export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemOperation, SteemJsAccountHistorySupplier> {
+export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransaction, SteemJsAccountHistorySupplier> {
     private steem: any;
     private username: string;
     private batchSize: number = 1000;
@@ -77,22 +77,45 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemOperat
 
     private processBatch(ops: RawOperation []): boolean {
         let loadNext: boolean = true;
-        for (let i = 0; i < ops.length; i++) {
-            const operation: RawOperation = ops[i];
-            loadNext = this.give(undefined, this.convertOperation(operation));
-            if (loadNext === false) break;
-        }
+
+        const opsGroupedByTransactionNum: { [key: number]: RawOperation [] }
+            = _.groupBy(ops, (op: RawOperation) => op[1].trx_id);
+            /* we use trx_id as it is purely unique */
+
+        const opsMappedToStemTransactions: SteemTransaction []
+            = _.values(opsGroupedByTransactionNum) // we count only single transactions
+            .map((txOps: RawOperation []) => {
+                const transaction: SteemTransaction = {
+                    block_num: txOps[0][1].block, // there is at least one operation in transaction
+                    transaction_num: txOps[0][1].trx_in_block,
+                    transaction_id: txOps[0][1].trx_id,
+                    timestamp: new Date(txOps[0][1].timestamp + "Z"), // this is UTC time (Z marks it so that it can be converted to local time properly)
+                    ops: txOps.map((op: RawOperation) => op[1].op) // map operations
+                };
+                return transaction;
+            });
+
+        const opsMappedToStemTransactionsSorted: SteemTransaction []
+            = _.sortBy(opsMappedToStemTransactions, ["block_num", "transaction_num"]);
+
+        opsMappedToStemTransactionsSorted.forEach(trx => {
+            if (loadNext) loadNext = this.give(undefined, trx);
+        });
+
         return loadNext;
     }
-
-    private convertOperation(op: RawOperation): SteemOperation {
-        return {
-            block_num: op[1].block,
-            transaction_num: op[1].trx_in_block,
-            transaction_id: op[1].trx_id,
-            operation_num: op[1].op_in_trx,
-            timestamp: new Date(op[1].timestamp + "Z"), // this is UTC time (Z marks it so that it can be converted to local time properly)
-            op: op[1].op
-        } as SteemOperation;
-    }
 }
+
+export type RawOperation =
+    [
+        number,
+        {
+            block: number,
+            op: [string, object],
+            op_in_trx: number,
+            timestamp: string,
+            trx_id: string,
+            trx_in_block: number,
+            virtual_op: number
+        }
+    ];

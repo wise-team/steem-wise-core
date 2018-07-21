@@ -4,7 +4,7 @@ import * as _ from "lodash";
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules, isSetRules } from "../../src/protocol/SetRules";
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
-import { SteemOperation } from "../../src/blockchain/SteemOperation";
+import { SteemTransaction } from "../../src/blockchain/SteemTransaction";
 import { Api } from "../../src/api/Api";
 import { Protocol } from "../../src/protocol/Protocol";
 import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
@@ -14,27 +14,27 @@ import { isConfirmVote } from "../protocol/ConfirmVote";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
 
-// TODO very slow. Examine why (maybe DirecrBlokchain could also be speeded up)
+// TODO very slow. Examine why (maybe DirecrBlockchain could also be speeded up)
 export class FakeApi extends Api {
     private posts: SteemPost [];
-    private operations: SteemOperation [];
+    private transactions: SteemTransaction [];
     private dynamicGlobalProperties: DynamicGlobalProperties;
     private accounts: AccountInfo [];
     private currentBlock = 0;
-    private pushedOperations: SteemOperation [] = [];
+    private pushedOperations: SteemTransaction [] = [];
 
-    public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], operations: SteemOperation []) {
+    public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], transactions: SteemTransaction []) {
         super();
 
         this.posts = posts;
         this.dynamicGlobalProperties = dynamicGlobalProperties;
         this.accounts = accounts;
-        this.operations = operations;
-        this.currentBlock = this.operations.map(op => op.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0);
+        this.transactions = transactions;
+        this.currentBlock = this.transactions.map(trx => trx.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0);
     }
 
     public static fromDataset(dataset: FakeApi.Dataset): FakeApi {
-        return new FakeApi(dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.operations);
+        return new FakeApi(dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.transactions);
     }
 
     public name(): string {
@@ -67,32 +67,28 @@ export class FakeApi extends Api {
         });
     }
 
-    public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
+    public sendToBlockchain(operationsInTransaction: [string, object][]): Promise<SteemOperationNumber> {
         return new Promise((resolve, reject) => {
             const blockNum = this.currentBlock + 1;
-            for (let i = 0; i < operations.length; i++) {
-                const op = operations[i];
-                const steemOp: SteemOperation = {
-                    block_num: blockNum,
-                    transaction_num: 0,
-                    operation_num: i,
-                    transaction_id: "",
-                    timestamp: new Date(),
-                    op: op
-                };
-                this.operations.push(steemOp);
-                this.pushedOperations.push(steemOp);
-                this.currentBlock = blockNum;
-            }
-            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operations.length - 1)), 4);
+            const steemTrx: SteemTransaction = {
+                block_num: blockNum,
+                transaction_num: 0,
+                transaction_id: "",
+                timestamp: new Date(),
+                ops: operationsInTransaction
+            };
+            this.transactions.push(steemTrx);
+            this.pushedOperations.push(steemTrx);
+            this.currentBlock = blockNum;
+            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1)), 4);
         });
     }
 
     public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
         return new Promise((resolve, reject) => {
             const result: EffectuatedSetRules [] = [];
-            for (let i = 0; i < this.operations.length; i++) {
-                const op = this.operations[i];
+            for (let i = 0; i < this.transactions.length; i++) {
+                const op = this.transactions[i];
                 const handleResult = protocol.handleOrReject(op);
                 if (handleResult) {
                     for (let j = 0; j < handleResult.length; j++) {
@@ -118,8 +114,8 @@ export class FakeApi extends Api {
     public getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
         return new Promise((resolve, reject) => {
             setTimeout(() => resolve(
-                this.operations
-                .map((op: SteemOperation) => protocol.handleOrReject(op))
+                this.transactions
+                .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
                 .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => (!!handledOrRejected))
                 .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
                 .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps))
@@ -145,9 +141,9 @@ export class FakeApi extends Api {
             };
 
             setTimeout(() => awaitBlock(() => resolve(
-                this.operations
-                .filter ((op: SteemOperation) => op.block_num === blockNum)
-                .map((op: SteemOperation) => protocol.handleOrReject(op))
+                this.transactions
+                .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
+                .map((op: SteemTransaction) => protocol.handleOrReject(op))
                 .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => (!!handledOrRejected))
                 .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
                 .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
@@ -175,8 +171,8 @@ export class FakeApi extends Api {
     public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => {
             const result: EffectuatedSmartvotesOperation [] = [];
-            for (let i = 0; i < this.operations.length; i++) {
-                const op = this.operations[i];
+            for (let i = 0; i < this.transactions.length; i++) {
+                const op = this.transactions[i];
                 const handleResult = protocol.handleOrReject(op);
                 if (handleResult) {
                     for (let j = 0; j < handleResult.length; j++) {
@@ -210,7 +206,7 @@ export class FakeApi extends Api {
     /**
      * Returns all operations that were pushed using #sentToBlockchain() after initialization of FakeApi.
      */
-    public getPushedOperations(): SteemOperation [] {
+    public getPushedTransactions(): SteemTransaction [] {
         return this.pushedOperations;
     }
 }
@@ -220,6 +216,6 @@ export namespace FakeApi {
         posts: SteemPost [];
         dynamicGlobalProperties: DynamicGlobalProperties;
         accounts: AccountInfo [];
-        operations: SteemOperation [];
+        transactions: SteemTransaction [];
     }
 }

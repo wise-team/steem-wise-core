@@ -1,8 +1,7 @@
 import { ChainableFilter } from "../../chainable/Chainable";
-import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
-import { SteemOperation } from "../../blockchain/SteemOperation";
+import { SteemTransaction } from "../../blockchain/SteemTransaction";
 
-export class DateLimiter extends ChainableFilter<SteemOperation, DateLimiter> {
+export class DateLimiter extends ChainableFilter<SteemTransaction, DateLimiter> {
     private until: Date;
 
     constructor(until: Date) {
@@ -15,11 +14,11 @@ export class DateLimiter extends ChainableFilter<SteemOperation, DateLimiter> {
         return this;
     }
 
-    protected take(error: Error | undefined, rawOp: SteemOperation): boolean {
+    protected take(error: Error | undefined, rawTx: SteemTransaction): boolean {
         if (error) throw error;
 
-        if (rawOp.timestamp.getTime() >= (this.until.getTime() / 1000)) {
-            return this.give(undefined, rawOp);
+        if (rawTx.timestamp.getTime() >= (this.until.getTime() / 1000)) {
+            return this.give(undefined, rawTx);
         }
         else return false;
     }

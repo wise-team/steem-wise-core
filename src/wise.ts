@@ -2,17 +2,14 @@ import { Promise } from "bluebird";
 import * as _ from "lodash";
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
-import { ChainableSupplier } from "./chainable/Chainable";
 import { Protocol } from "./protocol/Protocol";
 import { V1Handler } from "./protocol/versions/v1/V1Handler";
-import { ProtocolVersionHandler } from "./protocol/versions/ProtocolVersionHandler";
-import { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
 import { Api } from "./api/Api";
 import { SendVoteorder } from "./protocol/SendVoteorder";
 import { ProggressCallback } from "./ProggressCallback";
 import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
-import { SetRules, EffectuatedSetRules, SetRulesForVoter } from "./protocol/SetRules";
-import { SteemOperation } from "./blockchain/SteemOperation";
+import { SetRules, SetRulesForVoter } from "./protocol/SetRules";
+import { SteemTransaction } from "./blockchain/SteemTransaction";
 import { ValidationException } from "./validation/ValidationException";
 import { Validator } from "./validation/Validator";
 import { Synchronizer } from "./Synchronizer";
@@ -156,22 +153,21 @@ export class Wise {
      * @param op — an steem operation in format: [string, object] object (if it is a pending operation block_num should equal Infinity)
      */ // TODO test
     public validateOperation = (op: [string, object]): boolean => {
-        const so: SteemOperation = {
+        const so: SteemTransaction = {
             block_num: Infinity,
             transaction_num: 0,
             transaction_id: "",
-            operation_num: 0,
             timestamp: new Date(),
-            op: op
+            ops: [op]
         };
-        return this.validateSteemOperation(so);
+        return this.validateSteemTransaction(so);
     }
 
     /**
      * Validated if steem operation (object with blockchain data and timestamp) it is a valid smartvotes
-     * @param op — an steem operation object that implements SteemOperation interface
+     * @param op — an steem operation object that implements SteemTransaction interface
      */ // TODO test
-     public validateSteemOperation = (so: SteemOperation): boolean => {
+     public validateSteemTransaction = (so: SteemTransaction): boolean => {
         const res = this.protocol.handleOrReject(so);
         return res != undefined;
     }
@@ -295,7 +291,7 @@ export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi"
 export { WiseRESTApi } from "./api/WiseRESTApi";
 export { DisabledApi } from "./api/DisabledApi";
 
-export { SteemOperation } from "./blockchain/SteemOperation";
+export { SteemTransaction } from "./blockchain/SteemTransaction";
 export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 
 export { Protocol } from "./protocol/Protocol";

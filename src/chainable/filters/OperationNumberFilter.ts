@@ -1,8 +1,8 @@
 import { ChainableFilter } from "../Chainable";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
-import { SteemOperation } from "../../blockchain/SteemOperation";
+import { SteemTransaction } from "../../blockchain/SteemTransaction";
 
-export class OperationNumberFilter extends ChainableFilter<SteemOperation, OperationNumberFilter> {
+export class OperationNumberFilter extends ChainableFilter<SteemTransaction, OperationNumberFilter> {
     private tn: SteemOperationNumber;
     private mode: "<" | "<_solveOpInTrxBug" | "<=" | ">" | ">=";
     private limiter: boolean = false;
@@ -17,25 +17,25 @@ export class OperationNumberFilter extends ChainableFilter<SteemOperation, Opera
         return this;
     }
 
-    protected take(error: Error | undefined, rawOp: SteemOperation): boolean {
+    protected take(error: Error | undefined, rawTx: SteemTransaction): boolean {
         if (error) throw error;
 
-        const tn = SteemOperationNumber.fromOperation(rawOp);
+        const tn = SteemOperationNumber.fromTransaction(rawTx);
 
         if (this.mode === "<" && tn.isLesserThan(this.tn)) {
-            return this.give(undefined, rawOp);
+            return this.give(undefined, rawTx);
         }
         else if (this.mode === "<_solveOpInTrxBug" && tn.isLesserThan_solveOpInTrxBug(this.tn)) {
-            return this.give(undefined, rawOp);
+            return this.give(undefined, rawTx);
         }
         else if (this.mode === "<=" && (tn.isLesserThan(this.tn) || tn.isEqual(this.tn))) {
-            return this.give(undefined, rawOp);
+            return this.give(undefined, rawTx);
         }
         else if (this.mode === ">" && tn.isGreaterThan(this.tn)) {
-            return this.give(undefined, rawOp);
+            return this.give(undefined, rawTx);
         }
         else if (this.mode === ">=" && (tn.isGreaterThan(this.tn) || tn.isEqual(this.tn))) {
-            return this.give(undefined, rawOp);
+            return this.give(undefined, rawTx);
         }
         else {
             return !this.limiter; // true if filter, false if limiter

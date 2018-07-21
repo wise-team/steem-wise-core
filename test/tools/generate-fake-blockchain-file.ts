@@ -1,4 +1,4 @@
-import { Wise, DirectBlockchainApi, SteemOperation } from "../../src/wise";
+import { DirectBlockchainApi, SteemTransaction } from "../../src/wise";
 import * as Bluebird from "bluebird";
 import * as steem from "steem";
 import * as fs from "fs";
@@ -43,7 +43,7 @@ const postLinks: [string, string][] = [
 let posts: SteemPost [] = [];
 let accounts: AccountInfo [] = [];
 let dynamicGlobalProperties: DynamicGlobalProperties | undefined = undefined;
-let operations: SteemOperation [] = [];
+let transactions: SteemTransaction [] = [];
 
 const api = new DirectBlockchainApi("", "");
 
@@ -69,13 +69,13 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
 })
 .then(() => usernames)
 .map((username: string) => {
-    return new Bluebird<SteemOperation []>((resolve, reject) => {
-        const ops: SteemOperation [] = [];
+    return new Bluebird<SteemTransaction []>((resolve, reject) => {
+        const ops: SteemTransaction [] = [];
         new SteemJsAccountHistorySupplier(steem, username)
         .branch((historySupplier) => {
             historySupplier
             .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
-            .chain(new SimpleTaker((item: SteemOperation): boolean => {
+            .chain(new SimpleTaker((item: SteemTransaction): boolean => {
                 ops.push(item);
                 return true;
             }))
@@ -89,11 +89,11 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
         });
     });
 })
-.then((values: SteemOperation [][]) => {
-    return values.reduce((allOps: SteemOperation [], nextOps: SteemOperation []) => allOps.concat(nextOps));
+.then((values: SteemTransaction [][]) => {
+    return values.reduce((allOps: SteemTransaction [], nextOps: SteemTransaction []) => allOps.concat(nextOps));
 })
-.then((ops: SteemOperation []) => {
-    operations = ops;
+.then((ops: SteemTransaction []) => {
+    transactions = ops;
 })
 .then(() => {
     if (!dynamicGlobalProperties) throw new Error("Dynamic global properties are undefined");
@@ -101,7 +101,7 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
     const dataset: FakeApi.Dataset = {
         dynamicGlobalProperties: dynamicGlobalProperties,
         accounts: accounts,
-        operations: operations,
+        transactions: transactions,
         posts: posts
     };
     fs.writeFileSync(outFilePath, JSON.stringify(dataset));

@@ -1,4 +1,4 @@
-import { SteemOperation } from "../blockchain/SteemOperation";
+import { SteemTransaction } from "../blockchain/SteemTransaction";
 import { SmartvotesOperation } from "./SmartvotesOperation";
 import { ProtocolVersionHandler } from "./versions/ProtocolVersionHandler";
 import { EffectuatedSmartvotesOperation } from "./EffectuatedSmartvotesOperation";
@@ -15,9 +15,9 @@ export class Protocol {
         if (this.registry.length == 0) throw new Error("You must specify at least one protocol version handler");
     }
 
-    public handleOrReject(op: SteemOperation): EffectuatedSmartvotesOperation [] | undefined {
+    public handleOrReject(transaction: SteemTransaction): EffectuatedSmartvotesOperation [] | undefined {
         for (const pv of this.registry) {
-            const result = pv.handleOrReject(op);
+            const result = pv.handleOrReject(transaction);
             if (result) {
                 return result;
             }

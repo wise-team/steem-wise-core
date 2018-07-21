@@ -1,8 +1,8 @@
-import { SteemOperation } from "../../blockchain/SteemOperation";
+import { SteemTransaction } from "../../blockchain/SteemTransaction";
 import { SmartvotesOperation } from "../SmartvotesOperation";
 import { EffectuatedSmartvotesOperation } from "../EffectuatedSmartvotesOperation";
 
 export interface ProtocolVersionHandler {
-  handleOrReject: (op: SteemOperation) => EffectuatedSmartvotesOperation [] | undefined;
+  handleOrReject: (tx: SteemTransaction) => EffectuatedSmartvotesOperation [] | undefined;
   serializeToBlockchain: (op: SmartvotesOperation) => [string, object][];
 }

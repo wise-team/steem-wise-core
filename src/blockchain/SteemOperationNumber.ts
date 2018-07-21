@@ -1,4 +1,4 @@
-import { SteemOperation } from "./SteemOperation";
+import { SteemTransaction } from "./SteemTransaction";
 
 export class SteemOperationNumber {
     public blockNum: number;
@@ -7,7 +7,7 @@ export class SteemOperationNumber {
 
     public static FUTURE: SteemOperationNumber = new SteemOperationNumber(Infinity, Infinity, Infinity);
 
-    constructor(blockNum: number, transactionNum: number, operationNum: number) {
+    constructor(blockNum: number, transactionNum: number, operationNum: number = 0) {
         this.blockNum = blockNum;
         this.transactionNum = transactionNum;
         this.operationNum = operationNum;
@@ -77,7 +77,7 @@ export class SteemOperationNumber {
         return "[b=" + this.blockNum + ", tx=" + this.transactionNum + ", op=" + this.operationNum + "]";
     }
 
-    public static fromOperation(op: SteemOperation): SteemOperationNumber {
-        return new SteemOperationNumber(op.block_num, op.transaction_num, op.operation_num);
+    public static fromTransaction(op: SteemTransaction, operationNum: number = 0): SteemOperationNumber {
+        return new SteemOperationNumber(op.block_num, op.transaction_num, operationNum);
     }
 }
