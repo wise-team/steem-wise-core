@@ -1,8 +1,6 @@
 import { ChainableSupplier } from "../../chainable/Chainable";
-import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
 import { SteemOperation } from "../../blockchain/SteemOperation";
 import { RawOperation } from "./RawOperation";
-import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
 
 export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemOperation, SteemJsAccountHistorySupplier> {
     private steem: any;
