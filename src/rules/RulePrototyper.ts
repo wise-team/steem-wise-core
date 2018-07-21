@@ -7,6 +7,7 @@ import { WeightRule } from "./WeightRule";
 import { CustomRPCRule } from "./CustomRPCRule";
 import { ValidationException } from "../validation/ValidationException";
 import { VotingPowerRule } from "./VotingPowerRule";
+import { WeightForPeriodRule } from "./WeightForPeriodRule";
 
 /**
  * This is a rule prototyper. Prototyping is done when rules are loaded from json file.
@@ -29,7 +30,7 @@ export class RulePrototyper {
             return RulePrototyper.prototypeRule(new VotingPowerRule(VotingPowerRule.Mode.MORE_THAN, 0), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.WeightForPeriod) {
-            return RulePrototyper.prototypeRule(new WeightForPeriodRule(), unprototyped);
+            return RulePrototyper.prototypeRule(new WeightForPeriodRule(0, WeightForPeriodRule.PeriodUnit.SECOND, 0), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.CustomRPC) {
             return RulePrototyper.prototypeRule(new CustomRPCRule("", 0, "", ""), unprototyped);

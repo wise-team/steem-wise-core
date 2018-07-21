@@ -12,7 +12,8 @@ import {  wise_rule_authors, wise_rule_authors_encode, wise_rule_authors_decode 
 import { wise_rule_voting_power, wise_rule_voting_power_decode, wise_rule_voting_power_encode } from "./rules/rule-voting-power-schema";
 import { wise_rule_custom_rpc, wise_rule_custom_rpc_decode, wise_rule_custom_rpc_encode } from "./rules/rule-custom-rpc-schema";
 import { ValidationException } from "../../../validation/ValidationException";
-import { wise_rule_weight_for_period, wise_rule_weight_for_period_decode } from "./rules/rule-total-weight-schema";
+import { wise_rule_weight_for_period, wise_rule_weight_for_period_decode, wise_rule_weight_for_period_encode } from "./rules/rule-weight-for-period-schema";
+import { WeightForPeriodRule } from "../../../rules/WeightForPeriodRule";
 
 export type wise_rule = wise_rule_weight
                       | wise_rule_tags

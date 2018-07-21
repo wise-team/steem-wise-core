@@ -1,6 +1,7 @@
 /* tslint:disable class-name */
 
 import { WeightForPeriodRule } from "../../../../rules/WeightForPeriodRule";
+import { ValidationException } from "../../../../validation/ValidationException";
 
 
 /**
@@ -43,5 +44,16 @@ export function wise_rule_weight_for_period_encode(rule: WeightForPeriodRule): w
 }
 
 export function wise_rule_weight_for_period_decode(r: wise_rule_weight_for_period): WeightForPeriodRule  {
-    return new TotaWeightRule();
+    switch (r.unit) {
+        case "day":
+            return new WeightForPeriodRule(r.period, WeightForPeriodRule.PeriodUnit.DAY, r.weight);
+        case "hour":
+            return new WeightForPeriodRule(r.period, WeightForPeriodRule.PeriodUnit.HOUR, r.weight);
+        case "minute":
+            return new WeightForPeriodRule(r.period, WeightForPeriodRule.PeriodUnit.MINUTE, r.weight);
+        case "second":
+            return new WeightForPeriodRule(r.period, WeightForPeriodRule.PeriodUnit.SECOND, r.weight);
+        default:
+            throw new ValidationException("V2 wise_rule_weight_for_period: Unknown period unit");
+    }
 }
