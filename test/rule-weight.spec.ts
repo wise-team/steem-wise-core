@@ -23,7 +23,7 @@ describe("test/rule-weight.spec.ts", () => {
             author: "noisy",
             permlink: "nonexistent-post-" + Date.now()
         };
-        const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
+        const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
 
         describe("mode = SINGLE_VOTE_WEIGHT", () => {
             it ("allows 0 <= 50 <= 100", () => {

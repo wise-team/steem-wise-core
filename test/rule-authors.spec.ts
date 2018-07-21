@@ -23,7 +23,7 @@ describe("test/rule-authors.spec.ts", () => {
                 author: "noisy",
                 permlink: "dear-whales-please-consider-declining-all-comment-rewards-by-default-in-settings-5-reasons-to-do-that"
             };
-            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
             return rule.validate(voteorder, context);
         });
 
@@ -34,7 +34,7 @@ describe("test/rule-authors.spec.ts", () => {
                 author: "pojan",
                 permlink: "how-to-install-free-cad-on-windows-mac-os-and-linux-and-what-is-free-cad"
             };
-            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
             return rule.validate(voteorder, context)
             .then(() => { throw new Error("Should fail"); },
                   (e: Error) => { expect((e as ValidationException).validationException).to.be.true; });
@@ -47,7 +47,7 @@ describe("test/rule-authors.spec.ts", () => {
                 author: "pojan",
                 permlink: "how-to-install-free-cad-on-windows-mac-os-and-linux-and-what-is-free-cad"
             };
-            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
             return rule.validate(voteorder, context);
         });
 
@@ -58,7 +58,7 @@ describe("test/rule-authors.spec.ts", () => {
                 author: "noisy",
                 permlink: "dear-whales-please-consider-declining-all-comment-rewards-by-default-in-settings-5-reasons-to-do-that"
             };
-            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
             return rule.validate(voteorder, context)
             .then(() => { throw new Error("Should fail"); },
                   (e: Error) => { expect((e as ValidationException).validationException).to.be.true; });
@@ -71,7 +71,7 @@ describe("test/rule-authors.spec.ts", () => {
                 author: "noisy",
                 permlink: "nonexistent-post-" + Date.now()
             };
-            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
             return rule.validate(voteorder, context)
             .then(() => { throw new Error("Should fail"); },
                   (e: Error) => { expect((e as ValidationException).validationException).to.be.true; });

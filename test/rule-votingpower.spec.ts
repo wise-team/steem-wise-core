@@ -3,7 +3,7 @@ import { expect } from "chai";
 import "mocha";
 
 // wise imports
-import { VotingPowerRule, SendVoteorder, ValidationException } from "../src/wise";
+import { VotingPowerRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
 import { AccountInfo } from "../src/blockchain/AccountInfo";
@@ -12,6 +12,7 @@ import { AccountInfo } from "../src/blockchain/AccountInfo";
 const voter = "perduta";
 const fakeDataset = FakeWiseFactory.loadDataset();
 const fakeApi = FakeWiseFactory.buildFakeApiWithDataset(fakeDataset);
+const wise = new Wise(voter, fakeApi);
 
 describe("test/rule-votingpower.spec.ts", () => {
     describe("VotingPowerRule", function() {
@@ -60,7 +61,7 @@ describe("test/rule-votingpower.spec.ts", () => {
                 author: "noisy",
                 permlink: "dear-whales-please-consider-declining-all-comment-rewards-by-default-in-settings-5-reasons-to-do-that"
             };
-            const context = new ValidationContext(fakeApi, delegator.name, voter, voteorder);
+            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator.name, voter, voteorder);
 
             return rule.validate(voteorder, context)
             .then(() => { // passed

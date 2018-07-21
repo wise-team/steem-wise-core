@@ -27,7 +27,6 @@ describe("test/rules-prototyper.spec.ts", () => {
                 new VotingPowerRule(VotingPowerRule.Mode.EQUAL, 5),
                 new VotingPowerRule(VotingPowerRule.Mode.LESS_THAN, 5),
                 new VotingPowerRule(VotingPowerRule.Mode.MORE_THAN, 5),
-                
             ];
 
             const rulesUnprototyped = JSON.parse(JSON.stringify(rulesPrimary));
