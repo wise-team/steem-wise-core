@@ -22,6 +22,8 @@ import { NotFoundException } from "../src/util/NotFoundException";
 /* PREPARE TESTING DATASETS */
 import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote, isConfirmVote } from "../src/protocol/ConfirmVote";
+import { VoteOperation } from "../src/blockchain/VoteOperation";
 
 /* CONFIG */
 const username = "guest123";
@@ -224,6 +226,22 @@ describe("test/api.spec.ts", function () {
                 .then(() => api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum, wise.getProtocol()))
                 .then(() => {});
             });
+
+            it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
+                const blockNum = 24352800;
+                return api.getWiseOperationsRelatedToDelegatorInBlock("noisy", blockNum, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length(1);
+                    expect(isConfirmVoteBoundWithVote(ops[0].command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
+                    const expectedVoteOp: VoteOperation = {
+                        voter: "noisy",
+                        author: "tkow",
+                        permlink: "reklama-projektu-na-facebook-1",
+                        weight: 1000
+                    };
+                    expect((<ConfirmVoteBoundWithVote>ops[0].command).vote, ".cmd.vote").to.deep.equal(expectedVoteOp);
+                });
+            });
         });
 
         describe("#getDynamicGlobalProperties", () => {
@@ -289,6 +307,20 @@ describe("test/api.spec.ts", function () {
                 return api.getWiseOperations(username, until, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length(0);
+                });
+            });
+
+            it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
+                const until = new Date("2018-07-10T00:00:00");
+                return api.getWiseOperations("noisy", until, wise.getProtocol())
+                .then((ops: EffectuatedSmartvotesOperation []) => {
+                    expect(ops).to.be.an("array").with.length.greaterThan(0);
+                    ops.forEach(op => {
+                        if (isConfirmVote(op.command)) {
+                            expect(isConfirmVoteBoundWithVote(op.command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
+                            expect (op.command).to.haveOwnProperty("vote");
+                        }
+                    });
                 });
             });
         });
