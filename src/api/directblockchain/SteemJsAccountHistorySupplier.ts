@@ -96,7 +96,7 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
             });
 
         const opsMappedToStemTransactionsSorted: SteemTransaction []
-            = _.sortBy(opsMappedToStemTransactions, ["block_num", "transaction_num"]);
+            = _.reverse(_.sortBy(opsMappedToStemTransactions, ["block_num", "transaction_num"]));
 
         opsMappedToStemTransactionsSorted.forEach(trx => {
             if (loadNext) loadNext = this.give(undefined, trx);
