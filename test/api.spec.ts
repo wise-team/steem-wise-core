@@ -87,7 +87,7 @@ describe("test/api.spec.ts", function () {
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
                 return api.loadRulesets(delegator, voter, moment, wise.getProtocol())
                 .then(((r: SetRules) => {
-                    expect(r.rulesets).to.be.an("array").with.length(v1TestingSequence.stage1_0_Rulesets.rulesets.length);
+                    expect(r.rulesets, "rulesets").to.be.an("array").with.length(v1TestingSequence.stage1_0_Rulesets.rulesets.length);
                     for (let i = 0; i < v1TestingSequence.stage1_0_Rulesets.rulesets.length; i++) {
                         const expectedRuleset = v1TestingSequence.stage1_0_Rulesets.rulesets[i];
                         const receivedRuleset = r.rulesets[i];
@@ -172,14 +172,14 @@ describe("test/api.spec.ts", function () {
         });
 
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {
-            it("Loads only wise operation from block 22,485,801", () => {
-                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", 22485801, wise.getProtocol())
+            it.only("Loads only wise operation from single block", () => {
+                const blockNum = 23487915;
+                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
                     expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
-                    expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(22485801);
-                    expect(ops[0].moment.transactionNum, "ops[0] transaction_num").to.equal(38);
-                    if (api.name() !== "FakeApi") expect(ops[0].moment.operationNum, "ops[0] operation_num").to.equal(1);
+                    expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(blockNum);
+                    expect(ops[0].moment.transactionNum, "ops[0] transaction_num").to.equal(18);
                 });
             });
 

@@ -120,7 +120,7 @@ describe("test/chainable.spec.ts", () => {
                                     if (indexInSamples !== 0) {
                                         const error = new Error("Votes returned in wrogn order. Received " + vote.permlink + ", sholudReceive: " + randomVoteOperationsInDescendingTimeOrder[0]);
                                         console.error(error);
-                                        // done(error);
+                                        done(error);
                                         continueLoading = false;
                                     }
                                     else {

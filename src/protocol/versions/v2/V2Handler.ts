@@ -1,7 +1,8 @@
+import * as ajv from "ajv";
+import * as _ from "lodash";
+
 import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
 import { SmartvotesOperation } from "../../SmartvotesOperation";
-
-import * as ajv from "ajv";
 import { SendVoteorder, isSendVoteorder } from "../../SendVoteorder";
 import { SetRules, isSetRules } from "../../SetRules";
 import { Rule } from "../../../rules/Rule";
@@ -35,18 +36,24 @@ export class V2Handler implements ProtocolVersionHandler {
     public handleOrReject = (transaction: SteemTransaction): EffectuatedSmartvotesOperation [] | undefined => {
         if (transaction.block_num <= 22710498) return undefined;
 
-        if (transaction.ops[0][0] != "custom_json" || (transaction.ops[0][1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) return undefined;
+        /**
+         * The following reversion is mandatory, because when wise is publishing more than one
+         * operation in a single transaction (eg. vote + confirm_vote), it always puts wise operation as the last one.
+         */
+        const operations = _.reverse(transaction.ops);
 
-        if ((transaction.ops[0][1] as CustomJsonOperation).required_posting_auths.length != 1) return undefined; // must be authorized by single user
+        if (operations[0][0] != "custom_json" || (operations[0][1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) return undefined;
 
-        if (!this.isMyOperation((transaction.ops[0][1] as CustomJsonOperation).json)) return undefined;
+        if ((operations[0][1] as CustomJsonOperation).required_posting_auths.length != 1) return undefined; // must be authorized by single user
 
-        const jsonObj = JSON.parse((transaction.ops[0][1] as CustomJsonOperation).json);
+        if (!this.isMyOperation((operations[0][1] as CustomJsonOperation).json)) return undefined;
+
+        const jsonObj = JSON.parse((operations[0][1] as CustomJsonOperation).json);
         if (!this.validateJSON(jsonObj)) return undefined;
 
         const wiseOp = jsonObj as wise_operation;
 
-        return this.decode(transaction, wiseOp, (transaction.ops[0][1] as CustomJsonOperation).required_posting_auths[0]);
+        return this.decode(transaction, wiseOp, (operations[0][1] as CustomJsonOperation).required_posting_auths[0]);
     }
 
     private isMyOperation = (jsonStr: string): boolean => {
@@ -81,7 +88,7 @@ export class V2Handler implements ProtocolVersionHandler {
         }
 
         const out: EffectuatedSmartvotesOperation = {
-            moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0),
+            moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0 /* skip operation num due to rejection that was done in #handleOrReject */),
             transaction_id: transaction.transaction_id,
             timestamp: transaction.timestamp,
 
@@ -116,7 +123,7 @@ export class V2Handler implements ProtocolVersionHandler {
             weight: wiseOp[1].weight
         };
         return [{
-            moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0),
+            moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0 /* skip operation num due to rejection that was done in #handleOrReject */),
             transaction_id: transaction.transaction_id,
             timestamp: transaction.timestamp,
 
@@ -134,7 +141,7 @@ export class V2Handler implements ProtocolVersionHandler {
             msg: wiseOp[1].msg,
         };
         return [{
-            moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0),
+            moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0 /* skip operation num due to rejection that was done in #handleOrReject */),
             transaction_id: transaction.transaction_id,
             timestamp: transaction.timestamp,
 

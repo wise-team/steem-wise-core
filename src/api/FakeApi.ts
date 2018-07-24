@@ -88,8 +88,8 @@ export class FakeApi extends Api {
         return new Promise((resolve, reject) => {
             const result: EffectuatedSetRules [] = [];
             for (let i = 0; i < this.transactions.length; i++) {
-                const op = this.transactions[i];
-                const handleResult = protocol.handleOrReject(op);
+                const trx = this.transactions[i];
+                const handleResult = protocol.handleOrReject(trx);
                 if (handleResult) {
                     for (let j = 0; j < handleResult.length; j++) {
                         const effSo = handleResult[j];

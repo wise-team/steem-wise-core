@@ -197,7 +197,8 @@ export class DirectBlockchainApi extends Api {
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => {
-            this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => { // TODO would it be better to use RPC method get_ops_in_block?
+            this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => {
+                // TODO would it be better to use RPC method get_ops_in_block?
                 if (error) reject(error);
                 else {
                     if (!block_) {
@@ -243,16 +244,15 @@ export class DirectBlockchainApi extends Api {
             block_num: blockNum,
             transaction_num: transactionNum,
             transaction_id: transaction.transaction_id,
-            timestamp: timestamp, // this is UTC time (Z marks it so that it can be converted to local time properly)
+            timestamp: timestamp,
             ops: transaction.operations
         };
         const handleResult = protocol.handleOrReject(steemTx);
 
         if (handleResult) {
-            for (let i = 0; i < handleResult.length; i++) {
-                const wiseOp: EffectuatedSmartvotesOperation = handleResult[i];
+            handleResult.forEach(wiseOp => {
                 if (wiseOp.delegator === delegator) out.push(wiseOp);
-            }
+            });
         }
 
         return out;
