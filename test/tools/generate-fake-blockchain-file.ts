@@ -67,16 +67,16 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
 .then((value: DynamicGlobalProperties) => {
     dynamicGlobalProperties = value;
 })
-.then(() => usernames)
+.then(() => usernames) // for each username return a promise that returns transactions
 .map((username: string) => {
     return new Bluebird<SteemTransaction []>((resolve, reject) => {
-        const ops: SteemTransaction [] = [];
+        const trxs: SteemTransaction [] = [];
         new SteemJsAccountHistorySupplier(steem, username)
         .branch((historySupplier) => {
             historySupplier
             .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
-            .chain(new SimpleTaker((item: SteemTransaction): boolean => {
-                ops.push(item);
+            .chain(new SimpleTaker((trx: SteemTransaction): boolean => {
+                trxs.push(trx);
                 return true;
             }))
             .catch((error: Error) => {
@@ -85,15 +85,15 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
             });
         })
         .start(() => {
-            resolve(ops);
+            resolve(trxs);
         });
     });
 })
 .then((values: SteemTransaction [][]) => {
-    return values.reduce((allOps: SteemTransaction [], nextOps: SteemTransaction []) => allOps.concat(nextOps));
+    return values.reduce((allTrxs: SteemTransaction [], nextTrxs: SteemTransaction []) => allTrxs.concat(nextTrxs));
 })
-.then((ops: SteemTransaction []) => {
-    transactions = ops;
+.then((trxs: SteemTransaction []) => {
+    transactions = trxs;
 })
 .then(() => {
     if (!dynamicGlobalProperties) throw new Error("Dynamic global properties are undefined");

@@ -143,8 +143,8 @@ export class FakeApi extends Api {
             setTimeout(() => awaitBlock(() => resolve(
                 this.transactions
                 .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
-                .map((op: SteemTransaction) => protocol.handleOrReject(op))
-                .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => (!!handledOrRejected))
+                .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
+                .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => !!handledOrRejected)
                 .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
                 .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
                 .filter((effSop: EffectuatedSmartvotesOperation) => effSop.delegator === delegator)

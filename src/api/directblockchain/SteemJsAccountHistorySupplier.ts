@@ -90,7 +90,8 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
                     transaction_num: txOps[0][1].trx_in_block,
                     transaction_id: txOps[0][1].trx_id,
                     timestamp: new Date(txOps[0][1].timestamp + "Z"), // this is UTC time (Z marks it so that it can be converted to local time properly)
-                    ops: txOps.map((op: RawOperation) => op[1].op) // map operations
+                    ops: _.reverse(txOps.map((op: RawOperation) => op[1].op)) // map operations,
+                    // they have to be reversed (we want transactions from the newset to the oldest, but operations in reversed order: from the oldest to the newset)
                 };
                 return transaction;
             });

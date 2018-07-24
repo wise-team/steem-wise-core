@@ -172,7 +172,7 @@ describe("test/api.spec.ts", function () {
         });
 
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {
-            it.only("Loads only wise operation from single block", () => {
+            it("Loads only wise operation from single block", () => {
                 const blockNum = 23487915;
                 return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
