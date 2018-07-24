@@ -10,9 +10,10 @@ import { SteemTransaction } from "../../../blockchain/SteemTransaction";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
-import { isConfirmVote, ConfirmVote } from "../../ConfirmVote";
+import { isConfirmVote, ConfirmVote, ConfirmVoteBoundWithVote } from "../../ConfirmVote";
 import { wise_operation, wise_set_rules, wise_rule, wise_send_voteorder_operation, wise_set_rules_operation, wise_confirm_vote_operation } from "./wise-schema";
 import { wise_rule_decode, wise_rule_encode } from "./rules-schema";
+import { VoteOperation, isVoteOperation } from "../../../blockchain/VoteOperation";
 
 class WiseConstants {
     public static wise_send_voteorder_descriptor: string = "v2:send_voteorder";
@@ -135,11 +136,35 @@ export class V2Handler implements ProtocolVersionHandler {
     }
 
     private decodeConfirmVote = (transaction: SteemTransaction, wiseOp: wise_confirm_vote_operation, sender: string): EffectuatedSmartvotesOperation [] => {
-        const cmd: ConfirmVote = {
-            voteorderTxId: wiseOp[1].tx_id,
-            accepted: wiseOp[1].accepted,
-            msg: wiseOp[1].msg,
-        };
+        let voteOp: VoteOperation | undefined = undefined;
+
+        if (transaction.ops.length === 2
+         && transaction.ops[1][0] === "vote") {
+             const potentialVoteOp: object = transaction.ops[1][1];
+             if (isVoteOperation(potentialVoteOp)) {
+                 voteOp = potentialVoteOp;
+             }
+        }
+
+        let cmd: ConfirmVote | ConfirmVoteBoundWithVote;
+        if (voteOp) {
+            const cmd_: ConfirmVoteBoundWithVote = {
+                voteorderTxId: wiseOp[1].tx_id,
+                accepted: wiseOp[1].accepted,
+                msg: wiseOp[1].msg,
+                vote: voteOp,
+            };
+            cmd = cmd_;
+        }
+        else {
+            const cmd_: ConfirmVote = {
+                voteorderTxId: wiseOp[1].tx_id,
+                accepted: wiseOp[1].accepted,
+                msg: wiseOp[1].msg,
+            };
+            cmd = cmd_;
+        }
+
         return [{
             moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0 /* skip operation num due to rejection that was done in #handleOrReject */),
             transaction_id: transaction.transaction_id,

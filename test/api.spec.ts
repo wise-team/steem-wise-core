@@ -22,7 +22,7 @@ import { NotFoundException } from "../src/util/NotFoundException";
 /* PREPARE TESTING DATASETS */
 import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
-import { isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote, isConfirmVote } from "../src/protocol/ConfirmVote";
+import { isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote, isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
 import { VoteOperation } from "../src/blockchain/VoteOperation";
 
 /* CONFIG */
@@ -192,12 +192,12 @@ describe("test/api.spec.ts", function () {
             });
 
             it("Loads wise operations sent by voter but refering to delegator", () => {
-                const blockNum = 23487915;
-                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol())
+                const blockNum = 23944920; // steemprojects1 sent voteorder to delegatorsteemprojects2 in tx 48d7fa0b75c2bfaebce12571d86c57d53b8c7620
+                return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects2", blockNum, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
                     expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(blockNum);
-                    expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
+                    expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects2");
                     expect(ops[0].voter, "ops[0].voter").to.equal("steemprojects1");
                 });
             });
@@ -227,7 +227,7 @@ describe("test/api.spec.ts", function () {
                 .then(() => {});
             });
 
-            it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
+            it("returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
                 const blockNum = 24352800;
                 return api.getWiseOperationsRelatedToDelegatorInBlock("noisy", blockNum, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
@@ -288,7 +288,7 @@ describe("test/api.spec.ts", function () {
             });
         });
 
-        describe.only("getWiseOperations", () => {
+        describe("getWiseOperations", () => {
             it("Loads only wise operation that are newer than until", () => {
                 const until = new Date("2018-06-05T12:00:00Z");
                 const username = "guest123";
@@ -310,15 +310,18 @@ describe("test/api.spec.ts", function () {
                 });
             });
 
-            it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
+            it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote (when accepted = true)", () => {
                 const until = new Date("2018-07-10T00:00:00Z");
                 return api.getWiseOperations("noisy", until, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length.greaterThan(0);
                     ops.forEach(op => {
                         if (isConfirmVote(op.command)) {
-                            expect(isConfirmVoteBoundWithVote(op.command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
-                            expect (op.command).to.haveOwnProperty("vote");
+                            const confirmVoteCmd: ConfirmVote = op.command;
+                            if (confirmVoteCmd.accepted) {
+                                expect (confirmVoteCmd).to.haveOwnProperty("vote");
+                                expect(isConfirmVoteBoundWithVote(confirmVoteCmd), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
+                            }
                         }
                     });
                 });

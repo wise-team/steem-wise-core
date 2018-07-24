@@ -1,6 +1,6 @@
 import { SetRules } from "./SetRules";
 import { SendVoteorder } from "./SendVoteorder";
-import { VoteOperation } from "../blockchain/VoteOperation";
+import { VoteOperation, isVoteOperation } from "../blockchain/VoteOperation";
 
 export interface ConfirmVote {
     voteorderTxId: string;
@@ -29,5 +29,7 @@ export interface ConfirmVoteBoundWithVote extends ConfirmVote {
  * This is an TS 1.6+ TypeGuard as described here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
  */
 export function isConfirmVoteBoundWithVote(cmd: SetRules | SendVoteorder | ConfirmVote | ConfirmVoteBoundWithVote): cmd is ConfirmVoteBoundWithVote {
-    return isConfirmVote(cmd) && (<ConfirmVoteBoundWithVote>cmd).vote !== undefined;
+    return isConfirmVote(cmd)
+     && (<ConfirmVoteBoundWithVote>cmd).vote !== undefined
+     && isVoteOperation((<ConfirmVoteBoundWithVote>cmd).vote);
 }
