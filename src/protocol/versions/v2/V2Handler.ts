@@ -43,16 +43,25 @@ export class V2Handler implements ProtocolVersionHandler {
          */
         const operations = _.reverse(transaction.ops);
 
-        if (operations[0][0] != "custom_json" || (operations[0][1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) return undefined;
+        if (operations[0][0] != "custom_json" || (operations[0][1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) {
+            return undefined;
+        }
 
-        if ((operations[0][1] as CustomJsonOperation).required_posting_auths.length != 1) return undefined; // must be authorized by single user
+        if ((operations[0][1] as CustomJsonOperation).required_posting_auths.length != 1) {
+            return undefined; // must be authorized by single user
+        }
 
-        if (!this.isMyOperation((operations[0][1] as CustomJsonOperation).json)) return undefined;
+        if (!this.isMyOperation((operations[0][1] as CustomJsonOperation).json)) {
+            return undefined;
+        }
 
         const jsonObj = JSON.parse((operations[0][1] as CustomJsonOperation).json);
-        if (!this.validateJSON(jsonObj)) return undefined;
+        if (!this.validateJSON(jsonObj)) {
+            return undefined;
+        }
 
         const wiseOp = jsonObj as wise_operation;
+
 
         return this.decode(transaction, wiseOp, (operations[0][1] as CustomJsonOperation).required_posting_auths[0]);
     }

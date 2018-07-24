@@ -79,7 +79,7 @@ export class FakeApi extends Api {
                 transaction_num: 0,
                 transaction_id: "",
                 timestamp: new Date(),
-                ops: operationsInTransaction
+                ops: _.reverse(operationsInTransaction)
             };
             this.transactions.push(steemTrx);
             this.pushedOperations.push(steemTrx);

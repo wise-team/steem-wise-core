@@ -75,7 +75,7 @@ describe("test/synchronization.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(50))
             .then(() => {
                 const lastTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastTrx));
@@ -108,7 +108,7 @@ describe("test/synchronization.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(50))
             .then(() => {
                 return voterWise.getRulesetsAsync(delegator, SteemOperationNumber.FUTURE);
             })
@@ -134,8 +134,10 @@ describe("test/synchronization.spec.ts", () => {
         ];
         validVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends valid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator passes them", () => {
             return voterWise.sendVoteorderAsync(delegator, voteorder)
-            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(25))
+            .then((moment: SteemOperationNumber) => {
+                expect(moment.blockNum).to.be.greaterThan(0);
+            })
+            .then(() => Promise.delay(50))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -164,7 +166,7 @@ describe("test/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(50))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -191,7 +193,7 @@ describe("test/synchronization.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(50))
             .then(() => {
                 return voterWise.getRulesetsAsync(delegator, SteemOperationNumber.FUTURE);
             })
@@ -206,7 +208,7 @@ describe("test/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(50))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -227,7 +229,7 @@ describe("test/synchronization.spec.ts", () => {
         previouslyInalidNowValidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends now valid (but previously invalid) voteorder (rulesetName= " + voteorder.rulesetName + ") and delegator passes them", () => {
             return voterWise.sendVoteorderAsync(delegator, voteorder)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(20))
+            .then(() => Promise.delay(50))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -248,7 +250,7 @@ describe("test/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(20), (e: Error) => {
+            .then(() => Promise.delay(50), (e: Error) => {
                 if ((e as ValidationException).validationException) throw new Error("ValidationException present at send");
                 else throw e;
             })
