@@ -14,12 +14,14 @@ export class DateLimiter extends ChainableFilter<SteemTransaction, DateLimiter> 
         return this;
     }
 
-    protected take(error: Error | undefined, rawTx: SteemTransaction): boolean {
+    protected take(error: Error | undefined, comparedTx: SteemTransaction): boolean {
         if (error) throw error;
 
-        if (rawTx.timestamp.getTime() >= (this.until.getTime() / 1000)) {
-            return this.give(undefined, rawTx);
+        if (comparedTx.timestamp.getTime() >= this.until.getTime()) {
+            return this.give(undefined, comparedTx);
         }
-        else return false;
+        else {
+            return false;
+        }
     }
 }
