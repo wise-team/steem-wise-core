@@ -288,9 +288,9 @@ describe("test/api.spec.ts", function () {
             });
         });
 
-        describe("getWiseOperations", () => {
+        describe.only("getWiseOperations", () => {
             it("Loads only wise operation that are newer than until", () => {
-                const until = new Date("2018-06-05T12:00:00");
+                const until = new Date("2018-06-05T12:00:00Z");
                 const username = "guest123";
                 return api.getWiseOperations(username, until, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
@@ -302,7 +302,7 @@ describe("test/api.spec.ts", function () {
             });
 
             it("Returns empty array if no operations are present", () => {
-                const until = new Date("2010-01-01T00:00:00"); // date before steem
+                const until = new Date(Date.now() + 24 * 3600); // today, plus one day
                 const username = "guest123";
                 return api.getWiseOperations(username, until, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
@@ -311,7 +311,7 @@ describe("test/api.spec.ts", function () {
             });
 
             it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
-                const until = new Date("2018-07-10T00:00:00");
+                const until = new Date("2018-07-10T00:00:00Z");
                 return api.getWiseOperations("noisy", until, wise.getProtocol())
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops).to.be.an("array").with.length.greaterThan(0);

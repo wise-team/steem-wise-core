@@ -30,6 +30,10 @@ export class FakeApi extends Api {
         this.dynamicGlobalProperties = dynamicGlobalProperties;
         this.accounts = accounts;
         this.transactions = transactions;
+        this.transactions = this.transactions.map((trx: SteemTransaction) => {
+            trx.timestamp = new Date(trx.timestamp as any); // prototype timestamp loaded from json
+            return trx;
+        });
         this.currentBlock = this.transactions.map(trx => trx.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0);
     }
 
@@ -183,7 +187,7 @@ export class FakeApi extends Api {
                             // information on who pushed the operation to blockchain,
                             // so this hacky way is the only way to get this information.
                             // fortunately FakeApi is only used for unit testing.
-                            if (effSo.timestamp.getTime() >= (until.getTime() / 1000)) {
+                            if (effSo.timestamp.getTime() >= until.getTime()) {
                                 result.push(effSo);
                             }
                         }
