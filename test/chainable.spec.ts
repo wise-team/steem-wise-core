@@ -64,29 +64,27 @@ describe("test/chainable.spec.ts", () => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
                     .chain(new SimpleTaker((rawTrx: SteemTransaction): boolean => {
-                        if (rawTrx.ops[0][0] !== "vote") return true;
+                        let continueLoading: boolean = true;
+                        rawTrx.ops.forEach((op: [string, object]) => {
+                            if (op[0] === "vote") {
+                                const vote: {permlink: string} = op[1] as {permlink: string} ;
 
-                        const vote: {permlink: string} = rawTrx.ops[0][1] as {permlink: string} ;
-
-                        const indexInSamples: number = realAndVirtual.indexOf(vote.permlink);
-                        if (indexInSamples !== -1) {
-                            realAndVirtual.splice(indexInSamples, 1);
-                            if (realAndVirtual.length == 0) {
-                                return false;
+                                const indexInSamples: number = realAndVirtual.indexOf(vote.permlink);
+                                if (indexInSamples !== -1) {
+                                    realAndVirtual.splice(indexInSamples, 1); // remove found vote from
+                                    if (realAndVirtual.length == 0) continueLoading = false;
+                                }
                             }
-                        }
-
-                        return true;
+                        });
+                        return continueLoading;
                     }))
                     .catch((error: Error): boolean => {
-                        console.error(error);
                         done(error);
                         return false;
                     });
                 })
                 .start(() => {
                     if (realAndVirtual.length > 0) {
-                        console.error(new Error("Not all votes were loaded: missing: " + JSON.stringify(realAndVirtual)));
                         done(new Error("Not all votes were loaded: missing: " + JSON.stringify(realAndVirtual)));
                     }
                     else {
@@ -105,34 +103,36 @@ describe("test/chainable.spec.ts", () => {
                 "what-makes-you-you-secret-of-individuality-and-uniqueness"
             ];
 
-            it("Loads operations in correct order", function(done) {
+            it("Loads operations in correct order: from the newest to the oldest", function(done) {
                 this.timeout(25000);
                 new SteemJsAccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
                     .chain(new SimpleTaker((rawTrx: SteemTransaction): boolean => {
-                        if (rawTrx.ops[0][0] !== "vote") return true;
+                        let continueLoading: boolean = true;
+                        rawTrx.ops.forEach((op: [string, object]) => {
+                            if (op[0] === "vote") {
+                                const vote: {permlink: string} = op[1] as {permlink: string};
 
-                        const vote: {permlink: string} = rawTrx.ops[0][1] as {permlink: string};
-
-                        const indexInSamples: number = randomVoteOperationsInDescendingTimeOrder.indexOf(vote.permlink);
-                        if (indexInSamples !== -1) {
-                            if (indexInSamples !== 0) {
-                                const error = new Error("Votes returned in wrogn order. Received " + vote.permlink + ", sholudReceive: " + randomVoteOperationsInDescendingTimeOrder[0]);
-                                console.error(error);
-                                done(error);
-                                return false;
-                            }
-                            else {
-                                randomVoteOperationsInDescendingTimeOrder.shift();
-                                if (randomVoteOperationsInDescendingTimeOrder.length == 0) {
-                                    return false;
+                                const indexInSamples: number = randomVoteOperationsInDescendingTimeOrder.indexOf(vote.permlink);
+                                if (indexInSamples !== -1) {
+                                    if (indexInSamples !== 0) {
+                                        const error = new Error("Votes returned in wrogn order. Received " + vote.permlink + ", sholudReceive: " + randomVoteOperationsInDescendingTimeOrder[0]);
+                                        console.error(error);
+                                        // done(error);
+                                        continueLoading = false;
+                                    }
+                                    else {
+                                        randomVoteOperationsInDescendingTimeOrder.shift();
+                                        if (randomVoteOperationsInDescendingTimeOrder.length == 0) {
+                                            continueLoading = false;
+                                        }
+                                    }
                                 }
                             }
-                        }
-
-                        return true;
+                        });
+                        return continueLoading;
                     }))
                     .catch((error: Error): boolean => {
                         console.error(error);
