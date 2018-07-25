@@ -5,7 +5,7 @@ import { ValidationContext } from "../validation/ValidationContext";
 import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
-import { ConfirmVote, isConfirmVote } from "../protocol/ConfirmVote";
+import { ConfirmVote, isConfirmVote, isConfirmVoteBoundWithVote } from "../protocol/ConfirmVote";
 
 /**
  * This rule limits total absolute weight)of confirmed voteorders over given period of time.
@@ -29,7 +29,7 @@ export class WeightForPeriodRule extends Rule {
         return Rule.Type.WeightForPeriod;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public validate (voteorder: SendVoteorder, context: ValidationContext, validationTimestamp: Date = new Date() /* for unit testing */): Promise<void> {
         return Promise.resolve()
         .then(() => this.validateRuleObject(this))
         .then(() => {
@@ -38,20 +38,28 @@ export class WeightForPeriodRule extends Rule {
                                    (this.unit === WeightForPeriodRule.PeriodUnit.MINUTE ? 60 :
                                    1)));
             const numberOfSeconds = this.period * unitMultiplier;
-            const until = new Date(Date.now() - numberOfSeconds * 1000);
+            const until = new Date(validationTimestamp.getTime() - numberOfSeconds * 1000);
             return context.getWiseOperations(context.getDelegatorUsername(), until);
         })
         .then((ops: EffectuatedSmartvotesOperation []) => {
-            const sumOfWeightsForGivenPeriod = 0;
+            let sumOfWeightsForGivenPeriod = 0;
             ops.forEach(op => {
                 if (isConfirmVote(op.command)) {
                     const confirmVoteOp: ConfirmVote = op.command;
-                    if (confirmVoteOp.accepted) { // count only accepted vote confirmations
-                        // sumOfWeightsForGivenPeriod += confirmVoteOp
-                        // TODO problem here — we don't know what was the voteorder params
+                    // count only accepted vote confirmations:
+                    if (confirmVoteOp.accepted && isConfirmVoteBoundWithVote(confirmVoteOp)) {
+                        sumOfWeightsForGivenPeriod += confirmVoteOp.vote.weight;
                     }
                 }
-            })
+            });
+
+            if (sumOfWeightsForGivenPeriod > this.weight) {
+                throw new ValidationException(
+                    "WeightForPeriodRule: Sum of passed voteorders (" + sumOfWeightsForGivenPeriod + ")"
+                    + " was higher than allowed (" + this.weight + ") in a period of "
+                    + this.period + " " + this.unit
+                );
+            }
         });
     }
 

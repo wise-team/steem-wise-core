@@ -25,57 +25,55 @@ describe("test/rule-weight.spec.ts", () => {
         };
         const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
 
-        describe("mode = SINGLE_VOTE_WEIGHT", () => {
-            it ("allows 0 <= 50 <= 100", () => {
-                const rule = new WeightRule(0, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", 50);
-                return rule.validate(vo, context);
-            });
+        it ("allows 0 <= 50 <= 100", () => {
+            const rule = new WeightRule(0, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", 50);
+            return rule.validate(vo, context);
+        });
 
-            it ("allows 0 <= 0 <= 100", () => {
-                const rule = new WeightRule(0, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
-                return rule.validate(vo, context);
-            });
+        it ("allows 0 <= 0 <= 100", () => {
+            const rule = new WeightRule(0, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
+            return rule.validate(vo, context);
+        });
 
-            it ("allows 0 <= 100 <= 100", () => {
-                const rule = new WeightRule(0, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
-                return rule.validate(vo, context);
-            });
+        it ("allows 0 <= 100 <= 100", () => {
+            const rule = new WeightRule(0, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
+            return rule.validate(vo, context);
+        });
 
-            it ("allows -100 <= 0 <= 100", () => {
-                const rule = new WeightRule(-100, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
-                return rule.validate(vo, context);
-            });
+        it ("allows -100 <= 0 <= 100", () => {
+            const rule = new WeightRule(-100, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
+            return rule.validate(vo, context);
+        });
 
-            it ("allows -100 <= -100 <= 100", () => {
-                const rule = new WeightRule(-100, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", -100);
-                return rule.validate(vo, context);
-            });
+        it ("allows -100 <= -100 <= 100", () => {
+            const rule = new WeightRule(-100, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", -100);
+            return rule.validate(vo, context);
+        });
 
-            it ("rejects -100 <= -101 <= 100", () => {
-                const rule = new WeightRule(-100, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", -101);
-                return rule.validate(vo, context)
-                .then(() => { throw new Error("Should fail"); }, () => {});
-            });
+        it ("rejects -100 <= -101 <= 100", () => {
+            const rule = new WeightRule(-100, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", -101);
+            return rule.validate(vo, context)
+            .then(() => { throw new Error("Should fail"); }, () => {});
+        });
 
-            it ("rejects -100 <= 101 <= 100", () => {
-                const rule = new WeightRule(-100, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", 101);
-                return rule.validate(vo, context)
-                .then(() => { throw new Error("Should fail"); }, () => {});
-            });
+        it ("rejects -100 <= 101 <= 100", () => {
+            const rule = new WeightRule(-100, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", 101);
+            return rule.validate(vo, context)
+            .then(() => { throw new Error("Should fail"); }, () => {});
+        });
 
-            it ("rejects 10 <= 0 <= 100", () => {
-                const rule = new WeightRule(10, 100);
-                const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
-                return rule.validate(vo, context)
-                .then(() => { throw new Error("Should fail"); }, () => {});
-            });
+        it ("rejects 10 <= 0 <= 100", () => {
+            const rule = new WeightRule(10, 100);
+            const vo = _.set(_.cloneDeep(voteorder), "weight", 0);
+            return rule.validate(vo, context)
+            .then(() => { throw new Error("Should fail"); }, () => {});
         });
     });
 });

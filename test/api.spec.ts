@@ -288,7 +288,7 @@ describe("test/api.spec.ts", function () {
             });
         });
 
-        describe("getWiseOperations", () => {
+        describe("#getWiseOperations", () => {
             it("Loads only wise operation that are newer than until", () => {
                 const until = new Date("2018-06-05T12:00:00Z");
                 const username = "guest123";
