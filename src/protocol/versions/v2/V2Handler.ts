@@ -37,33 +37,37 @@ export class V2Handler implements ProtocolVersionHandler {
     public handleOrReject = (transaction: SteemTransaction): EffectuatedSmartvotesOperation [] | undefined => {
         if (transaction.block_num <= 22710498) return undefined;
 
-        /**
-         * The following reversion is mandatory, because when wise is publishing more than one
-         * operation in a single transaction (eg. vote + confirm_vote), it always puts wise operation as the last one.
-         */
-        const operations = _.reverse(transaction.ops);
+        let wiseCustomJsonOp: CustomJsonOperation | undefined = undefined;
 
-        if (operations[0][0] != "custom_json" || (operations[0][1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) {
+        transaction.ops.forEach(op => {
+            if (op[0] != "custom_json" || (op[1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) {
+                return undefined;
+            }
+
+            if ((op[1] as CustomJsonOperation).required_posting_auths.length != 1) {
+                return undefined; // must be authorized by single user
+            }
+
+            if (!this.isMyOperation((op[1] as CustomJsonOperation).json)) {
+                return undefined;
+            }
+
+            if (!wiseCustomJsonOp) wiseCustomJsonOp = (op[1] as CustomJsonOperation);
+        });
+
+        if (wiseCustomJsonOp) {
+            const wiseCustomJsonOp_: CustomJsonOperation = wiseCustomJsonOp; // allow ts compiler resolve types properly
+            const jsonObj = JSON.parse(wiseCustomJsonOp_.json);
+            if (!this.validateJSON(jsonObj)) {
+                return undefined;
+            }
+
+            const wiseOp = jsonObj as wise_operation;
+            return this.decode(transaction, wiseOp, wiseCustomJsonOp_.required_posting_auths[0]);
+        }
+        else {
             return undefined;
         }
-
-        if ((operations[0][1] as CustomJsonOperation).required_posting_auths.length != 1) {
-            return undefined; // must be authorized by single user
-        }
-
-        if (!this.isMyOperation((operations[0][1] as CustomJsonOperation).json)) {
-            return undefined;
-        }
-
-        const jsonObj = JSON.parse((operations[0][1] as CustomJsonOperation).json);
-        if (!this.validateJSON(jsonObj)) {
-            return undefined;
-        }
-
-        const wiseOp = jsonObj as wise_operation;
-
-
-        return this.decode(transaction, wiseOp, (operations[0][1] as CustomJsonOperation).required_posting_auths[0]);
     }
 
     private isMyOperation = (jsonStr: string): boolean => {
@@ -146,13 +150,13 @@ export class V2Handler implements ProtocolVersionHandler {
 
     private decodeConfirmVote = (transaction: SteemTransaction, wiseOp: wise_confirm_vote_operation, sender: string): EffectuatedSmartvotesOperation [] => {
         let voteOp: VoteOperation | undefined = undefined;
-
-        if (transaction.ops.length === 2
-         && transaction.ops[1][0] === "vote") {
-             const potentialVoteOp: object = transaction.ops[1][1];
-             if (isVoteOperation(potentialVoteOp)) {
-                 voteOp = potentialVoteOp;
-             }
+        if (transaction.ops.length > 1) {
+            transaction.ops.forEach((op: [string, object]) => {
+                const potentialVoteOp: object = op[1];
+                if (isVoteOperation(potentialVoteOp)) {
+                    if (!voteOp) voteOp = potentialVoteOp;
+                }
+            });
         }
 
         let cmd: ConfirmVote | ConfirmVoteBoundWithVote;
