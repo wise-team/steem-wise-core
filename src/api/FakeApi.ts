@@ -22,6 +22,7 @@ export class FakeApi extends Api {
     private accounts: AccountInfo [];
     private currentBlock = 0;
     private pushedOperations: SteemTransaction [] = [];
+    private fakeTime: Date | undefined = undefined;
 
     public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], transactions: SteemTransaction []) {
         super();
@@ -78,7 +79,7 @@ export class FakeApi extends Api {
                 block_num: blockNum,
                 transaction_num: 0,
                 transaction_id: "",
-                timestamp: new Date(),
+                timestamp: (this.fakeTime ? this.fakeTime : new Date()),
                 ops: _.reverse(operationsInTransaction)
             };
             this.transactions.push(steemTrx);
@@ -212,6 +213,10 @@ export class FakeApi extends Api {
      */
     public getPushedTransactions(): SteemTransaction [] {
         return this.pushedOperations;
+    }
+
+    public setFakeTime(fakeTime_: Date) {
+        this.fakeTime = fakeTime_;
     }
 }
 
