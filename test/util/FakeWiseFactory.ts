@@ -16,7 +16,7 @@ export class FakeWiseFactory {
     }
 
     public static buildFakeApi(): Api {
-        return FakeApi.fromDataset(fakeDataset);
+        return FakeApi.fromDataset(FakeWiseFactory.loadDataset());
     }
 
     public static buildFakeWise(username: string): Wise {
