@@ -21,7 +21,7 @@ export class VotingPowerRule extends Rule {
     }
 
     public type(): Rule.Type {
-        return Rule.Type.Authors;
+        return Rule.Type.VotingPower;
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {

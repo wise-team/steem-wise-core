@@ -64,7 +64,7 @@ export class TagsRule extends Rule {
                 else throw new ValidationException("Unknown mode in tags.");
         })
         .catch((e: Error) => {
-            if ((e as NotFoundException).notFoundException) throw new Error(e.message);
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
             else throw e;
         });
     }
