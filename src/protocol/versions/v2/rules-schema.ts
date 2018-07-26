@@ -20,7 +20,13 @@ export type wise_rule = wise_rule_weight
                       | wise_rule_authors
                       | wise_rule_voting_power
                       | wise_rule_custom_rpc
-                      | wise_rule_weight_for_period;
+                      | wise_rule_weight_for_period
+                      | wise_rule_reputation
+                      | wise_rule_votes_count
+                      | wise_rule_voters
+                      | wise_rule_first_post
+                      | wise_rule_payout
+                      | wise_rule_age_of_post;
 
 export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
     switch (r.rule) {
@@ -41,6 +47,24 @@ export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
 
         case "custom_rpc":
             return wise_rule_custom_rpc_decode(r as wise_rule_custom_rpc);
+
+        case "reputation":
+            return wise_rule_reputation_decode(r as wise_rule_reputation);
+
+        case "votes_count":
+            return wise_rule_votes_count_decode(r as wise_rule_votes_count);
+
+        case "voters":
+            return wise_rule_voters_decode(r as wise_rule_voters);
+
+        case "first_post":
+            return wise_rule_first_post_decode(r as wise_rule_first_post;
+
+        case "payout":
+            return wise_rule_payout_decode(r as wise_rule_payout);
+
+        case "age_of_post":
+            return wise_rule_age_of_post_decode(r as wise_rule_age_of_post);
 
         default:
             throw new ValidationException("v2 unknown rule: '" + (r as any).rule + "'");
@@ -66,6 +90,24 @@ export const wise_rule_encode = (r: Rule): wise_rule => {
 
         case Rule.Type.CustomRPC:
             return wise_rule_custom_rpc_encode(r as CustomRPCRule);
+
+        case Rule.Type.Reputation:
+            return wise_rule_reputation_encode(r as ReputationRule);
+
+        case Rule.Type.VotesCount:
+            return wise_rule_votes_count_encode(r as VotesCountRule);
+
+        case Rule.Type.Voters:
+            return wise_rule_voters_encode(r as VotersRule);
+
+        case Rule.Type.FirstPost:
+            return wise_rule_first_post_encode(r as FirstPostRule);
+
+        case Rule.Type.Payout:
+            return wise_rule_payout_encode(r as PayoutRule);
+
+        case Rule.Type.AgeOfPost:
+            return wise_rule_age_of_post_encode(r as AgeOfPostRule);
 
         default:
             throw new ValidationException("Rule type " + r.type() + " is not supported by V2 protocol handler.");
