@@ -74,7 +74,7 @@ describe("test/util.spec.ts", () => {
             setTimeout(() => {
                 if (numOfRejects == 4 && numOfResolves == 0 && numOfCalls == 1) done();
                 else done(new Error("Not all promises were rejected (rejects=" + numOfRejects + ", resolves=" + numOfResolves + ", calls=" + numOfCalls + ")"));
-            }, 25);
+            }, 45);
         });
 
         it("rejects on thrown errors", (done) => {
