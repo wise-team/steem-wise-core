@@ -20,6 +20,7 @@ import { DynamicGlobalProperties } from "../../blockchain/DynamicGlobalPropertie
 import { AccountInfo } from "../../blockchain/AccountInfo";
 import { NotFoundException } from "../../util/NotFoundException";
 import { DateLimiter } from "./DateLimiter";
+import { BlogEntry } from "../../blockchain/BlogEntry";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -279,6 +280,10 @@ export class DirectBlockchainApi extends Api {
                 }
             });
         });
+    }
+
+    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+        return this.steem.api.getBlogEntriesAsync(username, startFrom, limit);
     }
 }
 

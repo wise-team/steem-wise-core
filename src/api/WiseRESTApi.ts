@@ -9,6 +9,7 @@ import { DirectBlockchainApi } from "./directblockchain/DirectBlockchainApi";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
+import { BlogEntry } from "../blockchain/BlogEntry";
 
 export class WiseRESTApi extends Api {
     public static NOISY_ENDPOINT_HOST: string = "//to-be-launched/";
@@ -61,5 +62,9 @@ export class WiseRESTApi extends Api {
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
         return this.directBlockchainApi.getAccountInfo(username);
+    }
+
+    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+        return Promise.reject(new Error("Not yet implemented"));
     }
 }
