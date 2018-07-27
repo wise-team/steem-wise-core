@@ -14,7 +14,7 @@ import { Util } from "../util/util";
 export class FirstPostRule extends Rule {
     public rule: string = Rule.Type.FirstPost;
 
-    public constructor(min: number, max: number) {
+    public constructor() {
         super();
     }
 

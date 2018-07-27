@@ -34,5 +34,5 @@ export function wise_rule_payout_decode(r: wise_rule_payout): PayoutRule  {
     else if (r.mode === "less_than") mode = PayoutRule.Mode.LESS_THAN;
     else throw new ValidationException("v2:wise_rule_payout: unknown mode " + r.mode);
 
-    return new PayoutRule(r.mode, r.value);
+    return new PayoutRule(mode, r.value);
 }

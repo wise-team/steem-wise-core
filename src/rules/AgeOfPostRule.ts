@@ -13,11 +13,11 @@ import { SteemPost } from "../blockchain/SteemPost";
 export class AgeOfPostRule extends Rule {
     public rule: string = Rule.Type.AgeOfPost;
     public mode: AgeOfPostRule.Mode;
-    public unit: AgeOfPostRule.PeriodUnit;
+    public unit: AgeOfPostRule.TimeUnit;
     public period: number;
     public value: number;
 
-    public constructor(mode: AgeOfPostRule.Mode, period: number, unit: AgeOfPostRule.PeriodUnit, value: number) {
+    public constructor(mode: AgeOfPostRule.Mode, period: number, unit: AgeOfPostRule.TimeUnit, value: number) {
         super();
 
         this.mode = mode;
@@ -36,9 +36,9 @@ export class AgeOfPostRule extends Rule {
         .then(() => this.validateRuleObject(this))
         .then(() => context.getPost())
         .then((post: SteemPost) => {
-            const unitMultiplier = (this.unit === AgeOfPostRule.PeriodUnit.DAY ? 24 * 60 * 60 :
-                                   (this.unit === AgeOfPostRule.PeriodUnit.HOUR ? 60 * 60 :
-                                   (this.unit === AgeOfPostRule.PeriodUnit.MINUTE ? 60 :
+            const unitMultiplier = (this.unit === AgeOfPostRule.TimeUnit.DAY ? 24 * 60 * 60 :
+                                   (this.unit === AgeOfPostRule.TimeUnit.HOUR ? 60 * 60 :
+                                   (this.unit === AgeOfPostRule.TimeUnit.MINUTE ? 60 :
                                 1)));
             const numberOfSeconds = this.period * unitMultiplier;
             const thresholdTime = new Date(Date.now() - numberOfSeconds * 1000);
@@ -65,8 +65,8 @@ export class AgeOfPostRule extends Rule {
         });
 
         if (!_.includes([
-            AgeOfPostRule.PeriodUnit.DAY, AgeOfPostRule.PeriodUnit.HOUR,
-            AgeOfPostRule.PeriodUnit.MINUTE, AgeOfPostRule.PeriodUnit.SECOND
+            AgeOfPostRule.TimeUnit.DAY, AgeOfPostRule.TimeUnit.HOUR,
+            AgeOfPostRule.TimeUnit.MINUTE, AgeOfPostRule.TimeUnit.SECOND
         ], unprototypedObj.unit))
             throw new ValidationException("AgeOfPostRule: unknown unit " + unprototypedObj.unit);
 
@@ -78,7 +78,7 @@ export class AgeOfPostRule extends Rule {
 }
 
 export namespace AgeOfPostRule {
-    export enum PeriodUnit {
+    export enum TimeUnit {
         DAY = "day",
         HOUR = "hour",
         MINUTE = "minute",

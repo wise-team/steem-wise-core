@@ -34,5 +34,5 @@ export function wise_rule_votes_count_decode(r: wise_rule_votes_count): VotesCou
     else if (r.mode === "less_than") mode = VotesCountRule.Mode.LESS_THAN;
     else throw new ValidationException("v2:wise_rule_votes_count: unknown mode " + r.mode);
 
-    return new VotesCountRule(r.mode, r.value);
+    return new VotesCountRule(mode, r.value);
 }

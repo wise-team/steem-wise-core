@@ -19,6 +19,11 @@ import { wise_rule_voters_encode, wise_rule_voters_decode, wise_rule_voters } fr
 import { wise_rule_first_post_encode, wise_rule_first_post_decode, wise_rule_first_post } from "./rules/rule-first-post-schema";
 import { wise_rule_payout_encode, wise_rule_payout_decode, wise_rule_payout } from "./rules/rule-payout-schema";
 import { wise_rule_age_of_post_encode, wise_rule_age_of_post_decode, wise_rule_age_of_post } from "./rules/rule-age-of-post-schema";
+import { VotesCountRule } from "../../../rules/VotesCountRule";
+import { VotersRule } from "../../../rules/VotersRule";
+import { FirstPostRule } from "../../../rules/FirstPostRule";
+import { PayoutRule } from "../../../rules/PayoutRule";
+import { AgeOfPostRule } from "../../../rules/AgeOfPostRule";
 
 export type wise_rule = wise_rule_weight
                       | wise_rule_tags
@@ -91,9 +96,6 @@ export const wise_rule_encode = (r: Rule): wise_rule => {
 
         case Rule.Type.CustomRPC:
             return wise_rule_custom_rpc_encode(r as CustomRPCRule);
-
-        case Rule.Type.Reputation:
-            return wise_rule_reputation_encode(r as ReputationRule);
 
         case Rule.Type.VotesCount:
             return wise_rule_votes_count_encode(r as VotesCountRule);

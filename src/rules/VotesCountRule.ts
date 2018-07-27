@@ -37,7 +37,7 @@ export class VotesCountRule extends Rule {
                     throw new ValidationException("Delegator voting power (" + voteCount + ") does not equal " + this.value);
             }
             else if (this.mode == VotesCountRule.Mode.MORE_THAN) {
-                if (voteCount<= this.value)
+                if (voteCount <= this.value)
                 throw new ValidationException("Delegator voting power (" + voteCount + ") is not more than " + this.value);
             }
             else if (this.mode == VotesCountRule.Mode.LESS_THAN) {

@@ -9,6 +9,10 @@ import { ValidationException } from "../validation/ValidationException";
 import { VotingPowerRule } from "./VotingPowerRule";
 import { WeightForPeriodRule } from "./WeightForPeriodRule";
 import { VotesCountRule } from "./VotesCountRule";
+import { AgeOfPostRule } from "./AgeOfPostRule";
+import { FirstPostRule } from "./FirstPostRule";
+import { PayoutRule } from "./PayoutRule";
+import { VotersRule } from "./VotersRule";
 
 /**
  * This is a rule prototyper. Prototyping is done when rules are loaded from json file.
@@ -37,19 +41,19 @@ export class RulePrototyper {
             return RulePrototyper.prototypeRule(new CustomRPCRule("", 0, "", ""), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.AgeOfPost) {
-            return RulePrototyper.prototypeRule(new AgeOfPostRule("", 0, "", ""), unprototyped);
+            return RulePrototyper.prototypeRule(new AgeOfPostRule(AgeOfPostRule.Mode.OLDER_THAN, 0, AgeOfPostRule.TimeUnit.SECOND, 0), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.FirstPost) {
-            return RulePrototyper.prototypeRule(new FirstPostRule("", 0, "", ""), unprototyped);
+            return RulePrototyper.prototypeRule(new FirstPostRule(), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.Payout) {
-            return RulePrototyper.prototypeRule(new PayoutRule("", 0, "", ""), unprototyped);
+            return RulePrototyper.prototypeRule(new PayoutRule(PayoutRule.Mode.EQUAL, 0), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.VotesCount) {
             return RulePrototyper.prototypeRule(new VotesCountRule(VotesCountRule.Mode.MORE_THAN, 0), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.Voters) {
-            return RulePrototyper.prototypeRule(new VotersRule("", 0, "", ""), unprototyped);
+            return RulePrototyper.prototypeRule(new VotersRule(VotersRule.Mode.NONE, []), unprototyped);
         }
         else throw new ValidationException("There is no rule with this type (rule=" + unprototyped.rule + ")");
     }

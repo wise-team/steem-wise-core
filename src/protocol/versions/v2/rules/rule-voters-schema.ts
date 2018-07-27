@@ -23,7 +23,7 @@ export function wise_rule_voters_encode(r: VotersRule): wise_rule_voters {
     const out: wise_rule_voters = {
         rule: "voters",
         mode: mode,
-        usernames: (r as VotersRule).tags
+        usernames: (r as VotersRule).usernames
     };
     return out;
 }
