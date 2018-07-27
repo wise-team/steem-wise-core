@@ -26,7 +26,6 @@ export abstract class Api {
      */
     public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []>; // TODO test
 
-    // TODO test
     /**
      * Returns last user blog entries from follow_api. They are sorted from the newest to the oldest,
      * trimmed to the limit.

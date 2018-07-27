@@ -24,6 +24,7 @@ import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
 import { isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote, isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
 import { VoteOperation } from "../src/blockchain/VoteOperation";
+import { BlogEntry } from "../src/blockchain/BlogEntry";
 
 /* CONFIG */
 const username = "guest123";
@@ -322,6 +323,37 @@ describe("test/api.spec.ts", function () {
                                 expect (confirmVoteCmd).to.haveOwnProperty("vote");
                                 expect(isConfirmVoteBoundWithVote(confirmVoteCmd), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
                             }
+                        }
+                    });
+                });
+            });
+        });
+        describe("#getBlogEntries", () => {
+            it("Returns > 150 entries for noisy", () => {
+                return api.getBlogEntries("noisy", 0, 250)
+                .then((entries: BlogEntry []) => {
+                    expect(entries).to.be.an("array").with.length.greaterThan(150);
+                    entries.forEach((entry: BlogEntry) => {
+                        expect(entry).to.haveOwnProperty("author");
+                        expect(entry).to.haveOwnProperty("permlink");
+                        expect(entry).to.haveOwnProperty("blog");
+                        expect(entry).to.haveOwnProperty("reblog_on");
+                        expect(entry).to.haveOwnProperty("entry_id");
+
+                        expect(entry.blog).to.be.equal("noisy");
+                    });
+                });
+            });
+
+            it("Returns in order from newest to oldest", () => {
+                return api.getBlogEntries("noisy", 0, 250)
+                .then((entries: BlogEntry []) => {
+                    let lastTime = new Date().getTime() + 1000;
+                    entries.forEach((entry: BlogEntry) => {
+                        const currentEntryTime = new Date(entry.reblog_on + "Z").getTime();
+                        if (currentEntryTime > 0) { // this time is only > 0 for reblogs, but is useful for asserting order
+                            expect(currentEntryTime).to.be.lte(lastTime);
+                            lastTime = currentEntryTime;
                         }
                     });
                 });
