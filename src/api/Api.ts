@@ -5,6 +5,7 @@ import { Protocol } from "../protocol/Protocol";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
+import { BlogEntry } from "../blockchain/BlogEntry";
 
 // TODO comment
 export abstract class Api {
@@ -24,4 +25,15 @@ export abstract class Api {
      * @param until — the oldest date to search for operations.
      */
     public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []>; // TODO test
+
+    // TODO test
+    /**
+     * Returns last user blog entries from follow_api. They are sorted from the newest to the oldest,
+     * trimmed to the limit.
+     * @param username - steem username
+     * @param startFrom - number of the entry to start from counting from the newest to the oldest
+     *      (startFrom=0 will return the newest entry)
+     * @param limit — limit the number of returned entries (maximal limit is 500).
+     */
+    public abstract getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []>;
 }
