@@ -49,15 +49,17 @@ let blogEntries: BlogEntry [] = [];
 
 const api = new DirectBlockchainApi("", "");
 
-// load posts
-Bluebird.resolve(postLinks).map((link: [string, string]) => {
+Bluebird.resolve()
+.then(() => console.log("Loading posts..."))
+.then(() => postLinks)
+.map((link: [string, string]) => {
     return api.loadPost(link[0], link[1]);
 })
 .then((values: SteemPost []) => {
     posts = values;
 })
 
-// load account info
+.then(() => console.log("Loading account infos..."))
 .then(() => usernames)
 .map((username: string) => {
     return api.getAccountInfo(username);
@@ -66,7 +68,7 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
     accounts = values;
 })
 
-// load dynamic global properties
+.then(() => console.log("Loading dynamic global properties..."))
 .then(() => {
     return api.getDynamicGlobalProperties();
 })
@@ -74,7 +76,7 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
     dynamicGlobalProperties = value;
 })
 
-// load transactions
+.then(() => console.log("Loading transactions..."))
 .then(() => usernames) // for each username return a promise that returns transactions
 .map((username: string) => {
     return new Bluebird<SteemTransaction []>((resolve, reject) => {
@@ -104,7 +106,7 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
     transactions = trxs;
 })
 
-// load blog entries
+.then(() => console.log("Loading blog entries..."))
 .then(() => usernames)
 .map((username: string) => {
     return api.getBlogEntries(username, 0, 500);
@@ -116,7 +118,7 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
     blogEntries = blogEntries_;
 })
 
-// save
+.then(() => console.log("Saving..."))
 .then(() => {
     if (!dynamicGlobalProperties) throw new Error("Dynamic global properties are undefined");
 
