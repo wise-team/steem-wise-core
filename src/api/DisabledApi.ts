@@ -8,6 +8,7 @@ import { Protocol } from "../protocol/Protocol";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
+import { BlogEntry } from "../blockchain/BlogEntry";
 
 export class DisabledApi extends Api {
     public constructor() {
@@ -51,6 +52,10 @@ export class DisabledApi extends Api {
     }
 
     public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+        return Promise.reject(new Error("This api is disabled"));
+    }
+
+    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
         return Promise.reject(new Error("This api is disabled"));
     }
 }
