@@ -110,6 +110,45 @@
             ],
             "type": "object"
         },
+        "wise_rule_age_of_post": {
+            "properties": {
+                "mode": {
+                    "$ref": "#/definitions/wise_rule_age_of_post_mode"
+                },
+                "rule": {
+                    "enum": [
+                        "age_of_post"
+                    ],
+                    "type": "string"
+                },
+                "unit": {
+                    "enum": [
+                        "day",
+                        "hour",
+                        "minute",
+                        "second"
+                    ],
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "mode",
+                "rule",
+                "unit",
+                "value"
+            ],
+            "type": "object"
+        },
+        "wise_rule_age_of_post_mode": {
+            "enum": [
+                "older_than",
+                "younger_than"
+            ],
+            "type": "string"
+        },
         "wise_rule_authors": {
             "properties": {
                 "authors": {
@@ -172,6 +211,47 @@
             ],
             "type": "object"
         },
+        "wise_rule_first_post": {
+            "properties": {
+                "rule": {
+                    "enum": [
+                        "first_post"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "rule"
+            ],
+            "type": "object"
+        },
+        "wise_rule_payout": {
+            "properties": {
+                "mode": {
+                    "enum": [
+                        "equal",
+                        "less_than",
+                        "more_than"
+                    ],
+                    "type": "string"
+                },
+                "rule": {
+                    "enum": [
+                        "payout"
+                    ],
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "mode",
+                "rule",
+                "value"
+            ],
+            "type": "object"
+        },
         "wise_rule_tags": {
             "properties": {
                 "mode": {
@@ -205,6 +285,67 @@
                 "require"
             ],
             "type": "string"
+        },
+        "wise_rule_voters": {
+            "properties": {
+                "mode": {
+                    "$ref": "#/definitions/wise_rule_voters_mode"
+                },
+                "rule": {
+                    "enum": [
+                        "voters"
+                    ],
+                    "type": "string"
+                },
+                "usernames": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "mode",
+                "rule",
+                "usernames"
+            ],
+            "type": "object"
+        },
+        "wise_rule_voters_mode": {
+            "enum": [
+                "all",
+                "any",
+                "none",
+                "one"
+            ],
+            "type": "string"
+        },
+        "wise_rule_votes_count": {
+            "properties": {
+                "mode": {
+                    "enum": [
+                        "equal",
+                        "less_than",
+                        "more_than"
+                    ],
+                    "type": "string"
+                },
+                "rule": {
+                    "enum": [
+                        "votes_count"
+                    ],
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "mode",
+                "rule",
+                "value"
+            ],
+            "type": "object"
         },
         "wise_rule_voting_power": {
             "description": "This rule checks vorting_power of the delegator. Available modes are: more_than, less_than and egual.",
@@ -269,6 +410,42 @@
             ],
             "type": "object"
         },
+        "wise_rule_weight_for_period": {
+            "description": "This rule limits total absolute weight)of confirmed voteorders over given period of time.\nIt sums up absolute weights of upvotes and flags.",
+            "properties": {
+                "period": {
+                    "description": "The value of period.",
+                    "type": "integer"
+                },
+                "rule": {
+                    "enum": [
+                        "weight_for_period"
+                    ],
+                    "type": "string"
+                },
+                "unit": {
+                    "description": "The unit of period. It can be either: day, hour, minute, second",
+                    "enum": [
+                        "day",
+                        "hour",
+                        "minute",
+                        "second"
+                    ],
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Maximum total weight over given period of time. It is expressed in steem percent unit.\nIt means that 1 full (100%) upvote/flag is 10'000 while 2 full upvotes/flags is 20'000.",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "period",
+                "rule",
+                "unit",
+                "weight"
+            ],
+            "type": "object"
+        },
         "wise_send_voteorder": {
             "properties": {
                 "author": {
@@ -328,6 +505,24 @@
                                             },
                                             {
                                                 "$ref": "#/definitions/wise_rule_custom_rpc"
+                                            },
+                                            {
+                                                "$ref": "#/definitions/wise_rule_weight_for_period"
+                                            },
+                                            {
+                                                "$ref": "#/definitions/wise_rule_votes_count"
+                                            },
+                                            {
+                                                "$ref": "#/definitions/wise_rule_voters"
+                                            },
+                                            {
+                                                "$ref": "#/definitions/wise_rule_first_post"
+                                            },
+                                            {
+                                                "$ref": "#/definitions/wise_rule_payout"
+                                            },
+                                            {
+                                                "$ref": "#/definitions/wise_rule_age_of_post"
                                             }
                                         ]
                                     },
@@ -356,6 +551,24 @@
                                         },
                                         {
                                             "$ref": "#/definitions/wise_rule_custom_rpc"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/wise_rule_weight_for_period"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/wise_rule_votes_count"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/wise_rule_voters"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/wise_rule_first_post"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/wise_rule_payout"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/wise_rule_age_of_post"
                                         }
                                     ]
                                 },
