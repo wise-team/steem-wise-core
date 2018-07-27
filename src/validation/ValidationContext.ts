@@ -6,6 +6,7 @@ import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 import { Protocol } from "../protocol/Protocol";
+import { BlogEntry } from "../blockchain/BlogEntry";
 
 export class ValidationContext {
     private api: Api;
@@ -60,5 +61,17 @@ export class ValidationContext {
      */
     public getWiseOperations(username: string, until: Date): Promise<EffectuatedSmartvotesOperation []> {
         return this.api.getWiseOperations(username, until, this.protocol);
+    }
+
+    /**
+     * Returns last user blog entries from follow_api. They are sorted from the newest to the oldest,
+     * trimmed to the limit.
+     * @param username - steem username
+     * @param startFrom - number of the entry to start from counting from the newest to the oldest
+     *      (startFrom=0 will return the newest entry)
+     * @param limit — limit the number of returned entries (maximal limit is 500).
+     */
+    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+        return this.api.getBlogEntries(username, startFrom, limit);
     }
 }
