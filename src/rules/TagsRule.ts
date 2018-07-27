@@ -59,7 +59,7 @@ export class TagsRule extends Rule {
                             return;
                         }
                     }
-                    throw new ValidationException("None of the tags [" + postMetadata.tags.join() + "] is on the \"require\" tags list [" + this.tags.join() + "].");
+                    throw new ValidationException("None of the tags [" + postMetadata.tags.join() + "] is on the \"any\" tags list [" + this.tags.join() + "].");
                 }
                 else throw new ValidationException("Unknown mode in tags.");
         })
