@@ -22,7 +22,8 @@ const usernames: string [] = [
     "guest123",
     "noisy",
     "perduta",
-    "jblew"
+    "jblew",
+    "nicniezgrublem"
 ];
 
 const postLinks: [string, string][] = [
@@ -39,6 +40,10 @@ const postLinks: [string, string][] = [
     ["noisy", "public-and-private-keys-how-to-generate-all-steem-user-s-keys-from-master-password-without-a-steemit-website-being-offline"],
     ["phgnomo", "steem-project-of-the-week-1-get-on-steem"],
     ["perduta", "do-you-feel-connected-to-your-home-country"],
+    ["jblew", "wise-jak-glosowac-za-cudze-vp-a-takze-czym-jest-wise-i-dlaczego-powstal-czesc-pierwsza-cyklu-o-wise"],
+    ["steemprojects2", "4jxxyd-test"],
+    ["jblew", "witajcie-steemianie-przybywam-jedrzej-lewandowski"],
+    ["nicniezgrublem", "b52e6300-9011-11e8-b2de-f7be8f055a16"]
 ];
 
 let posts: SteemPost [] = [];

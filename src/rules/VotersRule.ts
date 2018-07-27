@@ -81,9 +81,9 @@ export class VotersRule extends Rule {
 
 export namespace VotersRule {
     export enum Mode {
-        ONE = "one",
-        NONE = "none",
-        ANY = "any",
-        ALL = "all"
+        ONE = "one", // "one of" mode (every post voter must be within this list)
+        NONE = "none", // "none of" - every voter must not be on the list
+        ANY = "any", // "any of" - post should be voted on by at least one of the voters from the list
+        ALL = "all" // "all of" - all usernames from the list must vote on the post
     }
 }
