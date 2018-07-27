@@ -45,9 +45,6 @@ export class RulePrototyper {
         else if (unprototyped.rule === Rule.Type.Payout) {
             return RulePrototyper.prototypeRule(new PayoutRule("", 0, "", ""), unprototyped);
         }
-        else if (unprototyped.rule === Rule.Type.Reputation) {
-            return RulePrototyper.prototypeRule(new ReputationRule("", 0, "", ""), unprototyped);
-        }
         else if (unprototyped.rule === Rule.Type.VotesCount) {
             return RulePrototyper.prototypeRule(new VotesCountRule(VotesCountRule.Mode.MORE_THAN, 0), unprototyped);
         }

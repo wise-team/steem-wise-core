@@ -14,6 +14,11 @@ import { wise_rule_custom_rpc, wise_rule_custom_rpc_decode, wise_rule_custom_rpc
 import { ValidationException } from "../../../validation/ValidationException";
 import { wise_rule_weight_for_period, wise_rule_weight_for_period_decode, wise_rule_weight_for_period_encode } from "./rules/rule-weight-for-period-schema";
 import { WeightForPeriodRule } from "../../../rules/WeightForPeriodRule";
+import { wise_rule_votes_count_encode, wise_rule_votes_count_decode, wise_rule_votes_count } from "./rules/rule-votes-count-schema";
+import { wise_rule_voters_encode, wise_rule_voters_decode, wise_rule_voters } from "./rules/rule-voters-schema";
+import { wise_rule_first_post_encode, wise_rule_first_post_decode, wise_rule_first_post } from "./rules/rule-first-post-schema";
+import { wise_rule_payout_encode, wise_rule_payout_decode, wise_rule_payout } from "./rules/rule-payout-schema";
+import { wise_rule_age_of_post_encode, wise_rule_age_of_post_decode, wise_rule_age_of_post } from "./rules/rule-age-of-post-schema";
 
 export type wise_rule = wise_rule_weight
                       | wise_rule_tags
@@ -21,7 +26,6 @@ export type wise_rule = wise_rule_weight
                       | wise_rule_voting_power
                       | wise_rule_custom_rpc
                       | wise_rule_weight_for_period
-                      | wise_rule_reputation
                       | wise_rule_votes_count
                       | wise_rule_voters
                       | wise_rule_first_post
@@ -48,9 +52,6 @@ export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
         case "custom_rpc":
             return wise_rule_custom_rpc_decode(r as wise_rule_custom_rpc);
 
-        case "reputation":
-            return wise_rule_reputation_decode(r as wise_rule_reputation);
-
         case "votes_count":
             return wise_rule_votes_count_decode(r as wise_rule_votes_count);
 
@@ -58,7 +59,7 @@ export const wise_rule_decode = (r: wise_rule): Rule | undefined => {
             return wise_rule_voters_decode(r as wise_rule_voters);
 
         case "first_post":
-            return wise_rule_first_post_decode(r as wise_rule_first_post;
+            return wise_rule_first_post_decode(r as wise_rule_first_post);
 
         case "payout":
             return wise_rule_payout_decode(r as wise_rule_payout);

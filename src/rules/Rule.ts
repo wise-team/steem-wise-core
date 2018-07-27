@@ -33,7 +33,6 @@ export namespace Rule {
         WeightForPeriod = "weight_for_period",
         CustomRPC = "custom_rpc",
         VotingPower = "voting_power",
-        Reputation = "reputation",
         VotesCount = "votes_count",
         Voters = "voters",
         FirstPost = "first_post",
