@@ -11,6 +11,7 @@ import { OperationNumberFilter } from "../../src/chainable/filters/OperationNumb
 import { V1Handler } from "../../src/protocol/versions/v1/V1Handler";
 import { SimpleTaker } from "../../src/chainable/Chainable";
 import { FakeApi } from "../../src/api/FakeApi";
+import { BlogEntry } from "../../src/blockchain/BlogEntry";
 
 const outFilePath = __dirname + "/../data/fake-blockchain.json";
 
@@ -44,16 +45,19 @@ let posts: SteemPost [] = [];
 let accounts: AccountInfo [] = [];
 let dynamicGlobalProperties: DynamicGlobalProperties | undefined = undefined;
 let transactions: SteemTransaction [] = [];
+let blogEntries: BlogEntry [] = [];
 
 const api = new DirectBlockchainApi("", "");
 
-
+// load posts
 Bluebird.resolve(postLinks).map((link: [string, string]) => {
     return api.loadPost(link[0], link[1]);
 })
 .then((values: SteemPost []) => {
     posts = values;
 })
+
+// load account info
 .then(() => usernames)
 .map((username: string) => {
     return api.getAccountInfo(username);
@@ -61,12 +65,16 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
 .then((values: AccountInfo []) => {
     accounts = values;
 })
+
+// load dynamic global properties
 .then(() => {
     return api.getDynamicGlobalProperties();
 })
 .then((value: DynamicGlobalProperties) => {
     dynamicGlobalProperties = value;
 })
+
+// load transactions
 .then(() => usernames) // for each username return a promise that returns transactions
 .map((username: string) => {
     return new Bluebird<SteemTransaction []>((resolve, reject) => {
@@ -95,6 +103,20 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
 .then((trxs: SteemTransaction []) => {
     transactions = trxs;
 })
+
+// load blog entries
+.then(() => usernames)
+.map((username: string) => {
+    return api.getBlogEntries(username, 0, 500);
+})
+.then((values: BlogEntry [][]) => {
+    return values.reduce((allEntries: BlogEntry [], nextEntries: BlogEntry []) => allEntries.concat(nextEntries));
+})
+.then((blogEntries_: BlogEntry []) => {
+    blogEntries = blogEntries_;
+})
+
+// save
 .then(() => {
     if (!dynamicGlobalProperties) throw new Error("Dynamic global properties are undefined");
 
@@ -102,7 +124,8 @@ Bluebird.resolve(postLinks).map((link: [string, string]) => {
         dynamicGlobalProperties: dynamicGlobalProperties,
         accounts: accounts,
         transactions: transactions,
-        posts: posts
+        posts: posts,
+        blogEntries: blogEntries
     };
     fs.writeFileSync(outFilePath, JSON.stringify(dataset));
 })

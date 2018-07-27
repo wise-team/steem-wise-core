@@ -13,6 +13,7 @@ import { AccountInfo } from "../../src/blockchain/AccountInfo";
 import { isConfirmVote } from "../protocol/ConfirmVote";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
+import { BlogEntry } from "../blockchain/BlogEntry";
 
 // TODO very slow. Examine why (maybe DirecrBlockchain could also be speeded up)
 export class FakeApi extends Api {
@@ -20,11 +21,12 @@ export class FakeApi extends Api {
     private transactions: SteemTransaction [];
     private dynamicGlobalProperties: DynamicGlobalProperties;
     private accounts: AccountInfo [];
+    private blogEntries: BlogEntry [];
     private currentBlock = 0;
     private pushedOperations: SteemTransaction [] = [];
     private fakeTime: Date | undefined = undefined;
 
-    public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], transactions: SteemTransaction []) {
+    public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], transactions: SteemTransaction [], blogEntries: BlogEntry []) {
         super();
 
         this.posts = posts;
@@ -36,10 +38,11 @@ export class FakeApi extends Api {
             return trx;
         });
         this.currentBlock = this.transactions.map(trx => trx.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0);
+        this.blogEntries = blogEntries;
     }
 
     public static fromDataset(dataset: FakeApi.Dataset): FakeApi {
-        return new FakeApi(dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.transactions);
+        return new FakeApi(dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.transactions, dataset.blogEntries);
     }
 
     public name(): string {
@@ -199,6 +202,22 @@ export class FakeApi extends Api {
         });
     }
 
+    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+        return new Promise((resolve, reject) => {
+            const result: BlogEntry [] = [];
+            let userI = 0;
+            for (let i = 0; i < this.blogEntries.length; i++) {
+                const entry = this.blogEntries[i];
+                if (entry.blog == username) {
+                    if (userI >= startFrom && userI < startFrom + limit)
+                        result.push(entry);
+                    userI++;
+                }
+            }
+            setTimeout(() => resolve(result), 4);
+        });
+    }
+
     public getCurrentBlockNum(): number {
         return this.currentBlock;
     }
@@ -226,5 +245,6 @@ export namespace FakeApi {
         dynamicGlobalProperties: DynamicGlobalProperties;
         accounts: AccountInfo [];
         transactions: SteemTransaction [];
+        blogEntries: BlogEntry [];
     }
 }
