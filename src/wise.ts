@@ -306,6 +306,12 @@ export { TagsRule } from "./rules/TagsRule";
 export { CustomRPCRule } from "./rules/CustomRPCRule";
 export { WeightRule } from "./rules/WeightRule";
 export { VotingPowerRule } from "./rules/VotingPowerRule";
+export { AgeOfPostRule } from "./rules/AgeOfPostRule";
+export { FirstPostRule } from "./rules/FirstPostRule";
+export { PayoutRule } from "./rules/PayoutRule";
+export { VotersRule } from "./rules/VotersRule";
+export { VotesCountRule } from "./rules/VotesCountRule";
+
 
 export { ValidationException } from "./validation/ValidationException";
 
