@@ -14,16 +14,14 @@ export class AgeOfPostRule extends Rule {
     public rule: string = Rule.Type.AgeOfPost;
     public mode: AgeOfPostRule.Mode;
     public unit: AgeOfPostRule.TimeUnit;
-    public period: number;
     public value: number;
 
-    public constructor(mode: AgeOfPostRule.Mode, period: number, unit: AgeOfPostRule.TimeUnit, value: number) {
+    public constructor(mode: AgeOfPostRule.Mode, value: number, unit: AgeOfPostRule.TimeUnit) {
         super();
 
         this.mode = mode;
-        this.period = period;
-        this.unit = unit;
         this.value = value;
+        this.unit = unit;
     }
 
     public type(): Rule.Type {
@@ -40,18 +38,18 @@ export class AgeOfPostRule extends Rule {
                                    (this.unit === AgeOfPostRule.TimeUnit.HOUR ? 60 * 60 :
                                    (this.unit === AgeOfPostRule.TimeUnit.MINUTE ? 60 :
                                 1)));
-            const numberOfSeconds = this.period * unitMultiplier;
+            const numberOfSeconds = this.value * unitMultiplier;
             const thresholdTime = new Date(Date.now() - numberOfSeconds * 1000);
 
             const postTime = new Date(post.created + "Z" /* this is UTC date */);
 
             if (this.mode === AgeOfPostRule.Mode.OLDER_THAN) {
-                if (postTime.getTime() > thresholdTime.getTime()) throw new ValidationException(
+                if (postTime.getTime() >= thresholdTime.getTime()) throw new ValidationException(
                     "AgeOfPostRule: Post (" + postTime + ") is older than " + thresholdTime
                 );
             }
             else if (this.mode === AgeOfPostRule.Mode.YOUNGER_THAN) {
-                if (postTime.getTime() < thresholdTime.getTime()) throw new ValidationException(
+                if (postTime.getTime() <= thresholdTime.getTime()) throw new ValidationException(
                     "AgeOfPostRule: Post (" + postTime + ") is younger than " + thresholdTime
                 );
             }
@@ -60,7 +58,7 @@ export class AgeOfPostRule extends Rule {
     }
 
     public validateRuleObject(unprototypedObj: any) {
-        ["mode", "period", "unit", "value"].forEach(prop => {
+        ["mode", "value", "unit"].forEach(prop => {
             if (!_.has(unprototypedObj, prop)) throw new ValidationException("AgeOfPostRule: property " + prop + " is missing");
         });
 

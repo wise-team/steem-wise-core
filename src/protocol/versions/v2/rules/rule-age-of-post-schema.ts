@@ -48,5 +48,5 @@ export function wise_rule_age_of_post_decode(r: wise_rule_age_of_post): AgeOfPos
     else throw new ValidationException("v2:wise_rule_age_of_post: unknown unit " + r.unit);
 
 
-    return new AgeOfPostRule(mode, r.value, unit, r.value);
+    return new AgeOfPostRule(mode, r.value, unit);
 }

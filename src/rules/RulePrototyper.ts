@@ -41,7 +41,7 @@ export class RulePrototyper {
             return RulePrototyper.prototypeRule(new CustomRPCRule("", 0, "", ""), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.AgeOfPost) {
-            return RulePrototyper.prototypeRule(new AgeOfPostRule(AgeOfPostRule.Mode.OLDER_THAN, 0, AgeOfPostRule.TimeUnit.SECOND, 0), unprototyped);
+            return RulePrototyper.prototypeRule(new AgeOfPostRule(AgeOfPostRule.Mode.OLDER_THAN, 0, AgeOfPostRule.TimeUnit.SECOND), unprototyped);
         }
         else if (unprototyped.rule === Rule.Type.FirstPost) {
             return RulePrototyper.prototypeRule(new FirstPostRule(), unprototyped);
