@@ -19,15 +19,15 @@ export type wise_rule_voting_power_mode = "more_than" | "less_than" | "equal";
 
 export function wise_rule_voting_power_encode(r: VotingPowerRule): wise_rule_voting_power {
     let mode: wise_rule_voting_power_mode;
-    if ((r as VotingPowerRule).mode === VotingPowerRule.Mode.MORE_THAN) mode = "more_than";
-    else if ((r as VotingPowerRule).mode === VotingPowerRule.Mode.LESS_THAN) mode = "less_than";
-    else if ((r as VotingPowerRule).mode === VotingPowerRule.Mode.EQUAL) mode = "equal";
-    else throw new ValidationException("Unknown mode of voting power rule");
+    if (r.mode === VotingPowerRule.Mode.MORE_THAN) mode = "more_than";
+    else if (r.mode === VotingPowerRule.Mode.LESS_THAN) mode = "less_than";
+    else if (r.mode === VotingPowerRule.Mode.EQUAL) mode = "equal";
+    else throw new ValidationException("VotingPowerRule: unknown mode " + r.mode);
 
     const out: wise_rule_voting_power = {
         rule: "voting_power",
         mode: mode,
-        value: (r as VotingPowerRule).value
+        value: r.value
     };
     return out;
 }

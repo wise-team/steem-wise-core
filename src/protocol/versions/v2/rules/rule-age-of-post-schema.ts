@@ -14,22 +14,22 @@ export type wise_rule_age_of_post_mode = "older_than" | "younger_than";
 
 export function wise_rule_age_of_post_encode(r: AgeOfPostRule): wise_rule_age_of_post {
     let mode: wise_rule_age_of_post_mode;
-    if ((r as AgeOfPostRule).mode === AgeOfPostRule.Mode.OLDER_THAN) mode = "older_than";
-    else if ((r as AgeOfPostRule).mode === AgeOfPostRule.Mode.YOUNGER_THAN) mode = "younger_than";
-    else throw new ValidationException("Unknown mode of age of post rule");
+    if (r.mode === AgeOfPostRule.Mode.OLDER_THAN) mode = "older_than";
+    else if (r.mode === AgeOfPostRule.Mode.YOUNGER_THAN) mode = "younger_than";
+    else throw new ValidationException("AgeOfPost rule, unknown mode: " + r.mode);
 
     let unit: "day" | "hour" | "minute" | "second";
-    if ((r as AgeOfPostRule).unit === AgeOfPostRule.TimeUnit.DAY) unit = "day";
-    else if ((r as AgeOfPostRule).unit === AgeOfPostRule.TimeUnit.HOUR) unit = "hour";
-    else if ((r as AgeOfPostRule).unit === AgeOfPostRule.TimeUnit.MINUTE) unit = "minute";
-    else if ((r as AgeOfPostRule).unit === AgeOfPostRule.TimeUnit.SECOND) unit = "second";
-    else throw new ValidationException("Unknown unit in age of post rule");
+    if (r.unit === AgeOfPostRule.TimeUnit.DAY) unit = "day";
+    else if (r.unit === AgeOfPostRule.TimeUnit.HOUR) unit = "hour";
+    else if (r.unit === AgeOfPostRule.TimeUnit.MINUTE) unit = "minute";
+    else if (r.unit === AgeOfPostRule.TimeUnit.SECOND) unit = "second";
+    else throw new ValidationException("AgeOfPostRule, unknown unit: " + r.unit);
 
     const out: wise_rule_age_of_post = {
         rule: "age_of_post",
         mode: mode,
         unit: unit,
-        value: (r as AgeOfPostRule).value
+        value: r.value
     };
     return out;
 }

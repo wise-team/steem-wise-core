@@ -14,10 +14,10 @@ export interface wise_rule_votes_count {
 
 export function wise_rule_votes_count_encode(r: VotesCountRule): wise_rule_votes_count {
     let mode: "equal" | "more_than" | "less_than";
-    if ((r as VotesCountRule).mode === VotesCountRule.Mode.EQUAL) mode = "equal";
-    else if ((r as VotesCountRule).mode === VotesCountRule.Mode.MORE_THAN) mode = "more_than";
-    else if ((r as VotesCountRule).mode === VotesCountRule.Mode.EQUAL) mode = "less_than";
-    else throw new ValidationException("VotesCountRule: Unknown mode in votes count rule");
+    if (r.mode === VotesCountRule.Mode.EQUAL) mode = "equal";
+    else if (r.mode === VotesCountRule.Mode.MORE_THAN) mode = "more_than";
+    else if (r.mode === VotesCountRule.Mode.LESS_THAN) mode = "less_than";
+    else throw new ValidationException("VotesCountRule: unknown mode " + r.mode);
 
     const out: wise_rule_votes_count = {
         rule: "votes_count",

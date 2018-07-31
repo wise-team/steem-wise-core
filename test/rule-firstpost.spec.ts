@@ -3,9 +3,10 @@ import { expect } from "chai";
 import "mocha";
 
 // wise imports
-import { AgeOfPostRule, SendVoteorder, ValidationException, Wise, FirstPostRule } from "../src/wise";
+import { FirstPostRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { wise_rule_first_post_encode, wise_rule_first_post_decode, wise_rule_first_post } from "../src/protocol/versions/v2/rules/rule-first-post-schema";
 
 /* CONFIG */
 const voter = "nonexistentvoter";
@@ -55,5 +56,16 @@ describe("test/rule-firstpost.spec.ts", () => {
                 }
             });
         }));
+
+        it ("is correctly serialized and deserialized by v2", () => {
+            const rule = new FirstPostRule();
+            const encoded: wise_rule_first_post = wise_rule_first_post_encode(rule);
+
+            const decoded: FirstPostRule = wise_rule_first_post_decode(encoded);
+            expect(decoded).to.deep.equal(rule);
+
+            const encoded2: wise_rule_first_post = wise_rule_first_post_encode(decoded);
+            expect(encoded2).to.deep.equal(encoded);
+        });
     });
 });

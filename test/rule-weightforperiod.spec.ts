@@ -12,6 +12,7 @@ import { WeightForPeriodRule } from "../src/rules/WeightForPeriodRule";
 import { FakeApi } from "../src/api/FakeApi";
 import { isSendVoteorder } from "../src/protocol/SendVoteorder";
 import { isConfirmVote, ConfirmVote, isConfirmVoteBoundWithVote } from "../src/protocol/ConfirmVote";
+import { wise_rule_weight_for_period, wise_rule_weight_for_period_encode, wise_rule_weight_for_period_decode } from "../src/protocol/versions/v2/rules/rule-weight-for-period-schema";
 
 /* CONFIG */
 const delegator = "nonexistentdelegator" + Date.now();
@@ -180,6 +181,17 @@ describe("test/rule-weightforperiod.spec.ts", () => {
             it("Ends synchronization without error", () => {
                 return synchronizationPromise.then(() => {});
             });
+        }));
+
+        tests.forEach((test, i: number) => it ("is correctly serialized and deserialized by v2", () => {
+            const rule = new WeightForPeriodRule(test.period, test.unit, test.weight);
+            const encoded: wise_rule_weight_for_period = wise_rule_weight_for_period_encode(rule);
+
+            const decoded: WeightForPeriodRule = wise_rule_weight_for_period_decode(encoded);
+            expect(decoded).to.deep.equal(rule);
+
+            const encoded2: wise_rule_weight_for_period = wise_rule_weight_for_period_encode(decoded);
+            expect(encoded2).to.deep.equal(encoded);
         }));
 
         // TODO test if it does not count other voter votes

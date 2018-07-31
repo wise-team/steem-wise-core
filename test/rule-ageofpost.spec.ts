@@ -6,6 +6,7 @@ import "mocha";
 import { AgeOfPostRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { wise_rule_age_of_post_encode, wise_rule_age_of_post_decode, wise_rule_age_of_post } from "../src/protocol/versions/v2/rules/rule-age-of-post-schema";
 
 /* CONFIG */
 const voter = "nonexistentvoter";
@@ -95,6 +96,17 @@ describe("test/rule-ageofpost.spec.ts", () => {
                         throw new Error("Should fail with ValidationException");
                 }
             });
+        }));
+
+        tests.forEach((test, i: number) => it ("is correctly serialized and deserialized by v2", () => {
+            const rule = new AgeOfPostRule(test.mode, test.value, test.unit);
+            const encoded: wise_rule_age_of_post = wise_rule_age_of_post_encode(rule);
+
+            const decoded: AgeOfPostRule = wise_rule_age_of_post_decode(encoded);
+            expect(decoded).to.deep.equal(rule);
+
+            const encoded2: wise_rule_age_of_post = wise_rule_age_of_post_encode(decoded);
+            expect(encoded2).to.deep.equal(encoded);
         }));
     });
 });

@@ -10,20 +10,23 @@ export interface wise_rule_voters {
     usernames: string [];
 }
 export type wise_rule_voters_mode = "all" | "any" | "one" | "none";
-
+// "one of" mode (every post voter must be within this list)
+// "none of" aka blacklist mode (none of post voters can be on this list)
+// the post should have all of the specified voters
+// the post should have at least one of the specified voters
 
 export function wise_rule_voters_encode(r: VotersRule): wise_rule_voters {
     let mode: wise_rule_voters_mode;
-    if ((r as VotersRule).mode === VotersRule.Mode.ALL) mode = "all";
-    else if ((r as VotersRule).mode === VotersRule.Mode.ANY) mode = "any";
-    else if ((r as VotersRule).mode === VotersRule.Mode.ONE) mode = "one";
-    else if ((r as VotersRule).mode === VotersRule.Mode.NONE) mode = "none";
-    else throw new ValidationException("VotersRule: Unknown mode");
+    if (r.mode === VotersRule.Mode.ALL) mode = "all";
+    else if (r.mode === VotersRule.Mode.ANY) mode = "any";
+    else if (r.mode === VotersRule.Mode.ONE) mode = "one";
+    else if (r.mode === VotersRule.Mode.NONE) mode = "none";
+    else throw new ValidationException("VotersRule: unknown mode " + r.mode);
 
     const out: wise_rule_voters = {
         rule: "voters",
         mode: mode,
-        usernames: (r as VotersRule).usernames
+        usernames: r.usernames
     };
     return out;
 }

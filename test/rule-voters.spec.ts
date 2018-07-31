@@ -7,6 +7,7 @@ import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, Api } 
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
 import { VotersRule } from "../src/rules/VotersRule";
+import { wise_rule_voters_decode, wise_rule_voters_encode, wise_rule_voters } from "../src/protocol/versions/v2/rules/rule-voters-schema";
 
 /* CONFIG */
 const delegator = "noisy";
@@ -62,6 +63,17 @@ describe("test/rule-voters.spec.ts", () => {
                     else expect((error as ValidationException).validationException).to.be.true;
                  }
             );
+        }));
+
+        tests.forEach((test, i: number) => it ("is correctly serialized and deserialized by v2", () => {
+            const rule = test.rule;
+            const encoded: wise_rule_voters = wise_rule_voters_encode(rule);
+
+            const decoded: VotersRule = wise_rule_voters_decode(encoded);
+            expect(decoded).to.deep.equal(rule);
+
+            const encoded2: wise_rule_voters = wise_rule_voters_encode(decoded);
+            expect(encoded2).to.deep.equal(encoded);
         }));
 
         it("throws ValidationException on nonexistent post", () => {

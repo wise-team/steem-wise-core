@@ -7,6 +7,7 @@ import { VotingPowerRule, SendVoteorder, ValidationException, Wise } from "../sr
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
 import { AccountInfo } from "../src/blockchain/AccountInfo";
+import { wise_rule_voting_power_encode, wise_rule_voting_power_decode, wise_rule_voting_power } from "../src/protocol/versions/v2/rules/rule-voting-power-schema";
 
 /* CONFIG */
 const voter = "perduta";
@@ -16,7 +17,7 @@ const wise = new Wise(voter, fakeApi);
 
 describe("test/rule-votingpower.spec.ts", () => {
     describe("VotingPowerRule", function() {
-        const testsModes: { mode: VotingPowerRule.Mode, ruleValue: number, testValue: number, pass: boolean } [] = [
+        const tests: { mode: VotingPowerRule.Mode, ruleValue: number, testValue: number, pass: boolean } [] = [
             {
                 mode: VotingPowerRule.Mode.EQUAL,
                 ruleValue: 1000, testValue: 1000, pass: true
@@ -47,7 +48,7 @@ describe("test/rule-votingpower.spec.ts", () => {
             },
         ];
 
-        testsModes.forEach((testMode, i: number) => it(
+        tests.forEach((testMode, i: number) => it(
                 "VotingPowerRule " + ( testMode.pass ? "should pass" : "should fail" ) + ": " +
                 testMode.testValue + " " + testMode.mode + " " + testMode.ruleValue, () => {
             const rule = new VotingPowerRule(testMode.mode, testMode.ruleValue);
@@ -74,6 +75,17 @@ describe("test/rule-votingpower.spec.ts", () => {
                         throw new Error("Should fail with ValidationException");
                 }
             });
+        }));
+
+        tests.forEach((test, i: number) => it ("is correctly serialized and deserialized by v2", () => {
+            const rule = new VotingPowerRule(test.mode, test.ruleValue);
+            const encoded: wise_rule_voting_power = wise_rule_voting_power_encode(rule);
+
+            const decoded: VotingPowerRule = wise_rule_voting_power_decode(encoded);
+            expect(decoded).to.deep.equal(rule);
+
+            const encoded2: wise_rule_voting_power = wise_rule_voting_power_encode(decoded);
+            expect(encoded2).to.deep.equal(encoded);
         }));
     });
 });

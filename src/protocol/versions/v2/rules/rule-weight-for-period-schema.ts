@@ -34,9 +34,16 @@ export interface wise_rule_weight_for_period {
 
 
 export function wise_rule_weight_for_period_encode(rule: WeightForPeriodRule): wise_rule_weight_for_period {
+    let unit: "day" | "hour" | "minute" | "second";
+    if (rule.unit === WeightForPeriodRule.PeriodUnit.DAY) unit = "day";
+    else if (rule.unit === WeightForPeriodRule.PeriodUnit.HOUR) unit = "hour";
+    else if (rule.unit === WeightForPeriodRule.PeriodUnit.MINUTE) unit = "minute";
+    else if (rule.unit === WeightForPeriodRule.PeriodUnit.SECOND) unit = "second";
+    else throw new ValidationException("WeightForPeriodRule, unknown unit: " + rule.unit);
+    
     const out: wise_rule_weight_for_period = {
         rule: "weight_for_period",
-        unit: rule.unit,
+        unit: unit,
         period: rule.period,
         weight: rule.weight
     };
@@ -54,6 +61,6 @@ export function wise_rule_weight_for_period_decode(r: wise_rule_weight_for_perio
         case "second":
             return new WeightForPeriodRule(r.period, WeightForPeriodRule.PeriodUnit.SECOND, r.weight);
         default:
-            throw new ValidationException("V2 wise_rule_weight_for_period: Unknown period unit");
+            throw new ValidationException("V2 wise_rule_weight_for_period: Unknown period unit " + r.unit);
     }
 }

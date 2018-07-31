@@ -7,6 +7,7 @@ import { PayoutRule, SendVoteorder, ValidationException, Wise } from "../src/wis
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
 import { AccountInfo } from "../src/blockchain/AccountInfo";
+import { wise_rule_payout_encode, wise_rule_payout, wise_rule_payout_decode } from "../src/protocol/versions/v2/rules/rule-payout-schema";
 
 /* CONFIG */
 const delegator = "noisy";
@@ -17,7 +18,7 @@ const wise = new Wise(voter, fakeApi);
 
 describe("test/rule-payout.spec.ts", () => {
     describe("PayoutRule.validate", function() {
-        const testsModes: { mode: PayoutRule.Mode, value: number; author: string;  permlink: string; pass: boolean } [] = [
+        const tests: { mode: PayoutRule.Mode, value: number; author: string;  permlink: string; pass: boolean } [] = [
             {
                 mode: PayoutRule.Mode.EQUAL, author: "steemprojects2", permlink: "sttnc-test",
                 value: 0, pass: true
@@ -39,7 +40,7 @@ describe("test/rule-payout.spec.ts", () => {
             },
         ];
 
-        testsModes.forEach((test, i: number) => it(
+        tests.forEach((test, i: number) => it(
                 "PayoutRule " + ( test.pass ? "should pass" : "should fail" ) + ": " +
                 "[" + test.author + ", " + test.permlink + "] " + test.mode + " " + test.value, () => {
             const rule = new PayoutRule(test.mode, test.value);
@@ -61,6 +62,17 @@ describe("test/rule-payout.spec.ts", () => {
                         throw new Error("Should fail with ValidationException");
                 }
             });
+        }));
+
+        tests.forEach((test, i: number) => it ("is correctly serialized and deserialized by v2", () => {
+            const rule = new PayoutRule(test.mode, test.value);
+            const encoded: wise_rule_payout = wise_rule_payout_encode(rule);
+
+            const decoded: PayoutRule = wise_rule_payout_decode(encoded);
+            expect(decoded).to.deep.equal(rule);
+
+            const encoded2: wise_rule_payout = wise_rule_payout_encode(decoded);
+            expect(encoded2).to.deep.equal(encoded);
         }));
     });
 

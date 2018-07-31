@@ -24,7 +24,6 @@ export class VotersRule extends Rule {
         return Rule.Type.Voters;
     }
 
-    // TODO test
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         return Promise.resolve()
         .then(() => this.validateRuleObject(this))

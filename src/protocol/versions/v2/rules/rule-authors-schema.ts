@@ -12,14 +12,14 @@ export type wise_rule_authors_mode = "allow" | "deny";
 
 export function wise_rule_authors_encode(r: AuthorsRule): wise_rule_authors {
     let mode: wise_rule_authors_mode;
-    if ((r as AuthorsRule).mode === AuthorsRule.Mode.ALLOW) mode = "allow";
-    else if ((r as AuthorsRule).mode === AuthorsRule.Mode.DENY) mode = "deny";
-    else throw new ValidationException("Unknown mode of authors rule");
+    if (r.mode === AuthorsRule.Mode.ALLOW) mode = "allow";
+    else if (r.mode === AuthorsRule.Mode.DENY) mode = "deny";
+    else throw new ValidationException("AuthorsRule, unknown mode: " + r.mode);
 
     const out: wise_rule_authors = {
         rule: "authors",
         mode: mode,
-        authors: (r as AuthorsRule).authors
+        authors: r.authors
     };
     return out;
 }

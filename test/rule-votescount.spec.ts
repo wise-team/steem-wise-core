@@ -6,6 +6,7 @@ import "mocha";
 import { VotesCountRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
 import { ValidationContext } from "../src/validation/ValidationContext";
 import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { wise_rule_votes_count_encode, wise_rule_votes_count, wise_rule_votes_count_decode } from "../src/protocol/versions/v2/rules/rule-votes-count-schema";
 
 /* CONFIG */
 const delegator = "noisy";
@@ -16,7 +17,7 @@ const wise = new Wise(voter, fakeApi);
 
 describe("test/rule-votescount.spec.ts", () => {
     describe("VotesCountRule.validate", function() {
-        const testsModes: { mode: VotesCountRule.Mode, value: number; author: string;  permlink: string; pass: boolean } [] = [
+        const tests: { mode: VotesCountRule.Mode, value: number; author: string;  permlink: string; pass: boolean } [] = [
             {
                 mode: VotesCountRule.Mode.EQUAL, author: "steemprojects2", permlink: "sttnc-test",
                 value: 1, pass: true
@@ -38,7 +39,7 @@ describe("test/rule-votescount.spec.ts", () => {
             },
         ];
 
-        testsModes.forEach((test, i: number) => it(
+        tests.forEach((test, i: number) => it(
                 "VotesCountRule " + ( test.pass ? "should pass" : "should fail" ) + ": " +
                 "[" + test.author + ", " + test.permlink + "] " + test.mode + " " + test.value, () => {
             const rule = new VotesCountRule(test.mode, test.value);
@@ -60,6 +61,17 @@ describe("test/rule-votescount.spec.ts", () => {
                         throw new Error("Should fail with ValidationException");
                 }
             });
+        }));
+
+        tests.forEach((test, i: number) => it ("is correctly serialized and deserialized by v2", () => {
+            const rule = new VotesCountRule(test.mode, test.value);
+            const encoded: wise_rule_votes_count = wise_rule_votes_count_encode(rule);
+
+            const decoded: VotesCountRule = wise_rule_votes_count_decode(encoded);
+            expect(decoded).to.deep.equal(rule);
+
+            const encoded2: wise_rule_votes_count = wise_rule_votes_count_encode(decoded);
+            expect(encoded2).to.deep.equal(encoded);
         }));
     });
 });

@@ -14,10 +14,10 @@ export interface wise_rule_payout {
 
 export function wise_rule_payout_encode(r: PayoutRule): wise_rule_payout {
     let mode: "equal" | "more_than" | "less_than";
-    if ((r as PayoutRule).mode === PayoutRule.Mode.EQUAL) mode = "equal";
-    else if ((r as PayoutRule).mode === PayoutRule.Mode.MORE_THAN) mode = "more_than";
-    else if ((r as PayoutRule).mode === PayoutRule.Mode.EQUAL) mode = "less_than";
-    else throw new ValidationException("PayoutRule: Unknown mode in votes count rule");
+    if (r.mode === PayoutRule.Mode.EQUAL) mode = "equal";
+    else if (r.mode === PayoutRule.Mode.MORE_THAN) mode = "more_than";
+    else if (r.mode === PayoutRule.Mode.LESS_THAN) mode = "less_than";
+    else throw new ValidationException("PayoutRule: unknown mode " + r.mode);
 
     const out: wise_rule_payout = {
         rule: "payout",
