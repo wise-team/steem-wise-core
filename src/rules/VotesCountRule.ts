@@ -34,15 +34,15 @@ export class VotesCountRule extends Rule {
 
             if (this.mode == VotesCountRule.Mode.EQUAL) {
                 if (voteCount !== this.value)
-                    throw new ValidationException("Delegator voting power (" + voteCount + ") does not equal " + this.value);
+                    throw new ValidationException("Post votes count (" + voteCount + ") does not equal " + this.value);
             }
             else if (this.mode == VotesCountRule.Mode.MORE_THAN) {
                 if (voteCount <= this.value)
-                throw new ValidationException("Delegator voting power (" + voteCount + ") is not more than " + this.value);
+                throw new ValidationException("Post votes count (" + voteCount + ") is not more than " + this.value);
             }
             else if (this.mode == VotesCountRule.Mode.LESS_THAN) {
                 if (voteCount >= this.value)
-                throw new ValidationException("Delegator voting power (" + voteCount + ") is not less than " + this.value);
+                throw new ValidationException("Post votes count (" + voteCount + ") is not less than " + this.value);
             }
             else {
                 throw new Error("Unknown mode of votes count rule: " + this.mode);

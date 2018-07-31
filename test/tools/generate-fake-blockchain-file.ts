@@ -84,8 +84,9 @@ Bluebird.resolve()
 
 .then(() => console.log("Loading transactions..."))
 .then(() => usernames) // for each username return a promise that returns transactions
-.map((username: string) => {
+.mapSeries((username: string) => {
     return new Bluebird<SteemTransaction []>((resolve, reject) => {
+        console.log("Loading transactions of @" + username + "...");
         const trxs: SteemTransaction [] = [];
         new SteemJsAccountHistorySupplier(steem, username)
         .branch((historySupplier) => {
@@ -101,6 +102,7 @@ Bluebird.resolve()
             });
         })
         .start(() => {
+            console.log("Done loading transactions of @" + username + "...");
             resolve(trxs);
         });
     });
