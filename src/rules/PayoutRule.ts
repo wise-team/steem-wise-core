@@ -30,7 +30,7 @@ export class PayoutRule extends Rule {
         .then(() => this.validateRuleObject(this))
         .then(() => context.getPost())
         .then((post: SteemPost) => {
-            const payout = this._parsePayout(post.total_payout_value);
+            const payout = PayoutRule._parsePayout(post.total_payout_value);
 
             if (this.mode == PayoutRule.Mode.EQUAL) {
                 if (payout !== this.value)
@@ -62,8 +62,7 @@ export class PayoutRule extends Rule {
             throw new ValidationException("PayoutRule: unknown mode " + unprototypedObj.mode);
     }
 
-    // TODO unit test and seek for changes on blockchain
-    public _parsePayout(payoutStr: string): number {
+    public static _parsePayout(payoutStr: string): number {
         const regex = /^([0-9]+\.?[0-9]*) SBD$/gm;
         const matches = regex.exec(payoutStr);
         if (matches && matches.length > 1) {

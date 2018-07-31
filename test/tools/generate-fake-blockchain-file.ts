@@ -43,7 +43,8 @@ const postLinks: [string, string][] = [
     ["jblew", "wise-jak-glosowac-za-cudze-vp-a-takze-czym-jest-wise-i-dlaczego-powstal-czesc-pierwsza-cyklu-o-wise"],
     ["steemprojects2", "4jxxyd-test"],
     ["jblew", "witajcie-steemianie-przybywam-jedrzej-lewandowski"],
-    ["nicniezgrublem", "b52e6300-9011-11e8-b2de-f7be8f055a16"]
+    ["nicniezgrublem", "b52e6300-9011-11e8-b2de-f7be8f055a16"],
+    ["steemprojects2", "sttnc-test"]
 ];
 
 let posts: SteemPost [] = [];
