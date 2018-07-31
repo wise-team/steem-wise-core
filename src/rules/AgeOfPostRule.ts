@@ -28,7 +28,6 @@ export class AgeOfPostRule extends Rule {
         return Rule.Type.AgeOfPost;
     }
 
-    // TODO test
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         return Promise.resolve()
         .then(() => this.validateRuleObject(this))
