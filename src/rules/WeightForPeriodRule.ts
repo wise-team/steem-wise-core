@@ -48,7 +48,7 @@ export class WeightForPeriodRule extends Rule {
                     const confirmVoteOp: ConfirmVote = op.command;
                     // count only accepted vote confirmations:
                     if (confirmVoteOp.accepted && isConfirmVoteBoundWithVote(confirmVoteOp)) {
-                        sumOfWeightsForGivenPeriod += confirmVoteOp.vote.weight;
+                        sumOfWeightsForGivenPeriod += Math.abs(confirmVoteOp.vote.weight);
                     }
                 }
             });
@@ -67,8 +67,8 @@ export class WeightForPeriodRule extends Rule {
         ["period", "unit", "weight"].forEach(prop => {
             if (!_.has(unprototypedObj, prop)) throw new ValidationException("WeightForPeriodRule: property " + prop + " is missing");
         });
-        if (Math.abs(unprototypedObj.weight) > 10000)
-            throw new ValidationException("WeightForPeriodRule: absolute value of .min ( " + unprototypedObj.min + " ) is > 10000");
+        if (unprototypedObj.weight < 0)
+            throw new ValidationException("WeightForPeriodRule: weight (" + unprototypedObj.weight + ") must be > 0 (the rule counts absolute VP of both upvotes and flags)");
 
         if (!_.includes([
             WeightForPeriodRule.PeriodUnit.DAY, WeightForPeriodRule.PeriodUnit.HOUR,
