@@ -40,7 +40,7 @@ export function wise_rule_weight_for_period_encode(rule: WeightForPeriodRule): w
     else if (rule.unit === WeightForPeriodRule.PeriodUnit.MINUTE) unit = "minute";
     else if (rule.unit === WeightForPeriodRule.PeriodUnit.SECOND) unit = "second";
     else throw new ValidationException("WeightForPeriodRule, unknown unit: " + rule.unit);
-    
+
     const out: wise_rule_weight_for_period = {
         rule: "weight_for_period",
         unit: unit,
