@@ -1,3 +1,5 @@
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
+
 /* tslint:disable no-null-keyword */
 export class Util {
     public static objectAssign (target: object, ...varArgs: object []) { // .length of function is 2
@@ -26,4 +28,8 @@ export class Util {
         if (input) return input;
         else throw error;
     };
+
+    public static cheapDebug(debugStringReturnerFn: () => string): void {
+        if (log.getLevel() <= log.levels.DEBUG) log.debug(debugStringReturnerFn());
+    }
 }

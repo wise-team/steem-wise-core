@@ -12,6 +12,7 @@ import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { Rule } from "../rules/Rule";
 import { ImposedRules } from "../rules/ImposedRules";
 import { NotFoundException } from "../util/NotFoundException";
+import { Util } from "../util/util";
 
 export class Validator {
     private api: Api;
@@ -36,10 +37,12 @@ export class Validator {
     }
 
     public provideRulesets(rulesets: EffectuatedSetRules) {
+        log.debug("Validator: provided with rulesets: " + JSON.stringify(rulesets, undefined, 2));
         this.providedRulesets = rulesets;
     }
 
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> => {
+        log.debug("Validator.validate(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + voteorder + ", atMoment=" + atMoment);
         const context = new ValidationContext(this.api, this.protocol, delegator, voter, voteorder);
 
         return new Promise<ValidationException | true>((resolve, reject) => {
@@ -81,15 +84,19 @@ export class Validator {
     }
 
     private selectRuleset = (rulesets: SetRules, voteorder: SendVoteorder): Promise<Rule []> => {
+        Util.cheapDebug(() => "Validator.selectRuleset(rulesets=" + rulesets + ", voteorder=" + voteorder + ")");
         return new Promise(function(resolve, reject) {
-            for (let i = 0; i < rulesets.rulesets.length; i++) {
+            let found: boolean = false;
+            for (let i = 0; i < rulesets.rulesets.length && !found; i++) {
                 const ruleset = rulesets.rulesets[i];
                 if (ruleset.name === voteorder.rulesetName) {
+                    found = true;
+                    Util.cheapDebug(() => "Validator.selectRuleset(...) => " + JSON.stringify(ruleset.rules, undefined, 2));
                     resolve(ruleset.rules);
                     return;
                 }
             }
-            throw new ValidationException("Delegator had no such ruleset (name=" + voteorder.rulesetName + ") at specified datetime.");
+            if (!found) throw new ValidationException("Delegator had no such ruleset (name=" + voteorder.rulesetName + ") at specified datetime.");
         });
     }
 
@@ -100,7 +107,14 @@ export class Validator {
             for (let i = 0; i < rules.length; i++) {
                 const rule = rules[i];
                 validatorPromiseReturners.push(() => {
-                    return rule.validate(voteorder, context);
+                    return rule.validate(voteorder, context)
+                    .then(
+                        () => Util.cheapDebug(() => "Validator.validateRules(...): validate rule " + JSON.stringify(rule) + " was successful"),
+                        (error: Error) => {
+                            Util.cheapDebug(() => "Validator.validateRules(...): validate rule " + JSON.stringify(rule) + " failed: " + error);
+                            throw error;
+                        }
+                    );
                 });
             }
             return validatorPromiseReturners;

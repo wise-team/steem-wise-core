@@ -39,11 +39,11 @@ export class Synchronizer {
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
     public runLoop(since: SteemOperationNumber): Synchronizer {
-        log.debug("Synchronizer.runLoop");
+        log.debug("Synchronizer: Synchronizer.runLoop");
         this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
         .then((rules: EffectuatedSetRules []) => {
-            log.debug("Loaded all rulesets: " + JSON.stringify(rules, undefined, 2));
+            log.debug("Synchronizer: Loaded all rulesets: " + JSON.stringify(rules, undefined, 2));
             this.rules = rules;
             this.processBlock(since.blockNum); // the loop is started
         })
@@ -113,13 +113,18 @@ export class Synchronizer {
                 rulesets: cmd.rulesets
             };
             this.rules.push(es);
+            log.debug("Synchronizer: Adding new rules encountered on blockchain: " + JSON.stringify(cmd.rulesets, undefined, 2));
             this.notify(undefined, { type: Synchronizer.EventType.RulesUpdated, moment: op.moment,
                 message: "Change of rules on blockchain. Local rules were updated." });
         });
     }
 
     private processVoteorder(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): Promise<void> {
+        log.debug("Synchronizer: Processing voteorder " + JSON.stringify(op, undefined, 2));
+
         const rules = this.determineRules(op, cmd);
+        log.debug("Synchronizer: Determined rules" + JSON.stringify(rules, undefined, 2));
+
         if (!rules) return this.rejectVoteorder(op, cmd, "There is no ruleset for you");
 
         const v = new Validator(this.api, this.protocol);
@@ -213,6 +218,10 @@ export class Synchronizer {
 
     private notify(error: Error | undefined, event: Synchronizer.Event) {
         this.notifier(error, event);
+        if (error) log.error(JSON.stringify(error));
+        else if (log.getLevel() <= log.levels.INFO) {
+            log.info(JSON.stringify(event, undefined, 2));
+        }
     }
 
     private continueIfRunning(fn: () => void) {
