@@ -25,6 +25,8 @@ export class FakeApi extends Api {
     private currentBlock = 0;
     private pushedOperations: SteemTransaction [] = [];
     private fakeTime: Date | undefined = undefined;
+    private fakeDelayMs: number = 5;
+    private transactionsByBlock: { [key: string]: SteemTransaction [] } = {};
 
     public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], transactions: SteemTransaction [], blogEntries: BlogEntry []) {
         super();
@@ -39,6 +41,13 @@ export class FakeApi extends Api {
         });
         this.currentBlock = this.transactions.map(trx => trx.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0);
         this.blogEntries = blogEntries;
+
+        this.transactions.forEach(trx => {
+            if (this.transactionsByBlock.hasOwnProperty(trx.block_num + "")) {
+                this.transactionsByBlock[trx.block_num + ""].push(trx);
+            }
+            else this.transactionsByBlock[trx.block_num + ""] = [trx];
+        });
     }
 
     public static fromDataset(dataset: FakeApi.Dataset): FakeApi {
@@ -53,7 +62,7 @@ export class FakeApi extends Api {
         return new Promise<SteemPost>((resolve, reject) => {
             for (let i = 0; i < this.posts.length; i++) {
                 if (this.posts[i].author === author && this.posts[i].permlink === permlink) {
-                    setTimeout(() => resolve(this.posts[i]), 4);
+                    setTimeout(() => resolve(this.posts[i]), this.fakeDelayMs);
                     return;
                 }
             }
@@ -87,8 +96,9 @@ export class FakeApi extends Api {
             };
             this.transactions.push(steemTrx);
             this.pushedOperations.push(steemTrx);
+            this.transactionsByBlock[blockNum + ""] = [steemTrx];
             this.currentBlock = blockNum;
-            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1)), 4);
+            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1)), this.fakeDelayMs);
         });
     }
 
@@ -115,7 +125,7 @@ export class FakeApi extends Api {
                     }
                 }
             }
-            setTimeout(() => resolve(result), 4);
+            setTimeout(() => resolve(result), this.fakeDelayMs);
         });
     }
 
@@ -133,7 +143,7 @@ export class FakeApi extends Api {
                     if (current.isGreaterThan(newest)) return current;
                     else return newest;
                 }, V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT)
-            ), 4);
+            ), this.fakeDelayMs);
         });
     }
 
@@ -144,19 +154,25 @@ export class FakeApi extends Api {
             awaitBlock = (thenFn: () => void) => {
                 if (blockNum <= this.currentBlock) thenFn();
                 else {
-                    setTimeout(() => awaitBlock(thenFn), 4);
+                    setTimeout(() => awaitBlock(thenFn), this.fakeDelayMs);
                 }
             };
-
-            setTimeout(() => awaitBlock(() => resolve(
-                this.transactions
-                .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
-                .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
-                .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => !!handledOrRejected)
-                .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
-                .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
-                .filter((effSop: EffectuatedSmartvotesOperation) => effSop.delegator === delegator)
-            )), 5);
+            setTimeout(() => {
+                if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) {
+                    awaitBlock(() => resolve(
+                        this.transactionsByBlock[blockNum + ""]
+                        .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
+                        .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
+                        .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => !!handledOrRejected)
+                        .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
+                        .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
+                        .filter((effSop: EffectuatedSmartvotesOperation) => effSop.delegator === delegator)
+                    ));
+                }
+                else {
+                    setTimeout(() => resolve([]), this.fakeDelayMs);
+                }
+            }, this.fakeDelayMs);
         });
     }
 
@@ -164,15 +180,15 @@ export class FakeApi extends Api {
         return new Promise((resolve, reject) => {
             this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
             this.dynamicGlobalProperties.head_block_number = this.currentBlock;
-            setTimeout(() => resolve(_.cloneDeep(this.dynamicGlobalProperties)), 4);
+            setTimeout(() => resolve(_.cloneDeep(this.dynamicGlobalProperties)), this.fakeDelayMs);
         });
     }
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
         return new Promise((resolve, reject) => {
             const result = this.accounts.filter((info: AccountInfo) => info.name === username);
-            if (result.length === 0) setTimeout(() => reject(new NotFoundException("Account " + username + " does not exist")), 4);
-            else setTimeout(() => resolve(result[0]), 4);
+            if (result.length === 0) setTimeout(() => reject(new NotFoundException("Account " + username + " does not exist")), this.fakeDelayMs);
+            else setTimeout(() => resolve(result[0]), this.fakeDelayMs);
         });
     }
 
@@ -198,7 +214,7 @@ export class FakeApi extends Api {
                     }
                 }
             }
-            setTimeout(() => resolve(result), 4);
+            setTimeout(() => resolve(result), this.fakeDelayMs);
         });
     }
 
@@ -214,7 +230,7 @@ export class FakeApi extends Api {
                     userI++;
                 }
             }
-            setTimeout(() => resolve(result), 4);
+            setTimeout(() => resolve(result), this.fakeDelayMs);
         });
     }
 
@@ -236,6 +252,10 @@ export class FakeApi extends Api {
 
     public setFakeTime(fakeTime_: Date) {
         this.fakeTime = fakeTime_;
+    }
+
+    public setFakeDelayMs(delayMs: number) {
+        this.fakeDelayMs = delayMs;
     }
 }
 
