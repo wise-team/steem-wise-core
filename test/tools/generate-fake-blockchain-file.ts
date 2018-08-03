@@ -44,7 +44,8 @@ const postLinks: [string, string][] = [
     ["steemprojects2", "4jxxyd-test"],
     ["jblew", "witajcie-steemianie-przybywam-jedrzej-lewandowski"],
     ["nicniezgrublem", "b52e6300-9011-11e8-b2de-f7be8f055a16"],
-    ["steemprojects2", "sttnc-test"]
+    ["steemprojects2", "sttnc-test"],
+    ["artemistau", "wielcy-polacy-professor-zbigniew-religa"]
 ];
 
 let posts: SteemPost [] = [];
@@ -53,7 +54,11 @@ let dynamicGlobalProperties: DynamicGlobalProperties | undefined = undefined;
 let transactions: SteemTransaction [] = [];
 let blogEntries: BlogEntry [] = [];
 
-const api = new DirectBlockchainApi("", "");
+const api = new DirectBlockchainApi("", "", /*{
+    transport: "http",
+    uri: "https://gtg.steem.house:8090",
+    url: "https://gtg.steem.house:8090"
+}*/);
 
 Bluebird.resolve()
 .then(() => console.log("Loading posts..."))
@@ -85,7 +90,7 @@ Bluebird.resolve()
 .then(() => console.log("Loading transactions..."))
 .then(() => usernames) // for each username return a promise that returns transactions
 .mapSeries((username: string) => {
-    return new Bluebird<SteemTransaction []>((resolve, reject) => {
+    return Bluebird.delay(2000).then(() => new Bluebird<SteemTransaction []>((resolve, reject) => {
         console.log("Loading transactions of @" + username + "...");
         const trxs: SteemTransaction [] = [];
         new SteemJsAccountHistorySupplier(steem, username)
@@ -105,7 +110,7 @@ Bluebird.resolve()
             console.log("Done loading transactions of @" + username + "...");
             resolve(trxs);
         });
-    });
+    }));
 })
 .then((values: SteemTransaction [][]) => {
     return values.reduce((allTrxs: SteemTransaction [], nextTrxs: SteemTransaction []) => allTrxs.concat(nextTrxs));
