@@ -4,6 +4,7 @@ import { expect, assert } from "chai";
 import * as _ from "lodash";
 import * as Promise from "bluebird";
 import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
+log.setLevel(log.levels.INFO);
 
 // wise imports
 import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedSmartvotesOperation } from "../src/wise";

@@ -1,6 +1,8 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
+log.setLevel(log.levels.INFO);
 
 // wise imports
 import { Wise, SteemTransaction } from "../src/wise";
