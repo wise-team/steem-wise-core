@@ -94,7 +94,7 @@ export class Synchronizer {
                     else if (isSendVoteorder(op.command)) {
                         return this.processVoteorder(op, op.command);
                     }
-                    // configmVote does not need to be processed
+                    // confirmVote does not need to be processed
                 }
             }
         })
@@ -146,10 +146,7 @@ export class Synchronizer {
             const r = this.rules[i];
             if (r.voter === op.voter) {
                 if (r.moment.isLesserThan_solveOpInTrxBug(moment)) {
-                    if (out && out.moment.isLesserThan_solveOpInTrxBug(r.moment)) {
-                        out = r;
-                    }
-                    else {
+                    if (!out || out.moment.isLesserThan_solveOpInTrxBug(r.moment)) {
                         out = r;
                     }
                 }
@@ -182,7 +179,7 @@ export class Synchronizer {
         };
         opsToSend.push(...this.protocol.serializeToBlockchain(wiseOp));
 
-        this.notify(undefined, { type: Synchronizer.EventType.VoteorderPassed, voteorder: cmd, moment: op.moment, voter: op.voter, message: "Voteorder passed" });
+        this.notify(undefined, { type: Synchronizer.EventType.VoteorderPassed, voteorder: cmd, voteorderTxId: op.transaction_id, moment: op.moment, voter: op.voter, message: "Voteorder passed" });
 
         return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
             this.notify(undefined, { type: Synchronizer.EventType.OperarionsPushed,
@@ -203,7 +200,7 @@ export class Synchronizer {
         };
         const opsToSend: [string, object][] = this.protocol.serializeToBlockchain(wiseOp);
 
-        this.notify(undefined, { type: Synchronizer.EventType.VoteorderRejected, voteorder: cmd, moment: op.moment, voter: op.voter, message: "Voteorder rejected: " + msg, validationException: undefined });
+        this.notify(undefined, { type: Synchronizer.EventType.VoteorderRejected, voteorder: cmd, voteorderTxId: op.transaction_id, moment: op.moment, voter: op.voter, message: "Voteorder rejected: " + msg, validationException: undefined });
 
         return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
             this.notify(undefined, { type: Synchronizer.EventType.OperarionsPushed,
@@ -280,6 +277,7 @@ export namespace Synchronizer {
     export interface VoteorderRejected {
         type: EventType.VoteorderRejected;
         voteorder: SendVoteorder;
+        voteorderTxId: string;
         voter: string;
         moment: SteemOperationNumber;
         validationException: ValidationException | undefined;
@@ -289,6 +287,7 @@ export namespace Synchronizer {
     export interface VoteorderPassed {
         type: EventType.VoteorderPassed;
         voteorder: SendVoteorder;
+        voteorderTxId: string;
         voter: string;
         moment: SteemOperationNumber;
         message: string;
