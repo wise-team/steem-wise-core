@@ -2,6 +2,7 @@
 import { expect } from "chai";
 import "mocha";
 import * as steem from "steem";
+import * as log from "loglevel";
 
 // wise imports
 import { BlockchainConfig } from "../src/blockchain/BlockchainConfig";
@@ -28,7 +29,7 @@ describe("test/steem.spec.ts", () => {
                         const rawOp: [string, {op_in_trx: number}] = result[0] as [string, {op_in_trx: number}];
                         if (rawOp[1].op_in_trx === 3) done(new Error("Steem account_history_api returns correct op_in_trx (" + rawOp[1].op_in_trx + "). The bug was repaird. Please replace all lesserThan_solveOpInTrxBug to lesserThan."));
                         else {
-                            console.log("Steem account_history_api returns wrong op_in_trx (" + rawOp[1].op_in_trx + "). The bug still persists, but is patched in this app, so there is nothing to do.");
+                            log.warn("Steem account_history_api returns wrong op_in_trx (" + rawOp[1].op_in_trx + "). The bug still persists, but is patched in this app, so there is nothing to do.");
                             done();
                         }
                     }

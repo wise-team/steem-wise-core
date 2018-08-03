@@ -3,6 +3,7 @@ import { expect, assert } from "chai";
 import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
+import * as log from "loglevel";
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api } from "../src/wise";
@@ -49,7 +50,7 @@ describe("test/synchronization.spec.ts", () => {
                     if (event.type === Synchronizer.EventType.SynchronizationStop) {
                         resolve();
                     }
-                    // console.log(event);
+                    // log.info(event);
 
                     if (error) {
                         reject(error);

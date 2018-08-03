@@ -3,6 +3,7 @@ import "mocha";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
 import * as Promise from "bluebird";
+import * as log from "loglevel";
 
 // wise imports
 import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedSmartvotesOperation } from "../src/wise";
@@ -75,7 +76,7 @@ describe("test/rule-weightforperiod.spec.ts", () => {
                         if (event.type === Synchronizer.EventType.SynchronizationStop) {
                             resolve();
                         }
-                        // if (event.type === Synchronizer.EventType.OperarionsPushed) console.log(event);
+                        // if (event.type === Synchronizer.EventType.OperarionsPushed) log.info(event);
 
                         if (error) {
                             reject(error);

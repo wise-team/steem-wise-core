@@ -3,6 +3,7 @@ import { expect } from "chai";
 import "mocha";
 import { Promise } from "bluebird";
 import * as steem from "steem";
+import * as log from "loglevel";
 
 // wise imports
 import { SimpleTaker } from "../src/chainable/Chainable";
@@ -119,7 +120,7 @@ describe("test/chainable.spec.ts", () => {
                                 if (indexInSamples !== -1) {
                                     if (indexInSamples !== 0) {
                                         const error = new Error("Votes returned in wrogn order. Received " + vote.permlink + ", sholudReceive: " + randomVoteOperationsInDescendingTimeOrder[0]);
-                                        console.error(error);
+                                        log.error(error);
                                         done(error);
                                         continueLoading = false;
                                     }
@@ -135,7 +136,7 @@ describe("test/chainable.spec.ts", () => {
                         return continueLoading;
                     }))
                     .catch((error: Error): boolean => {
-                        console.error(error);
+                        log.error(error);
                         done(error);
                         return false;
                     });

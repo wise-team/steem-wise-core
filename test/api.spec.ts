@@ -320,8 +320,8 @@ describe("test/api.spec.ts", function () {
                         if (isConfirmVote(op.command)) {
                             const confirmVoteCmd: ConfirmVote = op.command;
                             if (confirmVoteCmd.accepted) {
-                                expect (confirmVoteCmd).to.haveOwnProperty("vote");
                                 expect(isConfirmVoteBoundWithVote(confirmVoteCmd), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
+                                expect (confirmVoteCmd).to.haveOwnProperty("vote");
                             }
                         }
                     });

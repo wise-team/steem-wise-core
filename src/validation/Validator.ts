@@ -1,3 +1,5 @@
+import * as log from "loglevel";
+
 import { Api } from "../api/Api";
 import { ValidationException } from "./ValidationException";
 import { Protocol } from "../protocol/Protocol";
