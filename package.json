@@ -9,10 +9,12 @@
     "node": ">=9.11"
   },
   "dependencies": {
+    "@types/loglevel": "^1.5.3",
     "ajv": "^6.4.0",
     "axios": "^0.18.0",
     "bluebird": "^3.5.1",
     "lodash": "^4.17.10",
+    "loglevel": "^1.6.1",
     "steem": "^0.7.1"
   },
   "devDependencies": {
