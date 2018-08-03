@@ -3,7 +3,7 @@ import { expect, assert } from "chai";
 import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
-import * as log from "loglevel";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api } from "../src/wise";

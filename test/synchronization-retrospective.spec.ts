@@ -3,7 +3,7 @@ import { expect, assert } from "chai";
 import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
-import * as log from "loglevel";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, DirectBlockchainApi } from "../src/wise";
@@ -26,11 +26,10 @@ Promise.onPossiblyUnhandledRejection(function(error) {
  * Setup
  */
 const delegator = "noisy";
-/*const fakeDataset = FakeWiseFactory.loadDataset();
-/const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
+const fakeDataset = FakeWiseFactory.loadDataset();
+const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
 fakeApi.setFakeDelayMs(0);
-const delegatorWise = new Wise(delegator, fakeApi as object as Api);*/
-const delegatorWise = new Wise(delegator, new DirectBlockchainApi(delegator, ""));
+const delegatorWise = new Wise(delegator, fakeApi as object as Api);
 
 
 

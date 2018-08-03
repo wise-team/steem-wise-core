@@ -1,4 +1,4 @@
-import * as log from "loglevel";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 import { Api } from "../api/Api";
 import { ValidationException } from "./ValidationException";

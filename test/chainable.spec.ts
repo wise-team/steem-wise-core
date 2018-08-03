@@ -3,7 +3,7 @@ import { expect } from "chai";
 import "mocha";
 import { Promise } from "bluebird";
 import * as steem from "steem";
-import * as log from "loglevel";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 // wise imports
 import { SimpleTaker } from "../src/chainable/Chainable";

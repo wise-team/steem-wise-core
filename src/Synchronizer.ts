@@ -1,5 +1,6 @@
 import { Promise } from "bluebird";
 import * as _ from "lodash";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 import { Api } from "./api/Api";
 import { Protocol } from "./protocol/Protocol";
@@ -38,9 +39,11 @@ export class Synchronizer {
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
     public runLoop(since: SteemOperationNumber): Synchronizer {
+        log.debug("Synchronizer.runLoop");
         this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
         .then((rules: EffectuatedSetRules []) => {
+            log.debug("Loaded all rulesets: " + JSON.stringify(rules, undefined, 2));
             this.rules = rules;
             this.processBlock(since.blockNum); // the loop is started
         })

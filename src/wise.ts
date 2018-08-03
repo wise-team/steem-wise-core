@@ -1,5 +1,6 @@
 import { Promise } from "bluebird";
 import * as _ from "lodash";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { Protocol } from "./protocol/Protocol";
@@ -284,6 +285,9 @@ export class Wise {
         return this.protocol;
     }
 }
+
+ // setDefaultLevel can be overwritten by log.setLevel(). Also when setLevel was called before.
+ log.setDefaultLevel("warn");
 
 
 export { Api } from "./api/Api";

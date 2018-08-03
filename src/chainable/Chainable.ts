@@ -1,4 +1,4 @@
-import * as log from "loglevel";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 export abstract class Chainable<FROM, TO, IMPLEMENTERCLASS extends Chainable<FROM, TO, IMPLEMENTERCLASS>> {
     // ABSTRACT MEMBERS
