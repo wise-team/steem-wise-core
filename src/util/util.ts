@@ -32,4 +32,14 @@ export class Util {
     public static cheapDebug(debugStringReturnerFn: () => string): void {
         if (log.getLevel() <= log.levels.DEBUG) log.debug(debugStringReturnerFn());
     }
+
+    public static promiseResolveDebug<T>(msgBeginning: string, result: T): T {
+        Util.cheapDebug(() => msgBeginning + JSON.stringify(result));
+        return result;
+    }
+
+    public static promiseRejectionDebug<T>(msgBeginning: string, error: T): T {
+        Util.cheapDebug(() => msgBeginning + JSON.stringify(error));
+        throw error;
+    }
 }
