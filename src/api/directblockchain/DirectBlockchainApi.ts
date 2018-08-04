@@ -26,6 +26,7 @@ export class DirectBlockchainApi extends Api {
     private steem: any;
     private username: string;
     private postingWif: string;
+    private sendEnabled: boolean = true;
 
     public constructor(username: string, postingWif: string, steemOptions?: object) {
         super();
@@ -39,6 +40,10 @@ export class DirectBlockchainApi extends Api {
 
     public name(): string {
         return "DirectBlockchainApi";
+    }
+
+    public setSentEnabled(enabled: boolean) {
+        this.sendEnabled = enabled;
     }
 
     public loadPost(author: string, permlink: string): Promise<SteemPost> {
@@ -94,14 +99,19 @@ export class DirectBlockchainApi extends Api {
                 }
             };
 
-            steem.broadcast.send(
-                {
-                    extensions: [],
-                    operations: operations
-                },
-                {posting: this.postingWif},
-                steemCallback
-            );
+            if (this.sendEnabled) {
+                steem.broadcast.send(
+                    {
+                        extensions: [],
+                        operations: operations
+                    },
+                    {posting: this.postingWif},
+                    steemCallback
+                );
+            }
+            else {
+                steemCallback(undefined, { id: "direct-blockchain-api-send-disabled-false-id=" + Date.now(), block_num: 10000, trx_num: 1 });
+            }
         });
     }
 
