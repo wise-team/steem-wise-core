@@ -26,9 +26,14 @@ npm install
 echo "Build successful"
 
 
+echo "Creating git tag"
 git add package.json package-lock.json
 git commit -m "Semver ${VERSION}"
 git tag -a "v${VERSION}" -m "Steem WISE core library version ${VERSION}"
+git push --tags
+echo "Done creating tag"
+
+echo "Publishing to npmjs.com registry"
 npm publish
 
 echo "Done"
