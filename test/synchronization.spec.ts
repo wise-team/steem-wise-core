@@ -4,7 +4,6 @@ import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
 import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
-log.setLevel(log.levels.INFO);
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api } from "../src/wise";
@@ -12,7 +11,7 @@ import { SteemPost } from "../src/blockchain/SteemPost";
 import { FakeApi } from "../src/api/FakeApi";
 import { Util } from "../src/util/util";
 import { Synchronizer } from "../src/Synchronizer";
-import { isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
+import { isConfirmVote, ConfirmVote, isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote } from "../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */
@@ -77,7 +76,7 @@ describe("test/synchronization.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(50))
+            .then(() => Promise.delay(80))
             .then(() => {
                 const lastTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastTrx));
@@ -139,7 +138,7 @@ describe("test/synchronization.spec.ts", () => {
             .then((moment: SteemOperationNumber) => {
                 expect(moment.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(50))
+            .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -168,13 +167,13 @@ describe("test/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(50))
+            .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
-                expect(isConfirmVote(lastHandledOp.command)).to.be.true;
-                expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
+                expect(isConfirmVote(lastHandledOp.command), "last pushed op is confirm vote").to.be.true;
+                expect((lastHandledOp.command as ConfirmVote).accepted, "last pushed op is accepted confirm vote").to.be.false;
             });
         }));
 
@@ -210,7 +209,7 @@ describe("test/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorderAsync(delegator, voteorder, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(50))
+            .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -231,7 +230,7 @@ describe("test/synchronization.spec.ts", () => {
         previouslyInalidNowValidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends now valid (but previously invalid) voteorder (rulesetName= " + voteorder.rulesetName + ") and delegator passes them", () => {
             return voterWise.sendVoteorderAsync(delegator, voteorder)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(50))
+            .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
