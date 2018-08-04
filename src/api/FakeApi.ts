@@ -1,5 +1,6 @@
 import * as Promise from "bluebird";
 import * as _ from "lodash";
+import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules, isSetRules } from "../../src/protocol/SetRules";
@@ -14,6 +15,7 @@ import { isConfirmVote } from "../protocol/ConfirmVote";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
 import { BlogEntry } from "../blockchain/BlogEntry";
+import { Util } from "../util/util";
 
 // TODO very slow. Examine why (maybe DirecrBlockchain could also be speeded up)
 export class FakeApi extends Api {
@@ -39,7 +41,12 @@ export class FakeApi extends Api {
             trx.timestamp = new Date(trx.timestamp as any); // prototype timestamp loaded from json
             return trx;
         });
-        this.currentBlock = this.transactions.map(trx => trx.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0);
+        /*this.currentBlock = Math.max(
+            this.transactions.map(trx => trx.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0),
+            this.dynamicGlobalProperties.head_block_number
+        );*/
+        this.currentBlock = this.transactions.map(trx => trx.block_num)
+            .reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0) + 1;
         this.blogEntries = blogEntries;
 
         this.transactions.forEach(trx => {
@@ -98,6 +105,8 @@ export class FakeApi extends Api {
             this.pushedOperations.push(steemTrx);
             this.transactionsByBlock[blockNum + ""] = [steemTrx];
             this.currentBlock = blockNum;
+            Util.cheapDebug(() => "FakeApi: Pushed transaction " + JSON.stringify(steemTrx));
+            log.trace();
             setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1)), this.fakeDelayMs);
         });
     }
@@ -149,7 +158,7 @@ export class FakeApi extends Api {
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => {
-            if (blockNum > this.currentBlock + 1) reject(new Error("Cannot get block that has number greater than next block (blockNum must be <= this.currentBlockNum+1)"));
+            if (blockNum > this.currentBlock + 1) reject(new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)"));
             let awaitBlock: (thenFn: () => void) => void = () => {};
             awaitBlock = (thenFn: () => void) => {
                 if (blockNum <= this.currentBlock) thenFn();
@@ -158,8 +167,8 @@ export class FakeApi extends Api {
                 }
             };
             setTimeout(() => {
-                if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) {
-                    awaitBlock(() => resolve(
+                awaitBlock(() => {
+                    if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) resolve(
                         this.transactionsByBlock[blockNum + ""]
                         .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
                         .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
@@ -167,11 +176,13 @@ export class FakeApi extends Api {
                         .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
                         .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
                         .filter((effSop: EffectuatedSmartvotesOperation) => effSop.delegator === delegator)
-                    ));
-                }
+                    );
+                    else resolve([]);
+                });
+                /*}
                 else {
-                    setTimeout(() => resolve([]), this.fakeDelayMs);
-                }
+                    resolve([]);
+                }*/
             }, this.fakeDelayMs);
         });
     }
