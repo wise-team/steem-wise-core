@@ -1,6 +1,8 @@
 import * as _ from "lodash";
 import { ChainableSupplier } from "../../chainable/Chainable";
 import { SteemTransaction } from "../../blockchain/SteemTransaction";
+import { Util } from "../../util/util";
+import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
 
 export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransaction, SteemJsAccountHistorySupplier> {
     private steem: any;
@@ -75,8 +77,23 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
         });
     }
 
+    /**
+     * This is to prevent the situation in which a custom_json is placed at the end of one batch, and vote is placed at the start of the next batch.
+     */
+    private previousBatchLeftoverCustomJson: RawOperation | undefined = undefined;
+
     private processBatch(ops: RawOperation []): boolean {
         let loadNext: boolean = true;
+
+        if (this.previousBatchLeftoverCustomJson) {
+            ops.unshift(this.previousBatchLeftoverCustomJson);
+            this.previousBatchLeftoverCustomJson = undefined;
+        }
+
+        if (ops[ops.length - 1][1].op[0] === "custom_json") {
+            const lastOp: RawOperation = ops.pop() as RawOperation;
+            this.previousBatchLeftoverCustomJson = lastOp;
+        }
 
         const opsGroupedByTransactionNum: { [key: number]: RawOperation [] }
             = _.groupBy(ops, (op: RawOperation) => op[1].trx_id);
@@ -100,6 +117,22 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
             = _.reverse(_.sortBy(opsMappedToStemTransactions, ["block_num", "transaction_num"]));
 
         opsMappedToStemTransactionsSorted.forEach(trx => {
+            let hasAcceptedConfirmVote: boolean = false;
+            let hasVote: boolean = false;
+
+            if (trx.ops.filter(op => op[0] === "vote").length > 0) hasVote = true;
+            if (trx.ops.filter(op => op[0] === "custom_json")
+                .map(op => op[1] as CustomJsonOperation)
+                .filter((cjop: CustomJsonOperation) => cjop.id === "wise")
+                .map(cjop => JSON.parse(cjop.json) as string [])
+                .filter(o => o[0] === "v2:confirm_vote")
+                .filter(o => _.get(o[1], "accepted") as boolean === true).length > 0) hasAcceptedConfirmVote = true;
+
+            if (hasAcceptedConfirmVote && !hasVote) {
+                Util.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE=" + JSON.stringify(trx));
+                Util.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE_ALL_OPS=" + JSON.stringify(ops));
+            }
+
             if (loadNext) loadNext = this.give(undefined, trx);
         });
 
