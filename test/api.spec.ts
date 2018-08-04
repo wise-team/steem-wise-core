@@ -4,6 +4,7 @@ import "mocha";
 import * as _ from "lodash";
 import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 log.setLevel(log.levels.INFO);
+// log.enableAll();
 
 // wise imports
 import { Wise } from "../src/wise";
@@ -33,7 +34,7 @@ const username = "guest123";
 const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 
 describe("test/api.spec.ts", function () {
-    this.timeout(10000);
+    this.timeout(12000);
 
     const apis: Api [] = [
         new DirectBlockchainApi(username, postingWif),
@@ -322,6 +323,9 @@ describe("test/api.spec.ts", function () {
                         if (isConfirmVote(op.command)) {
                             const confirmVoteCmd: ConfirmVote = op.command;
                             if (confirmVoteCmd.accepted) {
+                                /*if (!isConfirmVoteBoundWithVote(confirmVoteCmd)) {
+                                    log.debug("CONFIRM_VOTE_NOT_BOUND_WITH_VOTE=" + JSON.stringify(op));
+                                }*/
                                 expect(isConfirmVoteBoundWithVote(confirmVoteCmd), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
                                 expect (confirmVoteCmd).to.haveOwnProperty("vote");
                             }
