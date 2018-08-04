@@ -105,8 +105,8 @@ export class FakeApi extends Api {
             this.pushedOperations.push(steemTrx);
             this.transactionsByBlock[blockNum + ""] = [steemTrx];
             this.currentBlock = blockNum;
-            Util.cheapDebug(() => "FakeApi: Pushed transaction " + JSON.stringify(steemTrx));
-            log.trace();
+
+            Util.cheapDebug(() => "FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx));
             setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1)), this.fakeDelayMs);
         });
     }

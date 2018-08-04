@@ -28,7 +28,7 @@ export class ValidationContext {
         this.voter = voter;
         this.voteorder = voteorder;
 
-        Util.cheapDebug(() => "ValidationContext.construct: " + JSON.stringify(this, undefined, 2));
+        Util.cheapDebug(() => "ValidationContext.construct(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + JSON.stringify(voteorder, undefined, 2));
     }
 
     public getPost(): Promise<SteemPost> {

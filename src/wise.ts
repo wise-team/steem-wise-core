@@ -286,10 +286,6 @@ export class Wise {
     }
 }
 
- // setDefaultLevel can be overwritten by log.setLevel(). Also when setLevel was called before.
- log.setDefaultLevel("warn");
-
-
 export { Api } from "./api/Api";
 export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
 export { WiseRESTApi } from "./api/WiseRESTApi";

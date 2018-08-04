@@ -37,12 +37,12 @@ export class Validator {
     }
 
     public provideRulesets(rulesets: EffectuatedSetRules) {
-        log.debug("Validator: provided with rulesets: " + JSON.stringify(rulesets, undefined, 2));
+        Util.cheapDebug(() => "VALIDATOR_PROVIDED_WITH_RULESETS=" + JSON.stringify(rulesets));
         this.providedRulesets = rulesets;
     }
 
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> => {
-        log.debug("Validator.validate(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + voteorder + ", atMoment=" + atMoment);
+        Util.cheapDebug(() => "VALIDATOR_VALIDATE=" + JSON.stringify({delegator: delegator, voter: voter, voteorder: voteorder, atMoment: atMoment}));
         const context = new ValidationContext(this.api, this.protocol, delegator, voter, voteorder);
 
         return new Promise<ValidationException | true>((resolve, reject) => {
@@ -84,14 +84,13 @@ export class Validator {
     }
 
     private selectRuleset = (rulesets: SetRules, voteorder: SendVoteorder): Promise<Rule []> => {
-        Util.cheapDebug(() => "Validator.selectRuleset(rulesets=" + rulesets + ", voteorder=" + voteorder + ")");
         return new Promise(function(resolve, reject) {
             let found: boolean = false;
             for (let i = 0; i < rulesets.rulesets.length && !found; i++) {
                 const ruleset = rulesets.rulesets[i];
                 if (ruleset.name === voteorder.rulesetName) {
                     found = true;
-                    Util.cheapDebug(() => "Validator.selectRuleset(...) => " + JSON.stringify(ruleset.rules, undefined, 2));
+                    Util.cheapDebug(() => "VALIDATOR_SELECTED_RULESET=" + JSON.stringify(ruleset.rules));
                     resolve(ruleset.rules);
                     return;
                 }
@@ -109,9 +108,9 @@ export class Validator {
                 validatorPromiseReturners.push(() => {
                     return rule.validate(voteorder, context)
                     .then(
-                        () => Util.cheapDebug(() => "Validator.validateRules(...): validate rule " + JSON.stringify(rule) + " was successful"),
+                        () => Util.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_SUCCEEDED=" + JSON.stringify(rule)),
                         (error: Error) => {
-                            Util.cheapDebug(() => "Validator.validateRules(...): validate rule " + JSON.stringify(rule) + " failed: " + error);
+                            Util.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_FAILED=" + JSON.stringify({ rule: rule, error: error.message }));
                             throw error;
                         }
                     );
