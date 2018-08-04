@@ -247,7 +247,7 @@ export namespace Synchronizer {
         EndBlockProcessing = "end-block-processing",
         OperarionsPushed = "operations-pushed",
         VoteorderRejected = "voteorder-rejected",
-        VoteorderPassed = "voteordr-passed",
+        VoteorderPassed = "voteorder-passed",
         ReversibleError = "reversible-error",
         UnhandledError = "unhandled-error",
         SynchronizationStop = "synchronization-stop",
