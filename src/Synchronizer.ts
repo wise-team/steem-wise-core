@@ -169,15 +169,6 @@ export class Synchronizer {
 
         const opsToSend: [string, object][] = [];
 
-        const voteOp: VoteOperation = {
-            voter: this.delegator,
-            author: cmd.author,
-            permlink: cmd.permlink,
-            weight: cmd.weight
-        };
-
-        opsToSend.push(["vote", voteOp]);
-
         const confirmCmd: ConfirmVote = {
             voteorderTxId: op.transaction_id,
             accepted: true,
@@ -189,6 +180,15 @@ export class Synchronizer {
             command: confirmCmd
         };
         opsToSend.push(...this.protocol.serializeToBlockchain(wiseOp));
+
+        const voteOp: VoteOperation = {
+            voter: this.delegator,
+            author: cmd.author,
+            permlink: cmd.permlink,
+            weight: cmd.weight
+        };
+
+        opsToSend.push(["vote", voteOp]);
 
         this.notify(undefined, { type: Synchronizer.EventType.VoteorderPassed, voteorder: cmd, voteorderTxId: op.transaction_id, moment: op.moment, voter: op.voter, message: "Voteorder passed" });
 
