@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e # fail on first error
-set -x # output commands
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.." # parent dir of scripts dir
 cd "${DIR}"
 
