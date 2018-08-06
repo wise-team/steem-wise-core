@@ -30,6 +30,9 @@ module.exports = {
     resolve: {
         extensions: [".js", ".json"]
     },
+    node: {
+        fs: "empty" // fix can't resolve "fs" in winston
+    },
     plugins: [
         new Visualizer({
             filename: './statistics.html'
