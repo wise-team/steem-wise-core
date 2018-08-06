@@ -2,7 +2,9 @@ import * as winston from "winston";
 
 export class Log {
     public static configureLoggers() {
-        Log.getLogger().add(new winston.transports.Console({}));
+        Log.getLogger().add(new winston.transports.Console({
+            format: winston.format.simple()
+        }));
         Log.getLogger().level = "warn";
     }
 
