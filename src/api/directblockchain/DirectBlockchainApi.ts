@@ -21,7 +21,7 @@ import { AccountInfo } from "../../blockchain/AccountInfo";
 import { NotFoundException } from "../../util/NotFoundException";
 import { DateLimiter } from "./DateLimiter";
 import { BlogEntry } from "../../blockchain/BlogEntry";
-import { Util } from "../../util/util";
+import { Log } from "../../util/log";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
@@ -44,17 +44,17 @@ export class DirectBlockchainApi extends Api {
     }
 
     public setSendEnabled(enabled: boolean) {
-        Util.cheapDebug(() => "DIRECT_BLOCKCHAIN_SET_SEND_ENABLED=" + enabled);
+        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_SET_SEND_ENABLED=" + enabled);
 
         this.sendEnabled = enabled;
     }
 
     public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        Util.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink }));
+        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink }));
 
         return new Promise((resolve, reject) => {
             this.steem.api.getContent(author, permlink, function(error: Error, result: any) {
-                Util.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST_RESULT=" + JSON.stringify({ author: author, permlink: permlink, result: result, error: error }));
+                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST_RESULT=" + JSON.stringify({ author: author, permlink: permlink, result: result, error: error }));
 
                 if (error) reject(error);
                 else if (result.author.length === 0) reject(new NotFoundException("The post (@" + author + "/" + permlink + ") does not exist"));
@@ -64,7 +64,7 @@ export class DirectBlockchainApi extends Api {
     }
 
     public loadRulesets(delegator: string, voter: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
-        Util.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS=" + JSON.stringify({ delegator: delegator, voter: voter, atMoment: atMoment }));
+        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS=" + JSON.stringify({ delegator: delegator, voter: voter, atMoment: atMoment }));
 
         return new Promise<SetRules>((resolve, reject) => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
@@ -97,13 +97,16 @@ export class DirectBlockchainApi extends Api {
                 if (noResult) resolve({rulesets: []} as SetRules);
             });
         })
-        .then((result: SetRules) => Util.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_RESULT", result),
-              (error: Error) => Util.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_ERROR", error));
+        .then((result: SetRules) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_RESULT", result),
+              (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_ERROR", error));
     }
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
         return new Promise<SteemOperationNumber>((resolve, reject) => {
             const steemCallback = function(error: Error | undefined, result: { id: string, block_num: number, trx_num: number }): void {
+                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_RESULT="
+                     + JSON.stringify({operations: operations, error: error, rewsult: result }));
+
                 if (error) reject(error);
                 else {
                     resolve(new SteemOperationNumber(result.block_num, result.trx_num, operations.length - 1));
@@ -111,6 +114,7 @@ export class DirectBlockchainApi extends Api {
             };
 
             if (this.sendEnabled) {
+                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
                 steem.broadcast.send(
                     {
                         extensions: [],
@@ -121,13 +125,15 @@ export class DirectBlockchainApi extends Api {
                 );
             }
             else {
+                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_DISABLED=" + JSON.stringify(operations));
+
                 steemCallback(undefined, { id: "direct-blockchain-api-send-disabled-false-id=" + Date.now(), block_num: 10000, trx_num: 1 });
             }
         });
     }
 
     public loadAllRulesets(delegator: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        Util.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS=" + JSON.stringify({ delegator: delegator, atMoment: atMoment }));
+        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS=" + JSON.stringify({ delegator: delegator, atMoment: atMoment }));
 
         return new Promise<EffectuatedSetRules []>((resolve, reject) => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
@@ -160,12 +166,12 @@ export class DirectBlockchainApi extends Api {
                 resolve(allRules);
             });
         })
-        .then((result: EffectuatedSetRules []) => Util.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_RESULT", result),
-              (error: Error) => Util.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_ERROR", error));
+        .then((result: EffectuatedSetRules []) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_RESULT", result),
+              (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_ERROR", error));
     }
 
     public getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
-        Util.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator }));
+        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator }));
 
         return new Promise<SteemOperationNumber>((resolve, reject) => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
@@ -194,8 +200,8 @@ export class DirectBlockchainApi extends Api {
                 if (noResult) resolve(V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT);
             });
         })
-        .then((result: SteemOperationNumber) => Util.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_RESULT", result),
-              (error: Error) => Util.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_ERROR", error));
+        .then((result: SteemOperationNumber) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_RESULT", result),
+              (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_ERROR", error));
     }
 
     public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
