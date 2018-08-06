@@ -1,6 +1,5 @@
 import * as Promise from "bluebird";
 import * as _ from "lodash";
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { SetRules, EffectuatedSetRules, isSetRules } from "../../src/protocol/SetRules";
@@ -15,7 +14,7 @@ import { isConfirmVote } from "../protocol/ConfirmVote";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
 import { BlogEntry } from "../blockchain/BlogEntry";
-import { Util } from "../util/util";
+import { Log } from "../util/log"; const log = Log.getLogger();
 
 // TODO very slow. Examine why (maybe DirecrBlockchain could also be speeded up)
 export class FakeApi extends Api {
@@ -106,7 +105,7 @@ export class FakeApi extends Api {
             this.transactionsByBlock[blockNum + ""] = [steemTrx];
             this.currentBlock = blockNum;
 
-            Util.cheapDebug(() => "FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx));
+            Log.cheapDebug(() => "FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx));
             setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1)), this.fakeDelayMs);
         });
     }

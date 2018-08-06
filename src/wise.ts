@@ -1,6 +1,5 @@
 import { Promise } from "bluebird";
 import * as _ from "lodash";
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { Protocol } from "./protocol/Protocol";
@@ -16,7 +15,10 @@ import { Validator } from "./validation/Validator";
 import { Synchronizer } from "./Synchronizer";
 import { V2Handler } from "./protocol/versions/v2/V2Handler";
 import { RulesUpdater } from "./RulesUpdater";
+import { Log } from "./util/log";
 
+Log.configureLoggers();
+const log = Log.getLogger();
 /**
  * TODO blockchain input sanitization (prevent malicious json)
  * TODO rename smartvotes to wise
@@ -319,6 +321,7 @@ export { ProggressCallback } from "./ProggressCallback";
 export { NotFoundException } from "./util/NotFoundException";
 
 export { Synchronizer } from "./Synchronizer";
+export { Log } from "./util/log";
 
 export * from "./protocol/versions/v2/wise-schema";
 

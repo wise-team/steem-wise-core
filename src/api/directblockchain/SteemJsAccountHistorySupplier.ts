@@ -1,8 +1,8 @@
 import * as _ from "lodash";
 import { ChainableSupplier } from "../../chainable/Chainable";
 import { SteemTransaction } from "../../blockchain/SteemTransaction";
-import { Util } from "../../util/util";
 import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
+import { Log } from "../../util/log"; const log = Log.getLogger();
 
 export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransaction, SteemJsAccountHistorySupplier> {
     private steem: any;
@@ -129,8 +129,8 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
                 .filter(o => _.get(o[1], "accepted") as boolean === true).length > 0) hasAcceptedConfirmVote = true;
 
             if (hasAcceptedConfirmVote && !hasVote) {
-                Util.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE=" + JSON.stringify(trx));
-                Util.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE_ALL_OPS=" + JSON.stringify(ops));
+                Log.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE=" + JSON.stringify(trx));
+                Log.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE_ALL_OPS=" + JSON.stringify(ops));
             }
 
             if (loadNext) loadNext = this.give(undefined, trx);

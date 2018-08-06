@@ -1,8 +1,7 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
-log.setLevel(log.levels.INFO);
+import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
 import { VotesCountRule, SendVoteorder, ValidationException, Wise } from "../src/wise";

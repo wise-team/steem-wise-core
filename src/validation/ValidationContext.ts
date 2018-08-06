@@ -1,5 +1,3 @@
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
-
 import { SteemPost } from "../blockchain/SteemPost";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { Api } from "../api/Api";
@@ -9,7 +7,7 @@ import { AccountInfo } from "../blockchain/AccountInfo";
 import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
 import { Protocol } from "../protocol/Protocol";
 import { BlogEntry } from "../blockchain/BlogEntry";
-import { Util } from "../util/util";
+import { Log } from "../util/log"; const log = Log.getLogger();
 
 export class ValidationContext {
     private api: Api;
@@ -28,7 +26,7 @@ export class ValidationContext {
         this.voter = voter;
         this.voteorder = voteorder;
 
-        Util.cheapDebug(() => "ValidationContext.construct(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + JSON.stringify(voteorder, undefined, 2));
+        Log.cheapDebug(() => "ValidationContext.construct(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + JSON.stringify(voteorder, undefined, 2));
     }
 
     public getPost(): Promise<SteemPost> {

@@ -3,8 +3,7 @@ import { expect, assert } from "chai";
 import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
-log.setLevel(log.levels.INFO);
+import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, DirectBlockchainApi } from "../src/wise";

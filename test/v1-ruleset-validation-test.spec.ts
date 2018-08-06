@@ -1,8 +1,7 @@
 // 3rd party imports
 import "mocha";
 import * as _ from "lodash";
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
-log.setLevel(log.levels.INFO);
+import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
 import { Util } from "../src/util/util";

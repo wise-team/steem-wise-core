@@ -1,5 +1,3 @@
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
-
 import { Api } from "../api/Api";
 import { ValidationException } from "./ValidationException";
 import { Protocol } from "../protocol/Protocol";
@@ -11,8 +9,7 @@ import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { Rule } from "../rules/Rule";
 import { ImposedRules } from "../rules/ImposedRules";
-import { NotFoundException } from "../util/NotFoundException";
-import { Util } from "../util/util";
+import { Log } from "../util/log"; const log = Log.getLogger();
 
 export class Validator {
     private api: Api;
@@ -37,12 +34,12 @@ export class Validator {
     }
 
     public provideRulesets(rulesets: EffectuatedSetRules) {
-        Util.cheapDebug(() => "VALIDATOR_PROVIDED_WITH_RULESETS=" + JSON.stringify(rulesets));
+        Log.cheapDebug(() => "VALIDATOR_PROVIDED_WITH_RULESETS=" + JSON.stringify(rulesets));
         this.providedRulesets = rulesets;
     }
 
     public validate = (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> => {
-        Util.cheapDebug(() => "VALIDATOR_VALIDATE=" + JSON.stringify({delegator: delegator, voter: voter, voteorder: voteorder, atMoment: atMoment}));
+        Log.cheapDebug(() => "VALIDATOR_VALIDATE=" + JSON.stringify({delegator: delegator, voter: voter, voteorder: voteorder, atMoment: atMoment}));
         const context = new ValidationContext(this.api, this.protocol, delegator, voter, voteorder);
 
         return new Promise<ValidationException | true>((resolve, reject) => {
@@ -90,7 +87,7 @@ export class Validator {
                 const ruleset = rulesets.rulesets[i];
                 if (ruleset.name === voteorder.rulesetName) {
                     found = true;
-                    Util.cheapDebug(() => "VALIDATOR_SELECTED_RULESET=" + JSON.stringify(ruleset.rules));
+                    Log.cheapDebug(() => "VALIDATOR_SELECTED_RULESET=" + JSON.stringify(ruleset.rules));
                     resolve(ruleset.rules);
                     return;
                 }
@@ -108,9 +105,9 @@ export class Validator {
                 validatorPromiseReturners.push(() => {
                     return rule.validate(voteorder, context)
                     .then(
-                        () => Util.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_SUCCEEDED=" + JSON.stringify(rule)),
+                        () => Log.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_SUCCEEDED=" + JSON.stringify(rule)),
                         (error: Error) => {
-                            Util.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_FAILED=" + JSON.stringify({ rule: rule, error: error.message }));
+                            Log.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_FAILED=" + JSON.stringify({ rule: rule, error: error.message }));
                             throw error;
                         }
                     );

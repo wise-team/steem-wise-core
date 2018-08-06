@@ -2,9 +2,8 @@
 import { assert, expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
-log.setLevel(log.levels.INFO);
-// log.enableAll();
+import { Log } from "../src/util/log"; const log = Log.getLogger();
+Log.setLevel("info");
 
 // wise imports
 import { Wise } from "../src/wise";

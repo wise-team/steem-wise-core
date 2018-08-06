@@ -14,6 +14,7 @@ import { isConfirmVote, ConfirmVote, ConfirmVoteBoundWithVote } from "../../Conf
 import { wise_operation, wise_set_rules, wise_rule, wise_send_voteorder_operation, wise_set_rules_operation, wise_confirm_vote_operation } from "./wise-schema";
 import { wise_rule_decode, wise_rule_encode } from "./rules-schema";
 import { VoteOperation, isVoteOperation } from "../../../blockchain/VoteOperation";
+import { Log } from "../../../util/log"; const log = Log.getLogger();
 
 class WiseConstants {
     public static wise_send_voteorder_descriptor: string = "v2:send_voteorder";

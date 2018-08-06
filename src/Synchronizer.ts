@@ -1,6 +1,6 @@
 import { Promise } from "bluebird";
 import * as _ from "lodash";
-import * as _log from "loglevel"; const log = _log.getLogger("steem-wise-core");
+import { Log } from "./util/log"; const log = Log.getLogger();
 
 import { Api } from "./api/Api";
 import { Protocol } from "./protocol/Protocol";
@@ -12,9 +12,7 @@ import { isSendVoteorder, SendVoteorder } from "./protocol/SendVoteorder";
 import { Validator } from "./validation/Validator";
 import { ValidationException } from "./validation/ValidationException";
 import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
-import { Util } from "./util/util";
 
-// TODO proper error handling (separate errors that should be reported to ConfirmVotes and Reversible errors [eg. network errors])
 export class Synchronizer {
     private timeoutMs = 12000;
 
@@ -121,10 +119,10 @@ export class Synchronizer {
     }
 
     private processVoteorder(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): Promise<void> {
-        Util.cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
+        Log.cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
 
         const rules = this.determineRules(op, cmd);
-        Util.cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
+        Log.cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
 
         if (!rules) return this.rejectVoteorder(op, cmd, "There is no ruleset for you");
 
@@ -165,7 +163,7 @@ export class Synchronizer {
     }
 
     private voteAndConfirm(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): Promise<void> {
-        Util.cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd}));
+        Log.cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd}));
 
         const opsToSend: [string, object][] = [];
 
@@ -199,7 +197,7 @@ export class Synchronizer {
     }
 
     private rejectVoteorder(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder, msg: string): Promise<void> {
-        Util.cheapDebug(() => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd, msg: msg}));
+        Log.cheapDebug(() => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd, msg: msg}));
 
         const confirmCmd: ConfirmVote = {
             voteorderTxId: op.transaction_id,
@@ -224,9 +222,7 @@ export class Synchronizer {
     private notify(error: Error | undefined, event: Synchronizer.Event) {
         this.notifier(error, event);
         if (error) log.error(JSON.stringify(error));
-        else if (log.getLevel() <= log.levels.INFO) {
-            log.info("SYNCHRONIZER_EVENT=" + JSON.stringify(event));
-        }
+        Log.cheapInfo(() => "SYNCHRONIZER_EVENT=" + JSON.stringify(event));
     }
 
     private continueIfRunning(fn: () => void) {
