@@ -1,6 +1,6 @@
 {
   "name": "steem-wise-core",
-  "version": "0.19.4",
+  "version": "0.19.5",
   "description": "Node/web library for Wise: a vote delegation system for STEEM blockchain",
   "main": "dist/wise.js",
   "types": "dist/wise.d.ts",
