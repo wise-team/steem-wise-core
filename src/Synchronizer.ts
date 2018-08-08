@@ -153,7 +153,10 @@ export class Synchronizer {
             const r = this.rules[i];
             if (r.voter === op.voter) {
                 if (r.moment.isLesserThan_solveOpInTrxBug(moment)) {
-                    if (!out || out.moment.isLesserThan_solveOpInTrxBug(r.moment)) {
+                    if (out && out.moment.isLesserThan_solveOpInTrxBug(r.moment)) {
+                        out = r;
+                    }
+                    else {
                         out = r;
                     }
                 }
