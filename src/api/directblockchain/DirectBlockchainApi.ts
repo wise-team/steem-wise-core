@@ -231,7 +231,7 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol, skipDelegatorCheck: boolean = false): Promise<EffectuatedSmartvotesOperation []> {
         return new Promise((resolve, reject) => {
             this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => {
                 // TODO would it be better to use RPC method get_ops_in_block?
@@ -239,14 +239,14 @@ export class DirectBlockchainApi extends Api {
                 else {
                     if (!block_) {
                         setTimeout(() =>
-                            this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, protocol)
+                            this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, protocol, skipDelegatorCheck)
                             .then((result: EffectuatedSmartvotesOperation []) => { resolve(result); }, e => { reject(e); })
                         , 1500);
                     }
                     else {
                         const block = block_ as Block;
                         resolve(
-                            this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, protocol)
+                            this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, protocol, skipDelegatorCheck)
                         );
                     }
                 }
@@ -254,7 +254,7 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: Block, protocol: Protocol): EffectuatedSmartvotesOperation [] {
+    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: Block, protocol: Protocol, skipDelegatorCheck: boolean): EffectuatedSmartvotesOperation [] {
         let out: EffectuatedSmartvotesOperation [] = [];
 
         const block_num = blockNum;
@@ -264,7 +264,7 @@ export class DirectBlockchainApi extends Api {
 
             out = out.concat(this.getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
                 delegator, blockNum, transaction_num, transaction,
-                new Date(timestampUtc + "Z" /* this is UTC date */), protocol
+                new Date(timestampUtc + "Z" /* this is UTC date */), protocol, skipDelegatorCheck
             ));
         }
 
@@ -273,7 +273,7 @@ export class DirectBlockchainApi extends Api {
 
     private getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
         delegator: string, blockNum: number, transactionNum: number, transaction: Transaction,
-        timestamp: Date, protocol: Protocol
+        timestamp: Date, protocol: Protocol, skipDelegatorCheck: boolean
     ): EffectuatedSmartvotesOperation [] {
         const out: EffectuatedSmartvotesOperation [] = [];
         const steemTx: SteemTransaction = {
@@ -287,11 +287,21 @@ export class DirectBlockchainApi extends Api {
 
         if (handleResult) {
             handleResult.forEach(wiseOp => {
-                if (wiseOp.delegator === delegator) out.push(wiseOp);
+                if (skipDelegatorCheck || wiseOp.delegator === delegator) out.push(wiseOp);
             });
         }
 
         return out;
+    }
+
+    /**
+     * This function is specific only to DirectBlockchainApi. It returns all wise operations in block
+     * (without checking delegator).
+     * @param blockNum — number of the block.
+     * @param protocol — Protocol object.
+     */
+    public getAllWiseOperationsInBlock(blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+        return this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, protocol, true /* skip delegator check */);
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
