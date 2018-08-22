@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import clone = require("fast-clone");
 
 import { Wise, Api } from "../../src/wise";
 import { FakeApi } from "../../src/api/FakeApi";
@@ -8,7 +9,7 @@ const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
 export class FakeWiseFactory {
     public static loadDataset(): FakeApi.Dataset {
-        return _.cloneDeep(fakeDataset);
+        return clone(fakeDataset);
     }
 
     public static buildFakeApiWithDataset(dataset: FakeApi.Dataset): Api {
