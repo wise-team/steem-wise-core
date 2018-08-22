@@ -44,7 +44,7 @@ describe("test/rule-weightforperiod.spec.ts", () => {
               voteorders: [ { deltaTime: -12, weight: -50 }, { deltaTime: -2, weight: 51 } ],
               period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
             { name: "fails when too much vote weight in two votes + new voteorder", pass: false,
-              voteorders: [ { deltaTime: -12, weight: 50 }, { deltaTime: -2, weight: 50 } ],
+              voteorders: [ { deltaTime: -7, weight: 50 }, { deltaTime: -2, weight: 50 } ],
               period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
         ];
         const units: { unit: WeightForPeriodRule.PeriodUnit, multiplier: number } [] = [

@@ -53,9 +53,11 @@ export class WeightForPeriodRule extends Rule {
                 }
             });
 
-            if (sumOfWeightsForGivenPeriod > this.weight) {
+            const totalSum = sumOfWeightsForGivenPeriod + Math.abs(voteorder.weight);
+
+            if (totalSum > this.weight) {
                 throw new ValidationException(
-                    "WeightForPeriodRule: Sum of passed voteorders (" + sumOfWeightsForGivenPeriod + ")"
+                    "WeightForPeriodRule: Sum of passed voteorders and the new voteorder (" + totalSum + ")"
                     + " was higher than allowed (" + this.weight + ") in a period of "
                     + this.period + " " + this.unit
                 );
