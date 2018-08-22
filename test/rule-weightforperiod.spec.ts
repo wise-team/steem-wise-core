@@ -21,25 +21,31 @@ const voter = "nonexistentvoter" + Date.now();
 
 describe("test/rule-weightforperiod.spec.ts", () => {
     describe("WeightForPeriodRule", () => {
-        const testsPerPeriod: { name: string, voteorders: { deltaTime: number, weight: number} [], period: number; weight: number, pass: boolean } [] = [
+        const testsPerPeriod: { name: string, voteorders: { deltaTime: number, weight: number} [], period: number; ruleWeight: number, nextVoteorderWeight: number, pass: boolean } [] = [
             { name: "passes when no votes over period 10", pass: true,
               voteorders: [],
-              period: 10, weight: 100 },
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
             { name: "fails when too much vote weight in single vote in period", pass: false,
               voteorders: [ { deltaTime: -10, weight: 101 } ],
-              period: 10, weight: 100 },
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
             { name: "passes when correct vote weight in single vote in period", pass: true,
               voteorders: [ { deltaTime: -10, weight: 99 } ],
-              period: 10, weight: 100 },
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
             { name: "passes when too much vote weight in single vote outside of period", pass: true,
               voteorders: [ { deltaTime: -12, weight: 101 } ],
-              period: 10, weight: 100 },
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
             { name: "fails when too much vote weight in two votes in period", pass: false,
               voteorders: [ { deltaTime: -8, weight: 50 }, { deltaTime: -2, weight: 51 } ],
-              period: 10, weight: 100 },
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
             { name: "passes when too much vote weight in two votes outside period", pass: true,
               voteorders: [ { deltaTime: -12, weight: 50 }, { deltaTime: -2, weight: 51 } ],
-              period: 10, weight: 100 },
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
+            { name: "passes when too much vote weight in two votes outside period and one vote is a flag ", pass: true,
+              voteorders: [ { deltaTime: -12, weight: -50 }, { deltaTime: -2, weight: 51 } ],
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
+            { name: "fails when too much vote weight in two votes + new voteorder", pass: false,
+              voteorders: [ { deltaTime: -12, weight: 50 }, { deltaTime: -2, weight: 50 } ],
+              period: 10, ruleWeight: 100, nextVoteorderWeight: 1 },
         ];
         const units: { unit: WeightForPeriodRule.PeriodUnit, multiplier: number } [] = [
             { unit: WeightForPeriodRule.PeriodUnit.SECOND, multiplier: 1 },
@@ -47,22 +53,30 @@ describe("test/rule-weightforperiod.spec.ts", () => {
             { unit: WeightForPeriodRule.PeriodUnit.HOUR, multiplier: 60 * 60 },
             { unit: WeightForPeriodRule.PeriodUnit.DAY, multiplier: 24 * 60 * 60 },
         ];
-        const tests: { name: string, voteorders: { deltaTime: number, weight: number} [], period: number; unit: WeightForPeriodRule.PeriodUnit, weight: number, pass: boolean } [] = [];
+        const tests: { name: string, voteorders: { deltaTime: number, weight: number} [], period: number; unit: WeightForPeriodRule.PeriodUnit, ruleWeight: number, nextVoteorderWeight: number, pass: boolean } [] = [];
 
         units.forEach(unit => {
             testsPerPeriod.forEach(t => {
                 tests.push({
                     name: t.name,
                     voteorders: t.voteorders.map(vo => ({ deltaTime: vo.deltaTime * unit.multiplier, weight: vo.weight})),
-                    period: t.period, unit: unit.unit, weight: t.weight, pass: t.pass
+                    period: t.period, unit: unit.unit, ruleWeight: t.ruleWeight, nextVoteorderWeight: t.nextVoteorderWeight,
+                    pass: t.pass
                 });
             });
         });
 
         tests.forEach(test => describe(test.name + ", unit: " + test.unit, () => {
-            const fakeApi: Api = FakeWiseFactory.buildFakeApi();
-            const delegatorWise = new Wise(delegator, fakeApi);
-            const voterWise = new Wise(voter, fakeApi);
+            let fakeApi: Api;
+            let delegatorWise: Wise;
+            let voterWise: Wise;
+
+            before(function () {
+                this.timeout(5000);
+                fakeApi = FakeWiseFactory.buildFakeApi();
+                delegatorWise = new Wise(delegator, fakeApi);
+                voterWise = new Wise(voter, fakeApi);
+            });
 
             const nowTime = new Date(Date.now());
 
@@ -155,12 +169,12 @@ describe("test/rule-weightforperiod.spec.ts", () => {
             it("Validates rule: " + test.name + ", unit: " + test.unit, () => {
                 const voteorder: SendVoteorder = {
                     rulesetName: "ruleset",
-                    weight: 1,
+                    weight: test.nextVoteorderWeight,
                     author: "noisy",
                     permlink: "nonexistent-post-" + Date.now()
                 };
                 const context = new ValidationContext(fakeApi, voterWise.getProtocol(), delegator, voter, voteorder);
-                const rule = new WeightForPeriodRule(test.period, test.unit, test.weight);
+                const rule = new WeightForPeriodRule(test.period, test.unit, test.ruleWeight);
                 return rule.validate(voteorder, context, nowTime)
                 .then (() => {
                     if (!test.pass) throw new Error("Should fail");
@@ -185,7 +199,7 @@ describe("test/rule-weightforperiod.spec.ts", () => {
         }));
 
         tests.forEach((test, i: number) => it ("is correctly serialized and deserialized by v2", () => {
-            const rule = new WeightForPeriodRule(test.period, test.unit, test.weight);
+            const rule = new WeightForPeriodRule(test.period, test.unit, test.ruleWeight);
             const encoded: wise_rule_weight_for_period = wise_rule_weight_for_period_encode(rule);
 
             const decoded: WeightForPeriodRule = wise_rule_weight_for_period_decode(encoded);
@@ -198,3 +212,5 @@ describe("test/rule-weightforperiod.spec.ts", () => {
         // TODO test if it does not count other voter votes
     });
 });
+
+console.info("End describes");
