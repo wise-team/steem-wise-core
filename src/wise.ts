@@ -313,6 +313,7 @@ export { FirstPostRule } from "./rules/FirstPostRule";
 export { PayoutRule } from "./rules/PayoutRule";
 export { VotersRule } from "./rules/VotersRule";
 export { VotesCountRule } from "./rules/VotesCountRule";
+export { WeightForPeriodRule } from "./rules/WeightForPeriodRule";
 
 
 export { ValidationException } from "./validation/ValidationException";
