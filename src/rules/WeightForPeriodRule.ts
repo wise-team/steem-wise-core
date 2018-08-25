@@ -44,7 +44,7 @@ export class WeightForPeriodRule extends Rule {
         .then((ops: EffectuatedSmartvotesOperation []) => {
             let sumOfWeightsForGivenPeriod = 0;
             ops.forEach(op => {
-                if (isConfirmVote(op.command)) {
+                if (isConfirmVote(op.command) && op.voter === context.getVoterUsername()) {
                     const confirmVoteOp: ConfirmVote = op.command;
                     // count only accepted vote confirmations:
                     if (confirmVoteOp.accepted && isConfirmVoteBoundWithVote(confirmVoteOp)) {
