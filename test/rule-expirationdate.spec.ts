@@ -18,17 +18,17 @@ const wise = new Wise(voter, fakeApi);
 
 describe("test/rule-expirationdate.spec.ts", () => {
     describe("ExpirationDateRule", function() {
-        const tests: { name: string; ruleDate: string, pass: boolean} [] = [
-            { name: "Allows ISO date", ruleDate: new Date(Date.now() + 60 * 1000).toISOString(), pass: true },
-            { name: "Allows IEFT date", ruleDate: new Date(Date.now() + 60 * 1000).toUTCString(), pass: true },
-            { name: "Fails on non ISO nor IEFT date", ruleDate: (Date.now() + 60 * 1000) + "", pass: false },
-            { name: "Passes non expired rule", ruleDate: new Date(Date.now() + 60 * 1000).toISOString(), pass: true },
-            { name: "Fails on expired rule", ruleDate: new Date(Date.now() - 60 * 1000).toISOString(), pass: false },
+        const tests: { name: string; ruleDate: () => string, pass: boolean} [] = [
+            { name: "Allows ISO date", ruleDate: () => new Date(Date.now() + 60 * 1000).toISOString(), pass: true },
+            { name: "Allows IEFT date", ruleDate: () => new Date(Date.now() + 60 * 1000).toUTCString(), pass: true },
+            { name: "Fails on non ISO nor IEFT date", ruleDate: () => (Date.now() + 60 * 1000) + "", pass: false },
+            { name: "Passes non expired rule", ruleDate: () => new Date(Date.now() + 60 * 1000).toISOString(), pass: true },
+            { name: "Fails on expired rule", ruleDate: () => new Date(Date.now() - 60 * 1000).toISOString(), pass: false },
         ];
 
         tests.forEach((test, i: number) => it(
                 "ExpirationDateRule: " + test.name, () => {
-            const rule = new ExpirationDateRule(test.ruleDate);
+            const rule = new ExpirationDateRule(test.ruleDate());
 
             const voteorder: SendVoteorder = {
                 rulesetName: "", weight: 1,
