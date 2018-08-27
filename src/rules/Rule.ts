@@ -38,5 +38,6 @@ export namespace Rule {
         FirstPost = "first_post",
         Payout = "payout",
         AgeOfPost = "age_of_post",
+        ExpirationDate = "expiration_date",
     }
 }
