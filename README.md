@@ -48,7 +48,7 @@ Wise publishes the messages to the blockchain as `custom_json` operations. There
 
 
 
-
+***
 
 Currently, it is used by the following tools:
 
