@@ -6,7 +6,7 @@ import * as _ from "lodash";
 import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { AuthorsRule, SendVoteorder, TagsRule, WeightRule, CustomRPCRule, VotingPowerRule } from "../src/wise";
+import { AuthorsRule, SendVoteorder, TagsRule, WeightRule, CustomRPCRule, VotingPowerRule, ExpirationDateRule } from "../src/wise";
 import { Rule } from "../src/rules/Rule";
 import { RulePrototyper } from "../src/rules/RulePrototyper";
 
@@ -28,6 +28,7 @@ describe("test/rules-prototyper.spec.ts", () => {
                 new VotingPowerRule(VotingPowerRule.Mode.EQUAL, 5),
                 new VotingPowerRule(VotingPowerRule.Mode.LESS_THAN, 5),
                 new VotingPowerRule(VotingPowerRule.Mode.MORE_THAN, 5),
+                new ExpirationDateRule(new Date(Date.now() + 60 * 1000).toISOString()),
             ];
 
             const rulesUnprototyped = JSON.parse(JSON.stringify(rulesPrimary));
