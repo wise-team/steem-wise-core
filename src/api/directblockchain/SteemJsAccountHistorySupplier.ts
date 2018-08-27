@@ -117,20 +117,22 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
             = _.reverse(_.sortBy(opsMappedToStemTransactions, ["block_num", "transaction_num"]));
 
         opsMappedToStemTransactionsSorted.forEach(trx => {
-            let hasAcceptedConfirmVote: boolean = false;
-            let hasVote: boolean = false;
+            if (Log.isDebug()) {
+                let hasAcceptedConfirmVote: boolean = false;
+                let hasVote: boolean = false;
 
-            if (trx.ops.filter(op => op[0] === "vote").length > 0) hasVote = true;
-            if (trx.ops.filter(op => op[0] === "custom_json")
-                .map(op => op[1] as CustomJsonOperation)
-                .filter((cjop: CustomJsonOperation) => cjop.id === "wise")
-                .map(cjop => JSON.parse(cjop.json) as string [])
-                .filter(o => o[0] === "v2:confirm_vote")
-                .filter(o => _.get(o[1], "accepted") as boolean === true).length > 0) hasAcceptedConfirmVote = true;
+                if (trx.ops.filter(op => op[0] === "vote").length > 0) hasVote = true;
+                if (trx.ops.filter(op => op[0] === "custom_json")
+                    .map(op => op[1] as CustomJsonOperation)
+                    .filter((cjop: CustomJsonOperation) => cjop.id === "wise")
+                    .map(cjop => JSON.parse(cjop.json) as string [])
+                    .filter(o => o[0] === "v2:confirm_vote")
+                    .filter(o => _.get(o[1], "accepted") as boolean === true).length > 0) hasAcceptedConfirmVote = true;
 
-            if (hasAcceptedConfirmVote && !hasVote) {
-                Log.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE=" + JSON.stringify(trx));
-                Log.cheapDebug(() => "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE_ALL_OPS=" + JSON.stringify(ops));
+                if (hasAcceptedConfirmVote && !hasVote) {
+                    log.debug("STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE=" + JSON.stringify(trx) + "\n"
+                        + "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE_ALL_OPS=" + JSON.stringify(ops));
+                }
             }
 
             if (loadNext) loadNext = this.give(undefined, trx);

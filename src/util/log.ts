@@ -28,6 +28,11 @@ export class Log {
         if (logger.levels[logger.level] >= logger.levels["debug"]) logger.debug(debugStringReturnerFn());
     }
 
+    public static isDebug() {
+        const logger = Log.getLogger();
+        return logger.levels[logger.level] >= logger.levels["debug"];
+    }
+
     public static cheapInfo(infoStringReturnerFn: () => string): void {
         const logger = Log.getLogger();
         if (logger.levels[logger.level] >= logger.levels["info"]) logger.debug(infoStringReturnerFn());
