@@ -211,6 +211,25 @@
             ],
             "type": "object"
         },
+        "wise_rule_expiration_date": {
+            "properties": {
+                "date": {
+                    "description": "An ISO 8601 date, at which validation of this rule will begin to fail.\nRemember to specify the time zone. If not specified default is the UTC/GMT timezone (+0:00).",
+                    "type": "string"
+                },
+                "rule": {
+                    "enum": [
+                        "expiration_date"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "date",
+                "rule"
+            ],
+            "type": "object"
+        },
         "wise_rule_first_post": {
             "properties": {
                 "rule": {
@@ -522,6 +541,9 @@
                                                 "$ref": "#/definitions/wise_rule_payout"
                                             },
                                             {
+                                                "$ref": "#/definitions/wise_rule_expiration_date"
+                                            },
+                                            {
                                                 "$ref": "#/definitions/wise_rule_age_of_post"
                                             }
                                         ]
@@ -566,6 +588,9 @@
                                         },
                                         {
                                             "$ref": "#/definitions/wise_rule_payout"
+                                        },
+                                        {
+                                            "$ref": "#/definitions/wise_rule_expiration_date"
                                         },
                                         {
                                             "$ref": "#/definitions/wise_rule_age_of_post"
