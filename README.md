@@ -48,6 +48,21 @@ Wise publishes the messages to the blockchain as `custom_json` operations. There
 
 
 
+### Structure of the Wise project
+
+Wise has several tools and is divided in the following way:
+
+- [steem-wise-core](https://github.com/noisy-witness/steem-wise-core) *(This repository)* — the core library that contains code that is shared among all other packages. Can be used separately in third party projects.
+- [steem-wise-cli](https://github.com/noisy-witness/steem-wise-cli) — the command-line tool. Allows performing all wise operations, but is mostly used to synchronise the rules (kept in file) and run the daemon.
+- [steem-wise-voter-page](https://github.com/noisy-witness/steem-wise-voter-page) — an online tool that allows to vote using Wise. Online version here: [https://wise.vote/](https://wise.vote/).
+- [steem-wise-sql](https://github.com/noisy-witness/steem-wise-sql) — an up-to-date database with REST api that contains all wise operations. Link to online version of the api is in the repository of steem-wise-sql.
+- [steem-wise-handbook](https://github.com/noisy-witness/steem-wise-handbook) — a manual. Online version: [https://noisy-witness.github.io/steem-wise-handbook](https://noisy-witness.github.io/steem-wise-handbook)
+- [steem-wise-test](https://github.com/noisy-witness/steem-wise-test) — integration & system tests for Wise
+
+*[See all our repositories](https://github.com/noisy-witness).*
+
+
+
 ***
 
 Currently, it is used by the following tools:
