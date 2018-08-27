@@ -3,6 +3,13 @@
 Vote delegation system for STEEM blockchain: common library for browser & node.
 Vote delegation system for STEEM blockchain: common library for browser & node. Wise allows you to securely grant other users your voting power under conditions specified by you.
 
+Important links:
+
+- [Wise home page](https://noisy-witness.github.io/steem-wise-handbook/)
+- [Voting page](https://wise.vote/)  — how to vote
+- [Daemon installation](https://noisy-witness.github.io/steem-wise-handbook/installation) — how to delegate
+- [Wise handbook (manual)](https://noisy-witness.github.io/steem-wise-handbook/introduction) — details about wise
+
 
 
 ## How does WISE work?
