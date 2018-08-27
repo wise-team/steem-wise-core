@@ -1,6 +1,21 @@
 # Steem WISE (core library)
 
 Vote delegation system for STEEM blockchain: common library for browser & node.
+Vote delegation system for STEEM blockchain: common library for browser & node. Wise allows you to securely grant other users your voting power under conditions specified by you.
+
+
+
+## How does WISE work?
+
+In short: WISE allows you to delegate your vote under **strictly defined criteria**.
+
+For example, you know that @andrejcibik is a great web designer. Thanks to WISE, you can give him the opportunity to use your vote:
+
+- in a safe way
+- under strictly defined rules (the post must meet the rules you had set). In this case, you will allow to use your vote only for posts with the # design tag.
+- with limited voting power
+
+How is this possible? Using WISE, you place on Steem blockchain the rules under which @andrejcibik can use your vote. In the meanwhile, you run a daemon, which iterates blockchain head waiting for a voteorder from @andrejcibik to emerge. When the daemon encounters the voteorder — it performs validation. It checks if the post and weight in the order meet the criteria set previously in the rules. If the result of the validation is positive — daemon casts a vote. If not — a custom_json with information on rejection is posted to the blockchain. / _More info in [handbook](https://noisy-witness.github.io/steem-wise-handbook/introduction)._
 
 Currently, it is used by the following tools:
 
