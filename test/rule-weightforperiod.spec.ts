@@ -224,5 +224,3 @@ describe("test/rule-weightforperiod.spec.ts", () => {
         // TODO test if it does not count other voter votes
     });
 });
-
-console.info("End describes");
