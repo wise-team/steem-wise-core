@@ -13,6 +13,7 @@ import { AgeOfPostRule } from "./AgeOfPostRule";
 import { FirstPostRule } from "./FirstPostRule";
 import { PayoutRule } from "./PayoutRule";
 import { VotersRule } from "./VotersRule";
+import { ExpirationDateRule } from "./ExpirationDateRule";
 
 /**
  * This is a rule prototyper. Prototyping is done when rules are loaded from json file.
@@ -54,6 +55,9 @@ export class RulePrototyper {
         }
         else if (unprototyped.rule === Rule.Type.Voters) {
             return RulePrototyper.prototypeRule(new VotersRule(VotersRule.Mode.NONE, []), unprototyped);
+        }
+        else if (unprototyped.rule === Rule.Type.ExpirationDate) {
+            return RulePrototyper.prototypeRule(new ExpirationDateRule(new Date().toISOString()), unprototyped);
         }
         else throw new ValidationException("There is no rule with this type (rule=" + unprototyped.rule + ")");
     }
