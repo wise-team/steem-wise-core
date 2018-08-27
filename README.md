@@ -1,6 +1,5 @@
 # Steem WISE (core library)
 
-Vote delegation system for STEEM blockchain: common library for browser & node.
 Vote delegation system for STEEM blockchain: common library for browser & node. Wise allows you to securely grant other users your voting power under conditions specified by you.
 
 Important links:
@@ -34,6 +33,22 @@ How is this possible? Using WISE, you place on Steem blockchain the rules under 
 ***Wise platform*** *(planned)* — an alternative to the daemon, which allows a user to be a delegator without setting up the daemon (instead the daemon is operated by us). Wise platform is under development now.
 **Ruleset** — named set of rules under which specified voter can vote with the delegator's account. Ruleset has a name, has a voter defined and has zero or more rules specified.
 **Voteorder** — a request from the voter to the delegator to vote for a given post. Contains name of the ruleset, author and permlink of the post.
+
+
+
+## The WISE protocol
+
+Wise puts all of its data on Steem blockchain. There is no other way of exchanging messages. It uses a carefoully designed [protocol](https://github.com/noisy-witness/steem-wise-core/tree/master/src/protocol/versions), which has versioning enabled, and is already oriented for future development. (_[Here](https://github.com/noisy-witness/steem-wise-core/tree/master/src/protocol/versions/v2) you can find both typescript definitions and a JSON schema of the protocol._)
+
+Wise publishes the messages to the blockchain as `custom_json` operations. There are three types of messages that wise puts on the blockchain:
+
+- set_rules — allows a delegator to specify one or more sets of rules under which a voter can use voting power of the delegator.
+- send_voteorder — the voter asks the delegator's daemon to vote for a given post under specified set of rules (a ruleset)
+- confirm_vote — contains confirmation that the delegator voted for the post, or a rejection with a message why the voteorder was rejected (which rule was not fulfilled and why).
+
+
+
+
 
 Currently, it is used by the following tools:
 
