@@ -94,6 +94,12 @@ voterWise.sendVoteorderAsync(delegator, voteorder)
 
 
 
+## Roadmap
+
+(Coming soon)
+
+
+
 ## Like the project? Let @noisy-witness become your favourite witness!
 
 If you use & appreciate our software — you can easily support us. Just cast a vote for "noisy-witness" on your steem account. You can do it here: [https://steemit.com/~witnesses](https://steemit.com/~witnesses).
