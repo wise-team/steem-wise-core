@@ -11,7 +11,7 @@ import { SteemPost } from "../src/blockchain/SteemPost";
 import { FakeApi } from "../src/api/FakeApi";
 import { Util } from "../src/util/util";
 import { Synchronizer } from "../src/Synchronizer";
-import { isConfirmVote, ConfirmVote, isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote } from "../src/protocol/ConfirmVote";
+import { isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */

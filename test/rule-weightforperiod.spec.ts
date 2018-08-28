@@ -167,7 +167,7 @@ describe("test/rule-weightforperiod.spec.ts", () => {
 
                 const context = new ValidationContext(fakeApi, delegatorWise.getProtocol(), delegator, test.voter, emptyVoteorder);
                 const until = new Date(nowTime.getTime() - 50 * 24 * 3600 * 1000);
-                
+
                 return context.getWiseOperations(context.getDelegatorUsername(), until)
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     expect(ops.filter(op => isConfirmVote(op.command))).to.be.an("array").with.length(test.voteorders.length);
