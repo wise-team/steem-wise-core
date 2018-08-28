@@ -74,11 +74,12 @@ export class RulesUpdater {
 
             return operationsToPerform;
         })
-        .then((operationsToPerform): Promise<SteemOperationNumber | true> => {
+        .then((operationsToPerform: SmartvotesOperation []): Promise<SteemOperationNumber | true> => {
             if (operationsToPerform.length === 0) return Promise.resolve(true) as Promise<SteemOperationNumber | true>;
             else {
                 proggressCallback("Updating rules: " + operationsToPerform.length + " operations to send...", 0);
-                return Promise.resolve(operationsToPerform).mapSeries((op: SmartvotesOperation, index) => {
+                return Promise.resolve(operationsToPerform).mapSeries((op_: any /* bug in Bluebird */, index) => {
+                    const op = op_ as SmartvotesOperation;
                     const num = index + 1;
                     proggressCallback("Updating rules: Sending operation " + num + "/" + operationsToPerform.length + "...", (num / operationsToPerform.length));
                     return api.sendToBlockchain(protocol.serializeToBlockchain(op))

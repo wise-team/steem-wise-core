@@ -114,7 +114,7 @@ export class Validator {
                 });
             }
             return validatorPromiseReturners;
-        }).map((returner: () => Promise<void []>) => { return returner(); }, { concurrency: this.concurrency })
+        }).map((returner: any /* 'any' because of@type bug in Bluebird */) => { return (returner as () => Promise<void []>)(); }, { concurrency: this.concurrency })
         .then(() => {});
     }
 }

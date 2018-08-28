@@ -64,8 +64,8 @@ export class Synchronizer {
         this.continueIfRunning(() =>
             Promise.resolve()
             .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
-            .mapSeries((op: EffectuatedSmartvotesOperation) =>
-                this.processOperation(op)
+            .mapSeries((op: any /* bug in Bluebird */) =>
+                this.processOperation(op as EffectuatedSmartvotesOperation)
             )
             .timeout(this.timeoutMs, new Error("Timeout (> " + this.timeoutMs + "ms while processing operations)"))
             // when timeout occurs an error is thrown. It is then catched few lines below

@@ -112,7 +112,7 @@ describe("test/rule-weightforperiod.spec.ts", () => {
                 };
                 const voters: string [] = _.uniq(test.voteorders.map(vo => vo.voter));
                 // set rules for each voter in the voteorders
-                return Promise.resolve(voters).mapSeries((voter: string) => delegatorWise.sendRulesAsync(voter, rules))
+                return Promise.resolve(voters).mapSeries((voter: any /* 'any' because of a bug in Bluebird */) => delegatorWise.sendRulesAsync(voter, rules))
                 .then(() => Promise.delay(50));
             });
 
@@ -145,7 +145,7 @@ describe("test/rule-weightforperiod.spec.ts", () => {
                 const until = new Date(nowTime.getTime() - 50 * 24 * 3600 * 1000);
                 // calculate for all voters
                 const voters: string [] = _.uniq(test.voteorders.map(vo => vo.voter));
-                return Promise.resolve(voters).mapSeries((voter: string) => context.getWiseOperations(voter/*! voter as we are testing sending, not synchronization !*/, until)
+                return Promise.resolve(voters).mapSeries((voter: any /* 'any' because of a bug in Bluebird */) => context.getWiseOperations(voter/*! voter as we are testing sending, not synchronization !*/, until)
                 .then((ops: EffectuatedSmartvotesOperation []) => {
                     ops.forEach(op => {
                         expect(op.timestamp.getTime(), "operation timestamp").to.be.greaterThan(until.getTime(), "until");
