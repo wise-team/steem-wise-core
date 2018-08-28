@@ -1,5 +1,10 @@
 # Steem WISE (core library)
 
+
+[![npm](https://img.shields.io/npm/v/steem-wise-core.svg?style=flat-square)](https://www.npmjs.com/package/steem-wise-core) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) [![NpmLicense](https://img.shields.io/npm/l/steem-wise-core.svg?style=flat-square)](https://www.npmjs.com/package/steem-wise-core)
+
+
+
 Vote delegation system for STEEM blockchain: common library for browser & node. Wise allows you to securely grant other users your voting power under conditions specified by you.
 
 Important links:
