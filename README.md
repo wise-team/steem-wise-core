@@ -1,7 +1,7 @@
 # Steem WISE (core library)
 
 
-[![npm](https://img.shields.io/npm/v/steem-wise-core.svg?style=flat-square)](https://www.npmjs.com/package/steem-wise-core) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) [![NpmLicense](https://img.shields.io/npm/l/steem-wise-core.svg?style=flat-square)](https://www.npmjs.com/package/steem-wise-core)
+[![npm](https://img.shields.io/npm/v/steem-wise-core.svg?style=flat-square)](https://www.npmjs.com/package/steem-wise-core) [![NpmLicense](https://img.shields.io/npm/l/steem-wise-core.svg?style=flat-square)](https://www.npmjs.com/package/steem-wise-core) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) [![Chat](https://img.shields.io/badge/chat-on%20steem.chat-6b11ff.svg?style=flat-square)](https://steem.chat/channel/wise) [![Wise operations count](https://img.shields.io/badge/dynamic/json.svg?label=wise%20operations%20count&url=http%3A%2F%2Fmuon.jblew.pl%3A3000%2Foperations%3Fselect%3Dcount&query=%24%5B0%5D.count&colorB=blue&style=flat-square)](http://muon.jblew.pl:3000/operations?select=count)
 
 
 
@@ -105,8 +105,22 @@ voterWise.sendVoteorderAsync(delegator, voteorder)
 
 
 
+## Contribute to steem Wise
+
+We welcome warmly:
+
+- Bug reports via [issues](https://github.com/noisy-witness/steem-wise-core/issues).
+- Enhancement requests via via [issues](https://github.com/noisy-witness/steem-wise-core/issues).
+- [Pull requests](https://github.com/noisy-witness/steem-wise-core/pulls)
+- Security reports to _jedrzejblew@gmail.com_.
+
+**Before** contributing please **read [Wise CONTRIBUTING guide](https://github.com/noisy-witness/steem-wise-core/blob/master/CONTRIBUTING.md)**.
+
+Thank you for helping us!
+
+
+
 ## Like the project? Let @noisy-witness become your favourite witness!
 
 If you use & appreciate our software — you can easily support us. Just cast a vote for "noisy-witness" on your steem account. You can do it here: [https://steemit.com/~witnesses](https://steemit.com/~witnesses).
-
 
