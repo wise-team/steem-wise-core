@@ -3,20 +3,20 @@ import { expect, assert } from "chai";
 import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, DirectBlockchainApi } from "../src/wise";
-import { SteemPost } from "../src/blockchain/SteemPost";
-import { FakeApi } from "../src/api/FakeApi";
-import { Util } from "../src/util/util";
-import { Synchronizer } from "../src/Synchronizer";
-import { isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
+import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, DirectBlockchainApi } from "../../src/wise";
+import { SteemPost } from "../../src/blockchain/SteemPost";
+import { FakeApi } from "../../src/api/FakeApi";
+import { Util } from "../../src/util/util";
+import { Synchronizer } from "../../src/Synchronizer";
+import { isConfirmVote, ConfirmVote } from "../../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */
-import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 Promise.onPossiblyUnhandledRejection(function(error) {
     throw error;
@@ -38,7 +38,7 @@ const delegatorWise = new Wise(delegator, fakeApi as object as Api);
  */
 let synchronizer: Synchronizer;
 
-describe("test/synchronization-retrospective.spec.ts", () => {
+describe("test/unit/synchronization-retrospective.spec.ts", () => {
     const cases: { voteorderTx: string; shouldAccept: boolean; } [] = [
         { voteorderTx: "1dcf2948d9f5efb3219ce04f6b782dc08076e7bf", shouldAccept: true },
     ];

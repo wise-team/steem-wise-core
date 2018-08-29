@@ -1,13 +1,13 @@
 // 3rd party imports
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { SendVoteorder, Wise, WeightRule, Api } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { FakeApi } from "../src/api/FakeApi";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { SendVoteorder, Wise, WeightRule, Api } from "../../src/wise";
+import { ValidationContext } from "../../src/validation/ValidationContext";
+import { FakeApi } from "../../src/api/FakeApi";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 /* CONFIG */
 const delegator = "noisy";
@@ -16,7 +16,7 @@ const fakeApi: Api = FakeWiseFactory.buildFakeApi();
 const wise = new Wise(voter, fakeApi);
 
 
-describe("test/rule-weight.spec.ts", () => {
+describe("test/unit/rule-weight.spec.ts", () => {
     describe("WeightRule", () => {
         const voteorder: SendVoteorder = {
             rulesetName: "",

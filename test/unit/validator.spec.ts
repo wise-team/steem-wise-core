@@ -1,16 +1,16 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { Validator } from "../src/validation/Validator";
-import { Wise, SteemOperationNumber, SendVoteorder, ValidationException } from "../src/wise";
-import { FakeApi } from "../src/api/FakeApi";
+import { Validator } from "../../src/validation/Validator";
+import { Wise, SteemOperationNumber, SendVoteorder, ValidationException } from "../../src/wise";
+import { FakeApi } from "../../src/api/FakeApi";
 
 
 /* PREPARE TESTING DATASETS */
-import * as fakeDataset_ from "./data/fake-blockchain.json";
+import * as fakeDataset_ from "../data/fake-blockchain.json";
 const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
 
 /* CONFIG */
@@ -20,7 +20,7 @@ const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
 
 
-describe("test/validator.spec.ts", () => {
+describe("test/unit/validator.spec.ts", () => {
     describe("Validator", () => {
         const validator = new Validator(fakeApi, wise.getProtocol());
         validator.provideRulesets({

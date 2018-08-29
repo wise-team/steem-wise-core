@@ -3,20 +3,20 @@ import { expect, assert } from "chai";
 import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger();
+import { Log } from "../../src/util/log"; const log = Log.getLogger();
 
 // wise imports
-import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api } from "../src/wise";
-import { SteemPost } from "../src/blockchain/SteemPost";
-import { FakeApi } from "../src/api/FakeApi";
-import { Util } from "../src/util/util";
-import { Synchronizer } from "../src/Synchronizer";
-import { isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
+import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api } from "../../src/wise";
+import { SteemPost } from "../../src/blockchain/SteemPost";
+import { FakeApi } from "../../src/api/FakeApi";
+import { Util } from "../../src/util/util";
+import { Synchronizer } from "../../src/Synchronizer";
+import { isConfirmVote, ConfirmVote } from "../../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */
-import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 Promise.onPossiblyUnhandledRejection(function(error) {
     throw error;
@@ -39,7 +39,7 @@ const voterWise = new Wise(voter, fakeApi as object as Api);
  */
 let synchronizer: Synchronizer;
 
-describe("test/synchronization.spec.ts", () => {
+describe("test/unit/synchronization.spec.ts", () => {
     describe("Synchronizer", function() {
         this.timeout(2000);
         let synchronizationPromise: Promise<void>;

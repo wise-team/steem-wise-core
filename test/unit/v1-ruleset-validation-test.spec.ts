@@ -1,17 +1,17 @@
 // 3rd party imports
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { Util } from "../src/util/util";
-import { SteemOperationNumber, Wise, SendVoteorder, ValidationException, AuthorsRule, TagsRule } from "../src/wise";
-import { FakeApi } from "../src/api/FakeApi";
+import { Util } from "../../src/util/util";
+import { SteemOperationNumber, Wise, SendVoteorder, ValidationException, AuthorsRule, TagsRule } from "../../src/wise";
+import { FakeApi } from "../../src/api/FakeApi";
 
 
 /* PREPARE TESTING DATASETS */
-import * as steemprojects1Rulesets from "./data/steemprojects1-rulesets";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import * as steemprojects1Rulesets from "../data/steemprojects1-rulesets";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 /* CONFIG */
 const voter = "guest123";
@@ -25,7 +25,7 @@ const validVoteorder: SendVoteorder = {
 const rulesetMomentForValidation: SteemOperationNumber = new SteemOperationNumber(22144059, 32, 0).addTransactions(1); // Moment just after tx_id = 7fe4a1a4efadb1230c41c2c865df15d91eb3c452
 
 
-describe("test/v1-ruleset-validation-test.spec.ts", function() {
+describe("test/unit/v1-ruleset-validation-test.spec.ts", function() {
     describe("RulesValidator.validateVoteOrder [delegator=steemprojects1, voter=guest123]", function() {
         this.retries(1);
 

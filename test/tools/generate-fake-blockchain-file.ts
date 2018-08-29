@@ -63,7 +63,8 @@ const api = new DirectBlockchainApi("", "", /*{
 Bluebird.resolve()
 .then(() => console.log("Loading posts..."))
 .then(() => postLinks)
-.map((link: [string, string]) => {
+.map((link_: any /* bluebird bug */) => {
+    const link = link_ as [string, string];
     return api.loadPost(link[0], link[1]);
 })
 .then((values: SteemPost []) => {
@@ -72,7 +73,7 @@ Bluebird.resolve()
 
 .then(() => console.log("Loading account infos..."))
 .then(() => usernames)
-.map((username: string) => {
+.map((username: any /* bluebird bug */) => {
     return api.getAccountInfo(username);
 })
 .then((values: AccountInfo []) => {
@@ -89,7 +90,7 @@ Bluebird.resolve()
 
 .then(() => console.log("Loading transactions..."))
 .then(() => usernames) // for each username return a promise that returns transactions
-.mapSeries((username: string) => {
+.mapSeries((username: any  /* bluebird bug */) => {
     return Bluebird.delay(2000).then(() => new Bluebird<SteemTransaction []>((resolve, reject) => {
         console.log("Loading transactions of @" + username + "...");
         const trxs: SteemTransaction [] = [];
@@ -121,7 +122,7 @@ Bluebird.resolve()
 
 .then(() => console.log("Loading blog entries..."))
 .then(() => usernames)
-.map((username: string) => {
+.map((username: any  /* bluebird bug */) => {
     return api.getBlogEntries(username, 0, 500);
 })
 .then((values: BlogEntry [][]) => {

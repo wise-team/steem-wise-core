@@ -31,6 +31,13 @@ echo "Building..."
 npm install
 echo "Build successful"
 
+echo "Unit testing..."
+npm test
+echo "Unit testing successful"
+
+echo "Integration testing..."
+npm run verify
+echo "Integration testing successful"
 
 echo "Creating git tag"
 git add package.json package-lock.json

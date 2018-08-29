@@ -3,12 +3,12 @@ import { expect } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { AuthorsRule, Wise, TagsRule, WeightRule, SteemOperationNumber, SetRules, SetRulesForVoter, Api } from "../src/wise";
-import { FakeApi } from "../src/api/FakeApi";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { AuthorsRule, Wise, TagsRule, WeightRule, SteemOperationNumber, SetRules, SetRulesForVoter, Api } from "../../src/wise";
+import { FakeApi } from "../../src/api/FakeApi";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 /* CONFIG */
 const delegator = "nonexistent-delegator-" + Date.now();
@@ -23,7 +23,7 @@ const voterBWise = new Wise(voterB, fakeApi);
 const voterCWise = new Wise(voterC, fakeApi);
 
 
-describe("test/rules-updater.spec.ts", () => {
+describe("test/unit/rules-updater.spec.ts", () => {
     describe("RulesUpdater", function() {
         const rules0: SetRulesForVoter [] = [
             {

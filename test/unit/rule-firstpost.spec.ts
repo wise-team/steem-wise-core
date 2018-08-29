@@ -1,13 +1,13 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { FirstPostRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
-import { wise_rule_first_post_encode, wise_rule_first_post_decode, wise_rule_first_post } from "../src/protocol/versions/v2/rules/rule-first-post-schema";
+import { FirstPostRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";
+import { ValidationContext } from "../../src/validation/ValidationContext";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { wise_rule_first_post_encode, wise_rule_first_post_decode, wise_rule_first_post } from "../../src/protocol/versions/v2/rules/rule-first-post-schema";
 
 /* CONFIG */
 const voter = "nonexistentvoter";
@@ -16,7 +16,7 @@ const fakeDataset = FakeWiseFactory.loadDataset();
 const fakeApi = FakeWiseFactory.buildFakeApiWithDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
 
-describe("test/rule-firstpost.spec.ts", () => {
+describe("test/unit/rule-firstpost.spec.ts", () => {
     describe("FirstPostRule", function() {
         const tests: { author: string; permlink: string; pass: boolean; } [] = [
             {

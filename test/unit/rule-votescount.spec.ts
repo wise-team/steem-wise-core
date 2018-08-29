@@ -1,13 +1,13 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { VotesCountRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
-import { wise_rule_votes_count_encode, wise_rule_votes_count, wise_rule_votes_count_decode } from "../src/protocol/versions/v2/rules/rule-votes-count-schema";
+import { VotesCountRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";
+import { ValidationContext } from "../../src/validation/ValidationContext";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { wise_rule_votes_count_encode, wise_rule_votes_count, wise_rule_votes_count_decode } from "../../src/protocol/versions/v2/rules/rule-votes-count-schema";
 
 /* CONFIG */
 const delegator = "noisy";
@@ -16,7 +16,7 @@ const fakeDataset = FakeWiseFactory.loadDataset();
 const fakeApi = FakeWiseFactory.buildFakeApiWithDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
 
-describe("test/rule-votescount.spec.ts", () => {
+describe("test/unit/rule-votescount.spec.ts", () => {
     describe("VotesCountRule.validate", function() {
         const tests: { mode: VotesCountRule.Mode, value: number; author: string;  permlink: string; pass: boolean } [] = [
             {

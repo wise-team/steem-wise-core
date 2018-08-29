@@ -1,13 +1,13 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { ExpirationDateRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
-import { wise_rule_age_of_post_encode, wise_rule_age_of_post_decode, wise_rule_age_of_post } from "../src/protocol/versions/v2/rules/rule-age-of-post-schema";
+import { ExpirationDateRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";
+import { ValidationContext } from "../../src/validation/ValidationContext";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { wise_rule_age_of_post_encode, wise_rule_age_of_post_decode, wise_rule_age_of_post } from "../../src/protocol/versions/v2/rules/rule-age-of-post-schema";
 
 /* CONFIG */
 const voter = "nonexistentvoter";
@@ -16,7 +16,7 @@ const fakeDataset = FakeWiseFactory.loadDataset();
 const fakeApi = FakeWiseFactory.buildFakeApiWithDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
 
-describe("test/rule-expirationdate.spec.ts", () => {
+describe("test/unit/rule-expirationdate.spec.ts", () => {
     describe("ExpirationDateRule", function() {
         const tests: { name: string; ruleDate: () => string, pass: boolean} [] = [
             { name: "Allows ISO date", ruleDate: () => new Date(Date.now() + 60 * 1000).toISOString(), pass: true },

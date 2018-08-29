@@ -1,12 +1,12 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, Api } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
+import { AuthorsRule, SendVoteorder, Wise, ValidationException, TagsRule, Api } from "../../src/wise";
+import { ValidationContext } from "../../src/validation/ValidationContext";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 /* CONFIG */
 const delegator = "noisy";
@@ -15,7 +15,7 @@ const fakeApi: Api = FakeWiseFactory.buildFakeApi();
 const wise = new Wise(voter, fakeApi);
 
 
-describe("test/rule-tags.spec.ts", () => {
+describe("test/unit/rule-tags.spec.ts", () => {
     describe("TagsRule", function() {
         const tests = [
             {rule: new TagsRule(TagsRule.Mode.ALLOW, ["steemprojects", "steemdev", "suggestion", "input", "busy", "esteem", "nonexistenttag"]),

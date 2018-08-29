@@ -1,14 +1,14 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { PayoutRule, SendVoteorder, ValidationException, Wise } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
-import { AccountInfo } from "../src/blockchain/AccountInfo";
-import { wise_rule_payout_encode, wise_rule_payout, wise_rule_payout_decode } from "../src/protocol/versions/v2/rules/rule-payout-schema";
+import { PayoutRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";
+import { ValidationContext } from "../../src/validation/ValidationContext";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { AccountInfo } from "../../src/blockchain/AccountInfo";
+import { wise_rule_payout_encode, wise_rule_payout, wise_rule_payout_decode } from "../../src/protocol/versions/v2/rules/rule-payout-schema";
 
 /* CONFIG */
 const delegator = "noisy";
@@ -17,7 +17,7 @@ const fakeDataset = FakeWiseFactory.loadDataset();
 const fakeApi = FakeWiseFactory.buildFakeApiWithDataset(fakeDataset);
 const wise = new Wise(voter, fakeApi);
 
-describe("test/rule-payout.spec.ts", () => {
+describe("test/unit/rule-payout.spec.ts", () => {
     describe("PayoutRule.validate", function() {
         const tests: { mode: PayoutRule.Mode, value: number; author: string;  permlink: string; pass: boolean } [] = [
             {

@@ -2,18 +2,18 @@
 import { expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { DirectBlockchainApi, Wise, SteemOperationNumber, ValidationException } from "../src/wise";
-import { DisabledApi } from "../src/api/DisabledApi";
+import { DirectBlockchainApi, Wise, SteemOperationNumber, ValidationException } from "../../src/wise";
+import { DisabledApi } from "../../src/api/DisabledApi";
 
 
 /* PREPARE TESTING DATASETS */
-import * as data from "./data/index.data";
+import * as data from "../data/index.data";
 
 
-describe("test/index.spec.ts", () => {
+describe("test/integration/wise.spec.ts", () => {
     describe("Wise", function() {
         this.timeout(30 * 1000);
 

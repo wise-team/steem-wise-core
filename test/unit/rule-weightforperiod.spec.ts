@@ -3,24 +3,24 @@ import "mocha";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
 import * as Promise from "bluebird";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedSmartvotesOperation } from "../src/wise";
-import { ValidationContext } from "../src/validation/ValidationContext";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
-import { WeightForPeriodRule } from "../src/rules/WeightForPeriodRule";
-import { FakeApi } from "../src/api/FakeApi";
-import { isSendVoteorder } from "../src/protocol/SendVoteorder";
-import { isConfirmVote, ConfirmVote, isConfirmVoteBoundWithVote } from "../src/protocol/ConfirmVote";
-import { wise_rule_weight_for_period, wise_rule_weight_for_period_encode, wise_rule_weight_for_period_decode } from "../src/protocol/versions/v2/rules/rule-weight-for-period-schema";
+import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedSmartvotesOperation } from "../../src/wise";
+import { ValidationContext } from "../../src/validation/ValidationContext";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { WeightForPeriodRule } from "../../src/rules/WeightForPeriodRule";
+import { FakeApi } from "../../src/api/FakeApi";
+import { isSendVoteorder } from "../../src/protocol/SendVoteorder";
+import { isConfirmVote, ConfirmVote, isConfirmVoteBoundWithVote } from "../../src/protocol/ConfirmVote";
+import { wise_rule_weight_for_period, wise_rule_weight_for_period_encode, wise_rule_weight_for_period_decode } from "../../src/protocol/versions/v2/rules/rule-weight-for-period-schema";
 
 /* CONFIG */
 const delegator = "nonexistentdelegator" + Date.now();
 const voterA = "nonexistentvoter_a" + Date.now();
 const voterB = "nonexistentvoter_b" + Date.now();
 
-describe("test/rule-weightforperiod.spec.ts", () => {
+describe("test/unit/rule-weightforperiod.spec.ts", () => {
     describe("WeightForPeriodRule", () => {
         const testsPerPeriod: { name: string, voteorders: { deltaTime: number, weight: number, voter: string; } [], period: number, ruleWeight: number, nextVoteorderWeight: number, voter: string, pass: boolean } [] = [
             { name: "passes when no votes over period 10", pass: true,

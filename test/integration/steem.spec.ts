@@ -2,13 +2,13 @@
 import { expect } from "chai";
 import "mocha";
 import * as steem from "steem";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { BlockchainConfig } from "../src/blockchain/BlockchainConfig";
+import { BlockchainConfig } from "../../src/blockchain/BlockchainConfig";
 
 
-describe("test/steem.spec.ts", () => {
+describe("test/integration/steem.spec.ts", () => {
     describe("account_history_api.get_account_history", () => {
         it("Returns incorrect op_in_trx", function(done) {
             this.timeout(15000);

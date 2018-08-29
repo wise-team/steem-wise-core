@@ -3,15 +3,15 @@ import { expect } from "chai";
 import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { AuthorsRule, SendVoteorder, TagsRule, WeightRule, CustomRPCRule, VotingPowerRule, ExpirationDateRule } from "../src/wise";
-import { Rule } from "../src/rules/Rule";
-import { RulePrototyper } from "../src/rules/RulePrototyper";
+import { AuthorsRule, SendVoteorder, TagsRule, WeightRule, CustomRPCRule, VotingPowerRule, ExpirationDateRule } from "../../src/wise";
+import { Rule } from "../../src/rules/Rule";
+import { RulePrototyper } from "../../src/rules/RulePrototyper";
 
 
-describe("test/rules-prototyper.spec.ts", () => {
+describe("test/unit/rules-prototyper.spec.ts", () => {
     describe("RulesPrototyper", () => {
         it ("Unserialized rules are equal to serialized after prototyping", () => {
             const rulesPrimary: Rule [] = [

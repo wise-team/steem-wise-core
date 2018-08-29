@@ -1,21 +1,21 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { Wise, SteemTransaction } from "../src/wise";
-import { DisabledApi } from "../src/api/DisabledApi";
+import { Wise, SteemTransaction } from "../../src/wise";
+import { DisabledApi } from "../../src/api/DisabledApi";
 
 
 /* PREPARE TESTING DATASETS */
-import * as v1ValidOperations_ from "./data/operations/v1-valid.operations.json";
+import * as v1ValidOperations_ from "../data/operations/v1-valid.operations.json";
 const v1ValidOperations: SteemOperation [] = v1ValidOperations_ as any as SteemOperation [];
-import * as v1InvalidOperations_ from "./data/operations/v1-invalid.operations.json";
+import * as v1InvalidOperations_ from "../data/operations/v1-invalid.operations.json";
 const v1InvalidOperations: SteemOperation [] = v1InvalidOperations_ as any as SteemOperation [];
 
 
-describe("test/protocol-versions-handling.spec.ts", function() {
+describe("test/unit/protocol-versions-handling.spec.ts", function() {
     this.timeout(3000);
 
     describe("Protocol V1", () => {

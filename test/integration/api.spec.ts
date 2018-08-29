@@ -2,37 +2,37 @@
 import { assert, expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../src/util/log"; const log = Log.getLogger();
+import { Log } from "../../src/util/log"; const log = Log.getLogger();
 Log.setLevel("info");
 
 // wise imports
-import { Wise } from "../src/wise";
-import { Api } from "../src/api/Api";
-import { DirectBlockchainApi } from "../src/api/directblockchain/DirectBlockchainApi";
-import { FakeApi } from "../src/api/FakeApi";
-import { SteemPost } from "../src/blockchain/SteemPost";
-import { SteemOperationNumber } from "../src/blockchain/SteemOperationNumber";
-import { SetRules, EffectuatedSetRules } from "../src/protocol/SetRules";
-import { WeightRule } from "../src/rules/WeightRule";
-import { Rule } from "../src/rules/Rule";
-import { EffectuatedSmartvotesOperation } from "../src/protocol/EffectuatedSmartvotesOperation";
-import { DynamicGlobalProperties } from "../src/blockchain/DynamicGlobalProperties";
-import { AccountInfo } from "../src/blockchain/AccountInfo";
-import { NotFoundException } from "../src/util/NotFoundException";
+import { Wise } from "../../src/wise";
+import { Api } from "../../src/api/Api";
+import { DirectBlockchainApi } from "../../src/api/directblockchain/DirectBlockchainApi";
+import { FakeApi } from "../../src/api/FakeApi";
+import { SteemPost } from "../../src/blockchain/SteemPost";
+import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
+import { SetRules, EffectuatedSetRules } from "../../src/protocol/SetRules";
+import { WeightRule } from "../../src/rules/WeightRule";
+import { Rule } from "../../src/rules/Rule";
+import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
+import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalProperties";
+import { AccountInfo } from "../../src/blockchain/AccountInfo";
+import { NotFoundException } from "../../src/util/NotFoundException";
 
 
 /* PREPARE TESTING DATASETS */
-import * as v1TestingSequence from "./data/protocol-v1-testing-sequence";
-import { FakeWiseFactory } from "./util/FakeWiseFactory";
-import { isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote, isConfirmVote, ConfirmVote } from "../src/protocol/ConfirmVote";
-import { VoteOperation } from "../src/blockchain/VoteOperation";
-import { BlogEntry } from "../src/blockchain/BlogEntry";
+import * as v1TestingSequence from "../data/protocol-v1-testing-sequence";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote, isConfirmVote, ConfirmVote } from "../../src/protocol/ConfirmVote";
+import { VoteOperation } from "../../src/blockchain/VoteOperation";
+import { BlogEntry } from "../../src/blockchain/BlogEntry";
 
 /* CONFIG */
 const username = "guest123";
 const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 
-describe("test/api.spec.ts", function () {
+describe("test/integration/api.spec.ts", function () {
     this.timeout(12000);
 
     const apis: Api [] = [

@@ -3,19 +3,19 @@ import { expect } from "chai";
 import "mocha";
 import { Promise } from "bluebird";
 import * as steem from "steem";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { SimpleTaker } from "../src/chainable/Chainable";
-import { SteemOperationNumber, SteemTransaction, Wise } from "../src/wise";
-import { SteemJsAccountHistorySupplier } from "../src/api/directblockchain/SteemJsAccountHistorySupplier";
-import { OperationNumberFilter } from "../src/chainable/filters/OperationNumberFilter";
-import { ToSmartvotesOperationTransformer } from "../src/chainable/transformers/ToSmartvotesOperationTransformer";
-import { DisabledApi } from "../src/api/DisabledApi";
-import { ChainableLimiter } from "../src/chainable/limiters/ChainableLimiter";
+import { SimpleTaker } from "../../src/chainable/Chainable";
+import { SteemOperationNumber, SteemTransaction, Wise } from "../../src/wise";
+import { SteemJsAccountHistorySupplier } from "../../src/api/directblockchain/SteemJsAccountHistorySupplier";
+import { OperationNumberFilter } from "../../src/chainable/filters/OperationNumberFilter";
+import { ToSmartvotesOperationTransformer } from "../../src/chainable/transformers/ToSmartvotesOperationTransformer";
+import { DisabledApi } from "../../src/api/DisabledApi";
+import { ChainableLimiter } from "../../src/chainable/limiters/ChainableLimiter";
 
 
-describe("test/chainable.spec.ts", () => {
+describe("test/integration/chainable.spec.ts", () => {
     describe("SteemJsAccountHistorySupplier", () => {
         describe("SteemJsAccountHistorySupplier [username = steemprojects1]", () => {
             const wise = new Wise("steemprojects1", new DisabledApi());

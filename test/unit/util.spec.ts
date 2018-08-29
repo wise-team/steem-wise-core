@@ -1,13 +1,13 @@
 // 3rd party imports
 import { Promise } from "bluebird";
 import "mocha";
-import { Log } from "../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { OneTimePromise } from "../src/util/OneTimePromise";
+import { OneTimePromise } from "../../src/util/OneTimePromise";
 
 
-describe("test/util.spec.ts", () => {
+describe("test/unit/util.spec.ts", () => {
     describe("OneTimePromise", function() {
         it("runs the promise exactly once", (done) => {
             let calls = 0;
