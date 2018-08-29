@@ -19,18 +19,10 @@ Please follow the contributing guidelines as it saves both your and maintainers 
 ## Ground Rules
 
 - Ensure you did `npm run build` to test if your change compiles well, and is compliant with tslint clean code rules
-- Do `npm run test` to perform unit tests. See [Common issues with unit tests](#common-issues-with-unit-tests).
+- Do `npm run test` to perform unit tests.
+- If you changed the code that is used for interactions with steem blockchain or external services please run `npm run verify` to run integration tests.  See [Common issues with integration tests](#common-issues-with-integration-tests).
 - Create an issue (add tag enhancement or bug) before adding a pull request
 - Think twice before adding a new file, but do not hesitate to do that if it increases the readability of the code.
-- Your code tells who you are. Make it art. Keep it quality and beautiful.
-- Be welcoming and warm to the others. See our [Code of conduct](https://github.com/noisy-witness/steem-wise-core/blob/master/CODE_OF_CONDUCT.md).
-
-
-
-- Ensure you did `npm run build` to test if your change compiles well, and is compliant with tslint clean code rules
-- Do `npm run test` to perform unit tests. See [Common issues with unit tests](#common-issues-with-unit-tests).
-- Create an issue (add tag enhancement or bug) before adding a pull request
-- Think twice before adding a new file, but do not hesitate to do that if it increases readability of the code.
 - Your code tells who you are. Make it art. Keep it quality and beautiful.
 - Be welcoming and warm to the others. See our [Code of conduct](https://github.com/noisy-witness/steem-wise-core/blob/master/CODE_OF_CONDUCT.md).
 
@@ -52,7 +44,8 @@ Small contributions such as fixing spelling errors, where the content is small e
 2. Do the changes in your fork
 3. If you like the change and think the project could use it:
    - Run `npm run build` to check compilation errors. Build also runs the linter that ensures the quality of the code.
-   - Run `npm run test`. See [Common issues with unit tests](#common-issues-with-unit-tests).
+   - Run `npm run test`.
+   - If you changed the code that is used for interactions with steem blockchain or external services please run `npm run verify` to run integration tests.  See [Common issues with integration tests](#common-issues-with-integration-tests).
    - See our [Code of conduct](https://github.com/noisy-witness/steem-wise-core/blob/master/CODE_OF_CONDUCT.md).
 4. Send a pull request.
 
@@ -78,6 +71,7 @@ If the answer to either of those two questions is "yes", then you're probably de
 When creating an issue please fill the following template:
 
 > **The problem**:
+>
 > **I did**:
 >
 > **I expected to see**:
@@ -85,7 +79,9 @@ When creating an issue please fill the following template:
 > **Instead, I saw**:
 >
 > **Version of steem-wise-core**: 
+>
 > **Version of nodejs**:
+>
 > **Links to gist with output / logs (or at least a picture):**
 
 Also please properly **tag the issue**. E.g. with the tag "bug".
@@ -105,7 +101,7 @@ You can also contact Jędrzej at jedrzejblew@gmail.com.
 
 
 
-## Common issues with unit tests
+## Common issues with integration tests
 
 1. **Some tests fail when the internet connection is poor**. Although it is generally thought to be a bad practice to make unit tests rely on the external resources, in this early stage of development this is just handier. We plan to separate unit tests from integration tests shortly. If this happens, check your internet connection and re-run the tests. Check if steemit RPC works correctly. If not — wait a few hours and try to rerun the tests. If it persists, do not bother to rerun the tests.
 
