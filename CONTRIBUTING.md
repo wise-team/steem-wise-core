@@ -103,7 +103,7 @@ You can also contact Jędrzej at jedrzejblew@gmail.com.
 
 ## Common issues with integration tests
 
-1. **Some tests fail when the internet connection is poor**. Although it is generally thought to be a bad practice to make unit tests rely on the external resources, in this early stage of development this is just handier. We plan to separate unit tests from integration tests shortly. If this happens, check your internet connection and re-run the tests. Check if steemit RPC works correctly. If not — wait a few hours and try to rerun the tests. If it persists, do not bother to rerun the tests.
+1. **Some tests fail when the internet connection is poor**. If this happens, check your internet connection and re-run the tests. Check if steemit RPC works correctly. If not — wait a few hours and try to rerun the tests. If it persists, do not bother to rerun the tests.
 
 2. **(rarely) Tests that check if confirm_vote operations are correctly bound with vote operations may fail**. They may fail due to processing operations in batches. Rarely vote_operation may be in different batch than confirm_vote. These tests are:
 
