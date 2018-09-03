@@ -99,6 +99,15 @@ voterWise.sendVoteorderAsync(delegator, voteorder)
 
 
 
+## Where to get help?
+
+Feel free to talk with us on our #wise channel on steem.chat: https://steem.chat/channel/wise .
+You can also contact Jędrzej at jedrzejblew@gmail.com.
+
+You can also ask questions as issues in appropriate repository: See [issues for this repository](https://github.com/noisy-witness/steem-wise-core/issues).
+
+
+
 ## Roadmap
 
 ![Wise Roadmap](https://noisy-witness.github.io/steem-wise-handbook/assets/images/roadmap/Roadmap-02.png)
