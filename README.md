@@ -101,7 +101,7 @@ voterWise.sendVoteorderAsync(delegator, voteorder)
 
 ## Roadmap
 
-(Coming soon)
+![Wise Roadmap](https://noisy-witness.github.io/steem-wise-handbook/assets/images/roadmap/Roadmap-02.png)
 
 
 
@@ -116,7 +116,7 @@ We welcome warmly:
 
 **Before** contributing please **read [Wise CONTRIBUTING guide](https://github.com/noisy-witness/steem-wise-core/blob/master/CONTRIBUTING.md)**.
 
-Thank you for helping us!
+Thank you for developing WISE together!
 
 
 
