@@ -9,10 +9,10 @@ Vote delegation system for STEEM blockchain: common library for browser & node. 
 
 Important links:
 
-- [Wise home page](https://noisy-witness.github.io/steem-wise-handbook/)
+- [Wise home page](https://noisy-witness.github.io/steem-wise-manual/)
 - [Voting page](https://wise.vote/)  — how to vote
-- [Daemon installation](https://noisy-witness.github.io/steem-wise-handbook/installation) — how to delegate
-- [Wise handbook (manual)](https://noisy-witness.github.io/steem-wise-handbook/introduction) — details about wise
+- [Daemon installation](https://noisy-witness.github.io/steem-wise-manual/installation) — how to delegate
+- [Wise manual](https://noisy-witness.github.io/steem-wise-manual/introduction) — details about wise
 
 
 
@@ -26,7 +26,7 @@ For example, you know that @andrejcibik is a great web designer. Thanks to WISE,
 - under strictly defined rules (the post must meet the rules you had set). In this case, you will allow to use your vote only for posts with the # design tag.
 - with limited voting power
 
-How is this possible? Using WISE, you place on Steem blockchain the rules under which @andrejcibik can use your vote. In the meanwhile, you run a daemon, which iterates blockchain head waiting for a voteorder from @andrejcibik to emerge. When the daemon encounters the voteorder — it performs validation. It checks if the post and weight in the order meet the criteria set previously in the rules. If the result of the validation is positive — daemon casts a vote. If not — a custom_json with information on rejection is posted to the blockchain. / _More info in [handbook](https://noisy-witness.github.io/steem-wise-handbook/introduction)._
+How is this possible? Using WISE, you place on Steem blockchain the rules under which @andrejcibik can use your vote. In the meanwhile, you run a daemon, which iterates blockchain head waiting for a voteorder from @andrejcibik to emerge. When the daemon encounters the voteorder — it performs validation. It checks if the post and weight in the order meet the criteria set previously in the rules. If the result of the validation is positive — daemon casts a vote. If not — a custom_json with information on rejection is posted to the blockchain. / _More info in [manual](https://noisy-witness.github.io/steem-wise-manual/introduction)._
 
 
 
@@ -61,7 +61,7 @@ Wise has several tools and is divided in the following way:
 - [steem-wise-cli](https://github.com/noisy-witness/steem-wise-cli) — the command-line tool. Allows performing all wise operations, but is mostly used to synchronise the rules (kept in file) and run the daemon.
 - [steem-wise-voter-page](https://github.com/noisy-witness/steem-wise-voter-page) — an online tool that allows to vote using Wise. Online version here: [https://wise.vote/](https://wise.vote/).
 - [steem-wise-sql](https://github.com/noisy-witness/steem-wise-sql) — an up-to-date database with REST api that contains all wise operations. Link to online version of the api is in the repository of steem-wise-sql.
-- [steem-wise-handbook](https://github.com/noisy-witness/steem-wise-handbook) — a manual. Online version: [https://noisy-witness.github.io/steem-wise-handbook](https://noisy-witness.github.io/steem-wise-handbook)
+- [steem-wise-manual](https://github.com/noisy-witness/steem-wise-manual) — a manual. Online version: [https://noisy-witness.github.io/steem-wise-manual](https://noisy-witness.github.io/steem-wise-manual)
 - [steem-wise-test](https://github.com/noisy-witness/steem-wise-test) — integration & system tests for Wise
 
 *[See all our repositories](https://github.com/noisy-witness).*
@@ -110,7 +110,7 @@ You can also ask questions as issues in appropriate repository: See [issues for 
 
 ## Roadmap
 
-![Wise Roadmap](https://noisy-witness.github.io/steem-wise-handbook/assets/images/roadmap/Roadmap-02.png)
+![Wise Roadmap](https://noisy-witness.github.io/steem-wise-manual/assets/images/roadmap/Roadmap-02.png)
 
 
 
