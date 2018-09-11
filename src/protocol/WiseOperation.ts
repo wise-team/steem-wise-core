@@ -3,7 +3,7 @@ import { SendVoteorder } from "./SendVoteorder";
 import { ConfirmVote, ConfirmVoteBoundWithVote } from "./ConfirmVote";
 
 
-export interface SmartvotesOperation {
+export interface WiseOperation {
     voter: string;
     delegator: string;
 

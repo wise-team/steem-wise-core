@@ -7,8 +7,8 @@ import { V1Handler } from "./protocol/versions/v1/V1Handler";
 import { Api } from "./api/Api";
 import { SendVoteorder } from "./protocol/SendVoteorder";
 import { ProggressCallback } from "./ProggressCallback";
-import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
-import { SetRules, SetRulesForVoter } from "./protocol/SetRules";
+import { WiseOperation } from "./protocol/WiseOperation";
+import { SetRules, SetRulesForVoter, EffectuatedSetRules } from "./protocol/SetRules";
 import { SteemTransaction } from "./blockchain/SteemTransaction";
 import { ValidationException } from "./validation/ValidationException";
 import { Validator } from "./validation/Validator";
@@ -167,7 +167,7 @@ export class Wise {
     }
 
     /**
-     * Validated if steem operation (object with blockchain data and timestamp) it is a valid smartvotes
+     * Validated if steem operation (object with blockchain data and timestamp) it is a valid wise
      * @param op — an steem operation object that implements SteemTransaction interface
      */ // TODO test
      public validateSteemTransaction = (so: SteemTransaction): boolean => {
@@ -299,8 +299,8 @@ export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 export { Protocol } from "./protocol/Protocol";
 export { SendVoteorder } from "./protocol/SendVoteorder";
 export { SetRules, SetRulesForVoter, EffectuatedSetRules } from "./protocol/SetRules";
-export { SmartvotesOperation } from "./protocol/SmartvotesOperation";
-export { EffectuatedSmartvotesOperation } from "./protocol/EffectuatedSmartvotesOperation";
+export { WiseOperation } from "./protocol/WiseOperation";
+export { EffectuatedWiseOperation } from "./protocol/EffectuatedWiseOperation";
 
 export { Rule } from "./rules/Rule";
 export { AuthorsRule } from "./rules/AuthorsRule";

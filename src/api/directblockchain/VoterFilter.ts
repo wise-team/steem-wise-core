@@ -1,7 +1,7 @@
 import { ChainableFilter } from "../../chainable/Chainable";
-import { SmartvotesOperation } from "../../protocol/SmartvotesOperation";
+import { WiseOperation } from "../../protocol/WiseOperation";
 
-export class VoterFilter extends ChainableFilter<SmartvotesOperation, VoterFilter> {
+export class VoterFilter extends ChainableFilter<WiseOperation, VoterFilter> {
     private voter: string;
 
     constructor(voter: string) {
@@ -13,7 +13,7 @@ export class VoterFilter extends ChainableFilter<SmartvotesOperation, VoterFilte
         return this;
     }
 
-    public take(error: Error | undefined, op: SmartvotesOperation): boolean {
+    public take(error: Error | undefined, op: WiseOperation): boolean {
         if (error) throw error;
 
         if (op.voter === this.voter) return this.give(undefined, op);

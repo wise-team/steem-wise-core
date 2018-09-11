@@ -4,7 +4,7 @@ import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { ConfirmVote, isConfirmVote, isConfirmVoteBoundWithVote } from "../protocol/ConfirmVote";
 
 /**
@@ -41,7 +41,7 @@ export class WeightForPeriodRule extends Rule {
             const until = new Date(validationTimestamp.getTime() - numberOfSeconds * 1000);
             return context.getWiseOperations(context.getDelegatorUsername(), until);
         })
-        .then((ops: EffectuatedSmartvotesOperation []) => {
+        .then((ops: EffectuatedWiseOperation []) => {
             let sumOfWeightsForGivenPeriod = 0;
             ops.forEach(op => {
                 if (isConfirmVote(op.command) && op.voter === context.getVoterUsername()) {

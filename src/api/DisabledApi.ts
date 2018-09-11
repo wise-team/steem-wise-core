@@ -5,7 +5,7 @@ import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { Api } from "./Api";
 import { Protocol } from "../protocol/Protocol";
-import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
 import { BlogEntry } from "../blockchain/BlogEntry";
@@ -39,7 +39,7 @@ export class DisabledApi extends Api {
         return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
         return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
 
@@ -51,7 +51,7 @@ export class DisabledApi extends Api {
         return new Promise((resolve, reject) => reject(new Error("This api is disabled")));
     }
 
-    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
         return Promise.reject(new Error("This api is disabled"));
     }
 

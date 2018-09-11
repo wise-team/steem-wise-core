@@ -1,5 +1,5 @@
 import { ChainableFilter } from "../Chainable";
-import { SmartvotesOperation } from "../../protocol/SmartvotesOperation";
+import { WiseOperation } from "../../protocol/WiseOperation";
 import { isSetRules } from "../../protocol/SetRules";
 import { isSendVoteorder } from "../../protocol/SendVoteorder";
 import { isConfirmVote } from "../../protocol/ConfirmVote";
@@ -7,28 +7,28 @@ import { isConfirmVote } from "../../protocol/ConfirmVote";
 /**
  * Filters steem blockchain operations by type.
  */
-export class SmartvotesOperationTypeFilter<T extends SmartvotesOperation> extends ChainableFilter<SmartvotesOperation, SmartvotesOperationTypeFilter<T>> {
-    private type: SmartvotesOperationTypeFilter.OperationType;
+export class WiseOperationTypeFilter<T extends WiseOperation> extends ChainableFilter<WiseOperation, WiseOperationTypeFilter<T>> {
+    private type: WiseOperationTypeFilter.OperationType;
 
-    constructor(type: SmartvotesOperationTypeFilter.OperationType) {
+    constructor(type: WiseOperationTypeFilter.OperationType) {
         super();
         this.type = type;
     }
 
-    protected me(): SmartvotesOperationTypeFilter<T> {
+    protected me(): WiseOperationTypeFilter<T> {
         return this;
     }
 
-    public take(error: Error | undefined, op: SmartvotesOperation): boolean {
+    public take(error: Error | undefined, op: WiseOperation): boolean {
         if (error) throw error;
 
-        if (this.type === SmartvotesOperationTypeFilter.OperationType.SetRules) {
+        if (this.type === WiseOperationTypeFilter.OperationType.SetRules) {
             if (isSetRules(op.command)) return this.give(undefined, op as T);
         }
-        else if (this.type === SmartvotesOperationTypeFilter.OperationType.SendVoteorder) {
+        else if (this.type === WiseOperationTypeFilter.OperationType.SendVoteorder) {
             if (isSendVoteorder(op.command)) return this.give(undefined, op as T);
         }
-        else if (this.type === SmartvotesOperationTypeFilter.OperationType.ConfirmVote) {
+        else if (this.type === WiseOperationTypeFilter.OperationType.ConfirmVote) {
             if (isConfirmVote(op.command)) return this.give(undefined, op as T);
         }
         else throw new Error("Illegal type of filter");
@@ -37,7 +37,7 @@ export class SmartvotesOperationTypeFilter<T extends SmartvotesOperation> extend
     }
 }
 
-export namespace SmartvotesOperationTypeFilter {
+export namespace WiseOperationTypeFilter {
     export enum OperationType {
         SetRules,
         SendVoteorder,

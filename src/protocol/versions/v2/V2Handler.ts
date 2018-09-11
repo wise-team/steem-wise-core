@@ -2,13 +2,13 @@ import * as ajv from "ajv";
 import * as _ from "lodash";
 
 import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
-import { SmartvotesOperation } from "../../SmartvotesOperation";
+import { WiseOperation } from "../../WiseOperation";
 import { SendVoteorder, isSendVoteorder } from "../../SendVoteorder";
 import { SetRules, isSetRules } from "../../SetRules";
 import { Rule } from "../../../rules/Rule";
 import { SteemTransaction } from "../../../blockchain/SteemTransaction";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
-import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../../EffectuatedWiseOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { isConfirmVote, ConfirmVote, ConfirmVoteBoundWithVote } from "../../ConfirmVote";
 import { wise_operation, wise_set_rules, wise_rule, wise_send_voteorder_operation, wise_set_rules_operation, wise_confirm_vote_operation } from "./wise-schema";
@@ -35,7 +35,7 @@ const validate = aajv.compile(require("./wise-schema.json"));
 export class V2Handler implements ProtocolVersionHandler {
     public static CUSTOM_JSON_ID = "wise";
 
-    public handleOrReject = (transaction: SteemTransaction): EffectuatedSmartvotesOperation [] | undefined => {
+    public handleOrReject = (transaction: SteemTransaction): EffectuatedWiseOperation [] | undefined => {
         if (transaction.block_num <= 22710498) return undefined;
 
         let wiseCustomJsonOp: CustomJsonOperation | undefined = undefined;
@@ -81,7 +81,7 @@ export class V2Handler implements ProtocolVersionHandler {
         return validate(input) as boolean;
     }
 
-    private decode = (transaction: SteemTransaction, wiseOp: wise_operation, sender: string): EffectuatedSmartvotesOperation [] | undefined => {
+    private decode = (transaction: SteemTransaction, wiseOp: wise_operation, sender: string): EffectuatedWiseOperation [] | undefined => {
         if (wiseOp[0] == WiseConstants.wise_confirm_vote_descriptor) {
             return this.decodeConfirmVote(transaction, wiseOp as wise_confirm_vote_operation, sender);
         }
@@ -94,7 +94,7 @@ export class V2Handler implements ProtocolVersionHandler {
         else return undefined;
     }
 
-    private decodeSetRules = (transaction: SteemTransaction, wiseOp: wise_set_rules_operation, sender: string): EffectuatedSmartvotesOperation [] => {
+    private decodeSetRules = (transaction: SteemTransaction, wiseOp: wise_set_rules_operation, sender: string): EffectuatedWiseOperation [] => {
         const rulesets: { name: string, rules: Rule []} [] = [];
 
         for (let i = 0; i < (wiseOp[1] as wise_set_rules).rulesets.length; i++) {
@@ -102,7 +102,7 @@ export class V2Handler implements ProtocolVersionHandler {
             rulesets.push(this.decodeRuleset(ruleset));
         }
 
-        const out: EffectuatedSmartvotesOperation = {
+        const out: EffectuatedWiseOperation = {
             moment: new SteemOperationNumber(transaction.block_num, transaction.transaction_num, 0 /* skip operation num due to rejection that was done in #handleOrReject */),
             transaction_id: transaction.transaction_id,
             timestamp: transaction.timestamp,
@@ -130,7 +130,7 @@ export class V2Handler implements ProtocolVersionHandler {
         return {name: ruleset[0], rules};
     }
 
-    private decodeSendVoteorder = (transaction: SteemTransaction, wiseOp: wise_send_voteorder_operation, sender: string): EffectuatedSmartvotesOperation [] => {
+    private decodeSendVoteorder = (transaction: SteemTransaction, wiseOp: wise_send_voteorder_operation, sender: string): EffectuatedWiseOperation [] => {
         const cmd: SendVoteorder = {
             rulesetName: wiseOp[1].ruleset,
             permlink: wiseOp[1].permlink,
@@ -146,10 +146,10 @@ export class V2Handler implements ProtocolVersionHandler {
             delegator: wiseOp[1].delegator,
 
             command: cmd
-        } as EffectuatedSmartvotesOperation];
+        } as EffectuatedWiseOperation];
     }
 
-    private decodeConfirmVote = (transaction: SteemTransaction, wiseOp: wise_confirm_vote_operation, sender: string): EffectuatedSmartvotesOperation [] => {
+    private decodeConfirmVote = (transaction: SteemTransaction, wiseOp: wise_confirm_vote_operation, sender: string): EffectuatedWiseOperation [] => {
         let voteOp: VoteOperation | undefined = undefined;
         if (transaction.ops.length > 1) {
             transaction.ops.forEach((op: [string, object]) => {
@@ -188,10 +188,10 @@ export class V2Handler implements ProtocolVersionHandler {
             delegator: sender,
 
             command: cmd
-        } as EffectuatedSmartvotesOperation];
+        } as EffectuatedWiseOperation];
     }
 
-    public serializeToBlockchain = (op: SmartvotesOperation): [string, object][] => {
+    public serializeToBlockchain = (op: WiseOperation): [string, object][] => {
         let senderUsername = "";
         let jsonObj: wise_operation;
 

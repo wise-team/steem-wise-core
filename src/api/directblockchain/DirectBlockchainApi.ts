@@ -10,10 +10,10 @@ import { Api } from "../Api";
 import { Protocol } from "../../protocol/Protocol";
 import { V1Handler } from "../../protocol/versions/v1/V1Handler";
 import { SteemJsAccountHistorySupplier } from "./SteemJsAccountHistorySupplier";
-import { SmartvotesOperationTypeFilter } from "../../chainable/filters/SmartvotesOperationTypeFilter";
-import { EffectuatedSmartvotesOperation } from "../../protocol/EffectuatedSmartvotesOperation";
+import { WiseOperationTypeFilter } from "../../chainable/filters/WiseOperationTypeFilter";
+import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
 import { OperationNumberFilter } from "../../chainable/filters/OperationNumberFilter";
-import { ToSmartvotesOperationTransformer } from "../../chainable/transformers/ToSmartvotesOperationTransformer";
+import { ToWiseOperationTransformer } from "../../chainable/transformers/ToWiseOperationTransformer";
 import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
 import { VoterFilter } from "./VoterFilter";
 import { DynamicGlobalProperties } from "../../blockchain/DynamicGlobalProperties";
@@ -77,12 +77,12 @@ export class DirectBlockchainApi extends Api {
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
-                .chain(new ToSmartvotesOperationTransformer(protocol))
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
+                .chain(new ToWiseOperationTransformer(protocol))
                 .chain(new VoterFilter(voter))
-                .chain(new SmartvotesOperationTypeFilter<EffectuatedSmartvotesOperation>(SmartvotesOperationTypeFilter.OperationType.SetRules))
+                .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.SetRules))
                 .chain(new ChainableLimiter(1))
-                .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
+                .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
                     noResult = false;
                     resolve(item.command as SetRules);
                     return false;
@@ -143,10 +143,10 @@ export class DirectBlockchainApi extends Api {
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
-                .chain(new ToSmartvotesOperationTransformer(protocol))
-                .chain(new SmartvotesOperationTypeFilter<EffectuatedSmartvotesOperation>(SmartvotesOperationTypeFilter.OperationType.SetRules))
-                .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
+                .chain(new ToWiseOperationTransformer(protocol))
+                .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.SetRules))
+                .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
                     const out: EffectuatedSetRules = {
                         rulesets: (item.command as SetRules).rulesets,
                         moment: item.moment,
@@ -180,11 +180,11 @@ export class DirectBlockchainApi extends Api {
             new SteemJsAccountHistorySupplier(this.steem, delegator)
             .branch((historySupplier) => {
                 historySupplier
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
-                .chain(new ToSmartvotesOperationTransformer(protocol))
-                .chain(new SmartvotesOperationTypeFilter<EffectuatedSmartvotesOperation>(SmartvotesOperationTypeFilter.OperationType.ConfirmVote))
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
+                .chain(new ToWiseOperationTransformer(protocol))
+                .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.ConfirmVote))
                 .chain(new ChainableLimiter(1))
-                .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
+                .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
                     noResult = false;
                     resolve(item.moment);
 
@@ -197,25 +197,25 @@ export class DirectBlockchainApi extends Api {
                 });
             })
             .start(() => {
-                if (noResult) resolve(V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT);
+                if (noResult) resolve(V1Handler.INTRODUCTION_OF_WISE_MOMENT);
             });
         })
         .then((result: SteemOperationNumber) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_RESULT", result),
               (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_ERROR", error));
     }
 
-    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
         return new Promise((resolve, reject) => {
             if (typeof username === "undefined" || username.length == 0) throw new Error("Username must not be empty");
 
-            const operations: EffectuatedSmartvotesOperation [] = [];
+            const operations: EffectuatedWiseOperation [] = [];
             new SteemJsAccountHistorySupplier(this.steem, username)
             .branch((historySupplier) => {
                 historySupplier
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
                 .chain(new DateLimiter(until))
-                .chain(new ToSmartvotesOperationTransformer(protocol))
-                .chain(new SimpleTaker((item: EffectuatedSmartvotesOperation): boolean => {
+                .chain(new ToWiseOperationTransformer(protocol))
+                .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
                     operations.push(item);
                     return true;
                 }))
@@ -231,7 +231,7 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol, skipDelegatorCheck: boolean = false): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol, skipDelegatorCheck: boolean = false): Promise<EffectuatedWiseOperation []> {
         return new Promise((resolve, reject) => {
             this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => {
                 // TODO would it be better to use RPC method get_ops_in_block?
@@ -240,7 +240,7 @@ export class DirectBlockchainApi extends Api {
                     if (!block_) {
                         setTimeout(() =>
                             this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, protocol, skipDelegatorCheck)
-                            .then((result: EffectuatedSmartvotesOperation []) => { resolve(result); }, e => { reject(e); })
+                            .then((result: EffectuatedWiseOperation []) => { resolve(result); }, e => { reject(e); })
                         , 1500);
                     }
                     else {
@@ -254,8 +254,8 @@ export class DirectBlockchainApi extends Api {
         });
     }
 
-    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: Block, protocol: Protocol, skipDelegatorCheck: boolean): EffectuatedSmartvotesOperation [] {
-        let out: EffectuatedSmartvotesOperation [] = [];
+    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: Block, protocol: Protocol, skipDelegatorCheck: boolean): EffectuatedWiseOperation [] {
+        let out: EffectuatedWiseOperation [] = [];
 
         const block_num = blockNum;
         const timestampUtc = block.timestamp;
@@ -274,8 +274,8 @@ export class DirectBlockchainApi extends Api {
     private getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
         delegator: string, blockNum: number, transactionNum: number, transaction: Transaction,
         timestamp: Date, protocol: Protocol, skipDelegatorCheck: boolean
-    ): EffectuatedSmartvotesOperation [] {
-        const out: EffectuatedSmartvotesOperation [] = [];
+    ): EffectuatedWiseOperation [] {
+        const out: EffectuatedWiseOperation [] = [];
         const steemTx: SteemTransaction = {
             block_num: blockNum,
             transaction_num: transactionNum,
@@ -300,7 +300,7 @@ export class DirectBlockchainApi extends Api {
      * @param blockNum — number of the block.
      * @param protocol — Protocol object.
      */
-    public getAllWiseOperationsInBlock(blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+    public getAllWiseOperationsInBlock(blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
         return this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, protocol, true /* skip delegator check */);
     }
 

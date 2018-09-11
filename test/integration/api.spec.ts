@@ -15,7 +15,7 @@ import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber"
 import { SetRules, EffectuatedSetRules } from "../../src/protocol/SetRules";
 import { WeightRule } from "../../src/rules/WeightRule";
 import { Rule } from "../../src/rules/Rule";
-import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
 import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../../src/blockchain/AccountInfo";
 import { NotFoundException } from "../../src/util/NotFoundException";
@@ -178,7 +178,7 @@ describe("test/integration/api.spec.ts", function () {
             it("Loads only wise operation from single block", () => {
                 const blockNum = 23487915;
                 return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
                     expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
                     expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(blockNum);
@@ -189,7 +189,7 @@ describe("test/integration/api.spec.ts", function () {
             it("Returns empty array if no operations are present", () => {
                 const blockNum = 1;
                 return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length(0);
                 });
             });
@@ -197,7 +197,7 @@ describe("test/integration/api.spec.ts", function () {
             it("Loads wise operations sent by voter but refering to delegator", () => {
                 const blockNum = 23944920; // steemprojects1 sent voteorder to delegatorsteemprojects2 in tx 48d7fa0b75c2bfaebce12571d86c57d53b8c7620
                 return api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects2", blockNum, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
                     expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(blockNum);
                     expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects2");
@@ -207,7 +207,7 @@ describe("test/integration/api.spec.ts", function () {
 
             it("Does not load operations sent as a voter", () => {
                 return api.getWiseOperationsRelatedToDelegatorInBlock("guest123", 22484096, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length(0);
                 });
             });
@@ -216,7 +216,7 @@ describe("test/integration/api.spec.ts", function () {
                 this.timeout(40000);
 
                 let blockNum: number;
-                for (const api of apis) if (api.name() === "FakeApi") _.times(2, (num) => setTimeout(() => (api as FakeApi).pushFakeBlock(), 200 * num));
+                for (const api of apis) if (api.name() === "FakeApi") _.times(2, (num) => setTimeout(() => (api as any as FakeApi).pushFakeBlock(), 200 * num));
 
                 return api.getDynamicGlobalProperties()
                 .then((dgp: DynamicGlobalProperties) => {
@@ -233,7 +233,7 @@ describe("test/integration/api.spec.ts", function () {
             it("returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
                 const blockNum = 24352800;
                 return api.getWiseOperationsRelatedToDelegatorInBlock("noisy", blockNum, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
                     expect(isConfirmVoteBoundWithVote(ops[0].command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
                     const expectedVoteOp: VoteOperation = {
@@ -296,7 +296,7 @@ describe("test/integration/api.spec.ts", function () {
                 const until = new Date("2018-06-05T12:00:00Z");
                 const username = "guest123";
                 return api.getWiseOperations(username, until, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length.gte(1);
                     ops.forEach(op => expect(op.timestamp.getTime()).to.be.greaterThan(until.getTime()));
                     expect(ops[0].delegator === username || ops[0].voter === username).to.be.true;
@@ -308,7 +308,7 @@ describe("test/integration/api.spec.ts", function () {
                 const until = new Date(Date.now() + 24 * 3600); // today, plus one day
                 const username = "guest123";
                 return api.getWiseOperations(username, until, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length(0);
                 });
             });
@@ -316,7 +316,7 @@ describe("test/integration/api.spec.ts", function () {
             it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote (when accepted = true)", () => {
                 const until = new Date("2018-07-10T00:00:00Z");
                 return api.getWiseOperations("noisy", until, wise.getProtocol())
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length.greaterThan(0);
                     ops.forEach(op => {
                         if (isConfirmVote(op.command)) {

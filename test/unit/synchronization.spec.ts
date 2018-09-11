@@ -15,7 +15,7 @@ import { isConfirmVote, ConfirmVote } from "../../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */
-import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 Promise.onPossiblyUnhandledRejection(function(error) {
@@ -141,7 +141,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(isConfirmVote(lastHandledOp.command), "isConfirmVote").to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted, "accepted").to.be.true;
@@ -170,7 +170,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(isConfirmVote(lastHandledOp.command), "last pushed op is confirm vote").to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted, "last pushed op is accepted confirm vote").to.be.false;
@@ -212,7 +212,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(isConfirmVote(lastHandledOp.command)).to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
@@ -233,7 +233,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then(() => Promise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(isConfirmVote(lastHandledOp.command)).to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted).to.be.true;
@@ -257,7 +257,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             })
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedSmartvotesOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(isConfirmVote(lastHandledOp.command)).to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;

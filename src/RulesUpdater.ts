@@ -4,7 +4,7 @@ import { Api } from "./api/Api";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { SetRules, EffectuatedSetRules, SetRulesForVoter } from "./protocol/SetRules";
 import { Protocol } from "./protocol/Protocol";
-import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
+import { WiseOperation } from "./protocol/WiseOperation";
 import { ProggressCallback } from "./ProggressCallback";
 import { Promise } from "bluebird";
 import { Util } from "./util/util";
@@ -50,7 +50,7 @@ export class RulesUpdater {
                 return _.merge(obj, newObj);
             }, {});
 
-            const operationsToPerform: SmartvotesOperation [] = [];
+            const operationsToPerform: WiseOperation [] = [];
             _.forOwn(rulesByVoter, (situation: RulesByVoterValue, voter: string, object: RulesByVoter) => {
                 if (situation.current && !situation.updated && situation.current.rulesets.length > 0 /* if length == 0 it means that the rules were voided */) {
                     // delete rules
@@ -74,12 +74,12 @@ export class RulesUpdater {
 
             return operationsToPerform;
         })
-        .then((operationsToPerform: SmartvotesOperation []): Promise<SteemOperationNumber | true> => {
+        .then((operationsToPerform: WiseOperation []): Promise<SteemOperationNumber | true> => {
             if (operationsToPerform.length === 0) return Promise.resolve(true) as Promise<SteemOperationNumber | true>;
             else {
                 proggressCallback("Updating rules: " + operationsToPerform.length + " operations to send...", 0);
                 return Promise.resolve(operationsToPerform).mapSeries((op_: any /* bug in Bluebird */, index) => {
-                    const op = op_ as SmartvotesOperation;
+                    const op = op_ as WiseOperation;
                     const num = index + 1;
                     proggressCallback("Updating rules: Sending operation " + num + "/" + operationsToPerform.length + "...", (num / operationsToPerform.length));
                     return api.sendToBlockchain(protocol.serializeToBlockchain(op))
@@ -97,7 +97,7 @@ export class RulesUpdater {
         });
     }
 
-    public static sendRules(voter: string, delegator: string, rulesCmd: SetRules): SmartvotesOperation {
+    public static sendRules(voter: string, delegator: string, rulesCmd: SetRules): WiseOperation {
         return {
             voter: voter,
             delegator: delegator,

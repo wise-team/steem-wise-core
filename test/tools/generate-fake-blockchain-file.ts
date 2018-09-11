@@ -97,7 +97,7 @@ Bluebird.resolve()
         new SteemJsAccountHistorySupplier(steem, username)
         .branch((historySupplier) => {
             historySupplier
-            .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of smartvotes presence)
+            .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
             .chain(new SimpleTaker((trx: SteemTransaction): boolean => {
                 trxs.push(trx);
                 return true;

@@ -1,9 +1,9 @@
 import { ChainableTransformer } from "../Chainable";
 import { SteemTransaction } from "../../blockchain/SteemTransaction";
 import { Protocol } from "../../protocol/Protocol";
-import { EffectuatedSmartvotesOperation } from "../../protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
 
-export class ToSmartvotesOperationTransformer extends ChainableTransformer<SteemTransaction, EffectuatedSmartvotesOperation, ToSmartvotesOperationTransformer> {
+export class ToWiseOperationTransformer extends ChainableTransformer<SteemTransaction, EffectuatedWiseOperation, ToWiseOperationTransformer> {
     private protocol: Protocol;
 
     public constructor(protocol: Protocol) {
@@ -12,14 +12,14 @@ export class ToSmartvotesOperationTransformer extends ChainableTransformer<Steem
         this.protocol = protocol;
     }
 
-    protected me(): ToSmartvotesOperationTransformer {
+    protected me(): ToWiseOperationTransformer {
         return this;
     }
 
     protected take(error: Error | undefined, steemTrx: SteemTransaction): boolean {
         if (error) throw error;
 
-        const handledOrRejected: EffectuatedSmartvotesOperation [] | undefined = this.protocol.handleOrReject(steemTrx);
+        const handledOrRejected: EffectuatedWiseOperation [] | undefined = this.protocol.handleOrReject(steemTrx);
         if (handledOrRejected) {
             let lastResult: boolean = true;
             for (let i = 0; i < handledOrRejected.length; i++) {

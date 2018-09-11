@@ -15,7 +15,7 @@ import { isConfirmVote, ConfirmVote } from "../../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */
-import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 Promise.onPossiblyUnhandledRejection(function(error) {

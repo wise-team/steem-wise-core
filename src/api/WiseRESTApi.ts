@@ -6,7 +6,7 @@ import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { Api } from "./Api";
 import { Protocol } from "../protocol/Protocol";
 import { DirectBlockchainApi } from "./directblockchain/DirectBlockchainApi";
-import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
 import { BlogEntry } from "../blockchain/BlogEntry";
@@ -48,11 +48,11 @@ export class WiseRESTApi extends Api {
         return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
         return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
     }
 
-    public getWiseOperations(username: string, until: Date): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
         return Promise.reject(new Error("Not yet implemented"));
     }
 

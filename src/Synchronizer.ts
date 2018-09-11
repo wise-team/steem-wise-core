@@ -6,12 +6,12 @@ import { Api } from "./api/Api";
 import { Protocol } from "./protocol/Protocol";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { SetRules, EffectuatedSetRules, isSetRules } from "./protocol/SetRules";
-import { EffectuatedSmartvotesOperation } from "./protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "./protocol/EffectuatedWiseOperation";
 import { ConfirmVote } from "./protocol/ConfirmVote";
 import { isSendVoteorder, SendVoteorder } from "./protocol/SendVoteorder";
 import { Validator } from "./validation/Validator";
 import { ValidationException } from "./validation/ValidationException";
-import { SmartvotesOperation } from "./protocol/SmartvotesOperation";
+import { WiseOperation } from "./protocol/WiseOperation";
 
 export class Synchronizer {
     private timeoutMs = 12000;
@@ -65,7 +65,7 @@ export class Synchronizer {
             Promise.resolve()
             .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
             .mapSeries((op: any /* bug in Bluebird */) =>
-                this.processOperation(op as EffectuatedSmartvotesOperation)
+                this.processOperation(op as EffectuatedWiseOperation)
             )
             .timeout(this.timeoutMs, new Error("Timeout (> " + this.timeoutMs + "ms while processing operations)"))
             // when timeout occurs an error is thrown. It is then catched few lines below
@@ -85,7 +85,7 @@ export class Synchronizer {
         );
     }
 
-    private processOperation(op: EffectuatedSmartvotesOperation): Promise<void> {
+    private processOperation(op: EffectuatedWiseOperation): Promise<void> {
         return Promise.resolve().then(() => {
             const currentOpNum = op.moment;
             if (currentOpNum.isGreaterThan(this.lastProcessedOperationNum)) {
@@ -104,7 +104,7 @@ export class Synchronizer {
     }
 
     // update preoaded rules to keep them up-to-date without calling blockchain every voteorder
-    private updateRulesArray(op: EffectuatedSmartvotesOperation, cmd: SetRules): Promise<void> {
+    private updateRulesArray(op: EffectuatedWiseOperation, cmd: SetRules): Promise<void> {
         return Promise.resolve().then(() => {
             const es: EffectuatedSetRules = {
                 moment: op.moment,
@@ -118,7 +118,7 @@ export class Synchronizer {
         });
     }
 
-    private processVoteorder(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): Promise<void> {
+    private processVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
         Log.cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
 
         const rules = this.determineRules(op, cmd);
@@ -145,7 +145,7 @@ export class Synchronizer {
         });
     }
 
-    private determineRules(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): EffectuatedSetRules | undefined {
+    private determineRules(op: EffectuatedWiseOperation, cmd: SendVoteorder): EffectuatedSetRules | undefined {
         let out: EffectuatedSetRules | undefined = undefined;
         const moment = op.moment;
 
@@ -162,7 +162,7 @@ export class Synchronizer {
         return out;
     }
 
-    private voteAndConfirm(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder): Promise<void> {
+    private voteAndConfirm(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
         Log.cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd}));
 
         const opsToSend: [string, object][] = [];
@@ -172,7 +172,7 @@ export class Synchronizer {
             accepted: true,
             msg: "",
         };
-        const wiseOp: SmartvotesOperation = {
+        const wiseOp: WiseOperation = {
             voter: op.voter,
             delegator: this.delegator,
             command: confirmCmd
@@ -196,7 +196,7 @@ export class Synchronizer {
         });
     }
 
-    private rejectVoteorder(op: EffectuatedSmartvotesOperation, cmd: SendVoteorder, msg: string): Promise<void> {
+    private rejectVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder, msg: string): Promise<void> {
         Log.cheapDebug(() => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd, msg: msg}));
 
         const confirmCmd: ConfirmVote = {
@@ -204,7 +204,7 @@ export class Synchronizer {
             accepted: false,
             msg: msg,
         };
-        const wiseOp: SmartvotesOperation = {
+        const wiseOp: WiseOperation = {
             voter: op.voter,
             delegator: this.delegator,
             command: confirmCmd

@@ -7,10 +7,10 @@ import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber"
 import { SteemTransaction } from "../../src/blockchain/SteemTransaction";
 import { Api } from "../../src/api/Api";
 import { Protocol } from "../../src/protocol/Protocol";
-import { EffectuatedSmartvotesOperation } from "../../src/protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
 import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../../src/blockchain/AccountInfo";
-import { isConfirmVote } from "../protocol/ConfirmVote";
+import { isConfirmVote, isConfirmVoteBoundWithVote } from "../protocol/ConfirmVote";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
 import { BlogEntry } from "../blockchain/BlogEntry";
@@ -142,20 +142,20 @@ export class FakeApi extends Api {
             setTimeout(() => resolve(
                 this.transactions
                 .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
-                .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => (!!handledOrRejected))
-                .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
-                .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps))
-                .filter((effSop: EffectuatedSmartvotesOperation) => isConfirmVote(effSop.command))
-                .map((effSop: EffectuatedSmartvotesOperation) => effSop.moment)
+                .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => (!!handledOrRejected))
+                .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
+                .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps))
+                .filter((effSop: EffectuatedWiseOperation) => isConfirmVote(effSop.command))
+                .map((effSop: EffectuatedWiseOperation) => effSop.moment)
                 .reduce((newest: SteemOperationNumber, current: SteemOperationNumber) => {
                     if (current.isGreaterThan(newest)) return current;
                     else return newest;
-                }, V1Handler.INTRODUCTION_OF_SMARTVOTES_MOMENT)
+                }, V1Handler.INTRODUCTION_OF_WISE_MOMENT)
             ), this.fakeDelayMs);
         });
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
         return new Promise((resolve, reject) => {
             if (blockNum > this.currentBlock + 1) reject(new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)"));
             let awaitBlock: (thenFn: () => void) => void = () => {};
@@ -171,10 +171,10 @@ export class FakeApi extends Api {
                         this.transactionsByBlock[blockNum + ""]
                         .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
                         .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
-                        .filter((handledOrRejected: EffectuatedSmartvotesOperation [] | undefined) => !!handledOrRejected)
-                        .map((handled: EffectuatedSmartvotesOperation [] | undefined) => handled as EffectuatedSmartvotesOperation [])
-                        .reduce((allOps: EffectuatedSmartvotesOperation [], nextOps: EffectuatedSmartvotesOperation []) => allOps.concat(nextOps), [])
-                        .filter((effSop: EffectuatedSmartvotesOperation) => effSop.delegator === delegator)
+                        .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => !!handledOrRejected)
+                        .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
+                        .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps), [])
+                        .filter((effSop: EffectuatedWiseOperation) => effSop.delegator === delegator)
                     );
                     else resolve([]);
                 });
@@ -202,9 +202,9 @@ export class FakeApi extends Api {
         });
     }
 
-    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
         return new Promise((resolve, reject) => {
-            const result: EffectuatedSmartvotesOperation [] = [];
+            const result: EffectuatedWiseOperation [] = [];
             for (let i = 0; i < this.transactions.length; i++) {
                 const op = this.transactions[i];
                 const handleResult = protocol.handleOrReject(op);
@@ -213,6 +213,7 @@ export class FakeApi extends Api {
                         const effSo = handleResult[j];
                         if ((effSo.delegator === username && isConfirmVote(effSo.command))
                          || (effSo.voter === username)) {
+                            // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.cheapDebug(() => JSON.stringify(effSo));
                             // (up) fake blockchain does not provide
                             // information on who pushed the operation to blockchain,
                             // so this hacky way is the only way to get this information.

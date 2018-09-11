@@ -1,4 +1,4 @@
-import { SmartvotesOperation } from "../protocol/SmartvotesOperation";
+import { WiseOperation } from "../protocol/WiseOperation";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";

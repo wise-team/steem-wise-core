@@ -6,7 +6,7 @@ import * as Promise from "bluebird";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedSmartvotesOperation } from "../../src/wise";
+import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedWiseOperation } from "../../src/wise";
 import { ValidationContext } from "../../src/validation/ValidationContext";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 import { WeightForPeriodRule } from "../../src/rules/WeightForPeriodRule";
@@ -87,7 +87,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
 
             it("Starts synchronization without error", () => {
                 const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
-                    synchronizer = delegatorWise.runSynchronizerLoop(new SteemOperationNumber((fakeApi as FakeApi).getCurrentBlockNum(), 0, 0),
+                    synchronizer = delegatorWise.runSynchronizerLoop(new SteemOperationNumber((fakeApi as any as FakeApi).getCurrentBlockNum(), 0, 0),
                         (error: Error | undefined, event: Synchronizer.Event): void => {
                         if (event.type === Synchronizer.EventType.SynchronizationStop) {
                             resolve();
@@ -126,11 +126,11 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                         permlink: "nonexistent-post-" + Date.now()
                     };
                     const voterWise = new Wise(vo.voter, fakeApi);
-                    (fakeApi as FakeApi).setFakeTime(fakeTime);
+                    (fakeApi as any as FakeApi).setFakeTime(fakeTime);
                     return voterWise.generateVoteorderCustomJSONAsync(delegator, voteorder)
-                    .then((ops: [string, object][]) => (fakeApi as FakeApi).sendToBlockchain(ops))
+                    .then((ops: [string, object][]) => (fakeApi as any as FakeApi).sendToBlockchain(ops))
                     .then(() => Promise.delay(60))
-                    .then(() => (fakeApi as FakeApi).setFakeTime(new Date(nowTime.getTime())));
+                    .then(() => (fakeApi as any as FakeApi).setFakeTime(new Date(nowTime.getTime())));
                 });
             });
 
@@ -146,7 +146,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                 // calculate for all voters
                 const voters: string [] = _.uniq(test.voteorders.map(vo => vo.voter));
                 return Promise.resolve(voters).mapSeries((voter: any /* 'any' because of a bug in Bluebird */) => context.getWiseOperations(voter/*! voter as we are testing sending, not synchronization !*/, until)
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     ops.forEach(op => {
                         expect(op.timestamp.getTime(), "operation timestamp").to.be.greaterThan(until.getTime(), "until");
                     });
@@ -169,7 +169,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                 const until = new Date(nowTime.getTime() - 50 * 24 * 3600 * 1000);
 
                 return context.getWiseOperations(context.getDelegatorUsername(), until)
-                .then((ops: EffectuatedSmartvotesOperation []) => {
+                .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops.filter(op => isConfirmVote(op.command))).to.be.an("array").with.length(test.voteorders.length);
                     ops.filter(op => isConfirmVote(op.command)).forEach(op => {
                         expect((<ConfirmVote>op.command).accepted).to.be.true;
@@ -200,7 +200,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
 
             it("Stops synchronization properly", () => {
                 synchronizer.stop();
-                return (fakeApi as FakeApi).pushFakeBlock().then((son: SteemOperationNumber) => {
+                return (fakeApi as any as FakeApi).pushFakeBlock().then((son: SteemOperationNumber) => {
                     return synchronizationPromise.then(() => {});
                 }).then(() => {});
             });

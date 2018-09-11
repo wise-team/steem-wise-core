@@ -16,8 +16,8 @@ http.createServer(function (request, response) {
     if (filePath == './') {
         filePath = './index.html';
     }
-    else if (filePath == './steem-smartvotes.min.js') {
-        filePath = '../../dist/browser/steem-smartvotes.min.js';
+    else if (filePath == './wise.min.js') {
+        filePath = '../../dist/browser/wise.min.js';
     }
 
     var extname = String(path.extname(filePath)).toLowerCase();

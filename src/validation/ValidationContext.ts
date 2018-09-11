@@ -4,7 +4,7 @@ import { Api } from "../api/Api";
 import { OneTimePromise } from "../util/OneTimePromise";
 import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
 import { AccountInfo } from "../blockchain/AccountInfo";
-import { EffectuatedSmartvotesOperation } from "../protocol/EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { Protocol } from "../protocol/Protocol";
 import { BlogEntry } from "../blockchain/BlogEntry";
 import { Log } from "../util/log"; const log = Log.getLogger();
@@ -62,7 +62,7 @@ export class ValidationContext {
      * @param username - steem username
      * @param until — the oldest date to search for operations.
      */
-    public getWiseOperations(username: string, until: Date): Promise<EffectuatedSmartvotesOperation []> {
+    public getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
         return this.api.getWiseOperations(username, until, this.protocol);
     }
 

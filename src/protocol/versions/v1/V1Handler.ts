@@ -1,5 +1,5 @@
 import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
-import { SmartvotesOperation } from "../../SmartvotesOperation";
+import { WiseOperation } from "../../WiseOperation";
 
 import * as ajv from "ajv";
 import { smartvotes_operation, smartvotes_command_set_rules, smartvotes_ruleset, smartvotes_command_send_voteorder, smartvotes_command_confirm_votes } from "./smartvotes.schema";
@@ -11,7 +11,7 @@ import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
 import { SteemTransaction } from "../../../blockchain/SteemTransaction";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
-import { EffectuatedSmartvotesOperation } from "../../EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "../../EffectuatedWiseOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { ConfirmVote } from "../../ConfirmVote";
 import { WeightRule } from "../../../rules/WeightRule";
@@ -21,9 +21,9 @@ aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
 const validate = aajv.compile(require("./smartvotes.schema.json"));
 
 export class V1Handler implements ProtocolVersionHandler {
-    public static INTRODUCTION_OF_SMARTVOTES_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
+    public static INTRODUCTION_OF_WISE_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
 
-    public handleOrReject(transaction: SteemTransaction): EffectuatedSmartvotesOperation [] | undefined {
+    public handleOrReject(transaction: SteemTransaction): EffectuatedWiseOperation [] | undefined {
         if (transaction.block_num > 22710498) return undefined; // this protocol version is disabled for new transactions
 
         if (transaction.ops[0][0] != "custom_json" || (transaction.ops[0][1] as CustomJsonOperation).id != "smartvote") return undefined;
@@ -41,7 +41,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return validate(input) as boolean;
     }
 
-    private transform(op: SteemTransaction, smartvotesOp: smartvotes_operation, sender: string): EffectuatedSmartvotesOperation [] | undefined {
+    private transform(op: SteemTransaction, smartvotesOp: smartvotes_operation, sender: string): EffectuatedWiseOperation [] | undefined {
         if (smartvotesOp.name == "set_rules") { // sort for every voter
             return this.transformSetRules(op, smartvotesOp, sender);
         }
@@ -54,7 +54,7 @@ export class V1Handler implements ProtocolVersionHandler {
         else return undefined;
     }
 
-    private transformSetRules(op: SteemTransaction, smartvotesOp: smartvotes_command_set_rules, sender: string): EffectuatedSmartvotesOperation [] {
+    private transformSetRules(op: SteemTransaction, smartvotesOp: smartvotes_command_set_rules, sender: string): EffectuatedWiseOperation [] {
         const rulesPerVoter: [string, {name: string, rules: Rule []}[]][] = [];
 
         for (let i = 0; i < smartvotesOp.rulesets.length; i++) {
@@ -71,7 +71,7 @@ export class V1Handler implements ProtocolVersionHandler {
             }
         }
 
-        const out: EffectuatedSmartvotesOperation [] = [];
+        const out: EffectuatedWiseOperation [] = [];
 
         for (let i = 0; i < rulesPerVoter.length; i++) {
             const cmd: SetRules = {
@@ -87,7 +87,7 @@ export class V1Handler implements ProtocolVersionHandler {
                 delegator: sender,
 
                 command: cmd
-            } as EffectuatedSmartvotesOperation);
+            } as EffectuatedWiseOperation);
         }
 
         return out;
@@ -121,7 +121,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return {name: ruleset.name, rules: rules};
     }
 
-    private transformSendVoteorder(op: SteemTransaction, smartvotesOp: smartvotes_command_send_voteorder, sender: string): EffectuatedSmartvotesOperation [] {
+    private transformSendVoteorder(op: SteemTransaction, smartvotesOp: smartvotes_command_send_voteorder, sender: string): EffectuatedWiseOperation [] {
         const cmd: SendVoteorder = {
             rulesetName: smartvotesOp.voteorder.ruleset_name,
             permlink: smartvotesOp.voteorder.permlink,
@@ -137,11 +137,11 @@ export class V1Handler implements ProtocolVersionHandler {
             delegator: smartvotesOp.voteorder.delegator,
 
             command: cmd
-        } as EffectuatedSmartvotesOperation];
+        } as EffectuatedWiseOperation];
     }
 
-    private transformConfirmVotes(op: SteemTransaction, smartvotesOp: smartvotes_command_confirm_votes, sender: string): EffectuatedSmartvotesOperation [] {
-        const out: EffectuatedSmartvotesOperation [] = [];
+    private transformConfirmVotes(op: SteemTransaction, smartvotesOp: smartvotes_command_confirm_votes, sender: string): EffectuatedWiseOperation [] {
+        const out: EffectuatedWiseOperation [] = [];
 
         for (let i = 0; i < smartvotesOp.voteorders.length; i++) {
             const confirmation = smartvotesOp.voteorders[i];
@@ -161,13 +161,13 @@ export class V1Handler implements ProtocolVersionHandler {
                 delegator: sender,
 
                 command: cmd
-            } as EffectuatedSmartvotesOperation);
+            } as EffectuatedWiseOperation);
         }
 
         return out;
     }
 
-    public serializeToBlockchain(op: SmartvotesOperation): [string, object][] {
+    public serializeToBlockchain(op: WiseOperation): [string, object][] {
         throw new Error("Protocol version V1 is disabled");
     }
 }

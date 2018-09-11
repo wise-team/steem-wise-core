@@ -1,7 +1,7 @@
 import { SteemTransaction } from "../blockchain/SteemTransaction";
-import { SmartvotesOperation } from "./SmartvotesOperation";
+import { WiseOperation } from "./WiseOperation";
 import { ProtocolVersionHandler } from "./versions/ProtocolVersionHandler";
-import { EffectuatedSmartvotesOperation } from "./EffectuatedSmartvotesOperation";
+import { EffectuatedWiseOperation } from "./EffectuatedWiseOperation";
 
 export class Protocol {
     private registry: ProtocolVersionHandler [];
@@ -15,7 +15,7 @@ export class Protocol {
         if (this.registry.length == 0) throw new Error("You must specify at least one protocol version handler");
     }
 
-    public handleOrReject(transaction: SteemTransaction): EffectuatedSmartvotesOperation [] | undefined {
+    public handleOrReject(transaction: SteemTransaction): EffectuatedWiseOperation [] | undefined {
         for (const pv of this.registry) {
             const result = pv.handleOrReject(transaction);
             if (result) {
@@ -25,7 +25,7 @@ export class Protocol {
         return undefined;
     }
 
-    public serializeToBlockchain(op: SmartvotesOperation): [string, object][] {
+    public serializeToBlockchain(op: WiseOperation): [string, object][] {
         return this.registry[0].serializeToBlockchain(op);
     }
 }

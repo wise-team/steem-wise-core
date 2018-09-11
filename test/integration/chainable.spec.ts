@@ -10,7 +10,7 @@ import { SimpleTaker } from "../../src/chainable/Chainable";
 import { SteemOperationNumber, SteemTransaction, Wise } from "../../src/wise";
 import { SteemJsAccountHistorySupplier } from "../../src/api/directblockchain/SteemJsAccountHistorySupplier";
 import { OperationNumberFilter } from "../../src/chainable/filters/OperationNumberFilter";
-import { ToSmartvotesOperationTransformer } from "../../src/chainable/transformers/ToSmartvotesOperationTransformer";
+import { ToWiseOperationTransformer } from "../../src/chainable/transformers/ToWiseOperationTransformer";
 import { DisabledApi } from "../../src/api/DisabledApi";
 import { ChainableLimiter } from "../../src/chainable/limiters/ChainableLimiter";
 
@@ -29,7 +29,7 @@ describe("test/integration/chainable.spec.ts", () => {
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
-                    .chain(new ToSmartvotesOperationTransformer(protocol))
+                    .chain(new ToWiseOperationTransformer(protocol))
                     .chain(new ChainableLimiter(6))
                     .chain(new SimpleTaker((item: SteemTransaction): boolean => {
                         steemprojects1Operations.push(item);
