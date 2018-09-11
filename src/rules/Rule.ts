@@ -7,9 +7,9 @@ export abstract class Rule {
     public rule: string = "not-set-in-inheriting-class";
     /**
      * Validates a voteorder.
-     * @param voteorder — a voteorder
-     * @param context — validation context (allows post loading, etc)
-     * @throws ValidationException — when an voteorder is invalid according to this rule
+     * @param voteorder - a voteorder
+     * @param context - validation context (allows post loading, etc)
+     * @throws ValidationException - when an voteorder is invalid according to this rule
      */
     public abstract validate (
         voteorder: SendVoteorder,

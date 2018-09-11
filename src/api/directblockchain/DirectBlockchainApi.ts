@@ -297,8 +297,8 @@ export class DirectBlockchainApi extends Api {
     /**
      * This function is specific only to DirectBlockchainApi. It returns all wise operations in block
      * (without checking delegator).
-     * @param blockNum — number of the block.
-     * @param protocol — Protocol object.
+     * @param blockNum - number of the block.
+     * @param protocol - Protocol object.
      */
     public getAllWiseOperationsInBlock(blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
         return this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, protocol, true /* skip delegator check */);

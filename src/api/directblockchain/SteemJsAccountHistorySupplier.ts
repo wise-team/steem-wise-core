@@ -62,7 +62,7 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
                 else {
                     result.reverse(); // loadFrom(from=-1) returns last "batchSize" of operations, but they are sorted from oldest to the newest.
                     // So the newest operation index is 1000 (it is a little awkward, but when limit=1000, steem returns 1001
-                    // operations — it may be a bug, so I do not rely on this behavior — thats why I use result.length < batchSize instead of result.length <= batchSize) below.
+                    // operations - it may be a bug, so I do not rely on this behavior - thats why I use result.length < batchSize instead of result.length <= batchSize) below.
                     const loadNext = this.processBatch(result);
 
                     if (loadNext && result.length >= this.batchSize) { // not all operations were loaded

@@ -22,7 +22,7 @@ export abstract class Api {
     /**
      * Returns WISE operations related to given username that are newer than until.
      * @param username - steem username
-     * @param until — the oldest date to search for operations.
+     * @param until - the oldest date to search for operations.
      */
     public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []>; // TODO test
 
@@ -32,7 +32,7 @@ export abstract class Api {
      * @param username - steem username
      * @param startFrom - number of the entry to start from counting from the newest to the oldest
      *      (startFrom=0 will return the newest entry)
-     * @param limit — limit the number of returned entries (maximal limit is 500).
+     * @param limit - limit the number of returned entries (maximal limit is 500).
      */
     public abstract getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []>;
 }

@@ -8,7 +8,7 @@ export class Protocol {
 
     /**
      * Remember that the current handler should be the first one.
-     * @param handlers — protocol version handlers ordered from the newest to the oldest
+     * @param handlers - protocol version handlers ordered from the newest to the oldest
      */
     public constructor(handlers: ProtocolVersionHandler []) {
         this.registry = handlers;

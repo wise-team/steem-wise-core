@@ -86,7 +86,7 @@ export interface smartvotes_rule_authors {
 
 /**
  * A rule, which allows using custom JSON-RPC for post validation. When user
- * browses posts / votes / before sending a vote based on a voteorder — a call will be performed.
+ * browses posts / votes / before sending a vote based on a voteorder - a call will be performed.
  * RPC should return boolean true or false indicating potential vote validity.
  */
 export interface smartvotes_rule_custom_rpc {
