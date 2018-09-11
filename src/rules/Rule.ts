@@ -41,3 +41,12 @@ export namespace Rule {
         ExpirationDate = "expiration_date",
     }
 }
+
+export namespace Rule {
+    /**
+     * This is an TS 1.6+ TypeGuard as described here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
+     */
+    export function isRule(o: object): o is Rule {
+        return (<Rule>o).rule !== undefined;
+    }
+}
