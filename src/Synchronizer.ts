@@ -79,7 +79,7 @@ export class Synchronizer {
                 this.notify(undefined, { type: Synchronizer.EventType.ReversibleError,
                     error: error, moment: this.lastProcessedOperationNum, message: " Reversible error: " + error.message + ". Retrying in 3 seconds..." });
                 // note that operations are processed only if currentOpNum > this.lastProcessedOperationNum,
-                // so if block processing is retried — already processed operations will not be processed second time
+                // so if block processing is retried - already processed operations will not be processed second time
                 this.continueIfRunning(() => setTimeout(() => this.processBlock(blockNum), 3000));
             })
         );

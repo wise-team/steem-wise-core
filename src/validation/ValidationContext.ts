@@ -60,7 +60,7 @@ export class ValidationContext {
     /**
      * Returns WISE operations related to given username that are newer than until.
      * @param username - steem username
-     * @param until — the oldest date to search for operations.
+     * @param until - the oldest date to search for operations.
      */
     public getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
         return this.api.getWiseOperations(username, until, this.protocol);
@@ -72,7 +72,7 @@ export class ValidationContext {
      * @param username - steem username
      * @param startFrom - number of the entry to start from counting from the newest to the oldest
      *      (startFrom=0 will return the newest entry)
-     * @param limit — limit the number of returned entries (maximal limit is 500).
+     * @param limit - limit the number of returned entries (maximal limit is 500).
      */
     public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
         return this.api.getBlogEntries(username, startFrom, limit);
