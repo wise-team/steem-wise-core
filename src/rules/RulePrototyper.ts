@@ -14,11 +14,26 @@ import { FirstPostRule } from "./FirstPostRule";
 import { PayoutRule } from "./PayoutRule";
 import { VotersRule } from "./VotersRule";
 import { ExpirationDateRule } from "./ExpirationDateRule";
+import { Ruleset } from "../protocol/Ruleset";
 
 /**
  * This is a rule prototyper. Prototyping is done when rules are loaded from json file.
  */
 export class RulePrototyper {
+    /**
+     * Prototypes and validates a ruleset. This function converts a plain json rules (without methods) to
+     * proper Rule objects that implements all needed methods. It also validates each rule object (checks if
+     * it contains all required parameters).
+     * @param unprototypedRuleset - ruleset to prototype
+     */
+    public static prototypeRuleset(unprototypedRuleset: Ruleset): Ruleset {
+        const out: Ruleset = {
+            name: unprototypedRuleset.name,
+            rules: unprototypedRuleset.rules.map(rule => RulePrototyper.fromUnprototypedRule(rule))
+        };
+        return out;
+    }
+
     public static fromUnprototypedRule(unprototyped: Rule): Rule {
         /* if rule implements validate, it means that it already had prototype */
         if (unprototyped.validate) return unprototyped;
