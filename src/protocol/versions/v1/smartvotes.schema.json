@@ -126,7 +126,7 @@
             "type": "object"
         },
         "smartvotes_rule_custom_rpc": {
-            "description": "A rule, which allows using custom JSON-RPC for post validation. When user\nbrowses posts / votes / before sending a vote based on a voteorder — a call will be performed.\nRPC should return boolean true or false indicating potential vote validity.",
+            "description": "A rule, which allows using custom JSON-RPC for post validation. When user\nbrowses posts / votes / before sending a vote based on a voteorder - a call will be performed.\nRPC should return boolean true or false indicating potential vote validity.",
             "properties": {
                 "rpc_host": {
                     "type": "string"

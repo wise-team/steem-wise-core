@@ -28,4 +28,28 @@ export class Protocol {
     public serializeToBlockchain(op: WiseOperation): [string, object][] {
         return this.registry[0].serializeToBlockchain(op);
     }
+
+    /**
+     * Validated if steem operation it is a valid wise
+     * @param op - an steem operation in format: [string, object] object (if it is a pending operation block_num should equal Infinity)
+     */ // TODO test
+     public validateOperation = (op: [string, object]): boolean => {
+        const so: SteemTransaction = {
+            block_num: Infinity,
+            transaction_num: 0,
+            transaction_id: "",
+            timestamp: new Date(),
+            ops: [op]
+        };
+        return this.validateSteemTransaction(so);
+    }
+
+    /**
+     * Validated if steem operation (object with blockchain data and timestamp) it is a valid wise
+     * @param op - an steem operation object that implements SteemTransaction interface
+     */ // TODO test
+    public validateSteemTransaction = (so: SteemTransaction): boolean => {
+        const res = this.handleOrReject(so);
+        return res != undefined;
+    }
 }

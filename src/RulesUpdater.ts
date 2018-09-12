@@ -2,19 +2,60 @@ import * as _ from "lodash";
 
 import { Api } from "./api/Api";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
-import { SetRules, EffectuatedSetRules, SetRulesForVoter } from "./protocol/SetRules";
+import { SetRules } from "./protocol/SetRules";
 import { Protocol } from "./protocol/Protocol";
 import { WiseOperation } from "./protocol/WiseOperation";
-import { ProggressCallback } from "./ProggressCallback";
+import { ProggressCallback, Callback, Wise } from "./wise";
 import { Promise } from "bluebird";
 import { Util } from "./util/util";
 import { RulePrototyper } from "./rules/RulePrototyper";
+import { Ruleset } from "./protocol/Ruleset";
+import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
+import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 
 export class RulesUpdater {
-    public static updateRulesIfChanged(api: Api, protocol: Protocol, delegator: string,
-            newRules: SetRulesForVoter [], proggressCallback: ProggressCallback): Promise<SteemOperationNumber | true> {
-        return api.loadAllRulesets(delegator, SteemOperationNumber.FUTURE, protocol)
-        .then((currentRules: EffectuatedSetRules []) => { // remove rules that were overwritten
+    public static uploadRulesetsForVoter(
+        api: Api, protocol: Protocol, delegator: string, voter: string, rulesets: Ruleset [],
+        proggressCallback?: ProggressCallback
+    ): Promise<SteemOperationNumber> {
+        // validate input params
+        if (!voter || !voter.length)
+            throw new Error("Wise#uploadRulesetsForVoter: voter cannot be undefined or empty");
+        if (!rulesets)
+            throw new Error("Wise#uploadRulesetsForVoter: rulesets cannot be undefined");
+        if (!Array.isArray(rulesets))
+            throw new Error("Wise#uploadRulesetsForVoter: rulesets must be an array");
+        if (rulesets.filter(ruleset => !Ruleset.isRuleset(ruleset)).length === 0)
+            throw new Error("Wise#uploadRulesetsForVoter: rulesets must contain valid rulesets");
+
+        // the following method will throw error on invalid rule object
+        const validatedAndPrototypedRulesets = rulesets.map(ruleset => RulePrototyper.prototypeRuleset(ruleset));
+
+        return Promise.resolve(validatedAndPrototypedRulesets)
+        .then(rulesets => { // serialize object to blockchain
+            const setRulesCmd: SetRules = {
+                rulesets: rulesets
+            };
+            const wiseOp: WiseOperation = {
+                voter: voter,
+                delegator: delegator,
+                command: setRulesCmd
+            };
+
+            const steemOps: [string, object][] = protocol.serializeToBlockchain(wiseOp);
+            if (steemOps.length !== 1) throw new Error("SetRules should be a single blockchain operation");
+            else return steemOps;
+        })
+        .then((steemOps: [string, object][]) => { // validate operation object
+            if (protocol.validateOperation(steemOps[0])) return (steemOps);
+            else throw new Error("Operation object has invalid structure");
+        })
+        .then((steemOps: [string, object][]) => api.sendToBlockchain(steemOps));
+    }
+
+    public static downloadAllRulesets(api: Api, protocol: Protocol, delegator: string, moment: SteemOperationNumber = SteemOperationNumber.FUTURE): Promise<EffectuatedSetRules []> {
+        return api.loadAllRulesets(delegator, moment, protocol)
+        .then((currentRules: EffectuatedSetRules []) => {
             if (currentRules.length == 0) return [];
 
             const rulesByVoter: [string, EffectuatedSetRules []][] = _.toPairs(_.groupBy(currentRules, (r: EffectuatedSetRules) => r.voter));
@@ -26,6 +67,14 @@ export class RulesUpdater {
                 }, votersRuleHistory[1][0]);
             });
         })
+        .then((rules: EffectuatedSetRules []) => { // remove voters with cleared (empty) rules
+            return _.filter(rules, rulesForSingleVoter => rulesForSingleVoter.rulesets.length > 0);
+        });
+    }
+
+    public static uploadAllRulesets(api: Api, protocol: Protocol, delegator: string,
+            newRules: SetRulesForVoter [], proggressCallback: ProggressCallback): Promise<SteemOperationNumber | true> {
+        return RulesUpdater.downloadAllRulesets(api, protocol, delegator)
         .then((currentRules: EffectuatedSetRules []) => { // decide what operations are needed to be sent
             // map all rules to format: { [voter: string]: { current: ? : updated: ? } }
             type RulesByVoterValue = { current: SetRules|undefined, updated: SetRules|undefined }; // { voter: string, rulesets: SetRules, updated: boolean };

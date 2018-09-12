@@ -1,22 +1,22 @@
 import * as Promise from "bluebird";
 import * as _ from "lodash";
 
-import { SteemPost } from "../../src/blockchain/SteemPost";
-import { SetRules, EffectuatedSetRules, isSetRules } from "../../src/protocol/SetRules";
-import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
-import { SteemTransaction } from "../../src/blockchain/SteemTransaction";
-import { Api } from "../../src/api/Api";
-import { Protocol } from "../../src/protocol/Protocol";
-import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
-import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalProperties";
-import { AccountInfo } from "../../src/blockchain/AccountInfo";
-import { isConfirmVote, isConfirmVoteBoundWithVote } from "../protocol/ConfirmVote";
+import { Log } from "../util/log"; const log = Log.getLogger();
+import { SteemPost } from "../blockchain/SteemPost";
+import { SetRules } from "../protocol/SetRules";
+import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
+import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SteemTransaction } from "../blockchain/SteemTransaction";
+import { Api } from "../api/Api";
+import { Protocol } from "../protocol/Protocol";
+import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
+import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
+import { AccountInfo } from "../blockchain/AccountInfo";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
 import { BlogEntry } from "../blockchain/BlogEntry";
-import { Log } from "../util/log"; const log = Log.getLogger();
+import { ConfirmVote } from "../protocol/ConfirmVote";
 
-// TODO very slow. Examine why (maybe DirecrBlockchain could also be speeded up)
 export class FakeApi extends Api {
     private posts: SteemPost [];
     private transactions: SteemTransaction [];
@@ -119,7 +119,7 @@ export class FakeApi extends Api {
                 if (handleResult) {
                     for (let j = 0; j < handleResult.length; j++) {
                         const effSo = handleResult[j];
-                        if (isSetRules(effSo.command) &&
+                        if (SetRules.isSetRules(effSo.command) &&
                             effSo.delegator === delegator) {
                             if (at.isGreaterOrEqual(effSo.moment)) {
                                 const effSetRules: EffectuatedSetRules = {
@@ -145,7 +145,7 @@ export class FakeApi extends Api {
                 .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => (!!handledOrRejected))
                 .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
                 .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps))
-                .filter((effSop: EffectuatedWiseOperation) => isConfirmVote(effSop.command))
+                .filter((effSop: EffectuatedWiseOperation) => ConfirmVote.isConfirmVote(effSop.command))
                 .map((effSop: EffectuatedWiseOperation) => effSop.moment)
                 .reduce((newest: SteemOperationNumber, current: SteemOperationNumber) => {
                     if (current.isGreaterThan(newest)) return current;
@@ -211,7 +211,7 @@ export class FakeApi extends Api {
                 if (handleResult) {
                     for (let j = 0; j < handleResult.length; j++) {
                         const effSo = handleResult[j];
-                        if ((effSo.delegator === username && isConfirmVote(effSo.command))
+                        if ((effSo.delegator === username && ConfirmVote.isConfirmVote(effSo.command))
                          || (effSo.voter === username)) {
                             // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.cheapDebug(() => JSON.stringify(effSo));
                             // (up) fake blockchain does not provide

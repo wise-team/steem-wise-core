@@ -331,7 +331,7 @@ export class Wise {
      * false.
      *
      * @param {SteemOperationNumber} since - moment in the blockchain to start synchronization from
-     * @param {Synchronizer.NotifierCallback} notifierCallback - a callback which is notified every time an event 
+     * @param {Synchronizer.NotifierCallback} notifierCallback - a callback which is notified every time an event
      *      occurs. It should return true to continue synchronization, or false if to stop it.
      *
      * @returns - this method returns the Synchronizer object.
@@ -360,7 +360,7 @@ export type Callback<RESULT> = (error: Error | undefined, result: RESULT | undef
 
 /**
  * A progress callback that is called every time a milestone in particular operation is achived. Msg is a textual
- * description of what happened, and proggress contains a fractional number (0.0 = 0%, 1.0 = 100%) which indicates 
+ * description of what happened, and proggress contains a fractional number (0.0 = 0%, 1.0 = 100%) which indicates
  * the proggress.
  */
 export type ProggressCallback = (msg: string, proggress: number) => void;
@@ -392,12 +392,13 @@ export { SteemTransaction } from "./blockchain/SteemTransaction";
 export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 
 export { Protocol } from "./protocol/Protocol";
+export { ConfirmVote } from "./protocol/ConfirmVote";
+export { ConfirmVoteBoundWithVote } from "./protocol/ConfirmVoteBoundWithVote";
 export { SendVoteorder } from "./protocol/SendVoteorder";
 export { Ruleset } from "./protocol/Ruleset";
 export { SetRules } from "./protocol/SetRules";
 export { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 export { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
-
 export { WiseOperation } from "./protocol/WiseOperation";
 export { EffectuatedWiseOperation } from "./protocol/EffectuatedWiseOperation";
 

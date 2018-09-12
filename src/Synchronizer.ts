@@ -5,13 +5,14 @@ import { Log } from "./util/log"; const log = Log.getLogger();
 import { Api } from "./api/Api";
 import { Protocol } from "./protocol/Protocol";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
-import { SetRules, EffectuatedSetRules, isSetRules } from "./protocol/SetRules";
+import { SetRules } from "./protocol/SetRules";
 import { EffectuatedWiseOperation } from "./protocol/EffectuatedWiseOperation";
 import { ConfirmVote } from "./protocol/ConfirmVote";
-import { isSendVoteorder, SendVoteorder } from "./protocol/SendVoteorder";
+import { SendVoteorder } from "./protocol/SendVoteorder";
 import { Validator } from "./validation/Validator";
 import { ValidationException } from "./validation/ValidationException";
 import { WiseOperation } from "./protocol/WiseOperation";
+import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 
 export class Synchronizer {
     private timeoutMs = 12000;
@@ -37,7 +38,7 @@ export class Synchronizer {
     }
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
-    public runLoop(since: SteemOperationNumber): Synchronizer {
+    public start(since: SteemOperationNumber): Synchronizer {
         log.debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({since: since}));
         this.lastProcessedOperationNum = since;
         this.api.loadAllRulesets(this.delegator, since, this.protocol)
@@ -90,10 +91,10 @@ export class Synchronizer {
             const currentOpNum = op.moment;
             if (currentOpNum.isGreaterThan(this.lastProcessedOperationNum)) {
                 if (op.delegator === this.delegator) {
-                    if (isSetRules(op.command)) {
+                    if (SetRules.isSetRules(op.command)) {
                         return this.updateRulesArray(op, op.command);
                     }
-                    else if (isSendVoteorder(op.command)) {
+                    else if (SendVoteorder.isSendVoteorder(op.command)) {
                         return this.processVoteorder(op, op.command);
                     }
                     // confirmVote does not need to be processed

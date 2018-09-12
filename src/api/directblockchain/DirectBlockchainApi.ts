@@ -2,7 +2,8 @@ import { Promise } from "bluebird";
 import * as steem from "steem";
 
 import { SteemPost } from "../../blockchain/SteemPost";
-import { SetRules, EffectuatedSetRules } from "../../protocol/SetRules";
+import { SetRules } from "../../protocol/SetRules";
+import { EffectuatedSetRules } from "../../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
 import { SimpleTaker } from "../../chainable/Chainable";
 import { SteemTransaction } from "../../blockchain/SteemTransaction";
@@ -50,24 +51,31 @@ export class DirectBlockchainApi extends Api {
     }
 
     public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink }));
+        Log.cheapDebug(
+            () => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink }));
 
         return new Promise((resolve, reject) => {
             this.steem.api.getContent(author, permlink, function(error: Error, result: any) {
-                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST_RESULT=" + JSON.stringify({ author: author, permlink: permlink, result: result, error: error }));
+                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST_RESULT="
+                     + JSON.stringify({ author: author, permlink: permlink, result: result, error: error }));
 
                 if (error) reject(error);
-                else if (result.author.length === 0) reject(new NotFoundException("The post (@" + author + "/" + permlink + ") does not exist"));
+                else if (result.author.length === 0)
+                    reject(new NotFoundException("The post (@" + author + "/" + permlink + ") does not exist"));
                 else resolve(result as SteemPost);
             });
         });
     }
 
-    public loadRulesets(delegator: string, voter: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS=" + JSON.stringify({ delegator: delegator, voter: voter, atMoment: atMoment }));
+    public loadRulesets(
+        delegator: string, voter: string, atMoment: SteemOperationNumber, protocol: Protocol
+    ): Promise<SetRules> {
+        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS="
+             + JSON.stringify({ delegator: delegator, voter: voter, atMoment: atMoment }));
 
         return new Promise<SetRules>((resolve, reject) => {
-            if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
+            if (typeof delegator === "undefined" || delegator.length == 0)
+                throw new Error("Delegator must not be empty");
             if (typeof voter === "undefined" || voter.length == 0) throw new Error("Voter must not be empty");
 
             const loadedRulesets: SetRules [] = [];
@@ -77,10 +85,13 @@ export class DirectBlockchainApi extends Api {
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
+                // this is limiter (restricts lookup to the period of wise presence):
+                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter())
                 .chain(new ToWiseOperationTransformer(protocol))
                 .chain(new VoterFilter(voter))
-                .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.SetRules))
+                .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(
+                    WiseOperationTypeFilter.OperationType.SetRules)
+                )
                 .chain(new ChainableLimiter(1))
                 .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
                     noResult = false;
@@ -103,7 +114,9 @@ export class DirectBlockchainApi extends Api {
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
         return new Promise<SteemOperationNumber>((resolve, reject) => {
-            const steemCallback = function(error: Error | undefined, result: { id: string, block_num: number, trx_num: number }): void {
+            const steemCallback = function(
+                error: Error | undefined, result: { id: string, block_num: number, trx_num: number }
+            ): void {
                 Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_RESULT="
                      + JSON.stringify({operations: operations, error: error, rewsult: result }));
 

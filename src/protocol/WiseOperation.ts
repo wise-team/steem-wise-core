@@ -1,6 +1,7 @@
 import { SetRules } from "./SetRules";
 import { SendVoteorder } from "./SendVoteorder";
-import { ConfirmVote, ConfirmVoteBoundWithVote } from "./ConfirmVote";
+import { ConfirmVote } from "./ConfirmVote";
+import { ConfirmVoteBoundWithVote } from "./ConfirmVoteBoundWithVote";
 
 
 export interface WiseOperation {

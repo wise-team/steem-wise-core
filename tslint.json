@@ -1,6 +1,9 @@
 {
     "rules": {
         "class-name": true,
+        /*"max-line-length": {
+            "options": [120]
+        },*/
         "comment-format": [
             true,
             "check-space"

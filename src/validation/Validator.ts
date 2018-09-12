@@ -1,15 +1,17 @@
+import { Log } from "../util/log";  const log = Log.getLogger();
+
 import { Api } from "../api/Api";
 import { ValidationException } from "./ValidationException";
 import { Protocol } from "../protocol/Protocol";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { ProggressCallback } from "../ProggressCallback";
 import { Promise } from "bluebird";
 import { ValidationContext } from "./ValidationContext";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
-import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
+import { SetRules } from "../protocol/SetRules";
 import { Rule } from "../rules/Rule";
 import { ImposedRules } from "../rules/ImposedRules";
-import { Log } from "../util/log"; const log = Log.getLogger();
+import { ProggressCallback } from "../wise";
+import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 
 export class Validator {
     private api: Api;

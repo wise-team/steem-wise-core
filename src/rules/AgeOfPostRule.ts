@@ -4,7 +4,6 @@ import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { ConfirmVote, isConfirmVote, isConfirmVoteBoundWithVote } from "../protocol/ConfirmVote";
 import { SteemPost } from "../blockchain/SteemPost";
 
 /**

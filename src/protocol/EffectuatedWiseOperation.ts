@@ -1,5 +1,3 @@
-import { SetRules } from "./SetRules";
-import { SendVoteorder } from "./SendVoteorder";
 import { WiseOperation } from "./WiseOperation";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 

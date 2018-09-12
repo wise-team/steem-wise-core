@@ -1,5 +1,6 @@
 import { SteemPost } from "../blockchain/SteemPost";
-import { SetRules, EffectuatedSetRules } from "../protocol/SetRules";
+import { SetRules } from "../protocol/SetRules";
+import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { Protocol } from "../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";

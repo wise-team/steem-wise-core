@@ -5,7 +5,8 @@ import { ValidationContext } from "../validation/ValidationContext";
 import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
-import { ConfirmVote, isConfirmVote, isConfirmVoteBoundWithVote } from "../protocol/ConfirmVote";
+import { ConfirmVote } from "../protocol/ConfirmVote";
+import { ConfirmVoteBoundWithVote } from "../protocol/ConfirmVoteBoundWithVote";
 
 /**
  * This rule limits total absolute weight)of confirmed voteorders over given period of time.
@@ -44,10 +45,10 @@ export class WeightForPeriodRule extends Rule {
         .then((ops: EffectuatedWiseOperation []) => {
             let sumOfWeightsForGivenPeriod = 0;
             ops.forEach(op => {
-                if (isConfirmVote(op.command) && op.voter === context.getVoterUsername()) {
+                if (ConfirmVote.isConfirmVote(op.command) && op.voter === context.getVoterUsername()) {
                     const confirmVoteOp: ConfirmVote = op.command;
                     // count only accepted vote confirmations:
-                    if (confirmVoteOp.accepted && isConfirmVoteBoundWithVote(confirmVoteOp)) {
+                    if (confirmVoteOp.accepted && ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(confirmVoteOp)) {
                         sumOfWeightsForGivenPeriod += Math.abs(confirmVoteOp.vote.weight);
                     }
                 }

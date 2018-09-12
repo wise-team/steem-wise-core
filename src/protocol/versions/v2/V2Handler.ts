@@ -1,20 +1,21 @@
 import * as ajv from "ajv";
 import * as _ from "lodash";
 
+import { Log } from "../../../util/log"; const log = Log.getLogger();
 import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
 import { WiseOperation } from "../../WiseOperation";
-import { SendVoteorder, isSendVoteorder } from "../../SendVoteorder";
-import { SetRules, isSetRules } from "../../SetRules";
+import { SendVoteorder } from "../../SendVoteorder";
+import { SetRules } from "../../SetRules";
 import { Rule } from "../../../rules/Rule";
 import { SteemTransaction } from "../../../blockchain/SteemTransaction";
 import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedWiseOperation } from "../../EffectuatedWiseOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
-import { isConfirmVote, ConfirmVote, ConfirmVoteBoundWithVote } from "../../ConfirmVote";
+import { ConfirmVote } from "../../ConfirmVote";
 import { wise_operation, wise_set_rules, wise_rule, wise_send_voteorder_operation, wise_set_rules_operation, wise_confirm_vote_operation } from "./wise-schema";
 import { wise_rule_decode, wise_rule_encode } from "./rules-schema";
 import { VoteOperation, isVoteOperation } from "../../../blockchain/VoteOperation";
-import { Log } from "../../../util/log"; const log = Log.getLogger();
+ import { ConfirmVoteBoundWithVote } from "../../ConfirmVoteBoundWithVote";
 
 class WiseConstants {
     public static wise_send_voteorder_descriptor: string = "v2:send_voteorder";
@@ -195,7 +196,7 @@ export class V2Handler implements ProtocolVersionHandler {
         let senderUsername = "";
         let jsonObj: wise_operation;
 
-        if (isSetRules(op.command)) {
+        if (SetRules.isSetRules(op.command)) {
             senderUsername = op.delegator;
 
             const rulesets: [string, wise_rule []] [] = [];
@@ -210,7 +211,7 @@ export class V2Handler implements ProtocolVersionHandler {
                 rulesets: rulesets
             }];
         }
-        else if (isSendVoteorder(op.command)) {
+        else if (SendVoteorder.isSendVoteorder(op.command)) {
             senderUsername = op.voter;
             jsonObj = ["v2:send_voteorder", {
                 delegator: op.delegator,
@@ -220,7 +221,7 @@ export class V2Handler implements ProtocolVersionHandler {
                 weight: op.command.weight
             }];
         }
-        else if (isConfirmVote(op.command)) {
+        else if (ConfirmVote.isConfirmVote(op.command)) {
             senderUsername = op.delegator;
             jsonObj = ["v2:confirm_vote", {
                 voter: op.voter,
