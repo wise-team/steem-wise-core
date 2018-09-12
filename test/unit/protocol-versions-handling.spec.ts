@@ -9,10 +9,8 @@ import { DisabledApi } from "../../src/api/DisabledApi";
 
 
 /* PREPARE TESTING DATASETS */
-import * as v1ValidOperations_ from "../data/operations/v1-valid.operations.json";
-const v1ValidOperations: SteemOperation [] = v1ValidOperations_ as any as SteemOperation [];
-import * as v1InvalidOperations_ from "../data/operations/v1-invalid.operations.json";
-const v1InvalidOperations: SteemOperation [] = v1InvalidOperations_ as any as SteemOperation [];
+const v1ValidOperations: SteemOperation [] = require("../data/operations/v1-valid.operations.json") as any as SteemOperation [];
+const v1InvalidOperations: SteemOperation [] = require("../data/operations/v1-invalid.operations.json") as any as SteemOperation [];
 
 
 describe("test/unit/protocol-versions-handling.spec.ts", function() {
@@ -24,14 +22,14 @@ describe("test/unit/protocol-versions-handling.spec.ts", function() {
 
         it ("Validates all previously valid V1 (smartvote) operations as valid", () => {
             for (const op of v1ValidOperations) {
-                const result = wise.validateSteemTransaction(operationToTransaction(op));
+                const result = wise.getProtocol().validateSteemTransaction(operationToTransaction(op));
                 expect(result).to.be.true;
             }
         });
 
-        it ("Validates all previously invalid V1 (smartvote) operations as valid", () => {
+        it ("Validates all previously invalid V1 (smartvote) operations as invalid", () => {
             for (const op of v1InvalidOperations) {
-                const result = wise.validateSteemTransaction(operationToTransaction(op));
+                const result = wise.getProtocol().validateSteemTransaction(operationToTransaction(op));
                 expect(result).to.be.false;
             }
         });

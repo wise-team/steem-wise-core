@@ -52,4 +52,8 @@ export class Protocol {
         const res = this.handleOrReject(so);
         return res != undefined;
     }
+
+    public getHandlers(): ProtocolVersionHandler [] {
+        return this.registry;
+    }
 }

@@ -6,16 +6,12 @@ import "mocha";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, DirectBlockchainApi } from "../../src/wise";
-import { SteemPost } from "../../src/blockchain/SteemPost";
+import { Wise, SteemOperationNumber, Api } from "../../src/wise";
 import { FakeApi } from "../../src/api/FakeApi";
-import { Util } from "../../src/util/util";
 import { Synchronizer } from "../../src/Synchronizer";
-import { isConfirmVote, ConfirmVote } from "../../src/protocol/ConfirmVote";
 
 
 /* PREPARE TESTING DATASETS */
-import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 Promise.onPossiblyUnhandledRejection(function(error) {
@@ -52,7 +48,7 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
         let synchronizationPromise: Promise<void>;
         it("Starts synchronization without error", () => {
             const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
-                synchronizer = delegatorWise.runSynchronizerLoop(new SteemOperationNumber(fromBlock, 0, 0),
+                synchronizer = delegatorWise.startDaemon(new SteemOperationNumber(fromBlock, 0, 0),
                     (error: Error | undefined, event: Synchronizer.Event): void => {
                     if (event.type === Synchronizer.EventType.SynchronizationStop) {
                         resolve();

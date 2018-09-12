@@ -5,24 +5,24 @@ import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLe
 
 // wise imports
 import { Validator } from "../../src/validation/Validator";
-import { Wise, SteemOperationNumber, SendVoteorder, ValidationException } from "../../src/wise";
+import { Wise, SteemOperationNumber, SendVoteorder, ValidationException, Api } from "../../src/wise";
 import { FakeApi } from "../../src/api/FakeApi";
+import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
 
 /* PREPARE TESTING DATASETS */
-import * as fakeDataset_ from "../data/fake-blockchain.json";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+const fakeDataset = FakeWiseFactory.loadDataset();
 
 /* CONFIG */
 const delegator = "noisy";
 const voter = "perduta";
 const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
-const wise = new Wise(voter, fakeApi);
+const wise = new Wise(voter, fakeApi as any as Api);
 
 
 describe("test/unit/validator.spec.ts", () => {
     describe("Validator", () => {
-        const validator = new Validator(fakeApi, wise.getProtocol());
+        const validator = new Validator(fakeApi as any as Api, wise.getProtocol());
         validator.provideRulesets({
             voter: voter,
             moment: new SteemOperationNumber(0, 0, 0),

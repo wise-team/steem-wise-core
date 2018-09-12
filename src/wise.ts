@@ -15,6 +15,7 @@ import { RulesUpdater } from "./RulesUpdater";
 import { Log } from "./util/log";
 import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
+import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 
 // TODO check if all methods have tests
 // TODO implement proggress callback in each method
@@ -154,7 +155,7 @@ export class Wise {
      *
      * @param {string} [delegator] - account name of the delegator (default is account name set in constructor of this
      *      Wise instance)
-     * @param {(error: Error, result: SetRulesForVoter []) => void} [callback=undefined] -
+     * @param {(error: Error, result: EffectuatedSetRules []) => void} [callback=undefined] -
      *      callback function that will be called when rules are downloaded or an error occurs. Can be ommited or set
      *      to undefined if you want to only use the returned promise.
      * @param {SteemOperationNumber} [atMoment = SteemOperationNumber.NOW] - a moment in blockchain (block, transaction,
@@ -162,16 +163,16 @@ export class Wise {
      * @param {(msg: string, proggress: number) => void} [proggressCallback] proggress callback that will receive
      *      proggress notifications (useful for UI)
      *
-     * @returns {Promise<SetRulesForVoter []>} - a Promise that resolves with SteemOperationNumber or true.
+     * @returns {Promise<EffectuatedSetRules []>} - a Promise that resolves with SteemOperationNumber or true.
      *      SteemOperationNumber indicates that rules were updated and contains the blockchain moment of last update
      *      operation. True indicates that rules were already up to date and no operations were sent to blockchain.
      */
     public downloadAllRulesets = (
         delegator: string = this.account,
-        callback?: Callback<SetRulesForVoter []>,
+        callback?: Callback<EffectuatedSetRules []>,
         atMoment: SteemOperationNumber = SteemOperationNumber.NOW,
         proggressCallback: ProggressCallback = () => {}
-    ): Promise<SetRulesForVoter []> => {
+    ): Promise<EffectuatedSetRules []> => {
         return RulesUpdater.downloadAllRulesets(this.api, this.protocol, delegator, atMoment)
         .then(
             result => { if (callback) callback(undefined, result); return result; },

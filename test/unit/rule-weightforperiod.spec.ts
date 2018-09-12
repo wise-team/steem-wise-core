@@ -6,14 +6,14 @@ import * as Promise from "bluebird";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
-import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedWiseOperation } from "../../src/wise";
+import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedWiseOperation, Ruleset } from "../../src/wise";
 import { ValidationContext } from "../../src/validation/ValidationContext";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 import { WeightForPeriodRule } from "../../src/rules/WeightForPeriodRule";
 import { FakeApi } from "../../src/api/FakeApi";
-import { isSendVoteorder } from "../../src/protocol/SendVoteorder";
-import { isConfirmVote, ConfirmVote, isConfirmVoteBoundWithVote } from "../../src/protocol/ConfirmVote";
 import { wise_rule_weight_for_period, wise_rule_weight_for_period_encode, wise_rule_weight_for_period_decode } from "../../src/protocol/versions/v2/rules/rule-weight-for-period-schema";
+import { ConfirmVote } from "../../src/protocol/ConfirmVote";
+import { ConfirmVoteBoundWithVote } from "../../src/protocol/ConfirmVoteBoundWithVote";
 
 /* CONFIG */
 const delegator = "nonexistentdelegator" + Date.now();
@@ -87,7 +87,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
 
             it("Starts synchronization without error", () => {
                 const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
-                    synchronizer = delegatorWise.runSynchronizerLoop(new SteemOperationNumber((fakeApi as any as FakeApi).getCurrentBlockNum(), 0, 0),
+                    synchronizer = delegatorWise.startDaemon(new SteemOperationNumber((fakeApi as any as FakeApi).getCurrentBlockNum(), 0, 0),
                         (error: Error | undefined, event: Synchronizer.Event): void => {
                         if (event.type === Synchronizer.EventType.SynchronizationStop) {
                             resolve();
@@ -105,14 +105,15 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
             });
 
             it("Sets rules", () => {
-                const rules: SetRules = {
-                    rulesets: [
+                const rulesets: Ruleset [] = [
                         { name: "ruleset", rules: [] }
-                    ]
-                };
+                ];
                 const voters: string [] = _.uniq(test.voteorders.map(vo => vo.voter));
                 // set rules for each voter in the voteorders
-                return Promise.resolve(voters).mapSeries((voter: any /* 'any' because of a bug in Bluebird */) => delegatorWise.sendRulesAsync(voter, rules))
+                return Promise.resolve(voters).mapSeries(
+                    (voter: any /* 'any' because of a bug in Bluebird */) =>
+                        delegatorWise.uploadRulesetsForVoter(voter, rulesets)
+                )
                 .then(() => Promise.delay(50));
             });
 
@@ -127,7 +128,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     };
                     const voterWise = new Wise(vo.voter, fakeApi);
                     (fakeApi as any as FakeApi).setFakeTime(fakeTime);
-                    return voterWise.generateVoteorderCustomJSONAsync(delegator, voteorder)
+                    return voterWise.generateVoteorderOperations(delegator, vo.voter, voteorder)
                     .then((ops: [string, object][]) => (fakeApi as any as FakeApi).sendToBlockchain(ops))
                     .then(() => Promise.delay(60))
                     .then(() => (fakeApi as any as FakeApi).setFakeTime(new Date(nowTime.getTime())));
@@ -150,7 +151,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     ops.forEach(op => {
                         expect(op.timestamp.getTime(), "operation timestamp").to.be.greaterThan(until.getTime(), "until");
                     });
-                    return ops.filter(op => isSendVoteorder(op.command)).length;
+                    return ops.filter(op => SendVoteorder.isSendVoteorder(op.command)).length;
                 }))
                 .then((counts: number []) => {
                     expect(counts.reduce((a, b) => a + b, 0)).to.be.equal(test.voteorders.length);
@@ -170,10 +171,10 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
 
                 return context.getWiseOperations(context.getDelegatorUsername(), until)
                 .then((ops: EffectuatedWiseOperation []) => {
-                    expect(ops.filter(op => isConfirmVote(op.command))).to.be.an("array").with.length(test.voteorders.length);
-                    ops.filter(op => isConfirmVote(op.command)).forEach(op => {
+                    expect(ops.filter(op => ConfirmVote.isConfirmVote(op.command))).to.be.an("array").with.length(test.voteorders.length);
+                    ops.filter(op => ConfirmVote.isConfirmVote(op.command)).forEach(op => {
                         expect((<ConfirmVote>op.command).accepted).to.be.true;
-                        expect(isConfirmVoteBoundWithVote(op.command)).to.be.true;
+                        expect(ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(op.command)).to.be.true;
                     });
                 });
             });

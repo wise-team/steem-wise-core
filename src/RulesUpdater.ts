@@ -25,8 +25,9 @@ export class RulesUpdater {
             throw new Error("Wise#uploadRulesetsForVoter: rulesets cannot be undefined");
         if (!Array.isArray(rulesets))
             throw new Error("Wise#uploadRulesetsForVoter: rulesets must be an array");
-        if (rulesets.filter(ruleset => !Ruleset.isRuleset(ruleset)).length === 0)
-            throw new Error("Wise#uploadRulesetsForVoter: rulesets must contain valid rulesets");
+        if (rulesets.filter(ruleset => !Ruleset.isRuleset(ruleset)).length > 0)
+            throw new Error("Wise#uploadRulesetsForVoter: rulesets must contain valid rulesets. Invalid rulesets: "
+             + JSON.stringify(rulesets.filter(ruleset => !Ruleset.isRuleset(ruleset))));
 
         // the following method will throw error on invalid rule object
         const validatedAndPrototypedRulesets = rulesets.map(ruleset => RulePrototyper.prototypeRuleset(ruleset));
