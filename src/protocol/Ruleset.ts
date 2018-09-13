@@ -15,4 +15,9 @@ export namespace Ruleset {
             && Array.isArray((<Ruleset>o).rules)
             && (<Ruleset>o).rules.filter(rule => !Rule.isRule(rule)).length === 0;
     }
+
+    export function validateRuleset(o: object): o is Ruleset {
+        return isRuleset(o)
+            && (<Ruleset>o).name.length > 0;
+    }
 }

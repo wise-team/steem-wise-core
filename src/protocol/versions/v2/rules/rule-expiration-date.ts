@@ -3,7 +3,6 @@
 import { ExpirationDateRule } from "../../../../rules/ExpirationDateRule";
 import { ValidationException } from "../../../../validation/ValidationException";
 
-// TODO document
 export interface wise_rule_expiration_date {
     rule: "expiration_date";
 

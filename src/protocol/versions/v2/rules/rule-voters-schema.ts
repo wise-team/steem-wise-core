@@ -3,7 +3,6 @@
 import { VotersRule } from "../../../../rules/VotersRule";
 import { ValidationException } from "../../../../validation/ValidationException";
 
-// TODO document
 export interface wise_rule_voters {
     rule: "voters";
     mode: wise_rule_voters_mode;

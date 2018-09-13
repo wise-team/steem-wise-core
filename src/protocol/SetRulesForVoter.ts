@@ -12,4 +12,10 @@ export namespace SetRulesForVoter {
         return SetRules.isSetRules(o)
             && (<SetRulesForVoter>o).voter !== undefined;
     }
+
+    export function validateSetRulesForVoter(o: object): o is SetRules {
+        return isSetRulesForVoter(o)
+            && (<SetRulesForVoter>o).voter.length > 0
+            && SetRules.validateSetRules(o);
+    }
 }

@@ -7,7 +7,7 @@ import { SendVoteorder } from "../protocol/SendVoteorder";
 import { SteemPost } from "../blockchain/SteemPost";
 
 /**
- * This rule limits age of the post.
+ * This rule expires the ruleset.
  */
 export class ExpirationDateRule extends Rule {
     public rule: string = Rule.Type.ExpirationDate;

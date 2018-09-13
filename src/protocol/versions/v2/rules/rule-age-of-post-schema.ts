@@ -3,7 +3,6 @@
 import { AgeOfPostRule } from "../../../../rules/AgeOfPostRule";
 import { ValidationException } from "../../../../validation/ValidationException";
 
-// TODO document
 export interface wise_rule_age_of_post {
     rule: "age_of_post";
     mode: wise_rule_age_of_post_mode;

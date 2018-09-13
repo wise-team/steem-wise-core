@@ -32,7 +32,7 @@ export class Protocol {
     /**
      * Validated if steem operation it is a valid wise
      * @param op - an steem operation in format: [string, object] object (if it is a pending operation block_num should equal Infinity)
-     */ // TODO test
+     */
      public validateOperation = (op: [string, object]): boolean => {
         const so: SteemTransaction = {
             block_num: Infinity,

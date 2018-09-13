@@ -18,21 +18,25 @@ export class RulesUpdater {
         api: Api, protocol: Protocol, delegator: string, voter: string, rulesets: Ruleset [],
         proggressCallback?: ProggressCallback
     ): Promise<SteemOperationNumber> {
-        // validate input params
-        if (!voter || !voter.length)
-            throw new Error("Wise#uploadRulesetsForVoter: voter cannot be undefined or empty");
-        if (!rulesets)
-            throw new Error("Wise#uploadRulesetsForVoter: rulesets cannot be undefined");
-        if (!Array.isArray(rulesets))
-            throw new Error("Wise#uploadRulesetsForVoter: rulesets must be an array");
-        if (rulesets.filter(ruleset => !Ruleset.isRuleset(ruleset)).length > 0)
-            throw new Error("Wise#uploadRulesetsForVoter: rulesets must contain valid rulesets. Invalid rulesets: "
-             + JSON.stringify(rulesets.filter(ruleset => !Ruleset.isRuleset(ruleset))));
 
-        // the following method will throw error on invalid rule object
-        const validatedAndPrototypedRulesets = rulesets.map(ruleset => RulePrototyper.prototypeRuleset(ruleset));
+        return Promise.resolve()
+        .then(() => { // remember that validation error throwing must occur in the promise. Not in the code of method.
+            // If it happens outside the promise, catching it requires try...catch additional to Promise.catch
+            // validate input params
+            if (!voter || !voter.length)
+                throw new Error("Wise#uploadRulesetsForVoter: voter cannot be undefined or empty");
+            if (!rulesets)
+                throw new Error("Wise#uploadRulesetsForVoter: rulesets cannot be undefined");
+            if (!Array.isArray(rulesets))
+                throw new Error("Wise#uploadRulesetsForVoter: rulesets must be an array");
+            if (rulesets.filter(ruleset => !Ruleset.validateRuleset(ruleset)).length > 0)
+                throw new Error("Wise#uploadRulesetsForVoter: rulesets must contain valid rulesets. Invalid rulesets: "
+                + JSON.stringify(rulesets.filter(ruleset => !Ruleset.validateRuleset(ruleset))));
 
-        return Promise.resolve(validatedAndPrototypedRulesets)
+            // the following method will throw error on invalid rule object
+            const validatedAndPrototypedRulesets = rulesets.map(ruleset => RulePrototyper.prototypeRuleset(ruleset));
+            return validatedAndPrototypedRulesets;
+        })
         .then(rulesets => { // serialize object to blockchain
             const setRulesCmd: SetRules = {
                 rulesets: rulesets
@@ -51,7 +55,12 @@ export class RulesUpdater {
             if (protocol.validateOperation(steemOps[0])) return (steemOps);
             else throw new Error("Operation object has invalid structure");
         })
-        .then((steemOps: [string, object][]) => api.sendToBlockchain(steemOps));
+        .then((steemOps: [string, object][]) => {
+            if (proggressCallback) proggressCallback("Sending rules to blockchain...", 0.0);
+            return api.sendToBlockchain(steemOps);
+        })
+        .then(resultSon => { if (proggressCallback) proggressCallback("Sent to blockchain (" + resultSon.toString()
+             + ")", 1.0); return resultSon; });
     }
 
     public static downloadAllRulesets(api: Api, protocol: Protocol, delegator: string, moment: SteemOperationNumber = SteemOperationNumber.FUTURE): Promise<EffectuatedSetRules []> {
@@ -74,8 +83,33 @@ export class RulesUpdater {
     }
 
     public static uploadAllRulesets(api: Api, protocol: Protocol, delegator: string,
-            newRules: SetRulesForVoter [], proggressCallback: ProggressCallback): Promise<SteemOperationNumber | true> {
-        return RulesUpdater.downloadAllRulesets(api, protocol, delegator)
+            newRules: SetRulesForVoter [], proggressCallback: ProggressCallback
+    ): Promise<SteemOperationNumber | true> {
+        return Promise.resolve()
+        .then(() => { // validate input rules
+            const invalidRulesetsForVoter = newRules.filter(r => !SetRulesForVoter.validateSetRulesForVoter(r));
+            if (invalidRulesetsForVoter.length > 0)
+                throw new Error("There are invalid rulesets: " + invalidRulesetsForVoter); // can throw inside promise
+
+                newRules.forEach((rulesetsForVoter: SetRulesForVoter) => {
+                    if (!SetRulesForVoter.validateSetRulesForVoter(rulesetsForVoter))
+                        throw new Error("Invalid ruleset: " + JSON.stringify(rulesetsForVoter));
+
+                    rulesetsForVoter.rulesets.forEach(ruleset => ruleset.rules.forEach(
+                        rule => {
+                            const prototypedRule = RulePrototyper.fromUnprototypedRule(rule);
+                            try {
+                                prototypedRule.validateRuleObject(rule);
+                            }
+                            catch (error) {
+                                throw new Error("Invalid rule " + JSON.stringify(rule) + " in ruleset \"" + ruleset.name
+                                     + "\" for voter " + rulesetsForVoter.voter + ": " + error.message);
+                            }
+                        }
+                    ));
+                });
+        })
+        .then(() => RulesUpdater.downloadAllRulesets(api, protocol, delegator))
         .then((currentRules: EffectuatedSetRules []) => { // decide what operations are needed to be sent
             // map all rules to format: { [voter: string]: { current: ? : updated: ? } }
             type RulesByVoterValue = { current: SetRules|undefined, updated: SetRules|undefined }; // { voter: string, rulesets: SetRules, updated: boolean };

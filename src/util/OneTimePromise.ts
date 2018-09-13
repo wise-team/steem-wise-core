@@ -1,6 +1,5 @@
 import { Promise } from "bluebird";
 
-// TODO test
 export class OneTimePromise<T> {
     private started: boolean = false;
     private finishedWithError: boolean = false;

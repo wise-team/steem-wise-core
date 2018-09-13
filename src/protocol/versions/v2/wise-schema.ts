@@ -41,7 +41,3 @@ export interface wise_send_voteorder {
 }
 
 export { wise_rule } from "./rules-schema";
-
-// TODO voting_power of delegator rule
-// TODO weight rule (per rule & per delegator)
-// TODO rule: maksymalna wartosc postu

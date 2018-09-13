@@ -221,7 +221,5 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
             const encoded2: wise_rule_weight_for_period = wise_rule_weight_for_period_encode(decoded);
             expect(encoded2).to.deep.equal(encoded);
         }));
-
-        // TODO test if it does not count other voter votes
     });
 });

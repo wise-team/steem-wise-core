@@ -17,8 +17,6 @@ import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 
-// TODO check if all methods have tests
-// TODO implement proggress callback in each method
 
 /**
  * Wise is a vote delegation system for steem blockchain. Wise allows you to securely grant other steemians your voting
@@ -83,7 +81,7 @@ export class Wise {
         )
         .then(
             result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); throw error; }
+            error => { if (callback) callback(error, undefined); return Promise.reject(error); }
         );
     }
 
@@ -173,9 +171,13 @@ export class Wise {
         atMoment: SteemOperationNumber = SteemOperationNumber.NOW,
         proggressCallback: ProggressCallback = () => {}
     ): Promise<EffectuatedSetRules []> => {
+        proggressCallback("Downloading all rulesets set by " + delegator, 0.0);
         return RulesUpdater.downloadAllRulesets(this.api, this.protocol, delegator, atMoment)
         .then(
-            result => { if (callback) callback(undefined, result); return result; },
+            result => {
+                proggressCallback("Downloaded all rulesets set by " + delegator, 1.0);
+                if (callback) callback(undefined, result); return result;
+            },
             error => { if (callback) callback(error, undefined); throw error; }
         );
     }
@@ -206,24 +208,32 @@ export class Wise {
         proggressCallback: ProggressCallback = () => {},
         skipValidation: boolean = false): Promise<[string, object][]> => {
 
-        const smOp: WiseOperation = {
-            voter: voter,
-            delegator: delegator,
-            command: voteorder
-        };
-        const steemOps = this.protocol.serializeToBlockchain(smOp);
+        proggressCallback("Validating voteorder...", 0.0);
+        return Promise.resolve()
+        .then((): [string, object] [] => {
+            const smOp: WiseOperation = {
+                voter: voter,
+                delegator: delegator,
+                command: voteorder
+            };
+            const steemOps = this.protocol.serializeToBlockchain(smOp);
             if (steemOps.length !== 1) throw new Error("An voteorder should be a single blockchain operation");
             if (!skipValidation && !this.protocol.validateOperation(steemOps[0]))
                 throw new Error("Operation object has invalid structure");
-
-        return Promise.resolve()
-        .then(() => {
-            if (!skipValidation) return this.validateVoteorder(delegator, voter, voteorder, SteemOperationNumber.FUTURE)
+            return steemOps;
+        })
+        .then((steemOps: [string, object][]): Promise<[string, object][]> => {
+            if (skipValidation) return Promise.resolve(steemOps);
+            return this.validateVoteorder(
+                delegator, voter, voteorder, SteemOperationNumber.FUTURE, undefined,
+                proggressCallback
+            )
             .then((result: ValidationException | true) => {
                 if (result !== true) throw new Error("Validation error: " + result.message);
-            });
+                proggressCallback("Voteorder validation done", 1.0);
+            })
+            .then(() => steemOps);
         })
-        .then(() => steemOps)
         .then(
             result => { if (callback) callback(undefined, result); return result; },
             error => { if (callback) callback(error, undefined); throw error; }
@@ -256,9 +266,15 @@ export class Wise {
 
         return this.generateVoteorderOperations(delegator, this.account, voteorder, undefined,
                                                 proggressCallback, skipValidation)
-        .then(steemOps => this.api.sendToBlockchain(steemOps))
+        .then(steemOps => {
+            proggressCallback("Sending voteorder...", 0.5);
+            return this.api.sendToBlockchain(steemOps);
+        })
         .then(
-            result => { if (callback) callback(undefined, result); return result; },
+            result => {
+                proggressCallback("Sending voteorder done", 1.0);
+                if (callback) callback(undefined, result); return result;
+            },
             error => { if (callback) callback(error, undefined); throw error; }
         );
     }

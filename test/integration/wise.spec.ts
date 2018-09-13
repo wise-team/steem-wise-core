@@ -1,216 +1,531 @@
+/* tslint:disable no-null-keyword */
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import * as Promise from "bluebird";
 
 // wise imports
-import { DirectBlockchainApi, Wise, SteemOperationNumber, ValidationException } from "../../src/wise";
+import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { DirectBlockchainApi, Wise, SteemOperationNumber, ValidationException, WeightRule, TagsRule, Ruleset, SetRulesForVoter, SendVoteorder } from "../../src/wise";
 import { DisabledApi } from "../../src/api/DisabledApi";
 
-
-/* PREPARE TESTING DATASETS */
-import * as data from "../data/index.data";
-
+const uniq = new Date();
+const config = {
+    username: "guest123",
+    postingWif: "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg",
+    validRulesetName: "valid-test-ruleset-" + uniq,
+    rulesetsForVoters: [
+        {
+            voter: "steemprojects1",
+            rulesets: [
+                {
+                    name: "Vote WISEly " + uniq,
+                    rules: [
+                        { rule: "weight", min: 0, max: 100 },
+                        { rule: "tags", mode: "require", tags: [ "wise" ] },
+                    ]
+                },
+                {
+                    name: "Something else " + uniq,
+                    rules: [
+                        { rule: "first_post" },
+                    ]
+                }
+            ]
+        },
+        {
+            voter: "guest123",
+            rulesets: [
+                {
+                    name: "Test ruleset " + uniq,
+                    rules: [
+                        { rule: "weight", min: 0, max: 100 },
+                        { rule: "tags", mode: "any", tags: [ "wise", "pl-wise" ] },
+                    ]
+                }
+            ]
+        }
+    ],
+    rulesetsForVotersInvalidators: [ // to test if uploading invalid rulesets fail
+        (rulesetsForVoters: object) => { _.unset(rulesetsForVoters, "[0].voter"); return rulesetsForVoters; },
+        (rulesetsForVoters: object) => { _.unset(rulesetsForVoters, "[1].rulesets"); return rulesetsForVoters; },
+        (rulesetsForVoters: object) => _.set(rulesetsForVoters, "[0].voter", ""),
+        (rulesetsForVoters: object) => { _.unset(rulesetsForVoters, "[0].rulesets[1].name"); return rulesetsForVoters; },
+        (rulesetsForVoters: object) => { _.unset(rulesetsForVoters, "[0].rulesets[1].rules"); return rulesetsForVoters; },
+        (rulesetsForVoters: object) => _.set(rulesetsForVoters, "[0].rulesets[1].name", ""),
+        (rulesetsForVoters: object) => { _.unset(rulesetsForVoters, "[0].rulesets[0].rules[0].rule"); return rulesetsForVoters; },
+        (rulesetsForVoters: object) => _.set(rulesetsForVoters, "[0].rulesets[0].rules[0].rule", ""),
+        (rulesetsForVoters: object) => _.set(rulesetsForVoters, "[0].rulesets[0].rules[0].rule", "nonexistent-rule-" + Date.now()),
+        (rulesetsForVoters: object) => _.set(rulesetsForVoters, "[1].rulesets[0].rules[1].mode", "illegal-mode"),
+    ],
+    validVoteorder: {
+        rulesetName: "Test ruleset " + uniq,
+        permlink: "wise-jak-glosowac-za-cudze-vp-a-takze-czym-jest-wise-i-dlaczego-powstal-czesc-pierwsza-cyklu-o-wise",
+        author: "jblew",
+        weight: 100
+    },
+    voteorderInvalidators: [
+        (voteorder: object) => { _.unset(voteorder, "rulesetName"); return voteorder; },
+        (voteorder: object) => { _.unset(voteorder, "permlink"); return voteorder; },
+        (voteorder: object) => { _.unset(voteorder, "author"); return voteorder; },
+        (voteorder: object) => { _.unset(voteorder, "weight"); return voteorder; },
+        (voteorder: object) => _.set(voteorder, "weight", -90),
+        (voteorder: object) => _.set(voteorder, "weight", 200),
+        (voteorder: object) => _.set(voteorder, "author", "nonexistent-user-" + uniq),
+    ],
+    invalidatorForVoteorderSkipValidationTest: (voteorder: object) => _.set(voteorder, "weight", 200),
+};
 
 describe("test/integration/wise.spec.ts", () => {
     describe("Wise", function() {
-        this.timeout(30 * 1000);
+        this.timeout(50 * 1000);
 
-        const username = "guest123";
-        const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
-        const wise = new Wise(username, new DirectBlockchainApi(username, postingWif));
+        const wise = new Wise(config.username, new DirectBlockchainApi(config.username, config.postingWif));
 
-        describe("#sendRules", () => {
-            it("sends valid rules without error", (done) => {
-                wise.sendRules(data.sendRules_valid.voter, data.sendRules_valid.rules, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
-                    if (error) done(error);
+        describe("#constructor", () => {
+            it ("Wise object has two protocol handlers", () => {
+                expect(wise.getProtocol().getHandlers()).to.be.an("array").with.length(2);
+            });
+        });
+
+        describe("#uploadRulesetsForVoter", () => {
+            const tests: { name: string; rulesets: any []; pass: boolean } [] = [
+                {
+                    name: "Uploads empty ruleset array without error",
+                    rulesets: [],
+                    pass: true
+                },
+                {
+                    name: "Uploads valid rulesets with no rules without error",
+                    rulesets: [{
+                        name: "valid_ruleset_with_no_rules",
+                        rules: []
+                    }],
+                    pass: true
+                },
+                {
+                    name: "Uploads valid ruleset without error",
+                    rulesets: [{
+                        name: config.validRulesetName,
+                        rules: [
+                            new WeightRule(0, 1000),
+                            new TagsRule(TagsRule.Mode.REQUIRE, ["steemprojects"])
+                        ]
+                    }],
+                    pass: true
+                },
+                {
+                    name: "Fails to upload ruleset with empty name",
+                    rulesets: [{
+                        name: "",
+                        rules: []
+                    }],
+                    pass: false
+                },
+                {
+                    name: "Fails to upload ruleset with null name",
+                    rulesets: [{
+                        name: null,
+                        rules: []
+                    }],
+                    pass: false
+                },
+                {
+                    name: "Fails to upload ruleset without name",
+                    rulesets: [{
+                        rules: []
+                    }],
+                    pass: false
+                },
+                {
+                    name: "Fails to upload ruleset without rules",
+                    rulesets: [{
+                        name: "invalid"
+                    }],
+                    pass: false
+                },
+                {
+                    name: "Fails to upload ruleset with no properties",
+                    rulesets: [{}],
+                    pass: false
+                }
+            ];
+            tests.forEach(test => it(test.name, () => {
+                let proggressCallbackCalled: boolean = false;
+                let resultCallback: any = false;
+                let resultPromise: any = false;
+                let errorCallback: any = false;
+                let errorPromise: any = false;
+
+                return wise.uploadRulesetsForVoter(
+                    config.username, test.rulesets as any as Ruleset [],
+
+                    (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
+                        errorCallback = error;
+                        resultCallback = result;
+                    },
+
+                    (msg: string, proggress: number): void => {
+                        proggressCallbackCalled = true;
+                    },
+                )
+                .then(
+                    result => { resultPromise = result; errorPromise = undefined; },
+                    error => { errorPromise = error; resultPromise = undefined; }
+                )
+                .then(() => Promise.delay(10))
+                .then(() => {
+                    expect(resultCallback, "resultCallback").to.not.equal(false);
+                    expect(errorCallback, "errorCallback").to.not.equal(false);
+                    expect(resultPromise, "resultPromise").to.not.equal(false);
+                    expect(errorPromise, "errorPromise").to.not.equal(false);
+                    if (test.pass) {
+                        if (errorPromise || errorCallback) throw errorPromise;
+                        expect(resultCallback, "resultCallback").is.instanceof(SteemOperationNumber);
+                        expect(resultPromise, "resultPromise").is.instanceof(SteemOperationNumber);
+                        expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
+                        expect(errorCallback, "errorCallback").to.be.undefined;
+                        expect(errorPromise, "errorPromise").to.be.undefined;
+                        expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
+                    }
                     else {
-                        if (result) {
-                            if (result && result.blockNum && result.blockNum > 1) done();
-                            else done(new Error("#sendRules did not returned valid block number"));
-                        }
-                        else done(new Error("Inconsistent state: no error and no result"));
+                        if (resultCallback || resultPromise) throw new Error("Should fail");
+                        expect(resultCallback, "resultCallback").to.be.undefined;
+                        expect(resultPromise, "resultPromise").to.be.undefined;
+                        expect(errorCallback, "errorCallback").to.be.instanceof(Error);
+                        expect(errorPromise, "errorPromise").to.be.instanceof(Error);
+                        expect(errorCallback, "errorCallback=(deep)=errorPromise").deep.equals(errorPromise);
                     }
                 });
+            }));
+        });
+
+        describe("#downloadRulesetsForVoter", () => {
+            it("Downloads correctly rules set much time ago", () => {
+                const delegator = "noisy";
+                const voter = "jblew";
+                const moment = new SteemOperationNumber(22900000, 0, 0);
+                const validRulesetName = "co robia lekarze w kuchni? Leczo!";
+
+                let resultCallback: any = false;
+                let resultPromise: any = false;
+                let errorCallback: any = false;
+                let errorPromise: any = false;
+                return wise.downloadRulesetsForVoter(delegator, voter,
+                    (error: Error | undefined, result: Ruleset [] | undefined): void => {
+                        errorCallback = error;
+                        resultCallback = result;
+                    },
+                    moment
+                )
+                .then(
+                    result => { resultPromise = result; errorPromise = undefined; },
+                    error => { errorPromise = error; resultPromise = undefined; }
+                )
+                .then(() => Promise.delay(10))
+                .then(() => {
+                    if (errorPromise || errorCallback) throw errorPromise;
+                    expect(resultCallback, "resultCallback").is.an("array").with.length(1);
+                    expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
+                    expect(resultCallback[0].name, "ruleset[0].name").to.be.equal(validRulesetName);
+                    expect(errorCallback, "errorCallback").to.be.undefined;
+                    expect(errorPromise, "errorPromise").to.be.undefined;
+                });
+            });
+
+            it("Downloads rulesets set by " + config.username + " for " + config.username + " in previous test", function () {
+                this.timeout(80 * 1000);
+                console.log("Waiting 60 seconds for rulesets to be available via account_history_api");
+                return Promise.delay(20 * 1000)
+                .then(() => console.log("40 seconds left..."))
+                .then(() => Promise.delay(20 * 1000))
+                .then(() => console.log("20 seconds left..."))
+                .then(() => Promise.delay(20 * 1000))
+                .then(() => console.log("Done waiting"))
+                .then(() => wise.downloadRulesetsForVoter(config.username, config.username,
+                    undefined, SteemOperationNumber.NOW
+                ))
+                .then(result => {
+                    expect(result, "result").is.an("array").with.length(1);
+                    expect(result[0].name, "ruleset[0].name").to.be.equal(config.validRulesetName);
+                });
             });
         });
 
-        describe("#sendRulesAsync", () => {
-            it("sends valid rules without error", () => {
-                return wise.sendRulesAsync(data.sendRules_valid.voter, data.sendRules_valid.rules);
+        describe("#uploadAllRulesets", () => {
+            const tests: { name: string; rulesets: SetRulesForVoter []; pass: boolean } [] = [
+                {
+                    name: "Uploads valid rulesets without error", pass: true,
+                    rulesets: config.rulesetsForVoters as SetRulesForVoter []
+                }
+            ];
+            config.rulesetsForVotersInvalidators.forEach(invalidator => {
+                tests.push({
+                    name: "Fails to upload invalid ruleset invalidated by " + invalidator.toString(),
+                    pass: false,
+                    rulesets: invalidator(_.cloneDeep(config.rulesetsForVoters)) as SetRulesForVoter []
+                });
             });
-        });
+            tests.forEach(test => it(test.name, () => {
+                let proggressCallbackCalled: boolean = false;
+                let resultCallback: any = false;
+                let resultPromise: any = false;
+                let errorCallback: any = false;
+                let errorPromise: any = false;
 
-        describe("#sendVoteorder", () => {
-            it("sends valid voteorder", (done) => {
-                wise.sendVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
-                    if (error) done(error);
-                    else {
-                        if (result) {
-                            if (result && result.blockNum && result.blockNum > 1) done();
-                            else done(new Error("#sendVoteorder did not returned valid block number"));
-                        }
-                        else done(new Error("Inconsistent state: no error and no result"));
+                return wise.uploadAllRulesets(
+                    test.rulesets as any as SetRulesForVoter [],
+
+                    (error: Error | undefined, result: SteemOperationNumber | true | undefined): void => {
+                        errorCallback = error;
+                        resultCallback = result;
+                    },
+
+                    (msg: string, proggress: number): void => {
+                        proggressCallbackCalled = true;
+                    },
+                )
+                .then(
+                    result => { resultPromise = result; errorPromise = undefined; },
+                    error => { errorPromise = error; resultPromise = undefined; }
+                )
+                .then(() => Promise.delay(10))
+                .then(() => {
+                    expect(resultCallback, "resultCallback").to.not.equal(false);
+                    expect(errorCallback, "errorCallback").to.not.equal(false);
+                    expect(resultPromise, "resultPromise").to.not.equal(false);
+                    expect(errorPromise, "errorPromise").to.not.equal(false);
+                    if (test.pass) {
+                        if (errorPromise || errorCallback) throw errorPromise;
+                        expect(resultCallback, "resultCallback").is.instanceof(SteemOperationNumber);
+                        expect(resultPromise, "resultPromise").is.instanceof(SteemOperationNumber);
+                        expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
+                        expect(errorCallback, "errorCallback").to.be.undefined;
+                        expect(errorPromise, "errorPromise").to.be.undefined;
+                        expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
                     }
-                    });
-            });
-
-            it("quickly fails to send voteorder with invalid structure", function (done) {
-                this.timeout(100);
-                const structChanged = _.set(_.cloneDeep(data.sendVoteorder_valid.voteorder), "weight", "string instead of number");
-                wise.sendVoteorder(data.sendVoteorder_valid.delegator, structChanged, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
-                    if (error) done();
-                    else done(new Error("Inconsistent state: no error and no result"));
+                    else {
+                        if (resultCallback || resultPromise) throw new Error("Should fail");
+                        expect(resultCallback, "resultCallback").to.be.undefined;
+                        expect(resultPromise, "resultPromise").to.be.undefined;
+                        expect(errorCallback, "errorCallback").to.be.instanceof(Error);
+                        expect(errorPromise, "errorPromise").to.be.instanceof(Error);
+                        expect(errorCallback, "errorCallback=(deep)=errorPromise").deep.equals(errorPromise);
+                    }
                 });
-            });
-
-            it("refuses to send invalid voteorder", (done) => {
-                wise.sendVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voteorder, (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
-                    if (error) done();
-                    else done(new Error("Inconsistent state: no error and no result"));
-                });
-            });
+            }));
         });
 
+        describe("#downloadAllRulesets", () => {
+            it("Downloads correctly rules set much time ago", () => {
+                const delegator = "noisy";
+                const moment = new SteemOperationNumber(23129457, 0, 0);
+                const properVoters = [
+                    "grecki-bazar-ewy", "cebula", "nicniezgrublem", "jblew", "lukmarcus", "lenka",
+                    "noisy2", "andrejcibik"
+                ];
 
-        describe("#sendVoteorderAsync", () => {
-            it("sends valid voteorder", () => {
-                return wise.sendVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder);
-            });
-
-            it("quickly fails to send voteorder with invalid structure", function () {
-                this.timeout(100);
-                const structChanged = _.set(_.cloneDeep(data.sendVoteorder_valid.voteorder), "weight", "string instead of number");
-                return wise.sendVoteorderAsync(data.sendVoteorder_valid.delegator, structChanged)
+                let resultCallback: any = false;
+                let resultPromise: any = false;
+                let errorCallback: any = false;
+                let errorPromise: any = false;
+                let proggressCallbackCalled: boolean = false;
+                return wise.downloadAllRulesets(delegator,
+                    (error: Error | undefined, result: SetRulesForVoter [] | undefined): void => {
+                        errorCallback = error;
+                        resultCallback = result;
+                    },
+                    moment,
+                    (msg: string, proggress: number) => { proggressCallbackCalled = true; }
+                )
+                .then(
+                    result => { resultPromise = result; errorPromise = undefined; },
+                    error => { errorPromise = error; resultPromise = undefined; }
+                )
+                .then(() => Promise.delay(10))
                 .then(() => {
-                    throw new Error("Should fail on invalid voteorder");
-                }, () => {
-                    // it is ok
+                    if (errorPromise || errorCallback) throw errorPromise;
+                    expect(resultCallback, "resultCallback").is.an("array").with.length.gt(1);
+                    expect(resultCallback[0].rulesets, "resultCallback[0].rulesets").is.an("array").with.length.gte(1);
+
+                    const voters = resultPromise.map((rfv: SetRulesForVoter) => rfv.voter);
+                    expect(voters).to.be.an("array").with.length(properVoters.length).that.has.members(properVoters);
+
+                    expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
+                    expect(errorCallback, "errorCallback").to.be.undefined;
+                    expect(errorPromise, "errorPromise").to.be.undefined;
+                    expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
                 });
             });
 
-            it("refuses to send invalid voteorder", () => {
-                return wise.sendVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voteorder)
-                .then(() => {
-                    throw new Error("Should fail on invalid voteorder");
-                }, () => {
-                    // it is ok
-                });
-            });
-        });
-
-
-        describe("#validateOperation", () => {
-            it("rejects valid v1 operation (this is disabled version of protocol). It is handled, but it is not valid according to new protocol", () => {
-                const wise = new Wise("steemprojects1", new DisabledApi());
-                const obj = JSON.parse('["custom_json",{"required_auths":[],"required_posting_auths":["steemprojects1"],"id":"smartvote","json":"{\\"name\\":\\"send_voteorder\\",\\"voteorder\\":{\\"ruleset_name\\":\\"RulesetOneChangesContent\\",\\"delegator\\":\\"steemprojects2\\",\\"type\\":\\"upvote\\",\\"weight\\":10,\\"author\\":\\"pojan\\",\\"permlink\\":\\"how-to-install-free-cad-on-windows-mac-os-and-linux-and-what-is-free-cad\\"}}"}]');
-                expect(wise.validateOperation(obj)).to.be.false;
-            });
-
-            /* tslint:disable:whitespace */
-            const validV2Ops: [string, object][] = [
-                ["custom_json",{id:"wise",json:"[\"v2:send_voteorder\",{\"delegator\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
-                ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"weight\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":1000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}]
-            ];
-            validV2Ops.forEach((op: [string, object]) => {
-                it("passes valid v2 operation", () => {
-                    const wise = new Wise("guest123", new DisabledApi());
-                    expect(wise.validateOperation(op)).to.be.true;
-                });
-            });
-
-            const invalidV2Ops: [string, object][] = [
-                ["custom_json",{id:"wise",json:"[\"v2:send_voteorde\",{\"delegator\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
-                ["custom_json",{id:"wise",json:"[\"v3:send_voteorder\",{\"delegator\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
-                ["custom_json",{id:"wise",json:"[\"v2:send_voteorder\",{\"deleg\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000,\"sth_wrong\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
-                ["custom_json",{id:"wise",json:"[\"v2:send_voteorder\",{}]",required_auths:[],required_posting_auths:["guest123"]}],["custom_json",{id:"wise",json:"[\"v2:send_voteorder\",{\"a\":\"b\"}]",required_auths:[],required_posting_auths:["guest123"]}],
-                ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"strange_rule\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":1000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}],
-                ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"weight\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":20000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}]
-            ];
-            invalidV2Ops.forEach((op: [string, object]) => {
-                it("rejects invalid v2 operation", () => {
-                    const wise = new Wise("guest123", new DisabledApi());
-                    expect(wise.validateOperation(op)).to.be.false;
-                });
-            });
-            /* tslint:enable:whitespace */
-        });
-
-
-        describe("#validateVoteorder", () => {
-            it("passes valid voteorder", (done) => {
-                wise.validateVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE, (error: Error | undefined, result: true | ValidationException | undefined) => {
-                    if (error) done(error);
-                    else if (result === true) done();
-                    else done(result);
-                });
-            });
-
-            it("fails on rules not fulfilled", (done) => {
-                return wise.validateVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder, SteemOperationNumber.FUTURE, (error: Error | undefined, result: true | ValidationException | undefined) => {
-                    if (error) done(error);
-                    else if (result === true) done(new Error("Should mark as invalid"));
-                    else done();
+            it("Downloads all rulesets set by " + config.username + " in previous test", function () {
+                this.timeout(80 * 1000);
+                console.log("Waiting 60 seconds for rulesets to be available via account_history_api");
+                return Promise.delay(20 * 1000)
+                .then(() => console.log("40 seconds left..."))
+                .then(() => Promise.delay(20 * 1000))
+                .then(() => console.log("20 seconds left..."))
+                .then(() => Promise.delay(20 * 1000))
+                .then(() => console.log("Done waiting"))
+                .then(() => wise.downloadAllRulesets(config.username))
+                .then(result => {
+                    expect(result, "result").is.an("array").with.length(config.rulesetsForVoters.length);
+                    const notMatching = config.rulesetsForVoters.filter(rfv => {
+                        const found = result.filter(resultRfv => resultRfv.voter === rfv.voter);
+                        if (found.length !== 1) return false;
+                        expect(found[0].rulesets).deep.equal(rfv.rulesets);
+                    }).filter(valid => !valid);
+                    expect(notMatching, "notMatching").to.be.an("array").with.length(0);
                 });
             });
         });
 
-
-        describe("#validateVoteorderAsync", () => {
-            it("passes valid voteorder", () => {
-                return wise.validateVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, SteemOperationNumber.FUTURE);
-            });
-
-            it("fails on rules not fulfilled", () => {
-                return wise.validateVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder, SteemOperationNumber.FUTURE)
-                .then((result: ValidationException | true) => {
-                    if (result === true) throw new Error("Should fail");
-                });
-            });
-        });
-
-
-        describe("#validatePotentialVoteorder", () => {
-            it("passes valid voteorder", (done) => {
-                wise.validatePotentialVoteorder(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder, (error: Error | undefined, result: true | ValidationException | undefined) => {
-                    if (error) done(error);
-                    else if (result === true) done();
-                    else done(result);
-                });
-            });
-
-            it("fails on rules not fulfilled", (done) => {
-                return wise.validatePotentialVoteorder(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder, (error: Error | undefined, result: true | ValidationException | undefined) => {
-                    if (error) done(error);
-                    else if (result === true) done(new Error("Should mark as invalid"));
-                    else done();
-                });
-            });
-        });
-
-
-        describe("#validatePotentialVoteorderAsync", () => {
-            it("passes valid voteorder", () => {
-                return wise.validatePotentialVoteorderAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voter, data.sendVoteorder_valid.voteorder);
-            });
-
-            it("fails on rules not fulfilled", () => {
-                return wise.validatePotentialVoteorderAsync(data.sendVoteorder_invalid.delegator, data.sendVoteorder_invalid.voter, data.sendVoteorder_invalid.voteorder)
-                .then((result: ValidationException | true) => {
-                    if (result === true) throw new Error("Should fail");
-                });
-            });
-        });
-
-        describe("#generateVoteorderCustomJSONAsync", () => {
+        describe("#generateVoteorderOperations", () => {
             it("generated weight is a number, not a string", () => {
-                return wise.generateVoteorderCustomJSONAsync(data.sendVoteorder_valid.delegator, data.sendVoteorder_valid.voteorder, () => {}, true)
+                return wise.generateVoteorderOperations(
+                    config.username, config.username, config.validVoteorder, undefined, () => {}, true
+                )
                 .then((ops: { [key: string]: any } []) => {
                     expect(ops).to.be.an("array").with.length(1);
                     const customJsonObj: { [key: string]: any } [] = JSON.parse(ops[0][1].json);
                     expect(customJsonObj[1].weight).to.be.a("number").that.is.greaterThan(0).and.not.be.a("string");
                 });
+            });
+        });
+
+        describe("#sendVoteorder", () => {
+            let proggressCallbackCalled: boolean = false;
+            let resultCallback: any = false;
+            let resultPromise: any = false;
+            let errorCallback: any = false;
+            let errorPromise: any = false;
+
+            const tests: { name: string; voteorder: SendVoteorder; skipValidation: boolean; pass: boolean; } [] = [
+                { name: "Passes valid voteorder", voteorder: config.validVoteorder, skipValidation: false, pass: true }
+            ];
+
+            config.voteorderInvalidators.forEach(invalidator => {
+                tests.push({
+                    name: "Fails to upload invalid voteorder invalidated by " + invalidator.toString(),
+                    pass: false,
+                    skipValidation: false,
+                    voteorder: invalidator(_.cloneDeep(config.validVoteorder)) as SendVoteorder
+                });
+            });
+
+            tests.push({
+                name: "Passes invalid voteorder invalidated by " + config.invalidatorForVoteorderSkipValidationTest.toString()
+                     + " when skipValidation = true",
+                pass: true,
+                skipValidation: true,
+                voteorder: config.invalidatorForVoteorderSkipValidationTest(_.cloneDeep(config.validVoteorder)) as SendVoteorder
+            });
+
+            tests.forEach(test => it(test.name, () => {
+                return wise.sendVoteorder(config.username, test.voteorder,
+                    (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
+                        errorCallback = error;
+                        resultCallback = result;
+                    },
+                    (msg: string, proggress: number) => { proggressCallbackCalled = true; },
+                    test.skipValidation
+                )
+                .then(
+                    result => { resultPromise = result; errorPromise = undefined; },
+                    error => { errorPromise = error; resultPromise = undefined; }
+                )
+                .then(() => Promise.delay(10))
+                .then(() => {
+                    expect(resultCallback, "resultCallback").to.not.equal(false);
+                    expect(errorCallback, "errorCallback").to.not.equal(false);
+                    expect(resultPromise, "resultPromise").to.not.equal(false);
+                    expect(errorPromise, "errorPromise").to.not.equal(false);
+                    if (test.pass) {
+                        if (errorPromise || errorCallback) throw errorPromise;
+                        expect(resultCallback, "resultCallback").is.instanceof(SteemOperationNumber);
+                        expect(resultPromise, "resultPromise").is.instanceof(SteemOperationNumber);
+                        expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
+                        expect(errorCallback, "errorCallback").to.be.undefined;
+                        expect(errorPromise, "errorPromise").to.be.undefined;
+                        expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
+                    }
+                    else {
+                        if (resultCallback || resultPromise) throw new Error("Should fail");
+                        expect(resultCallback, "resultCallback").to.be.undefined;
+                        expect(resultPromise, "resultPromise").to.be.undefined;
+                        expect(errorCallback, "errorCallback").to.be.instanceof(Error);
+                        expect(errorPromise, "errorPromise").to.be.instanceof(Error);
+                        expect(errorCallback, "errorCallback=(deep)=errorPromise").deep.equals(errorPromise);
+                    }
+                });
+            }));
+        });
+
+        describe("#validateVoteorder", () => {
+            let proggressCallbackCalled: boolean = false;
+            let resultCallback: any = false;
+            let resultPromise: any = false;
+            let errorCallback: any = false;
+            let errorPromise: any = false;
+
+            const tests: { name: string; voteorder: SendVoteorder; skipValidation: boolean; pass: boolean; } [] = [
+                { name: "Passes valid voteorder", voteorder: config.validVoteorder, skipValidation: false, pass: true }
+            ];
+
+            config.voteorderInvalidators.forEach(invalidator => {
+                tests.push({
+                    name: "Fails to upload invalid voteorder invalidated by " + invalidator.toString(),
+                    pass: false,
+                    skipValidation: false,
+                    voteorder: invalidator(_.cloneDeep(config.validVoteorder)) as SendVoteorder
+                });
+            });
+
+            tests.forEach(test => it(test.name, () => {
+                return wise.validateVoteorder(
+                    config.username, config.username, test.voteorder, SteemOperationNumber.NOW,
+                    (error: Error | undefined, result: ValidationException | true | undefined): void => {
+                        errorCallback = error;
+                        resultCallback = result;
+                    },
+                    (msg: string, proggress: number) => { proggressCallbackCalled = true; },
+                )
+                .then(
+                    result => { resultPromise = result; errorPromise = undefined; },
+                    error => { errorPromise = error; resultPromise = undefined; }
+                )
+                .then(() => Promise.delay(10))
+                .then(() => {
+                    expect(resultCallback, "resultCallback").to.not.equal(false);
+                    expect(errorCallback, "errorCallback").to.not.equal(false);
+                    expect(resultPromise, "resultPromise").to.not.equal(false);
+                    expect(errorPromise, "errorPromise").to.not.equal(false);
+                    expect(errorCallback, "errorCallback").to.be.undefined;
+                    expect(errorPromise, "errorPromise").to.be.undefined;
+                    expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
+                    expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
+                    if (errorPromise || errorCallback) throw errorPromise;
+
+                    if (test.pass) {
+                        expect(resultCallback, "resultCallback").is.equal(true);
+                        expect(resultPromise, "resultPromise").is.equal(true);
+                    }
+                    else {
+                        expect(resultCallback, "resultCallback").is.instanceof(ValidationException);
+                        expect(resultPromise, "resultPromise").is.instanceof(ValidationException);
+                    }
+                });
+            }));
+        });
+
+        describe("#getLastConfirmationMoment", () => { /* this can be tested only in daemon tests */ });
+
+        describe("#startDaemon", () => { /* daemon has separate tests */ });
+
+        describe("#getProtocol", () => {
+            it ("has two handlers", () => {
+                expect(wise.getProtocol().getHandlers()).to.be.an("array").with.length(2);
             });
         });
     });

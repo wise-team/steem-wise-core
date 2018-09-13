@@ -252,7 +252,5 @@ describe("test/unit/v1-ruleset-validation-test.spec.ts", function() {
                 else done(error);
             });
         });
-
-        // TODO unit test custom_rpc
     });
 });

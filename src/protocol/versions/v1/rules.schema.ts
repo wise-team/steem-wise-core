@@ -58,7 +58,7 @@ export interface smartvotes_rule_tags {
 
     /**
      * Rule mode.
-     * - allow => every post tag must be on the specified list // TODO: rename to all
+     * - allow => every post tag must be on the specified list
      * - deny => none of the post tags can be on the specified list
      * - require => the post should have all of the specified tags
      * - any => the post should have at least one of the specified tags

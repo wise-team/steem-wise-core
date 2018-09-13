@@ -47,15 +47,18 @@ export class Validator {
         return new Promise<ValidationException | true>((resolve, reject) => {
             this.validateVoteorderObject(voteorder)
             .then(() => {
+                this.proggressCallback("Loading rulesets...", 0);
                 if (this.providedRulesets) return Promise.resolve(this.providedRulesets);
                 else return this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
             })
             .then((rulesets: SetRules) => this.selectRuleset(rulesets, voteorder)) // select correct ruleset (using rulesetName)
             .then((rules: Rule []) => rules.concat(ImposedRules.getImposedRules(delegator, voter))) // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
             .then((rules: Rule []) => {
+                this.proggressCallback("Validating rules...", 0.3);
                 return this.validateRules(rules, voteorder, context);
             })
             .then(() => {
+                this.proggressCallback("Validation done", 1.0);
                 resolve(true);
             }, (error: Error | ValidationException) => {
                 if ((error as ValidationException).validationException) {

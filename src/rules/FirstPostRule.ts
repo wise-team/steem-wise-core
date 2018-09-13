@@ -22,7 +22,6 @@ export class FirstPostRule extends Rule {
         return Rule.Type.FirstPost;
     }
 
-    // TODO test
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         return Promise.resolve()
         .then(() => this.validateRuleObject(this))

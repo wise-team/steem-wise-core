@@ -1,12 +1,12 @@
 import { Promise } from "bluebird";
 import * as _ from "lodash";
 
-import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
+import { NotFoundException } from "../util/NotFoundException";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { SteemPost } from "../blockchain/SteemPost";
-import { NotFoundException } from "../util/NotFoundException";
+import { Rule } from "./Rule";
 
 export class AuthorsRule extends Rule {
     public rule: string = Rule.Type.Authors;

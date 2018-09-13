@@ -6,13 +6,13 @@ import { Log } from "../../src/util/log"; const log = Log.getLogger();
 Log.setLevel("info");
 
 // wise imports
-import { Wise } from "../../src/wise";
+import { Wise, EffectuatedSetRules } from "../../src/wise";
 import { Api } from "../../src/api/Api";
 import { DirectBlockchainApi } from "../../src/api/directblockchain/DirectBlockchainApi";
 import { FakeApi } from "../../src/api/FakeApi";
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
-import { SetRules, EffectuatedSetRules } from "../../src/protocol/SetRules";
+import { SetRules } from "../../src/protocol/SetRules";
 import { WeightRule } from "../../src/rules/WeightRule";
 import { Rule } from "../../src/rules/Rule";
 import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
@@ -24,9 +24,10 @@ import { NotFoundException } from "../../src/util/NotFoundException";
 /* PREPARE TESTING DATASETS */
 import * as v1TestingSequence from "../data/protocol-v1-testing-sequence";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
-import { isConfirmVoteBoundWithVote, ConfirmVoteBoundWithVote, isConfirmVote, ConfirmVote } from "../../src/protocol/ConfirmVote";
 import { VoteOperation } from "../../src/blockchain/VoteOperation";
 import { BlogEntry } from "../../src/blockchain/BlogEntry";
+import { ConfirmVoteBoundWithVote } from "../../src/protocol/ConfirmVoteBoundWithVote";
+import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 
 /* CONFIG */
 const username = "guest123";
@@ -235,7 +236,7 @@ describe("test/integration/api.spec.ts", function () {
                 return api.getWiseOperationsRelatedToDelegatorInBlock("noisy", blockNum, wise.getProtocol())
                 .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length(1);
-                    expect(isConfirmVoteBoundWithVote(ops[0].command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
+                    expect(ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(ops[0].command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
                     const expectedVoteOp: VoteOperation = {
                         voter: "noisy",
                         author: "tkow",
@@ -319,13 +320,13 @@ describe("test/integration/api.spec.ts", function () {
                 .then((ops: EffectuatedWiseOperation []) => {
                     expect(ops).to.be.an("array").with.length.greaterThan(0);
                     ops.forEach(op => {
-                        if (isConfirmVote(op.command)) {
+                        if (ConfirmVote.isConfirmVote(op.command)) {
                             const confirmVoteCmd: ConfirmVote = op.command;
                             if (confirmVoteCmd.accepted) {
                                 /*if (!isConfirmVoteBoundWithVote(confirmVoteCmd)) {
                                     log.debug("CONFIRM_VOTE_NOT_BOUND_WITH_VOTE=" + JSON.stringify(op));
                                 }*/
-                                expect(isConfirmVoteBoundWithVote(confirmVoteCmd), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
+                                expect(ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(confirmVoteCmd), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
                                 expect (confirmVoteCmd).to.haveOwnProperty("vote");
                             }
                         }
