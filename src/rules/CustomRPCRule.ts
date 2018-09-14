@@ -37,4 +37,8 @@ export class CustomRPCRule extends Rule {
             if (!_.has(unprototypedObj, prop)) throw new ValidationException("CustomRPCRule: property " + prop + " is missing");
         });
     }
+
+    public getDescription(): string {
+        return "CustomRPC to " + this.host + ":" + this.port + "/" + this.path + " " + this.method + "()";
+    }
 }

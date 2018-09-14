@@ -46,4 +46,16 @@ export class WeightRule extends Rule {
         if (Math.abs(unprototypedObj.max) > 10000)
             throw new ValidationException("WeightRule: absolute value of .max ( " + unprototypedObj.max + " ) is > 10000");
     }
+
+    public getDescription(): string {
+        return (this.min < 0 ? "Flag: "
+            + Math.abs(Math.min(0, this.max)) / 100 + " - " + Math.abs(this.min) / 100 + " %"
+            : "(no flag)")
+
+            + "; " + // separator
+
+            (this.max > 0 ? "Upvote: "
+            + Math.max(0, this.min) / 100 + " - " +  this.max / 100 + " %"
+            : "(no upvote)");
+    }
 }

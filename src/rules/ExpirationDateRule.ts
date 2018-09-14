@@ -49,4 +49,8 @@ export class ExpirationDateRule extends Rule {
         if (!Date.parse(unprototypedObj.date)) throw new ValidationException("ExpirationDateRule: date should be "
             + "formatted in one of the following formats: ISO 8601, IETF");
     }
+
+    public getDescription(): string {
+        return "Ruleset expires at " + this.date;
+    }
 }

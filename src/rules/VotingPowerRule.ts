@@ -62,6 +62,20 @@ export class VotingPowerRule extends Rule {
         if (!_.includes([VotingPowerRule.Mode.MORE_THAN, VotingPowerRule.Mode.LESS_THAN, VotingPowerRule.Mode.EQUAL], unprototypedObj.mode))
             throw new ValidationException("VotingPowerRule: unknown mode " + unprototypedObj.mode);
     }
+
+    public getDescription(): string {
+        let out = "The delegator has ";
+
+        switch (this.mode) {
+            case VotingPowerRule.Mode.MORE_THAN: out += "more than";
+            case VotingPowerRule.Mode.LESS_THAN: out += "less than";
+            case VotingPowerRule.Mode.EQUAL: out += "exactly";
+            default: out += this.mode;
+        }
+        out += " " + this.value + " voting power";
+
+        return out;
+    }
 }
 
 export namespace VotingPowerRule {

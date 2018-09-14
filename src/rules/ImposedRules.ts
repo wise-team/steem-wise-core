@@ -88,5 +88,9 @@ export namespace ImposedRules {
         public validateRuleObject(unprototypedObj: any) {
             throw new Error("This rule should not be prototyped.");
         }
+
+        public getDescription(): string {
+            throw new Error("This is an internal rule");
+        }
     }
 }

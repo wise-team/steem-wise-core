@@ -56,6 +56,11 @@ export class AuthorsRule extends Rule {
         if (!_.includes([AuthorsRule.Mode.ALLOW, AuthorsRule.Mode.DENY], unprototypedObj.mode))
             throw new ValidationException("AuthorsRule: unknown mode " + unprototypedObj.mode);
     }
+
+    public getDescription(): string {
+        return (this.mode === "allow" ? "Allowed" : "Denied")
+            + " " + _.join(this.authors, ", ");
+    }
 }
 
 export namespace AuthorsRule {

@@ -82,6 +82,11 @@ export class WeightForPeriodRule extends Rule {
         ], unprototypedObj.unit))
             throw new ValidationException("WeightForPeriodRule: unknown unit " + unprototypedObj.unit);
     }
+
+    public getDescription(): string {
+        return "You can use at most "
+            + parseFloat((this.weight / 10000) + "").toFixed(3) + " votes of this delegator over the last " + this.period + " " + this.unit + "s";
+    }
 }
 
 export namespace WeightForPeriodRule {

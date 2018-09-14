@@ -78,6 +78,20 @@ export class TagsRule extends Rule {
         if (!_.includes([TagsRule.Mode.ALLOW, TagsRule.Mode.DENY, TagsRule.Mode.ANY, TagsRule.Mode.REQUIRE], unprototypedObj.mode))
             throw new ValidationException("TagsRule: unknown mode " + unprototypedObj.mode);
     }
+
+    public getDescription(): string {
+        if (this.mode === TagsRule.Mode.ALLOW) {
+            return "Allow only tags: " + this.tags.join(", ");
+        } else if (this.mode === TagsRule.Mode.DENY) {
+            return "Deny tags: " + this.tags.join(", ");
+        } else if (this.mode === TagsRule.Mode.REQUIRE) {
+            return "Require all of tags: " + this.tags.join(", ");
+        } else if (this.mode === TagsRule.Mode.ANY) {
+            return "Require at least one of tags: " + this.tags.join(", ");
+        } else {
+            return "[Unknown mode " + this.mode + "] tags: " + this.tags.join(", ");
+        }
+    }
 }
 
 export namespace TagsRule {

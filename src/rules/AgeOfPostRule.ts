@@ -74,6 +74,12 @@ export class AgeOfPostRule extends Rule {
         ], unprototypedObj.mode))
             throw new ValidationException("AgeOfPostRule: unknown mode " + unprototypedObj.mode);
     }
+
+    public getDescription(): string {
+        return "Post "
+            + (this.mode === "older_than" ? "older than" : "younger than")
+            + this.value + " " + this.unit + "s";
+    }
 }
 
 export namespace AgeOfPostRule {

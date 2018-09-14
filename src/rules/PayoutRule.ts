@@ -71,6 +71,20 @@ export class PayoutRule extends Rule {
         }
         else throw new Error("PayoutRule: cannot parse payout (" + payoutStr + ")");
     }
+
+    public getDescription(): string {
+        let out = "Payout of the post ";
+
+        switch (this.mode) {
+            case PayoutRule.Mode.MORE_THAN: out += "is more than";
+            case PayoutRule.Mode.LESS_THAN: out += "is less than";
+            case PayoutRule.Mode.EQUAL: out += "equals";
+            default: out += this.mode;
+        }
+        out += " " + this.value + " SBD";
+
+        return out;
+    }
 }
 
 export namespace PayoutRule {

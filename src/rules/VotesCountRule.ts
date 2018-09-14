@@ -63,6 +63,20 @@ export class VotesCountRule extends Rule {
         if (!_.includes([VotesCountRule.Mode.MORE_THAN, VotesCountRule.Mode.LESS_THAN, VotesCountRule.Mode.EQUAL], unprototypedObj.mode))
             throw new ValidationException("VotesCountRule: unknown mode " + unprototypedObj.mode);
     }
+
+    public getDescription(): string {
+        let out = "The post has ";
+
+        switch (this.mode) {
+            case VotesCountRule.Mode.MORE_THAN: out += "more than";
+            case VotesCountRule.Mode.LESS_THAN: out += "less than";
+            case VotesCountRule.Mode.EQUAL: out += "";
+            default: out += this.mode;
+        }
+        out += " " + this.value + " votes";
+
+        return out;
+    }
 }
 
 export namespace VotesCountRule {

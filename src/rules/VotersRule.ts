@@ -78,6 +78,20 @@ export class VotersRule extends Rule {
         if (!_.includes([VotersRule.Mode.ONE, VotersRule.Mode.NONE, VotersRule.Mode.ANY, VotersRule.Mode.ALL], unprototypedObj.mode))
             throw new ValidationException("VotersRule: unknown mode " + unprototypedObj.mode);
     }
+
+    public getDescription(): string {
+        if (this.mode === VotersRule.Mode.ALL) {
+            return this.usernames.join(", ") + " must all vote for the post";
+        } else if (this.mode === VotersRule.Mode.NONE) {
+            return "None of " + this.usernames.join(", ") + " can vote for the post";
+        } else if (this.mode === VotersRule.Mode.ONE) {
+            return "All voters must be on the list: " + this.usernames.join(", ");
+        } else if (this.mode === VotersRule.Mode.ANY) {
+            return "Any of " + this.usernames.join(", ") + " must vote for the post";
+        } else {
+            return "VotersRule: [Unknown mode " + this.mode + "] voters: " + this.usernames.join(", ");
+        }
+    }
 }
 
 export namespace VotersRule {

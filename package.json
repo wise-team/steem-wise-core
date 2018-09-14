@@ -24,6 +24,7 @@
     "@types/lodash": "^4.14.116",
     "@types/mocha": "^5.2.5",
     "@types/node": "^9.6.31",
+    "@types/winston": "^2.4.4",
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
     "express": "^4.16.3",

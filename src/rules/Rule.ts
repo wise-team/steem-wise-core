@@ -21,6 +21,7 @@ export abstract class Rule {
     public abstract validateRuleObject(unprototypedRule: any): void; // throws a ValidationException
 
     public abstract type(): Rule.Type;
+    public abstract getDescription(): string;
 }
 
 export namespace Rule {

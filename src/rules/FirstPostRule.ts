@@ -45,4 +45,8 @@ export class FirstPostRule extends Rule {
 
     public validateRuleObject(unprototypedObj: any) {
     }
+
+    public getDescription(): string {
+        return "First post of the author";
+    }
 }
