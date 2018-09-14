@@ -37,7 +37,7 @@ describe("test/integration/api.spec.ts", function () {
     this.timeout(12000);
 
     const apis: Api [] = [
-        new DirectBlockchainApi(username, postingWif),
+        new DirectBlockchainApi(postingWif),
         FakeWiseFactory.buildFakeApi()
         // new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
     ];
@@ -369,7 +369,7 @@ describe("test/integration/api.spec.ts", function () {
 
     describe("Temporarily test here v2 rules loading", () => {
         it("loads proper rules (v2)", () => {
-            const api = new DirectBlockchainApi("guest123", "");
+            const api = new DirectBlockchainApi("");
             const wise = new Wise("guest123", api);
             const delegator = "guest123";
             const voter = "guest123";

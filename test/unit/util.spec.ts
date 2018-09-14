@@ -1,5 +1,7 @@
 // 3rd party imports
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import "mocha";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
@@ -12,7 +14,7 @@ describe("test/unit/util.spec.ts", () => {
         it("runs the promise exactly once", (done) => {
             let calls = 0;
             const promiseReturner = () => {
-                return new Promise<number>((resolve, reject) => {
+                return new BluebirdPromise<number>((resolve, reject) => {
                     setTimeout(() => {
                         calls++;
                         resolve(calls);
@@ -47,7 +49,7 @@ describe("test/unit/util.spec.ts", () => {
             let numOfResolves = 0;
             let numOfCalls = 0;
             const promiseReturner = () => {
-                return new Promise<number>((resolve, reject) => {
+                return new BluebirdPromise<number>((resolve, reject) => {
                     setTimeout(() => {
                         numOfCalls++;
                         reject(new Error("Some error"));
@@ -81,7 +83,7 @@ describe("test/unit/util.spec.ts", () => {
         it("rejects on thrown errors", (done) => {
             let numOfRejects = 0;
             const promiseReturner = () => {
-                return new Promise<number>((resolve, reject) => {
+                return new BluebirdPromise<number>((resolve, reject) => {
                     throw new Error("Some error");
                 });
             };

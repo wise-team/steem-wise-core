@@ -1,8 +1,10 @@
 // 3rd party imports
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import "mocha";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
-import * as Promise from "bluebird";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
@@ -86,7 +88,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
             let synchronizationPromise: Promise<void>;
 
             it("Starts synchronization without error", () => {
-                const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
+                const synchronizationPromiseReturner = () => new BluebirdPromise<void>((resolve, reject) => {
                     synchronizer = delegatorWise.startDaemon(new SteemOperationNumber((fakeApi as any as FakeApi).getCurrentBlockNum(), 0, 0),
                         (error: Error | undefined, event: Synchronizer.Event): void => {
                         if (event.type === Synchronizer.EventType.SynchronizationStop) {
@@ -110,11 +112,11 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                 ];
                 const voters: string [] = _.uniq(test.voteorders.map(vo => vo.voter));
                 // set rules for each voter in the voteorders
-                return Promise.resolve(voters).mapSeries(
-                    (voter: any /* 'any' because of a bug in Bluebird */) =>
+                return BluebirdPromise.resolve(voters).mapSeries(
+                    (voter: any /* 'any' because of a bug in BluebirdPromise */) =>
                         delegatorWise.uploadRulesetsForVoter(voter, rulesets)
                 )
-                .then(() => Promise.delay(50));
+                .then(() => BluebirdPromise.delay(50));
             });
 
             test.voteorders.forEach((vo: { deltaTime: number, weight: number, voter: string }) => {
@@ -130,7 +132,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     (fakeApi as any as FakeApi).setFakeTime(fakeTime);
                     return voterWise.generateVoteorderOperations(delegator, vo.voter, voteorder)
                     .then((ops: [string, object][]) => (fakeApi as any as FakeApi).sendToBlockchain(ops))
-                    .then(() => Promise.delay(60))
+                    .then(() => BluebirdPromise.delay(60))
                     .then(() => (fakeApi as any as FakeApi).setFakeTime(new Date(nowTime.getTime())));
                 });
             });
@@ -146,7 +148,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                 const until = new Date(nowTime.getTime() - 50 * 24 * 3600 * 1000);
                 // calculate for all voters
                 const voters: string [] = _.uniq(test.voteorders.map(vo => vo.voter));
-                return Promise.resolve(voters).mapSeries((voter: any /* 'any' because of a bug in Bluebird */) => context.getWiseOperations(voter/*! voter as we are testing sending, not synchronization !*/, until)
+                return BluebirdPromise.resolve(voters).mapSeries((voter: any /* 'any' because of a bug in BluebirdPromise */) => context.getWiseOperations(voter/*! voter as we are testing sending, not synchronization !*/, until)
                 .then((ops: EffectuatedWiseOperation []) => {
                     ops.forEach(op => {
                         expect(op.timestamp.getTime(), "operation timestamp").to.be.greaterThan(until.getTime(), "until");

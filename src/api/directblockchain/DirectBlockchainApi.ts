@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as steem from "steem";
 
 import { SteemPost } from "../../blockchain/SteemPost";
@@ -26,15 +28,13 @@ import { Log } from "../../util/log";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
-    private username: string;
-    private postingWif: string;
+    private postingWif: string | undefined;
     private sendEnabled: boolean = true;
 
-    public constructor(username: string, postingWif: string, steemOptions?: object) {
+    public constructor(postingWif?: string, steemOptions?: object) {
         super();
 
         this.steem = steem;
-        this.username = username;
         this.postingWif = postingWif;
 
         if (steemOptions) this.steem.api.setOptions(steemOptions);
@@ -54,34 +54,31 @@ export class DirectBlockchainApi extends Api {
         Log.cheapDebug(
             () => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink }));
 
-        return new Promise((resolve, reject) => {
-            this.steem.api.getContent(author, permlink, function(error: Error, result: any) {
-                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_POST_RESULT="
-                     + JSON.stringify({ author: author, permlink: permlink, result: result, error: error }));
-
-                if (error) reject(error);
-                else if (result.author.length === 0)
-                    reject(new NotFoundException("The post (@" + author + "/" + permlink + ") does not exist"));
-                else resolve(result as SteemPost);
-            });
+        const steemApiGetContent: ((author: string, permlink: string) => Promise<any>) =  BluebirdPromise.promisify(this.steem.api.getContent);
+        return steemApiGetContent(author, permlink)
+        .then((result: any) => {
+            if (result.author.length === 0)
+                    throw new NotFoundException("The post (@" + author + "/" + permlink + ") does not exist");
+            return result as SteemPost;
         });
     }
 
     public loadRulesets(
         delegator: string, voter: string, atMoment: SteemOperationNumber, protocol: Protocol
     ): Promise<SetRules> {
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS="
+        const loadedRulesets: SetRules [] = [];
+
+        return BluebirdPromise.resolve()
+        .then(() => {
+            Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS="
              + JSON.stringify({ delegator: delegator, voter: voter, atMoment: atMoment }));
 
-        return new Promise<SetRules>((resolve, reject) => {
-            if (typeof delegator === "undefined" || delegator.length == 0)
+             if (typeof delegator === "undefined" || delegator.length == 0)
                 throw new Error("Delegator must not be empty");
-            if (typeof voter === "undefined" || voter.length == 0) throw new Error("Voter must not be empty");
-
-            const loadedRulesets: SetRules [] = [];
-
-            let noResult: boolean = true;
-            new SteemJsAccountHistorySupplier(this.steem, delegator)
+             if (typeof voter === "undefined" || voter.length == 0)
+                throw new Error("Voter must not be empty");
+        })
+        .then(() => new SteemJsAccountHistorySupplier(this.steem, delegator)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
@@ -94,65 +91,63 @@ export class DirectBlockchainApi extends Api {
                 )
                 .chain(new ChainableLimiter(1))
                 .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
-                    noResult = false;
-                    resolve(item.command as SetRules);
+                    loadedRulesets.push(item.command as SetRules);
                     return false;
                 }))
-                .catch((error: Error) => {
-                    noResult = false;
-                    reject(error);
-                    return false;
-                });
+                .catch((error: Error) => false); // if we return false on error, the Promise will be rejected
             })
-            .start(() => {
-                if (noResult) resolve({rulesets: []} as SetRules);
-            });
+            .start())
+        .then(() => {
+            if (loadedRulesets.length > 0) return loadedRulesets[0];
+            else {
+                const emptyResult: SetRules = { rulesets: [] };
+                return emptyResult;
+            }
         })
-        .then((result: SetRules) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_RESULT", result),
-              (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_ERROR", error));
+        .then(
+            (result: SetRules) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_RESULT", result),
+            (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_RULESETS_ERROR", error)
+        );
     }
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
-        return new Promise<SteemOperationNumber>((resolve, reject) => {
-            const steemCallback = function(
-                error: Error | undefined, result: { id: string, block_num: number, trx_num: number }
-            ): void {
-                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_RESULT="
-                     + JSON.stringify({operations: operations, error: error, rewsult: result }));
-
-                if (error) reject(error);
-                else {
-                    resolve(new SteemOperationNumber(result.block_num, result.trx_num, operations.length - 1));
-                }
-            };
-
-            if (this.sendEnabled) {
-                Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
-                steem.broadcast.send(
-                    {
-                        extensions: [],
-                        operations: operations
-                    },
-                    {posting: this.postingWif},
-                    steemCallback
-                );
-            }
-            else {
+        return BluebirdPromise.resolve()
+        .then(() => {
+            if (!this.sendEnabled) {
                 Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_DISABLED=" + JSON.stringify(operations));
-
-                steemCallback(undefined, { id: "direct-blockchain-api-send-disabled-false-id=" + Date.now(), block_num: 10000, trx_num: 1 });
+                return SteemOperationNumber.NEVER;
             }
+
+            Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
+            return steem.broadcast.sendAsync(
+                { extensions: [], operations: operations },
+                { posting: this.postingWif },
+            )
+            .then(
+                (result: { id: string, block_num: number, trx_num: number }) => {
+                    Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_RESULT="
+                        + JSON.stringify({operations: operations, error: undefined, result: result }));
+                    return new SteemOperationNumber(result.block_num, result.trx_num, operations.length - 1);
+                },
+                (error: Error) => {
+                    Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_RESULT="
+                     + JSON.stringify({operations: operations, error: error, result: undefined }));
+                     throw error;
+                }
+            );
         });
     }
 
     public loadAllRulesets(delegator: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
         Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS=" + JSON.stringify({ delegator: delegator, atMoment: atMoment }));
 
-        return new Promise<EffectuatedSetRules []>((resolve, reject) => {
+        const allRules: EffectuatedSetRules [] = [];
+
+        return BluebirdPromise.resolve()
+        .then(() => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
-            const allRules: EffectuatedSetRules [] = [];
-            new SteemJsAccountHistorySupplier(this.steem, delegator)
+            return new SteemJsAccountHistorySupplier(this.steem, delegator)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
@@ -169,28 +164,26 @@ export class DirectBlockchainApi extends Api {
 
                     return true;
                 }))
-                .catch((error: Error) => {
-                    reject(error);
-
-                    return false;
-                });
+                .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
             })
-            .start(() => {
-                resolve(allRules);
-            });
+            .start();
         })
-        .then((result: EffectuatedSetRules []) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_RESULT", result),
-              (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_ERROR", error));
+        .then(() => allRules)
+        .then(
+            (result: EffectuatedSetRules []) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_RESULT", result),
+            (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_ERROR", error)
+        );
     }
 
     public getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
         Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator }));
 
-        return new Promise<SteemOperationNumber>((resolve, reject) => {
+        let result: SteemOperationNumber = V1Handler.INTRODUCTION_OF_WISE_MOMENT;
+        return BluebirdPromise.resolve()
+        .then(() => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
-            let noResult = true;
-            new SteemJsAccountHistorySupplier(this.steem, delegator)
+            return new SteemJsAccountHistorySupplier(this.steem, delegator)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
@@ -198,56 +191,47 @@ export class DirectBlockchainApi extends Api {
                 .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.ConfirmVote))
                 .chain(new ChainableLimiter(1))
                 .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
-                    noResult = false;
-                    resolve(item.moment);
-
+                    result = item.moment;
                     return false;
                 }))
-                .catch((error: Error) => {
-                    reject(error);
-
-                    return false;
-                });
+                .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
             })
-            .start(() => {
-                if (noResult) resolve(V1Handler.INTRODUCTION_OF_WISE_MOMENT);
-            });
+            .start();
         })
-        .then((result: SteemOperationNumber) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_RESULT", result),
-              (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_ERROR", error));
+        .then(() => result)
+        .then(
+            (result: SteemOperationNumber) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_RESULT", result),
+            (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT_ERROR", error)
+        );
     }
 
-    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
-        return new Promise((resolve, reject) => {
-            if (typeof username === "undefined" || username.length == 0) throw new Error("Username must not be empty");
+    public getWiseOperations(account: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+        const result: EffectuatedWiseOperation [] = [];
 
-            const operations: EffectuatedWiseOperation [] = [];
-            new SteemJsAccountHistorySupplier(this.steem, username)
+        return BluebirdPromise.resolve()
+        .then(() => {
+            if (typeof account === "undefined" || account.length == 0) throw new Error("Username must not be empty");
+
+            return new SteemJsAccountHistorySupplier(this.steem, account)
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
                 .chain(new DateLimiter(until))
                 .chain(new ToWiseOperationTransformer(protocol))
                 .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
-                    operations.push(item);
+                    result.push(item);
                     return true;
                 }))
-                .catch((error: Error) => {
-                    reject(error);
-
-                    return false;
-                });
+                .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
             })
-            .start(() => {
-                resolve(operations);
-            });
-        });
+            .start();
+        })
+        .then(() => result);
     }
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol, skipDelegatorCheck: boolean = false): Promise<EffectuatedWiseOperation []> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => {
-                // TODO would it be better to use RPC method get_ops_in_block?
                 if (error) reject(error);
                 else {
                     if (!block_) {
@@ -318,25 +302,18 @@ export class DirectBlockchainApi extends Api {
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
-        return new Promise((resolve, reject) => {
-            this.steem.api.getDynamicGlobalProperties((error: Error, result: DynamicGlobalProperties) => {
-                if (error) reject(error);
-                else resolve(result);
-            });
-        });
+        return BluebirdPromise.resolve()
+        .then(() => this.steem.api.getDynamicGlobalPropertiesAsync());
     }
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
-        return new Promise((resolve, reject) => {
-            this.steem.api.getAccounts([username], (error: Error, result: AccountInfo []) => {
-                if (error) reject(error);
-                else {
-                    if (result.length > 0) {
-                        resolve(result[0]);
-                    }
-                    else reject(new NotFoundException("Account " + username + " does not exist"));
-                }
-            });
+        return BluebirdPromise.resolve()
+        .then(() => this.steem.api.getAccountsAsync([username]))
+        .then((result: AccountInfo []) => {
+            if (result.length > 0) {
+                return result[0];
+            }
+            else throw new NotFoundException("Account " + username + " does not exist");
         });
     }
 

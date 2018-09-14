@@ -1,7 +1,5 @@
-import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { RulePrototyper } from "./RulePrototyper";
 
 export abstract class Rule {
     public rule: string = "not-set-in-inheriting-class";

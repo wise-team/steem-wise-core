@@ -71,8 +71,6 @@ export abstract class ChainableSupplier<TO, IMPLEMENTERCLASS extends ChainableSu
         throw new Error("Supplier cannot take.");
     }
 
-    public abstract onFinish(callback: () => void): IMPLEMENTERCLASS;
-
     public abstract start(callback?: () => void): void;
 }
 

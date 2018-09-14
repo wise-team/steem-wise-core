@@ -1,9 +1,11 @@
 /* tslint:disable no-null-keyword */
 // 3rd party imports
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import { expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import * as Promise from "bluebird";
 
 // wise imports
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
@@ -81,7 +83,7 @@ describe("test/integration/wise.spec.ts", () => {
     describe("Wise", function() {
         this.timeout(50 * 1000);
 
-        const wise = new Wise(config.username, new DirectBlockchainApi(config.username, config.postingWif));
+        const wise = new Wise(config.username, new DirectBlockchainApi(config.postingWif));
 
         describe("#constructor", () => {
             it ("Wise object has two protocol handlers", () => {
@@ -174,7 +176,7 @@ describe("test/integration/wise.spec.ts", () => {
                     result => { resultPromise = result; errorPromise = undefined; },
                     error => { errorPromise = error; resultPromise = undefined; }
                 )
-                .then(() => Promise.delay(10))
+                .then(() => BluebirdPromise.delay(10))
                 .then(() => {
                     expect(resultCallback, "resultCallback").to.not.equal(false);
                     expect(errorCallback, "errorCallback").to.not.equal(false);
@@ -223,7 +225,7 @@ describe("test/integration/wise.spec.ts", () => {
                     result => { resultPromise = result; errorPromise = undefined; },
                     error => { errorPromise = error; resultPromise = undefined; }
                 )
-                .then(() => Promise.delay(10))
+                .then(() => BluebirdPromise.delay(10))
                 .then(() => {
                     if (errorPromise || errorCallback) throw errorPromise;
                     expect(resultCallback, "resultCallback").is.an("array").with.length(1);
@@ -237,11 +239,11 @@ describe("test/integration/wise.spec.ts", () => {
             it("Downloads rulesets set by " + config.username + " for " + config.username + " in previous test", function () {
                 this.timeout(80 * 1000);
                 console.log("Waiting 60 seconds for rulesets to be available via account_history_api");
-                return Promise.delay(20 * 1000)
+                return BluebirdPromise.delay(20 * 1000)
                 .then(() => console.log("40 seconds left..."))
-                .then(() => Promise.delay(20 * 1000))
+                .then(() => BluebirdPromise.delay(20 * 1000))
                 .then(() => console.log("20 seconds left..."))
-                .then(() => Promise.delay(20 * 1000))
+                .then(() => BluebirdPromise.delay(20 * 1000))
                 .then(() => console.log("Done waiting"))
                 .then(() => wise.downloadRulesetsForVoter(config.username, config.username,
                     undefined, SteemOperationNumber.NOW
@@ -290,7 +292,7 @@ describe("test/integration/wise.spec.ts", () => {
                     result => { resultPromise = result; errorPromise = undefined; },
                     error => { errorPromise = error; resultPromise = undefined; }
                 )
-                .then(() => Promise.delay(10))
+                .then(() => BluebirdPromise.delay(10))
                 .then(() => {
                     expect(resultCallback, "resultCallback").to.not.equal(false);
                     expect(errorCallback, "errorCallback").to.not.equal(false);
@@ -343,7 +345,7 @@ describe("test/integration/wise.spec.ts", () => {
                     result => { resultPromise = result; errorPromise = undefined; },
                     error => { errorPromise = error; resultPromise = undefined; }
                 )
-                .then(() => Promise.delay(10))
+                .then(() => BluebirdPromise.delay(10))
                 .then(() => {
                     if (errorPromise || errorCallback) throw errorPromise;
                     expect(resultCallback, "resultCallback").is.an("array").with.length.gt(1);
@@ -362,11 +364,11 @@ describe("test/integration/wise.spec.ts", () => {
             it("Downloads all rulesets set by " + config.username + " in previous test", function () {
                 this.timeout(80 * 1000);
                 console.log("Waiting 60 seconds for rulesets to be available via account_history_api");
-                return Promise.delay(20 * 1000)
+                return BluebirdPromise.delay(20 * 1000)
                 .then(() => console.log("40 seconds left..."))
-                .then(() => Promise.delay(20 * 1000))
+                .then(() => BluebirdPromise.delay(20 * 1000))
                 .then(() => console.log("20 seconds left..."))
-                .then(() => Promise.delay(20 * 1000))
+                .then(() => BluebirdPromise.delay(20 * 1000))
                 .then(() => console.log("Done waiting"))
                 .then(() => wise.downloadAllRulesets(config.username))
                 .then(result => {
@@ -435,7 +437,7 @@ describe("test/integration/wise.spec.ts", () => {
                     result => { resultPromise = result; errorPromise = undefined; },
                     error => { errorPromise = error; resultPromise = undefined; }
                 )
-                .then(() => Promise.delay(10))
+                .then(() => BluebirdPromise.delay(10))
                 .then(() => {
                     expect(resultCallback, "resultCallback").to.not.equal(false);
                     expect(errorCallback, "errorCallback").to.not.equal(false);
@@ -495,7 +497,7 @@ describe("test/integration/wise.spec.ts", () => {
                     result => { resultPromise = result; errorPromise = undefined; },
                     error => { errorPromise = error; resultPromise = undefined; }
                 )
-                .then(() => Promise.delay(10))
+                .then(() => BluebirdPromise.delay(10))
                 .then(() => {
                     expect(resultCallback, "resultCallback").to.not.equal(false);
                     expect(errorCallback, "errorCallback").to.not.equal(false);

@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -27,9 +29,7 @@ export class CustomRPCRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return new Promise((resolve, reject) => {
-            throw new ValidationException("CustomRPC rule is not yet implemented"); // TODO
-        });
+        return BluebirdPromise.reject(new ValidationException("CustomRPC rule is not yet implemented")); // TODO
     }
 
     public validateRuleObject(unprototypedObj: any) {

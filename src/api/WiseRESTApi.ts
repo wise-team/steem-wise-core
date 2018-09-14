@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 
 import { SteemPost } from "../blockchain/SteemPost";
 import { SetRules } from "../protocol/SetRules";
@@ -22,7 +24,7 @@ export class WiseRESTApi extends Api {
         super();
 
         this.host = host;
-        this.directBlockchainApi = new DirectBlockchainApi(username, postingWif, steemOptions);
+        this.directBlockchainApi = new DirectBlockchainApi(postingWif, steemOptions);
     }
 
     public name(): string {
@@ -34,7 +36,7 @@ export class WiseRESTApi extends Api {
     }
 
     public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return BluebirdPromise.reject(new Error("Not implemented yet"));
     }
 
     public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
@@ -42,19 +44,19 @@ export class WiseRESTApi extends Api {
     }
 
     public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return BluebirdPromise.reject(new Error("Not implemented yet"));
     }
 
     public getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return BluebirdPromise.reject(new Error("Not implemented yet"));
     }
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
-        return new Promise((resolve, reject) => reject(new Error("Not implemented yet")));
+        return BluebirdPromise.reject(new Error("Not implemented yet"));
     }
 
     public getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
-        return Promise.reject(new Error("Not yet implemented"));
+        return BluebirdPromise.reject(new Error("Not yet implemented"));
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
@@ -66,6 +68,6 @@ export class WiseRESTApi extends Api {
     }
 
     public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
-        return Promise.reject(new Error("Not yet implemented"));
+        return BluebirdPromise.reject(new Error("Not yet implemented"));
     }
 }

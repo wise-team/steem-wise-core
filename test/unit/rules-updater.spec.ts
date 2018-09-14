@@ -1,6 +1,8 @@
 // 3rd party imports
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import { expect } from "chai";
-import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
@@ -53,7 +55,7 @@ describe("test/unit/rules-updater.spec.ts", () => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(10))
+            .then(() => BluebirdPromise.delay(10))
             .then(() => voterAWise.downloadRulesetsForVoter(delegator, voterA))
             .then((rulesets: Ruleset []) => {
                 expect(rulesets).to.be.an("array").with.length(1);
@@ -80,7 +82,7 @@ describe("test/unit/rules-updater.spec.ts", () => {
 
 
         it("Does not update same rules", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules0))
             .then((result: SteemOperationNumber | true) => {
                 expect(result === true, "rules were not updated").to.be.true;
@@ -102,13 +104,13 @@ describe("test/unit/rules-updater.spec.ts", () => {
         rules1.push(additionalRuleForVoterC);
 
         it("Updates on added new voter", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules1))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(10))
+            .then(() => BluebirdPromise.delay(10))
             .then(() => voterCWise.downloadRulesetsForVoter(delegator, voterC))
             .then((rulesets: Ruleset []) => {
                 expect(rulesets).to.be.an("array").with.length(1);
@@ -128,13 +130,13 @@ describe("test/unit/rules-updater.spec.ts", () => {
 
         const rules2 = _.slice(_.cloneDeep(rules1), 1); // remove first element
         it("Updates on removed voter", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules2))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(25))
+            .then(() => BluebirdPromise.delay(25))
             .then(() => voterAWise.downloadRulesetsForVoter(delegator, voterA))
             .then((rulesets: Ruleset []) => {
                 expect(rulesets).to.be.an("array").with.length(0);
@@ -144,13 +146,13 @@ describe("test/unit/rules-updater.spec.ts", () => {
         const rules3 = _.cloneDeep(rules2); // modify rules for voter c
         (rules3[rules3.length - 1].rulesets[0].rules[0] as WeightRule).max = 50;
         it("Updates on modified weight rule numbered property", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules3))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(25))
+            .then(() => BluebirdPromise.delay(25))
             .then(() => voterCWise.downloadRulesetsForVoter(delegator, voterC))
             .then((rulesets: Ruleset []) => {
                 expect(rulesets).to.be.an("array").with.length(1);
@@ -162,13 +164,13 @@ describe("test/unit/rules-updater.spec.ts", () => {
         const rules4 = _.cloneDeep(rules3); // modify rules for voter c
         (rules4[rules4.length - 1].rulesets[0].rules[1] as TagsRule).mode = TagsRule.Mode.DENY;
         it("Updates on modified tags rule enum property", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules4))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(25))
+            .then(() => BluebirdPromise.delay(25))
             .then(() => voterCWise.downloadRulesetsForVoter(delegator, voterC))
             .then((rulesets: Ruleset []) => {
                 expect(rulesets).to.be.an("array").with.length(1);
@@ -180,13 +182,13 @@ describe("test/unit/rules-updater.spec.ts", () => {
         const rules5 = _.cloneDeep(rules4); // modify rules for voter c
         (rules5[rules5.length - 1].rulesets[0].rules[1] as TagsRule).tags.push("sometag");
         it("Updates on modified tags array", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules5))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(25))
+            .then(() => BluebirdPromise.delay(25))
             .then(() => voterCWise.downloadRulesetsForVoter(delegator, voterC))
             .then((rulesets: Ruleset []) => {
                 expect(rulesets).to.be.an("array").with.length(1);
@@ -206,7 +208,7 @@ describe("test/unit/rules-updater.spec.ts", () => {
 
         const rules6 = _.cloneDeep(rules5);
         it("Does not update on same but deeply cloned rules", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules6))
             .then((result: SteemOperationNumber | true) => {
                 expect(result === true, "rules were not updated").to.be.true;
@@ -215,7 +217,7 @@ describe("test/unit/rules-updater.spec.ts", () => {
 
         const rules7 = JSON.parse(JSON.stringify(_.cloneDeep(rules6)));
         it("Does not update unchanged unprototyped rules object", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules7))
             .then((result: SteemOperationNumber | true) => {
                 expect(result === true, "rules were not updated").to.be.true;
@@ -224,13 +226,13 @@ describe("test/unit/rules-updater.spec.ts", () => {
 
         const rules8 = JSON.parse(JSON.stringify(_.cloneDeep(rules0))); // copy of rules0
         it("Correctly appends prototype to unprototyped rules and updates them", () => {
-            return Promise.delay(10)
+            return BluebirdPromise.delay(10)
             .then(() => delegatorWise.uploadAllRulesets(rules8))
             .then((result: SteemOperationNumber | true) => {
                 expect(result !== true, "rules were actually updated").to.be.true;
                 expect((result as SteemOperationNumber).blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(10))
+            .then(() => BluebirdPromise.delay(10))
             .then(() => voterAWise.downloadRulesetsForVoter(delegator, voterA))
             .then((rulesets: Ruleset []) => {
                 expect(rulesets).to.be.an("array").with.length(1);

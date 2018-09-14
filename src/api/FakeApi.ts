@@ -1,4 +1,6 @@
-import * as Promise from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Log } from "../util/log"; const log = Log.getLogger();
@@ -65,7 +67,7 @@ export class FakeApi extends Api {
     }
 
     public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        return new Promise<SteemPost>((resolve, reject) => {
+        return new BluebirdPromise<SteemPost>((resolve, reject) => {
             for (let i = 0; i < this.posts.length; i++) {
                 if (this.posts[i].author === author && this.posts[i].permlink === permlink) {
                     setTimeout(() => resolve(this.posts[i]), this.fakeDelayMs);
@@ -91,7 +93,7 @@ export class FakeApi extends Api {
     }
 
     public sendToBlockchain(operationsInTransaction: [string, object][]): Promise<SteemOperationNumber> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             const blockNum = this.currentBlock + 1;
             const steemTrx: SteemTransaction = {
                 block_num: blockNum,
@@ -111,7 +113,7 @@ export class FakeApi extends Api {
     }
 
     public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             const result: EffectuatedSetRules [] = [];
             for (let i = 0; i < this.transactions.length; i++) {
                 const trx = this.transactions[i];
@@ -138,7 +140,7 @@ export class FakeApi extends Api {
     }
 
     public getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             setTimeout(() => resolve(
                 this.transactions
                 .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
@@ -156,7 +158,7 @@ export class FakeApi extends Api {
     }
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             if (blockNum > this.currentBlock + 1) reject(new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)"));
             let awaitBlock: (thenFn: () => void) => void = () => {};
             awaitBlock = (thenFn: () => void) => {
@@ -187,7 +189,7 @@ export class FakeApi extends Api {
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
             this.dynamicGlobalProperties.head_block_number = this.currentBlock;
             setTimeout(() => resolve(_.cloneDeep(this.dynamicGlobalProperties)), this.fakeDelayMs);
@@ -195,7 +197,7 @@ export class FakeApi extends Api {
     }
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             const result = this.accounts.filter((info: AccountInfo) => info.name === username);
             if (result.length === 0) setTimeout(() => reject(new NotFoundException("Account " + username + " does not exist")), this.fakeDelayMs);
             else setTimeout(() => resolve(result[0]), this.fakeDelayMs);
@@ -203,7 +205,7 @@ export class FakeApi extends Api {
     }
 
     public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             const result: EffectuatedWiseOperation [] = [];
             for (let i = 0; i < this.transactions.length; i++) {
                 const op = this.transactions[i];
@@ -230,7 +232,7 @@ export class FakeApi extends Api {
     }
 
     public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             const result: BlogEntry [] = [];
             let userI = 0;
             for (let i = 0; i < this.blogEntries.length; i++) {

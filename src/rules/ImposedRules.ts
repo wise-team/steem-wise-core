@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 
 import { Rule } from "./Rule";
 import { SendVoteorder } from "../protocol/SendVoteorder";
@@ -30,7 +32,7 @@ export namespace ImposedRules {
         public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
             return context.getDynamicGlobalProperties()
             .then((dynamicGlobalProperties: DynamicGlobalProperties): Promise<{dynamicGlobalProperties: DynamicGlobalProperties, accountInfo: AccountInfo}> => {
-                return new Promise((resolve, reject) => {
+                return new BluebirdPromise((resolve, reject) => {
                     return context.getAccountInfo(this.voter)
                     .then((accountInfo: AccountInfo) => resolve({dynamicGlobalProperties: dynamicGlobalProperties, accountInfo: accountInfo}))
                     .catch((error: Error) => reject(error));

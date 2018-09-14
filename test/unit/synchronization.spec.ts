@@ -1,6 +1,8 @@
 // 3rd party imports
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import { expect, assert } from "chai";
-import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
 import { Log } from "../../src/util/log"; const log = Log.getLogger();
@@ -18,7 +20,7 @@ import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
-Promise.onPossiblyUnhandledRejection(function(error) {
+BluebirdPromise.onPossiblyUnhandledRejection(function(error) {
     throw error;
 });
 
@@ -44,7 +46,7 @@ describe("test/unit/synchronization.spec.ts", () => {
         this.timeout(2000);
         let synchronizationPromise: Promise<void>;
         it("Starts synchronization without error", () => {
-            const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
+            const synchronizationPromiseReturner = () => new BluebirdPromise<void>((resolve, reject) => {
                 synchronizer = delegatorWise.startDaemon(new SteemOperationNumber(fakeApi.getCurrentBlockNum(), 0, 0),
                     (error: Error | undefined, event: Synchronizer.Event): void => {
                     if (event.type === Synchronizer.EventType.SynchronizationStop) {
@@ -76,7 +78,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(80))
+            .then(() => BluebirdPromise.delay(80))
             .then(() => {
                 const lastTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastTrx));
@@ -107,7 +109,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(50))
+            .then(() => BluebirdPromise.delay(50))
             .then(() => {
                 return voterWise.downloadRulesetsForVoter(delegator, voter);
             })
@@ -136,7 +138,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then((moment: SteemOperationNumber) => {
                 expect(moment.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(100))
+            .then(() => BluebirdPromise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -165,7 +167,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(100))
+            .then(() => BluebirdPromise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -190,7 +192,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             .then((son: SteemOperationNumber) => {
                 expect(son.blockNum).to.be.greaterThan(0);
             })
-            .then(() => Promise.delay(50))
+            .then(() => BluebirdPromise.delay(50))
             .then(() => {
                 return voterWise.downloadRulesetsForVoter(delegator, voter);
             })
@@ -205,7 +207,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(100))
+            .then(() => BluebirdPromise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -226,7 +228,7 @@ describe("test/unit/synchronization.spec.ts", () => {
         previouslyInalidNowValidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends now valid (but previously invalid) voteorder (rulesetName= " + voteorder.rulesetName + ") and delegator passes them", () => {
             return voterWise.sendVoteorder(delegator, voteorder)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(100))
+            .then(() => BluebirdPromise.delay(100))
             .then(() => {
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
@@ -247,7 +249,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             const skipValidation = true;
             return voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation)
             .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => Promise.delay(50), (e: Error) => {
+            .then(() => BluebirdPromise.delay(50), (e: Error) => {
                 if ((e as ValidationException).validationException) throw new Error("ValidationException present at send");
                 else throw e;
             })

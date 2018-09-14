@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { ValidationException } from "../validation/ValidationException";
@@ -25,11 +27,11 @@ export class AuthorsRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => this.validateRuleObject(this))
         .then(() => context.getPost())
         .then((post: SteemPost): Promise<void> => {
-            return new Promise((resolve, reject) => {
+            return new BluebirdPromise((resolve, reject) => {
                 const authorIsOnList: boolean = (this.authors.indexOf(post.author) !== -1);
                 if (this.mode == AuthorsRule.Mode.ALLOW) {
                     if (authorIsOnList) resolve();

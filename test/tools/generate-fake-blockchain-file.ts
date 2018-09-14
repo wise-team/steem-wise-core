@@ -1,8 +1,10 @@
-import { DirectBlockchainApi, SteemTransaction } from "../../src/wise";
-import * as Bluebird from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as steem from "steem";
 import * as fs from "fs";
 
+import { DirectBlockchainApi, SteemTransaction } from "../../src/wise";
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { AccountInfo } from "../../src/blockchain/AccountInfo";
 import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalProperties";
@@ -91,7 +93,7 @@ Bluebird.resolve()
 .then(() => console.log("Loading transactions..."))
 .then(() => usernames) // for each username return a promise that returns transactions
 .mapSeries((username: any  /* bluebird bug */) => {
-    return Bluebird.delay(2000).then(() => new Bluebird<SteemTransaction []>((resolve, reject) => {
+    return BluebirdBluebirdPromise.delay(2000).then(() => new BluebirdPromise<SteemTransaction []>((resolve, reject) => {
         console.log("Loading transactions of @" + username + "...");
         const trxs: SteemTransaction [] = [];
         new SteemJsAccountHistorySupplier(steem, username)

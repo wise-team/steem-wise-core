@@ -1,8 +1,11 @@
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
+
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
-import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { SteemPost } from "../blockchain/SteemPost";
 
@@ -28,7 +31,7 @@ export class AgeOfPostRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => this.validateRuleObject(this))
         .then(() => context.getPost())
         .then((post: SteemPost) => {

@@ -7,6 +7,7 @@ export class SteemOperationNumber {
 
     public static FUTURE: SteemOperationNumber = new SteemOperationNumber(Infinity, Infinity, Infinity);
     public static NOW: SteemOperationNumber = SteemOperationNumber.FUTURE;
+    public static NEVER: SteemOperationNumber = new SteemOperationNumber(-1, -1, -1);
 
     constructor(blockNum: number, transactionNum: number, operationNum: number = 0) {
         this.blockNum = blockNum;

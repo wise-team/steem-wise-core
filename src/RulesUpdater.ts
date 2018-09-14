@@ -1,3 +1,6 @@
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Api } from "./api/Api";
@@ -6,7 +9,6 @@ import { SetRules } from "./protocol/SetRules";
 import { Protocol } from "./protocol/Protocol";
 import { WiseOperation } from "./protocol/WiseOperation";
 import { ProggressCallback, Callback, Wise } from "./wise";
-import { Promise } from "bluebird";
 import { Util } from "./util/util";
 import { RulePrototyper } from "./rules/RulePrototyper";
 import { Ruleset } from "./protocol/Ruleset";
@@ -19,7 +21,7 @@ export class RulesUpdater {
         proggressCallback?: ProggressCallback
     ): Promise<SteemOperationNumber> {
 
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => { // remember that validation error throwing must occur in the promise. Not in the code of method.
             // If it happens outside the promise, catching it requires try...catch additional to Promise.catch
             // validate input params
@@ -85,7 +87,7 @@ export class RulesUpdater {
     public static uploadAllRulesets(api: Api, protocol: Protocol, delegator: string,
             newRules: SetRulesForVoter [], proggressCallback: ProggressCallback
     ): Promise<SteemOperationNumber | true> {
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => { // validate input rules
             const invalidRulesetsForVoter = newRules.filter(r => !SetRulesForVoter.validateSetRulesForVoter(r));
             if (invalidRulesetsForVoter.length > 0)
@@ -159,10 +161,10 @@ export class RulesUpdater {
             return operationsToPerform;
         })
         .then((operationsToPerform: WiseOperation []): Promise<SteemOperationNumber | true> => {
-            if (operationsToPerform.length === 0) return Promise.resolve(true) as Promise<SteemOperationNumber | true>;
+            if (operationsToPerform.length === 0) return BluebirdPromise.resolve(true) as Promise<SteemOperationNumber | true>;
             else {
                 proggressCallback("Updating rules: " + operationsToPerform.length + " operations to send...", 0);
-                return Promise.resolve(operationsToPerform).mapSeries((op_: any /* bug in Bluebird */, index) => {
+                return BluebirdPromise.resolve(operationsToPerform).mapSeries((op_: any /* bug in BluebirdPromise */, index) => {
                     const op = op_ as WiseOperation;
                     const num = index + 1;
                     proggressCallback("Updating rules: Sending operation " + num + "/" + operationsToPerform.length + "...", (num / operationsToPerform.length));

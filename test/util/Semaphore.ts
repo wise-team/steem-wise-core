@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 
 /**
  * Source: https://github.com/notenoughneon/await-semaphore/blob/master/index.ts .
@@ -27,7 +29,7 @@ export class Semaphore {
     }
 
     public acquire() {
-        return new Promise<() => void>((res, rej) => {
+        return new BluebirdPromise<() => void>((res, rej) => {
             const task = () => {
                 let released = false;
                 res(() => {

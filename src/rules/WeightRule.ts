@@ -1,8 +1,11 @@
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
+
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
-import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 
 /**
@@ -26,7 +29,7 @@ export class WeightRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => this.validateRuleObject(this))
         .then(() => {
             if (voteorder.weight < this.min) throw new ValidationException("Weight is too low (" + voteorder.weight + " < " + this.min + ")");

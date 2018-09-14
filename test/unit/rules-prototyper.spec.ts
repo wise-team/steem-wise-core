@@ -1,6 +1,8 @@
 // 3rd party imports
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import { expect } from "chai";
-import { Promise } from "bluebird";
 import "mocha";
 import * as _ from "lodash";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
@@ -56,7 +58,7 @@ describe("test/unit/rules-prototyper.spec.ts", () => {
                 rulesetName: ""
             };
 
-            return Promise.resolve().then(() => {
+            return BluebirdPromise.resolve().then(() => {
                 const rulePrimary = rulePair[0];
                 const propertyToOmit = rulePair[1];
 

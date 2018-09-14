@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -25,7 +27,7 @@ export class PayoutRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => this.validateRuleObject(this))
         .then(() => context.getPost())
         .then((post: SteemPost) => {

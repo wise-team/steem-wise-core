@@ -1,8 +1,11 @@
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
+
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
-import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { BlogEntry } from "../blockchain/BlogEntry";
 import { Util } from "../util/util";
@@ -23,7 +26,7 @@ export class FirstPostRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => this.validateRuleObject(this))
         .then(() => context.getBlogEntries(voteorder.author, 0, 250))
         .then((entries: BlogEntry []) => {

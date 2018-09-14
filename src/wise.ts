@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
@@ -17,6 +19,7 @@ import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 
+// TODO conform to JS convention that callback is the last argument. And use options array for optional arguments
 
 /**
  * Wise is a vote delegation system for steem blockchain. Wise allows you to securely grant other steemians your voting
@@ -81,7 +84,7 @@ export class Wise {
         )
         .then(
             result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); return Promise.reject(error); }
+            error => { if (callback) callback(error, undefined); return BluebirdPromise.reject(error); }
         );
     }
 
@@ -209,7 +212,7 @@ export class Wise {
         skipValidation: boolean = false): Promise<[string, object][]> => {
 
         proggressCallback("Validating voteorder...", 0.0);
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then((): [string, object] [] => {
             const smOp: WiseOperation = {
                 voter: voter,
@@ -223,7 +226,7 @@ export class Wise {
             return steemOps;
         })
         .then((steemOps: [string, object][]): Promise<[string, object][]> => {
-            if (skipValidation) return Promise.resolve(steemOps);
+            if (skipValidation) return BluebirdPromise.resolve(steemOps);
             return this.validateVoteorder(
                 delegator, voter, voteorder, SteemOperationNumber.FUTURE, undefined,
                 proggressCallback
@@ -402,7 +405,6 @@ const log = Log.getLogger();
 export { Api } from "./api/Api";
 export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
 export { WiseRESTApi } from "./api/WiseRESTApi";
-export { FakeApi } from "./api/FakeApi";
 export { DisabledApi } from "./api/DisabledApi";
 
 export { SteemTransaction } from "./blockchain/SteemTransaction";

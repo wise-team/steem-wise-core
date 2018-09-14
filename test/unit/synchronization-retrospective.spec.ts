@@ -1,6 +1,8 @@
 // 3rd party imports
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import { expect, assert } from "chai";
-import * as Promise from "bluebird";
 import * as _ from "lodash";
 import "mocha";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
@@ -14,7 +16,7 @@ import { Synchronizer } from "../../src/Synchronizer";
 /* PREPARE TESTING DATASETS */
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
-Promise.onPossiblyUnhandledRejection(function(error) {
+BluebirdPromise.onPossiblyUnhandledRejection(function(error) {
     throw error;
 });
 
@@ -47,7 +49,7 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
         this.timeout(3000);
         let synchronizationPromise: Promise<void>;
         it("Starts synchronization without error", () => {
-            const synchronizationPromiseReturner = () => new Promise<void>((resolve, reject) => {
+            const synchronizationPromiseReturner = () => new BluebirdPromise<void>((resolve, reject) => {
                 synchronizer = delegatorWise.startDaemon(new SteemOperationNumber(fromBlock, 0, 0),
                     (error: Error | undefined, event: Synchronizer.Event): void => {
                     if (event.type === Synchronizer.EventType.SynchronizationStop) {

@@ -1,7 +1,9 @@
 // 3rd party imports
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import { expect } from "chai";
 import "mocha";
-import { Promise } from "bluebird";
 import * as steem from "steem";
 import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
@@ -23,9 +25,9 @@ describe("test/integration/chainable.spec.ts", () => {
 
             const steemprojects1Operations: SteemTransaction [] = [];
 
-            before(function(done) {
+            before(function () {
                 this.timeout(15000);
-                new SteemJsAccountHistorySupplier(steem, "steemprojects1")
+                return new SteemJsAccountHistorySupplier(steem, "steemprojects1")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
@@ -35,12 +37,9 @@ describe("test/integration/chainable.spec.ts", () => {
                         steemprojects1Operations.push(item);
                         return true;
                     }))
-                    .catch((error: Error): boolean => {
-                        done(error);
-                        return false;
-                    });
+                    .catch((error: Error): boolean => false); // when we abort on error, the promise will be rejected with this error
                 })
-                .start(() => done());
+                .start();
             });
 
             it("Returns exactly 6 operations", () => {
@@ -58,9 +57,9 @@ describe("test/integration/chainable.spec.ts", () => {
                 "what-makes-you-you-secret-of-individuality-and-uniqueness"
             ];
 
-            it("Loads both real and virtual operations", function(done) {
+            it("Loads both real and virtual operations", function() {
                 this.timeout(25000);
-                new SteemJsAccountHistorySupplier(steem, "guest123")
+                return new SteemJsAccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
@@ -79,19 +78,13 @@ describe("test/integration/chainable.spec.ts", () => {
                         });
                         return continueLoading;
                     }))
-                    .catch((error: Error): boolean => {
-                        done(error);
-                        return false;
-                    });
+                    .catch((error: Error): boolean => false); // when we abort on error, the promise will be rejected with this error
                 })
-                .start(() => {
+                .start()
+                .then(() => {
                     if (realAndVirtual.length > 0) {
-                        done(new Error("Not all votes were loaded: missing: " + JSON.stringify(realAndVirtual)));
+                        throw new Error("Not all votes were loaded: missing: " + JSON.stringify(realAndVirtual));
                     }
-                    else {
-                        done();
-                    }
-                    /* tslint:disable no-null-keyword */
                 });
             });
 
@@ -104,9 +97,9 @@ describe("test/integration/chainable.spec.ts", () => {
                 "what-makes-you-you-secret-of-individuality-and-uniqueness"
             ];
 
-            it("Loads operations in correct order: from the newest to the oldest", function(done) {
+            it("Loads operations in correct order: from the newest to the oldest", function() {
                 this.timeout(25000);
-                new SteemJsAccountHistorySupplier(steem, "guest123")
+                return new SteemJsAccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
@@ -121,7 +114,7 @@ describe("test/integration/chainable.spec.ts", () => {
                                     if (indexInSamples !== 0) {
                                         const error = new Error("Votes returned in wrogn order. Received " + vote.permlink + ", sholudReceive: " + randomVoteOperationsInDescendingTimeOrder[0]);
                                         log.error(error);
-                                        done(error);
+                                        throw error;
                                         continueLoading = false;
                                     }
                                     else {
@@ -135,53 +128,39 @@ describe("test/integration/chainable.spec.ts", () => {
                         });
                         return continueLoading;
                     }))
-                    .catch((error: Error): boolean => {
-                        log.error(error);
-                        done(error);
-                        return false;
-                    });
+                    .catch((error: Error): boolean => false); // when we abort on error, the promise will be rejected with this error
                 })
-                .start(() => {
+                .start()
+                .then(() => {
                     if (randomVoteOperationsInDescendingTimeOrder.length > 0) {
-                        done(new Error("Not all votes were loaded: missing: " + JSON.stringify(randomVoteOperationsInDescendingTimeOrder)));
+                        throw new Error("Not all votes were loaded: missing: " + JSON.stringify(randomVoteOperationsInDescendingTimeOrder));
                     }
-                    else done();
                 });
             });
         });
     });
 
     describe("OperationNumberFilter", () => {
-        it("returns only operations with number < (block=22202938, tx=14)", function(done) {
+        it("returns only operations with number < (block=22202938, tx=14)", function() {
             this.timeout(35000);
-            new Promise((resolve, reject) => {
-                new SteemJsAccountHistorySupplier(steem, "guest123")
-                .branch((historySupplier) => {
-                    historySupplier
-                    .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1)))
-                    .chain(new SimpleTaker((rawTrx: SteemTransaction): boolean => {
-                        if (rawTrx.block_num > 22202938) {
-                            reject(new Error("Operation outside of scope was passed: " + SteemOperationNumber.fromTransaction(rawTrx).toString()));
-                            return false;
-                        }
-                        else if (rawTrx.block_num == 22202938 && rawTrx.transaction_num > 14) {
-                            reject(new Error("Operation outside of scope was passed: " +  + SteemOperationNumber.fromTransaction(rawTrx).toString()));
-                            return false;
-                        }
+            return new SteemJsAccountHistorySupplier(steem, "guest123")
+            .branch((historySupplier) => {
+                historySupplier
+                .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1)))
+                .chain(new SimpleTaker((rawTrx: SteemTransaction): boolean => {
+                    if (rawTrx.block_num > 22202938) {
+                        throw new Error("Operation outside of scope was passed: " + SteemOperationNumber.fromTransaction(rawTrx).toString());
+                    }
+                    else if (rawTrx.block_num == 22202938 && rawTrx.transaction_num > 14) {
+                        throw new Error("Operation outside of scope was passed: " +  + SteemOperationNumber.fromTransaction(rawTrx).toString());
+                    }
 
-                        return true;
-                    }))
-                    .catch((error: Error): boolean => {
-                        reject(error);
-                        return false;
-                    });
-                })
-                .start(() => {
-                    resolve();
-                });
+                    return true;
+                }))
+                .catch((error: Error): boolean => false); // when we abort on error, the promise will be rejected with this error
             })
-            .then(() => done())
-            .catch((error: Error) => done(error));
+            .start()
+            .then(() => {});
         });
     });
 });

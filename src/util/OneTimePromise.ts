@@ -1,4 +1,6 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 
 export class OneTimePromise<T> {
     private started: boolean = false;
@@ -23,7 +25,7 @@ export class OneTimePromise<T> {
      * @param promiseReturningFn - Remember that when you call a function that returns a promise, the executor starts executing. That is why you have to pass an function here
      */
     public execute(promiseReturningFn: () => Promise<T>): Promise<T> {
-        return new Promise((resolve, reject) => {
+        return new BluebirdPromise((resolve, reject) => {
             if (this.finishedWithError) {
                 setTimeout(() => reject(this.error), 4);
             }

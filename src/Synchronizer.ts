@@ -1,5 +1,8 @@
-import { Promise } from "bluebird";
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
+
 import { Log } from "./util/log"; const log = Log.getLogger();
 
 import { Api } from "./api/Api";
@@ -63,9 +66,9 @@ export class Synchronizer {
     private processBlock(blockNum: number) {
         this.notify(undefined, { type: Synchronizer.EventType.StartBlockProcessing, blockNum: blockNum, message: "Start processing block " + blockNum });
         this.continueIfRunning(() =>
-            Promise.resolve()
+            BluebirdPromise.resolve()
             .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
-            .mapSeries((op: any /* bug in Bluebird */) =>
+            .mapSeries((op: any /* bug in bluebird */) =>
                 this.processOperation(op as EffectuatedWiseOperation)
             )
             .timeout(this.timeoutMs, new Error("Timeout (> " + this.timeoutMs + "ms while processing operations)"))
@@ -87,7 +90,7 @@ export class Synchronizer {
     }
 
     private processOperation(op: EffectuatedWiseOperation): Promise<void> {
-        return Promise.resolve().then(() => {
+        return BluebirdPromise.resolve().then(() => {
             const currentOpNum = op.moment;
             if (currentOpNum.isGreaterThan(this.lastProcessedOperationNum)) {
                 if (op.delegator === this.delegator) {
@@ -106,7 +109,7 @@ export class Synchronizer {
 
     // update preoaded rules to keep them up-to-date without calling blockchain every voteorder
     private updateRulesArray(op: EffectuatedWiseOperation, cmd: SetRules): Promise<void> {
-        return Promise.resolve().then(() => {
+        return BluebirdPromise.resolve().then(() => {
             const es: EffectuatedSetRules = {
                 moment: op.moment,
                 voter: op.voter,

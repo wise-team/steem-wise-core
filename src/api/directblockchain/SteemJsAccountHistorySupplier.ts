@@ -1,20 +1,24 @@
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
+
+import { Log } from "../../util/log"; const log = Log.getLogger();
+
 import { ChainableSupplier } from "../../chainable/Chainable";
 import { SteemTransaction } from "../../blockchain/SteemTransaction";
 import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
-import { Log } from "../../util/log"; const log = Log.getLogger();
 
 export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransaction, SteemJsAccountHistorySupplier> {
     private steem: any;
     private username: string;
     private batchSize: number = 1000;
-    private onFinishCallback: () => void;
+    private onFinishCallback: ((error: Error | undefined) => void) = () => {};
 
     constructor(steem: any, username: string) {
         super();
         this.steem = steem;
         this.username = username;
-        this.onFinishCallback = function(): void {};
 
         if (!this.steem) throw new Error("Supplied steem object is null");
     }
@@ -28,17 +32,16 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
         return this;
     }
 
-    public onFinish(callback: () => void): SteemJsAccountHistorySupplier {
-        this.onFinishCallback = callback;
-        return this;
-    }
-
-    public start(callback?: () => void) {
-        if (callback) {
-            this.onFinishCallback = callback;
-        }
+    public start(): Promise<void> {
         // load and iterate over blockchain
         this.loadFromOnlyIfConsumers(-1);
+
+        return new BluebirdPromise((resolve, reject) => {
+            this.onFinishCallback = (error: Error | undefined) => {
+                if (error) reject(error);
+                else resolve();
+            };
+        });
     }
 
     private loadFromOnlyIfConsumers(from: number): void {
@@ -53,11 +56,12 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
 
         this.steem.api.getAccountHistory(this.username, from, batchLimit, (error: Error, result: any) => {
             if (error) {
-                this.give(error, undefined);
+                const continueOnThisError = this.give(error, undefined);
+                if (!continueOnThisError) this.onFinishCallback(error);
             }
             else {
                 if (result.length == 0) {
-                    this.onFinishCallback();
+                    this.onFinishCallback(undefined);
                 }
                 else {
                     result.reverse(); // loadFrom(from=-1) returns last "batchSize" of operations, but they are sorted from oldest to the newest.
@@ -70,7 +74,7 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
                         this.loadFromOnlyIfConsumers(from);
                     }
                     else {
-                        this.onFinishCallback();
+                        this.onFinishCallback(undefined);
                     }
                 }
             }

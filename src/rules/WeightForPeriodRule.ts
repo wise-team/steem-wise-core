@@ -1,8 +1,11 @@
+/* PROMISE_DEF */
+import * as BluebirdPromise from "bluebird";
+/* END_PROMISE_DEF */
 import * as _ from "lodash";
+
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
-import { Promise } from "bluebird";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { ConfirmVote } from "../protocol/ConfirmVote";
@@ -31,7 +34,7 @@ export class WeightForPeriodRule extends Rule {
     }
 
     public validate (voteorder: SendVoteorder, context: ValidationContext, validationTimestamp: Date = new Date() /* for unit testing */): Promise<void> {
-        return Promise.resolve()
+        return BluebirdPromise.resolve()
         .then(() => this.validateRuleObject(this))
         .then(() => {
             const unitMultiplier = (this.unit === WeightForPeriodRule.PeriodUnit.DAY ? 24 * 60 * 60 :
