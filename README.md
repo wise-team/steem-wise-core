@@ -83,7 +83,7 @@ let wise = require('steem-wise-core');
 
 let voter = "jblew";
 let postingWif = "...";
-let voterWise = new wise.Wise(voter, new wise.DirectBlockchainApi(voter, postingWif));
+let voterWise = new wise.Wise(voter, new wise.DirectBlockchainApi(postingWif));
 
 let delegator = "noisy";
 let voteorder = {
