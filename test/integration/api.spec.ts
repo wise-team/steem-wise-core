@@ -34,7 +34,7 @@ const username = "guest123";
 const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 
 describe("test/integration/api.spec.ts", function () {
-    this.timeout(12000);
+    this.timeout(15000);
 
     const apis: Api [] = [
         new DirectBlockchainApi(postingWif),

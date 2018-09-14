@@ -56,13 +56,13 @@ let dynamicGlobalProperties: DynamicGlobalProperties | undefined = undefined;
 let transactions: SteemTransaction [] = [];
 let blogEntries: BlogEntry [] = [];
 
-const api = new DirectBlockchainApi("", "", /*{
+const api = new DirectBlockchainApi("", /*{
     transport: "http",
     uri: "https://gtg.steem.house:8090",
     url: "https://gtg.steem.house:8090"
 }*/);
 
-Bluebird.resolve()
+BluebirdPromise.resolve()
 .then(() => console.log("Loading posts..."))
 .then(() => postLinks)
 .map((link_: any /* bluebird bug */) => {
@@ -93,10 +93,12 @@ Bluebird.resolve()
 .then(() => console.log("Loading transactions..."))
 .then(() => usernames) // for each username return a promise that returns transactions
 .mapSeries((username: any  /* bluebird bug */) => {
-    return BluebirdBluebirdPromise.delay(2000).then(() => new BluebirdPromise<SteemTransaction []>((resolve, reject) => {
+    const trxs: SteemTransaction [] = [];
+    return BluebirdPromise.delay(2000)
+    .then(() => {
         console.log("Loading transactions of @" + username + "...");
-        const trxs: SteemTransaction [] = [];
-        new SteemJsAccountHistorySupplier(steem, username)
+
+        return new SteemJsAccountHistorySupplier(steem, username)
         .branch((historySupplier) => {
             historySupplier
             .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
@@ -104,16 +106,14 @@ Bluebird.resolve()
                 trxs.push(trx);
                 return true;
             }))
-            .catch((error: Error) => {
-                console.error(error);
-                return false;
-            });
+            .catch((error: Error) => false);
         })
-        .start(() => {
-            console.log("Done loading transactions of @" + username + "...");
-            resolve(trxs);
-        });
-    }));
+        .start();
+    })
+    .then(() => {
+        console.log("Done loading transactions of @" + username + "...");
+        return trxs;
+    });
 })
 .then((values: SteemTransaction [][]) => {
     return values.reduce((allTrxs: SteemTransaction [], nextTrxs: SteemTransaction []) => allTrxs.concat(nextTrxs));
