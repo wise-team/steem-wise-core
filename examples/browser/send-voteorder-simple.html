@@ -5,7 +5,11 @@
     <title>Steem WISE send voteorder</title>
 </head>
 <body>
-<h1>Steem WISE send voteorder</h1>
+<h1>Warning: outdated examples. Sorry. We are working on it.</h1>
+<p>TODO: update this page</p>
+        
+
+<h2>Steem WISE send voteorder</h2>
 <p id="result">Sending voteorder...</p>
 
 <!-- UNPKG is a CDN for NPM packages -->
@@ -24,7 +28,7 @@
         };
 
         console.log("Loading wise...");
-        const api = new wise.DirectBlockchainApi(voter, postingKeyWif);
+        const api = new wise.DirectBlockchainApi(postingKeyWif);
         const wiseObj = new wise.Wise(voter, api);
 
         console.log("Sending voteorder...");

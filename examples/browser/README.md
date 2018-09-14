@@ -1,4 +1,9 @@
-# STEEM Smartvotes core library usage examples — browser
+# Warning: outdated content & examples.
+
+We are working on it.
+TODO: update this file
+
+## STEEM Smartvotes core library usage examples — browser
 
 Here are some examples showing how to use Steem Smartvotes core library in browser. Before you run them, you have to build the library first:
 

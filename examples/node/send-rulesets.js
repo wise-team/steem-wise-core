@@ -1,3 +1,8 @@
+/**
+ * WARNING! This example is outdated. We are working on making it up-to-date.
+ * TODO update this example
+ */
+
 var fs = require("fs");
 var smartvotesLib = require("../../dist/steem-smartvotes.js");
 /**

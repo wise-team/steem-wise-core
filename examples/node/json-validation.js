@@ -1,3 +1,8 @@
+/**
+ * WARNING! This example is outdated. We are working on making it up-to-date.
+ * TODO update this example
+ */
+
 var steemsmartvotes = require("../../dist/steem-smartvotes.js");
 /**
  * Note that steemsmartvotes is a module namespace. To access main class use *steemsmartvotes.SteemSmartvotes*.

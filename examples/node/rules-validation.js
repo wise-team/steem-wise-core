@@ -1,4 +1,9 @@
 /**
+ * WARNING! This example is outdated. We are working on making it up-to-date.
+ * TODO update this example
+ */
+
+/**
  * In this example we can validate certain articles against rules set by guest123.
  */
 

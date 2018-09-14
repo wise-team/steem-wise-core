@@ -1,3 +1,8 @@
+/**
+ * WARNING! This example is outdated. We are working on making it up-to-date.
+ * TODO update this example
+ */
+
 /*****************************
  * SEND VOTEORDER in ts-node *
  *****************************/

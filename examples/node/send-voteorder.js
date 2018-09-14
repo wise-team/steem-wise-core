@@ -1,3 +1,9 @@
+/**
+ * WARNING! This example is outdated. We are working on making it up-to-date.
+ * TODO update this example
+ */
+
+
 var fs = require("fs");
 var wiseLib = require("../../dist/wise.js");
 /**
@@ -40,7 +46,7 @@ function sendVoteorder(credentials) {
         weight: 20
     };
 
-    const api = new wiseLib.DirectBlockchainApi(credentials.username, credentials.postingWif);
+    const api = new wiseLib.DirectBlockchainApi(credentials.postingWif);
     const wise = new wiseLib.Wise(credentials.username, api);
     wise.sendVoteorder(delegator, voteorder, function(error, result) {
         if(error) {
