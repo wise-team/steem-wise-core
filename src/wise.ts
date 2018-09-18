@@ -434,6 +434,7 @@ export { VotersRule } from "./rules/VotersRule";
 export { VotesCountRule } from "./rules/VotesCountRule";
 export { WeightForPeriodRule } from "./rules/WeightForPeriodRule";
 export { ExpirationDateRule } from "./rules/ExpirationDateRule";
+export { RulePrototyper } from "./rules/RulePrototyper";
 
 export { ValidationException } from "./validation/ValidationException";
 
