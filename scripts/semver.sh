@@ -18,15 +18,6 @@ if [ "$(git rev-parse --abbrev-ref HEAD)" != "${REQUIRED_BRANCH}" ]; then
 fi
 
 
-echo "Updating steem-wise-core to ${VERSION}"
-node -e " \
-var packageFileContents = require(\"./package.json\"); \
-packageFileContents.version = \"${VERSION}\"; \
-require('fs').writeFileSync(\"./package.json\", JSON.stringify(packageFileContents, null, 2), \"utf8\"); \
-"
-echo "Updating version succeeded"
-
-
 echo "Building..."
 npm install
 echo "Build successful"
@@ -39,15 +30,32 @@ echo "Integration testing..."
 npm run verify
 echo "Integration testing successful"
 
+
+echo "Updating steem-wise-core to ${VERSION}"
+node -e " \
+var packageFileContents = require(\"./package.json\"); \
+packageFileContents.version = \"${VERSION}\"; \
+require('fs').writeFileSync(\"./package.json\", JSON.stringify(packageFileContents, null, 2), \"utf8\"); \
+"
+echo "Updating version succeeded"
+
+
+echo "Generating changelog"
+npm run changelog
+echo "Generating changelog correct"
+
+
 echo "Creating git tag"
-git add package.json package-lock.json
+git add package.json package-lock.json CHANGELOG.md
 git commit -m "Semver ${VERSION}"
 git push
 git tag -a "v${VERSION}" -m "Steem WISE core library version ${VERSION}"
 git push --tags
 echo "Done creating tag"
 
+
 echo "Publishing to npmjs.com registry"
 npm publish
+
 
 echo "Done"
