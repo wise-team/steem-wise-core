@@ -6,17 +6,25 @@ cd "${DIR}"
 VERSION=$1
 
 if [ -z "${VERSION}" ]; then
-    echo "You must specify new version"
+    echo "Error: You must specify new version"
     exit 1
 fi
 
 
 REQUIRED_BRANCH="master"
 if [ "$(git rev-parse --abbrev-ref HEAD)" != "${REQUIRED_BRANCH}" ]; then
-    echo "You must be on a \"${REQUIRED_BRANCH}\" branch to do semver"
+    echo "Error: You must be on a \"${REQUIRED_BRANCH}\" branch to do semver"
     exit 1
+else
+    echo "On master branch"
 fi
 
+if [[ "$(node --version)" = "$(cat .nvmrc)"* ]]; then \
+       echo "Node version correct ($(node --version))"; 
+else 
+    echo "Error: Node version does not match .nvmrc"
+    exit 1
+fi
 
 echo "Building..."
 npm install
