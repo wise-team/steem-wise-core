@@ -1,3 +1,13 @@
+<a name="1.1.2"></a>
+## [1.1.2](https://github.com/noisy-witness/steem-wise-core/compare/v1.1.1...v1.1.2) (2018-09-18)
+
+
+### Features
+
+* **wise.ts:** export Validator ([a1d95e6](https://github.com/noisy-witness/steem-wise-core/commit/a1d95e6))
+
+
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://github.com/noisy-witness/steem-wise-core/compare/v1.1.0...v1.1.1) (2018-09-18)
 
