@@ -30,7 +30,6 @@
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
     "conventional-changelog-cli": "^2.0.5",
-    "cz-conventional-changelog": "^2.1.0",
     "express": "^4.16.3",
     "fast-clone": "^1.5.3",
     "husky": "^0.14.3",
@@ -80,10 +79,5 @@
   "bugs": {
     "url": "https://github.com/noisy-witness/steem-wise-core/issues"
   },
-  "homepage": "https://github.com/noisy-witness/steem-wise-core#readme",
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  }
+  "homepage": "https://github.com/noisy-witness/steem-wise-core#readme"
 }
