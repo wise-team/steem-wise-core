@@ -437,6 +437,7 @@ export { ExpirationDateRule } from "./rules/ExpirationDateRule";
 export { RulePrototyper } from "./rules/RulePrototyper";
 
 export { ValidationException } from "./validation/ValidationException";
+export { ValidationContext } from "./validation/ValidationContext";
 
 export { NotFoundException } from "./util/NotFoundException";
 
