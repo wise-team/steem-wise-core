@@ -55,7 +55,7 @@ echo "Generating changelog correct"
 
 echo "Creating git tag"
 git add package.json package-lock.json CHANGELOG.md
-git commit -m "Semver ${VERSION}"
+git commit -m "chore(release): semver ${VERSION}"
 git push
 git tag -a "v${VERSION}" -m "Steem WISE core library version ${VERSION}"
 git push --tags
