@@ -16,6 +16,7 @@
 /dist
 /node_modules
 /coverage
+/report
 /schema/node_modules
 /schema/package.json
 /schema/package-lock.json

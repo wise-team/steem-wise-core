@@ -44,7 +44,7 @@
     "webpack-visualizer-plugin": "^0.1.11"
   },
   "scripts": {
-    "check": "if ! [[ \"$(node --version)\" = \"$(cat .nvmrc)\"* ]]; then echo \"Node version does not match that in .nvmrc\" && exit 1; fi",
+    "check": "if echo \"$(node --version)\" | grep -q \"$(cat .nvmrc)\"; then echo \"Node version correct\"; else echo \"Node version does not match that in .nvmrc\" && exit 1; fi",
     "build": "rm -rf dist && npm run build-node && npm run build-browser",
     "build-node": "npm run build-ts && npm run tslint && npm run build-schema",
     "build-ts": "npm run check && tsc",
