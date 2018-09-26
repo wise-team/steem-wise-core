@@ -1,3 +1,13 @@
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/noisy-witness/steem-wise-core/compare/v1.1.2...v1.2.0) (2018-09-26)
+
+
+### Features
+
+* update dependencies including steem-js ([61169a1](https://github.com/noisy-witness/steem-wise-core/commit/61169a1))
+
+
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/noisy-witness/steem-wise-core/compare/v1.1.1...v1.1.2) (2018-09-18)
 
