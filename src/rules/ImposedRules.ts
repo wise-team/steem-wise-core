@@ -51,7 +51,7 @@ export namespace ImposedRules {
 
                 const elapsed_seconds = (head_block_time_s - last_vote_time_s);
 
-                const regenerated_power = (BlockchainConfig.STEEM_100_PERCENT * elapsed_seconds) / BlockchainConfig.STEEM_VOTE_REGENERATION_SECONDS;
+                const regenerated_power = (BlockchainConfig.STEEM_100_PERCENT * elapsed_seconds) / BlockchainConfig.STEEM_VOTING_MANA_REGENERATION_SECONDS;
                 const current_power = Math.min(accountInfo.voting_power + regenerated_power, BlockchainConfig.STEEM_100_PERCENT);
                 if (current_power <= 0) throw new ValidationException("Account " + this.voter + " currently does not have voting power.");
 
@@ -59,7 +59,7 @@ export namespace ImposedRules {
 
                 let used_power = ((current_power * abs_weight) / BlockchainConfig.STEEM_100_PERCENT) * (60 * 60 * 24);
 
-                const max_vote_denom = votes_per_regeneration_period * BlockchainConfig.STEEM_VOTE_REGENERATION_SECONDS;
+                const max_vote_denom = votes_per_regeneration_period * BlockchainConfig.STEEM_VOTING_MANA_REGENERATION_SECONDS;
                 if (max_vote_denom <= 0) throw new ValidationException("Account " + this.voter + ": max_vote_denom = " + max_vote_denom);
 
                 used_power = (used_power + max_vote_denom - 1) / max_vote_denom;
