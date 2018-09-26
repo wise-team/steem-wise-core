@@ -28,6 +28,7 @@ import { Log } from "../../util/log";
 
 export class DirectBlockchainApi extends Api {
     private steem: any;
+    private steemOptions?: any;
     private postingWif: string | undefined;
     private sendEnabled: boolean = true;
 
@@ -37,7 +38,10 @@ export class DirectBlockchainApi extends Api {
         this.steem = steem;
         this.postingWif = postingWif;
 
-        if (steemOptions) this.steem.api.setOptions(steemOptions);
+        if (steemOptions) {
+            this.steemOptions = steemOptions;
+            this.updateOptions();
+        }
     }
 
     public name(): string {
@@ -54,6 +58,7 @@ export class DirectBlockchainApi extends Api {
         Log.cheapDebug(
             () => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink }));
 
+        this.updateOptions();
         const steemApiGetContent: ((author: string, permlink: string) => Promise<any>) =  BluebirdPromise.promisify(this.steem.api.getContent);
         return steemApiGetContent(author, permlink)
         .then((result: any) => {
@@ -77,6 +82,8 @@ export class DirectBlockchainApi extends Api {
                 throw new Error("Delegator must not be empty");
              if (typeof voter === "undefined" || voter.length == 0)
                 throw new Error("Voter must not be empty");
+
+            this.updateOptions();
         })
         .then(() => new SteemJsAccountHistorySupplier(this.steem, delegator)
             .branch((historySupplier) => {
@@ -119,6 +126,7 @@ export class DirectBlockchainApi extends Api {
             }
 
             Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
+            this.updateOptions();
             return steem.broadcast.sendAsync(
                 { extensions: [], operations: operations },
                 { posting: this.postingWif },
@@ -147,6 +155,7 @@ export class DirectBlockchainApi extends Api {
         .then(() => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
+            this.updateOptions();
             return new SteemJsAccountHistorySupplier(this.steem, delegator)
             .branch((historySupplier) => {
                 historySupplier
@@ -183,6 +192,7 @@ export class DirectBlockchainApi extends Api {
         .then(() => {
             if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
+            this.updateOptions();
             return new SteemJsAccountHistorySupplier(this.steem, delegator)
             .branch((historySupplier) => {
                 historySupplier
@@ -212,6 +222,7 @@ export class DirectBlockchainApi extends Api {
         .then(() => {
             if (typeof account === "undefined" || account.length == 0) throw new Error("Username must not be empty");
 
+            this.updateOptions();
             return new SteemJsAccountHistorySupplier(this.steem, account)
             .branch((historySupplier) => {
                 historySupplier
@@ -231,6 +242,7 @@ export class DirectBlockchainApi extends Api {
 
     public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol, skipDelegatorCheck: boolean = false): Promise<EffectuatedWiseOperation []> {
         return new BluebirdPromise((resolve, reject) => {
+            this.updateOptions();
             this.steem.api.getBlock(blockNum, (error: Error| undefined, block_: object) => {
                 if (error) reject(error);
                 else {
@@ -302,11 +314,13 @@ export class DirectBlockchainApi extends Api {
     }
 
     public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+        this.updateOptions();
         return BluebirdPromise.resolve()
         .then(() => this.steem.api.getDynamicGlobalPropertiesAsync());
     }
 
     public getAccountInfo(username: string): Promise<AccountInfo> {
+        this.updateOptions();
         return BluebirdPromise.resolve()
         .then(() => this.steem.api.getAccountsAsync([username]))
         .then((result: AccountInfo []) => {
@@ -318,7 +332,12 @@ export class DirectBlockchainApi extends Api {
     }
 
     public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+        this.updateOptions();
         return this.steem.api.getBlogEntriesAsync(username, startFrom, limit);
+    }
+
+    private updateOptions() {
+        if (this.steemOptions) this.steem.api.setOptions(this.steemOptions);
     }
 }
 
