@@ -1,3 +1,14 @@
+<a name="1.2.1"></a>
+## [1.2.1](https://github.com/noisy-witness/steem-wise-core/compare/v1.2.0...v1.2.1) (2018-09-26)
+
+
+### Bug Fixes
+
+* **blockchain config:** rename prop to STEEM_VOTING_MANA_REGENERATION ([c3236c4](https://github.com/noisy-witness/steem-wise-core/commit/c3236c4))
+* **direct blockchain api:** set steem options before each operation ([e655171](https://github.com/noisy-witness/steem-wise-core/commit/e655171))
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/noisy-witness/steem-wise-core/compare/v1.1.2...v1.2.0) (2018-09-26)
 
