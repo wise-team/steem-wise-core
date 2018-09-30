@@ -2,7 +2,7 @@
 
 
 [![npm](https://img.shields.io/npm/v/steem-wise-core.svg?style=flat-square)](https://www.npmjs.com/package/steem-wise-core) 
-[![GitHub](https://img.shields.io/github/license/wise-team/steem-wise-core.svg?style=flat-square)](https://github.com/wise-team/steem-wise-core/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/wise-team/steem-wise-core.svg?style=flat-square)](https://github.com/wise-team/steem-wise-core/blob/master/LICENSE)
  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) [![Chat](https://img.shields.io/badge/chat-on%20steem.chat-6b11ff.svg?style=flat-square)](https://steem.chat/channel/wise) [![Wise operations count](https://img.shields.io/badge/dynamic/json.svg?label=wise%20operations%20count&url=http%3A%2F%2Fsql.wise.vote%3A80%2Foperations%3Fselect%3Dcount&query=%24%5B0%5D.count&colorB=blue&style=flat-square)](http://sql.wise.vote:80/operations?select=moment,delegator,voter,operation_type&order=moment.desc)
 
 
