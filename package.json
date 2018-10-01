@@ -67,18 +67,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/noisy-witness/steem-wise-core.git"
+    "url": "git+https://github.com/wise-team/steem-wise-core.git"
   },
   "keywords": [
-    "steem",
-    "blockchain",
-    "wise",
-    "cli"
+    "steem", "blockchain", "wise"
   ],
-  "author": "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)",
+  "author": "The Wise Team (https://wise-team.io/)",
+  "contributors": [
+    "Jędrzej Lewandowski <jedrzejblew@gmail.com> (https://jedrzej.lewandowski.doctor/)"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/noisy-witness/steem-wise-core/issues"
+    "url": "https://github.com/wise-team/steem-wise-core/issues"
   },
-  "homepage": "https://github.com/noisy-witness/steem-wise-core#readme"
+  "homepage": "https://wise.vote/"
 }
