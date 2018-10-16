@@ -404,7 +404,6 @@ const log = Log.getLogger();
  */
 export { Api } from "./api/Api";
 export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
-export { WiseRESTApi } from "./api/WiseRESTApi";
 export { DisabledApi } from "./api/DisabledApi";
 
 export { SteemTransaction } from "./blockchain/SteemTransaction";
