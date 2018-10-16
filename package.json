@@ -6,7 +6,7 @@
   "types": "dist/wise.d.ts",
   "directories": {},
   "engines": {
-    "node": ">=9.11"
+    "node": ">=10.12"
   },
   "dependencies": {
     "ajv": "^6.5.4",
