@@ -9,6 +9,7 @@ Log.setLevel("info");
 import { Wise, EffectuatedSetRules } from "../../src/wise";
 import { Api } from "../../src/api/Api";
 import { DirectBlockchainApi } from "../../src/api/directblockchain/DirectBlockchainApi";
+import { WiseSQLApi } from "../../src/api/WiseSQLApi";
 import { FakeApi } from "../../src/api/FakeApi";
 import { SteemPost } from "../../src/blockchain/SteemPost";
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
@@ -32,14 +33,15 @@ import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 /* CONFIG */
 const username = "guest123";
 const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
+const wiseSqlEndpoint = "https://sql.wise.vote"; //  #§< 'const wiseSqlEndpoint = "' + d(data.config.sql.endpoint.schema) + '://' + d(data.config.sql.endpoint.host) + '"; // '
 
-describe("test/integration/api.spec.ts", function () {
-    this.timeout(15000);
+describe.only("test/integration/api.spec.ts", function () {
+    this.timeout(30000);
 
     const apis: Api [] = [
         new DirectBlockchainApi(postingWif),
-        FakeWiseFactory.buildFakeApi()
-        // new WiseRESTApi(WiseRESTApi.NOISY_ENDPOINT_HOST, username, postingWif)
+        // FakeWiseFactory.buildFakeApi(),
+        new WiseSQLApi(wiseSqlEndpoint, Wise.constructDefaultProtocol(), new DirectBlockchainApi(postingWif))
     ];
 
     apis.forEach((api: Api) => describe("api " + api.name(), () => {
@@ -150,10 +152,10 @@ describe("test/integration/api.spec.ts", function () {
             });
         });
 
-        describe("#loadAllRulesets", () => {
+        describe.only("#loadAllRulesets", () => {
             it("Loads properly all rulesets from protocol-v1-testing-sequence", () => {
                 const requiredRulesets: { ruleset: v1TestingSequence.RulesetsAtMoment, found: boolean } [] = [
-                    { ruleset: v1TestingSequence.stage1_0_Rulesets, found: false },
+                    // { ruleset: v1TestingSequence.stage1_0_Rulesets, found: false },
                     { ruleset: v1TestingSequence.stage2_1_Rulesets, found: false },
                     // { ruleset: v1TestingSequence.stage3_0_Rulesets, found: false } // this is an v1 reseting set_rules. There is no easy way to port it to V2.
                 ];
@@ -171,6 +173,45 @@ describe("test/integration/api.spec.ts", function () {
                     for (let i = 0; i < requiredRulesets.length; i++) {
                         expect(requiredRulesets[i].found, "requiredRulesets[" + i + "].found").to.be.true;
                     }
+                });
+            });
+
+            it.only("Does load properly rulesets that were current for noisy at b23589679", () => {
+                return api.loadAllRulesets("noisy", new SteemOperationNumber(23589679, 0, 0), Wise.constructDefaultProtocol())
+                .then((result: EffectuatedSetRules []) => {
+                    result.forEach(esr => {
+                        if (esr.voter === "innuendo") { // returns only tyhe most current rulesey for innuendo
+                            expect (esr.moment.blockNum).to.be.equal(25286929);
+                        }
+                        expect(esr.moment.blockNum).to.be.lte(23589679);
+                    });
+                    expect(result).to.be.an("array").with.length(18);
+                });
+            });
+
+            it("Does not load any rulesets if user did not have any at the moment", () => {
+                return api.loadAllRulesets("innuendo", new SteemOperationNumber(24389679, 0, 0), Wise.constructDefaultProtocol())
+                .then((result: EffectuatedSetRules []) => {
+                    result.forEach(esr => {
+                        console.log(esr.voter + " at b" + esr.moment.blockNum);
+                    });
+                    expect(result).to.be.an("array").with.length(0);
+                });
+            });
+
+            it("Loads all new rulesets when moment is SteemOperationNumber.FUTURE and does not load the old ones", () => {
+                return api.loadAllRulesets("noisy", SteemOperationNumber.FUTURE, Wise.constructDefaultProtocol())
+                .then((result: EffectuatedSetRules []) => {
+                    result.forEach(esr => {
+                        console.log(esr.voter + " at b" + esr.moment.blockNum);
+                    });
+                    expect(result).to.be.an("array").with.length.gt(0);
+                    result.forEach(esr => {
+                        if (esr.voter === "kolorowa.wedzma") { // this it good for testing because @noisy made a typo in account name and did not upload this mistaken ruleset anymore
+                            expect(esr.moment.blockNum).to.be.equal(23630550);
+                        }
+                        expect(esr.moment.blockNum).to.be.greaterThan(25286800);
+                    });
                 });
             });
         });
@@ -231,7 +272,7 @@ describe("test/integration/api.spec.ts", function () {
                 .then(() => {});
             });
 
-            it("returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
+            it.skip("returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", () => {
                 const blockNum = 24352800;
                 return api.getWiseOperationsRelatedToDelegatorInBlock("noisy", blockNum, wise.getProtocol())
                 .then((ops: EffectuatedWiseOperation []) => {
@@ -314,7 +355,7 @@ describe("test/integration/api.spec.ts", function () {
                 });
             });
 
-            it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote (when accepted = true)", () => {
+            it.skip("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote (when accepted = true)", () => {
                 const until = new Date("2018-07-10T00:00:00Z");
                 return api.getWiseOperations("noisy", until, wise.getProtocol())
                 .then((ops: EffectuatedWiseOperation []) => {
