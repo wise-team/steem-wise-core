@@ -24,8 +24,8 @@ export class OneTimePromise<T> {
      * Executes the promiseReturningFn only on the first call of execute
      * @param promiseReturningFn - Remember that when you call a function that returns a promise, the executor starts executing. That is why you have to pass an function here
      */
-    public execute(promiseReturningFn: () => Promise<T>): Promise<T> {
-        return new BluebirdPromise((resolve, reject) => {
+    public async execute(promiseReturningFn: () => Promise<T>): Promise<T> {
+        return await new BluebirdPromise<T>((resolve, reject) => {
             if (this.finishedWithError) {
                 setTimeout(() => reject(this.error), 4);
             }

@@ -44,16 +44,19 @@ export class Synchronizer {
     public start(since: SteemOperationNumber): Synchronizer {
         log.debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({since: since}));
         this.lastProcessedOperationNum = since;
-        this.api.loadAllRulesets(this.delegator, since, this.protocol)
-        .then((rules: EffectuatedSetRules []) => {
-            log.debug("SYNCHRONIZER_INITIAL_RULESETS_LOADED=" + JSON.stringify(rules));
-            this.rules = rules;
-            this.processBlock(since.blockNum); // the loop is started
-        })
-        .catch((error: Error) => {
-            this.notifier(error, { type: Synchronizer.EventType.UnhandledError,
-                 error: error, moment: this.lastProcessedOperationNum, message: "Unhandled error in synchronizer loop: " + error.message });
-        });
+
+        (async () => {
+            try {
+                const rules: EffectuatedSetRules [] = await this.api.loadAllRulesets(this.delegator, since, this.protocol);
+
+                log.debug("SYNCHRONIZER_INITIAL_RULESETS_LOADED=" + JSON.stringify(rules));
+                this.rules = rules;
+                this.processBlock(since.blockNum); // the loop is started
+            } catch (error) {
+                this.notifier(error, { type: Synchronizer.EventType.UnhandledError,
+                    error: error, moment: this.lastProcessedOperationNum, message: "Unhandled error in synchronizer loop: " + error.message });
+            }
+        })();
 
         return this;
     }
@@ -65,8 +68,7 @@ export class Synchronizer {
 
     private processBlock(blockNum: number) {
         this.notify(undefined, { type: Synchronizer.EventType.StartBlockProcessing, blockNum: blockNum, message: "Start processing block " + blockNum });
-        this.continueIfRunning(() =>
-            BluebirdPromise.resolve()
+        this.continueIfRunning(() => BluebirdPromise.resolve()
             .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
             .mapSeries((op: any /* bug in bluebird */) =>
                 this.processOperation(op as EffectuatedWiseOperation)
@@ -89,37 +91,33 @@ export class Synchronizer {
         );
     }
 
-    private processOperation(op: EffectuatedWiseOperation): Promise<void> {
-        return BluebirdPromise.resolve().then(() => {
-            const currentOpNum = op.moment;
-            if (currentOpNum.isGreaterThan(this.lastProcessedOperationNum)) {
-                if (op.delegator === this.delegator) {
-                    if (SetRules.isSetRules(op.command)) {
-                        return this.updateRulesArray(op, op.command);
-                    }
-                    else if (SendVoteorder.isSendVoteorder(op.command)) {
-                        return this.processVoteorder(op, op.command);
-                    }
-                    // confirmVote does not need to be processed
+    private async processOperation(op: EffectuatedWiseOperation): Promise<void> {
+        const currentOpNum = op.moment;
+        if (currentOpNum.isGreaterThan(this.lastProcessedOperationNum)) {
+            if (op.delegator === this.delegator) {
+                if (SetRules.isSetRules(op.command)) {
+                    this.updateRulesArray(op, op.command);
                 }
+                else if (SendVoteorder.isSendVoteorder(op.command)) {
+                    await this.processVoteorder(op, op.command);
+                }
+                // confirmVote does not need to be processed
             }
-        })
-        .then(() => this.lastProcessedOperationNum = op.moment).then(() => {}); // update lastProcessedOperation
+        }
+        this.lastProcessedOperationNum = op.moment;
     }
 
     // update preoaded rules to keep them up-to-date without calling blockchain every voteorder
-    private updateRulesArray(op: EffectuatedWiseOperation, cmd: SetRules): Promise<void> {
-        return BluebirdPromise.resolve().then(() => {
-            const es: EffectuatedSetRules = {
-                moment: op.moment,
-                voter: op.voter,
-                rulesets: cmd.rulesets
-            };
-            this.rules.push(es);
-            log.debug("SYNCHRONIZER_UPDATED_RULES=" + JSON.stringify(cmd.rulesets));
-            this.notify(undefined, { type: Synchronizer.EventType.RulesUpdated, moment: op.moment,
-                message: "Change of rules on blockchain. Local rules were updated." });
-        });
+    private updateRulesArray(op: EffectuatedWiseOperation, cmd: SetRules) {
+        const es: EffectuatedSetRules = {
+            moment: op.moment,
+            voter: op.voter,
+            rulesets: cmd.rulesets
+        };
+        this.rules.push(es);
+        log.debug("SYNCHRONIZER_UPDATED_RULES=" + JSON.stringify(cmd.rulesets));
+        this.notify(undefined, { type: Synchronizer.EventType.RulesUpdated, moment: op.moment,
+            message: "Change of rules on blockchain. Local rules were updated." });
     }
 
     private processVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
@@ -223,8 +221,8 @@ export class Synchronizer {
         });
     }
 
-    private notify(error: Error | undefined, event: Synchronizer.Event) {
-        this.notifier(error, event);
+    private async notify(error: Error | undefined, event: Synchronizer.Event) {
+        return await BluebirdPromise.resolve(); // spawn
         if (error) log.error(JSON.stringify(error));
         Log.cheapInfo(() => "SYNCHRONIZER_EVENT=" + JSON.stringify(event));
     }

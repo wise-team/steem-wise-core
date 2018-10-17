@@ -53,11 +53,16 @@ export class Wise {
             this.protocol = protocol;
         }
         else {
-            this.protocol = new Protocol([ // a default protocol which handles both V2 and V1 messages on blockchain.
-                new V2Handler(),
-                new V1Handler()
-            ]);
+            this.protocol = Wise.constructDefaultProtocol();
         }
+    }
+
+
+    public static constructDefaultProtocol(): Protocol {
+        return new Protocol([ // a default protocol which handles both V2 and V1 messages on blockchain.
+            new V2Handler(),
+            new V1Handler()
+        ]);
     }
 
 
@@ -205,42 +210,40 @@ export class Wise {
      * be directly sent to the blockchain using broadcast send in RPC/WS, or using external tool such as vessel
      * or steemconnect.
      */
-    public generateVoteorderOperations = (
+    public generateVoteorderOperations = async (
         delegator: string, voter: string, voteorder: SendVoteorder,
         callback?: Callback<[string, object][]>,
         proggressCallback: ProggressCallback = () => {},
         skipValidation: boolean = false): Promise<[string, object][]> => {
+        try {
+            proggressCallback("Validating voteorder...", 0.0);
 
-        proggressCallback("Validating voteorder...", 0.0);
-        return BluebirdPromise.resolve()
-        .then((): [string, object] [] => {
             const smOp: WiseOperation = {
                 voter: voter,
                 delegator: delegator,
                 command: voteorder
             };
             const steemOps = this.protocol.serializeToBlockchain(smOp);
-            if (steemOps.length !== 1) throw new Error("An voteorder should be a single blockchain operation");
+            if (steemOps.length !== 1) throw new Error("A voteorder should be a single blockchain operation");
             if (!skipValidation && !this.protocol.validateOperation(steemOps[0]))
                 throw new Error("Operation object has invalid structure");
-            return steemOps;
-        })
-        .then((steemOps: [string, object][]): Promise<[string, object][]> => {
-            if (skipValidation) return BluebirdPromise.resolve(steemOps);
-            return this.validateVoteorder(
-                delegator, voter, voteorder, SteemOperationNumber.FUTURE, undefined,
-                proggressCallback
-            )
-            .then((result: ValidationException | true) => {
-                if (result !== true) throw new Error("Validation error: " + result.message);
+
+            if (!skipValidation) {
+                const validationResult: ValidationException | true = await this.validateVoteorder(
+                    delegator, voter, voteorder, SteemOperationNumber.FUTURE, undefined,
+                    proggressCallback
+                );
+                if (validationResult !== true) throw new Error("Validation error: " + validationResult.message);
                 proggressCallback("Voteorder validation done", 1.0);
-            })
-            .then(() => steemOps);
-        })
-        .then(
-            result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); throw error; }
-        );
+
+            }
+            if (callback) (async () => callback(undefined, steemOps))();
+            return steemOps;
+        }
+        catch (error) {
+            if (callback) (async () => callback(error, undefined))();
+            throw error;
+        }
     }
 
 
@@ -404,6 +407,8 @@ const log = Log.getLogger();
  */
 export { Api } from "./api/Api";
 export { DirectBlockchainApi } from "./api/directblockchain/DirectBlockchainApi";
+export { WiseSQLApi } from "./api/sql/WiseSQLApi";
+export { WiseSQLProtocol } from "./api/sql/WiseSQLProtocol";
 export { DisabledApi } from "./api/DisabledApi";
 
 export { SteemTransaction } from "./blockchain/SteemTransaction";
