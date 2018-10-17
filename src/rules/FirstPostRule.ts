@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";

@@ -1,7 +1,6 @@
 /* tslint:disable no-null-keyword */
 export class Util {
     public static objectAssign (target: object, ...varArgs: object []) { // .length of function is 2
-        "use strict";
         if (target == null) { // TypeError if undefined or null
         throw new TypeError("Cannot convert undefined or null to object");
         }
