@@ -5,5 +5,8 @@
 /tools
 /index.html
 /webpack.config.js
+/report
+/scripts
+/.github
 
 /dist/browser/statistics.html
