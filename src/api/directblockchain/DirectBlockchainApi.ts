@@ -2,6 +2,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as steem from "steem";
+import * as _ from "lodash";
 
 import { SteemPost } from "../../blockchain/SteemPost";
 import { SetRules } from "../../protocol/SetRules";
@@ -177,7 +178,15 @@ export class DirectBlockchainApi extends Api {
             })
             .start();
         })
-        .then(() => allRules)
+        .then(() => { // filter only newest rules
+            const allRulesGrouppedByVoter: { [voter: string]: EffectuatedSetRules [] } = _.groupBy(allRules, "voter");
+
+            const out: EffectuatedSetRules [] = [];
+            _.forOwn(allRulesGrouppedByVoter, (esr: EffectuatedSetRules [], voter: string) => {
+                out.push(esr.sort((a, b) => SteemOperationNumber.compare(a.moment, b.moment)).reverse()[0]);
+            });
+            return out;
+        })
         .then(
             (result: EffectuatedSetRules []) => Log.promiseResolveDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_RESULT", result),
             (error: Error) => Log.promiseRejectionDebug("DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS_ERROR", error)
