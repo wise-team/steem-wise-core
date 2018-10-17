@@ -82,4 +82,15 @@ export class SteemOperationNumber {
     public static fromTransaction(op: SteemTransaction, operationNum: number = 0): SteemOperationNumber {
         return new SteemOperationNumber(op.block_num, op.transaction_num, operationNum);
     }
+
+    public static compare(sonA: SteemOperationNumber, sonB: SteemOperationNumber): number {
+        if (sonA.blockNum === sonB.blockNum) {
+            if (sonA.transactionNum === sonB.transactionNum)
+                return sonA.operationNum - sonB.operationNum;
+            else
+                return sonA.transactionNum - sonB.transactionNum;
+        }
+        else
+            return sonA.blockNum - sonB.blockNum;
+    }
 }
