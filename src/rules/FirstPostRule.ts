@@ -25,22 +25,19 @@ export class FirstPostRule extends Rule {
         return Rule.Type.FirstPost;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getBlogEntries(voteorder.author, 0, 250))
-        .then((entries: BlogEntry []) => {
-            const oldestEntry: BlogEntry = Util.definedOrThrow(
-                _.last(entries),
-                new ValidationException("This author (" + voteorder.author + ") has no blog entries.")
-            );
-            if (oldestEntry.entry_id !== 0) throw new ValidationException("This author already has more than 250 blog entries.");
-            else {
-                if (oldestEntry.author !== voteorder.author || oldestEntry.permlink !== voteorder.permlink) {
-                    throw new ValidationException("This is not the first post of this author");
-                }
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const entries = await context.getBlogEntries(voteorder.author, 0, 250);
+        const oldestEntry: BlogEntry = Util.definedOrThrow(
+            _.last(entries),
+            new ValidationException("This author (" + voteorder.author + ") has no blog entries.")
+        );
+        if (oldestEntry.entry_id !== 0) throw new ValidationException("This author already has more than 250 blog entries.");
+        else {
+            if (oldestEntry.author !== voteorder.author || oldestEntry.permlink !== voteorder.permlink) {
+                throw new ValidationException("This is not the first post of this author");
             }
-        });
+        }
     }
 
     public validateRuleObject(unprototypedObj: any) {

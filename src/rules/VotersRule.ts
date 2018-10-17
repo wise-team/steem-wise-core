@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -26,49 +23,42 @@ export class VotersRule extends Rule {
         return Rule.Type.Voters;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getPost())
-        .then((post: SteemPost) => {
-            const voters = post.active_votes.map(vote => vote.voter);
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const post = await context.getPost();
+        const voters = post.active_votes.map(vote => vote.voter);
 
-            if (this.mode === VotersRule.Mode.ONE) { // "one of" mode (every post voter must be within this list)
-                for (let i = 0; i < voters.length; i++) {
-                    const voter = voters[i];
-                    if (this.usernames.indexOf(voter) === -1)
-                        throw new ValidationException("VotersRule: " + voter + " is not on the allowed voters list [" + this.usernames.join() + "].");
+        if (this.mode === VotersRule.Mode.ONE) { // "one of" mode (every post voter must be within this list)
+            for (let i = 0; i < voters.length; i++) {
+                const voter = voters[i];
+                if (this.usernames.indexOf(voter) === -1)
+                    throw new ValidationException("VotersRule: " + voter + " is not on the allowed voters list [" + this.usernames.join() + "].");
+            }
+        }
+        else if (this.mode === VotersRule.Mode.NONE) { // "none of" aka blacklist mode (none of post voters can be on this list)
+            for (let i = 0; i < voters.length; i++) {
+                const voter = voters[i];
+                if (this.usernames.indexOf(voter) !== -1)
+                    throw new ValidationException("VotersRule: " + voter + " is on the denied voters list [" + this.usernames.join() + "].");
+            }
+        }
+        else if (this.mode === VotersRule.Mode.ALL) { // the post should have all of the specified voters
+            for (let i = 0; i < this.usernames.length; i++) {
+                const voter = this.usernames[i];
+                if (voters.indexOf(voter) === -1)
+                    throw new ValidationException("VotersRule: The post voters [" + voters.join() + "] does not include " + voter + ".");
+            }
+        }
+        else if (this.mode === VotersRule.Mode.ANY) { // the post should have at least one of the specified voters
+            for (let i = 0; i < this.usernames.length; i++) {
+                const voter = this.usernames[i];
+                if (voters.indexOf(voter) !== -1) {
+                    return;
                 }
             }
-            else if (this.mode === VotersRule.Mode.NONE) { // "none of" aka blacklist mode (none of post voters can be on this list)
-                for (let i = 0; i < voters.length; i++) {
-                    const voter = voters[i];
-                    if (this.usernames.indexOf(voter) !== -1)
-                        throw new ValidationException("VotersRule: " + voter + " is on the denied voters list [" + this.usernames.join() + "].");
-                }
-            }
-            else if (this.mode === VotersRule.Mode.ALL) { // the post should have all of the specified voters
-                for (let i = 0; i < this.usernames.length; i++) {
-                    const voter = this.usernames[i];
-                    if (voters.indexOf(voter) === -1)
-                        throw new ValidationException("VotersRule: The post voters [" + voters.join() + "] does not include " + voter + ".");
-                }
-            }
-            else if (this.mode === VotersRule.Mode.ANY) { // the post should have at least one of the specified voters
-                for (let i = 0; i < this.usernames.length; i++) {
-                    const voter = this.usernames[i];
-                    if (voters.indexOf(voter) !== -1) {
-                        return;
-                    }
-                }
-                throw new ValidationException("VotersRule: None of the voters [" + voters.join() + "] is on the \"any\" voters list [" + this.usernames.join() + "].");
-            }
-            else throw new ValidationException("VotersRule: Unknown mode");
-        })
-        .catch((e: Error) => {
-            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
-            else throw e;
-        });
+            throw new ValidationException("VotersRule: None of the voters [" + voters.join() + "] is on the \"any\" voters list [" + this.usernames.join() + "].");
+        }
+        else throw new ValidationException("VotersRule: Unknown mode");
     }
 
     public validateRuleObject(unprototypedObj: any) {

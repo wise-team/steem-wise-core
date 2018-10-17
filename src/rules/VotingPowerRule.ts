@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -26,33 +23,26 @@ export class VotingPowerRule extends Rule {
         return Rule.Type.VotingPower;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getAccountInfo(context.getDelegatorUsername()))
-        .then((delegatorAccount: AccountInfo) => {
-            if (!delegatorAccount) throw new Error("Delegator account info is undefined");
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const delegatorAccount = await context.getAccountInfo(context.getDelegatorUsername());
+        if (!delegatorAccount) throw new Error("Delegator account info is undefined");
 
-            if (this.mode == VotingPowerRule.Mode.EQUAL) {
-                if (delegatorAccount.voting_power !== this.value)
-                    throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") does not equal " + this.value);
-            }
-            else if (this.mode == VotingPowerRule.Mode.MORE_THAN) {
-                if (delegatorAccount.voting_power <= this.value)
-                throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") is not more than " + this.value);
-            }
-            else if (this.mode == VotingPowerRule.Mode.LESS_THAN) {
-                if (delegatorAccount.voting_power >= this.value)
-                throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") is not less than " + this.value);
-            }
-            else {
-                throw new Error("Unknown mode of voting power rule: " + this.mode);
-            }
-        })
-        .catch((e: Error) => {
-            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
-            else throw e;
-        });
+        if (this.mode == VotingPowerRule.Mode.EQUAL) {
+            if (delegatorAccount.voting_power !== this.value)
+                throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") does not equal " + this.value);
+        }
+        else if (this.mode == VotingPowerRule.Mode.MORE_THAN) {
+            if (delegatorAccount.voting_power <= this.value)
+            throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") is not more than " + this.value);
+        }
+        else if (this.mode == VotingPowerRule.Mode.LESS_THAN) {
+            if (delegatorAccount.voting_power >= this.value)
+            throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") is not less than " + this.value);
+        }
+        else {
+            throw new Error("Unknown mode of voting power rule: " + this.mode);
+        }
     }
 
     public validateRuleObject(unprototypedObj: any) {

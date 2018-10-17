@@ -30,32 +30,30 @@ export class AgeOfPostRule extends Rule {
         return Rule.Type.AgeOfPost;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getPost())
-        .then((post: SteemPost) => {
-            const unitMultiplier = (this.unit === AgeOfPostRule.TimeUnit.DAY ? 24 * 60 * 60 :
-                                   (this.unit === AgeOfPostRule.TimeUnit.HOUR ? 60 * 60 :
-                                   (this.unit === AgeOfPostRule.TimeUnit.MINUTE ? 60 :
-                                1)));
-            const numberOfSeconds = this.value * unitMultiplier;
-            const thresholdTime = new Date(Date.now() - numberOfSeconds * 1000);
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const post: SteemPost = await context.getPost();
 
-            const postTime = new Date(post.created + "Z" /* this is UTC date */);
+        const unitMultiplier = (this.unit === AgeOfPostRule.TimeUnit.DAY ? 24 * 60 * 60 :
+                                (this.unit === AgeOfPostRule.TimeUnit.HOUR ? 60 * 60 :
+                                (this.unit === AgeOfPostRule.TimeUnit.MINUTE ? 60 :
+                            1)));
+        const numberOfSeconds = this.value * unitMultiplier;
+        const thresholdTime = new Date(Date.now() - numberOfSeconds * 1000);
 
-            if (this.mode === AgeOfPostRule.Mode.OLDER_THAN) {
-                if (postTime.getTime() >= thresholdTime.getTime()) throw new ValidationException(
-                    "AgeOfPostRule: Post (" + postTime + ") is older than " + thresholdTime
-                );
-            }
-            else if (this.mode === AgeOfPostRule.Mode.YOUNGER_THAN) {
-                if (postTime.getTime() <= thresholdTime.getTime()) throw new ValidationException(
-                    "AgeOfPostRule: Post (" + postTime + ") is younger than " + thresholdTime
-                );
-            }
-            else throw new ValidationException("AgeOfPostRule: Unknown mode " + this.mode);
-        });
+        const postTime = new Date(post.created + "Z" /* this is UTC date */);
+
+        if (this.mode === AgeOfPostRule.Mode.OLDER_THAN) {
+            if (postTime.getTime() >= thresholdTime.getTime()) throw new ValidationException(
+                "AgeOfPostRule: Post (" + postTime + ") is older than " + thresholdTime
+            );
+        }
+        else if (this.mode === AgeOfPostRule.Mode.YOUNGER_THAN) {
+            if (postTime.getTime() <= thresholdTime.getTime()) throw new ValidationException(
+                "AgeOfPostRule: Post (" + postTime + ") is younger than " + thresholdTime
+            );
+        }
+        else throw new ValidationException("AgeOfPostRule: Unknown mode " + this.mode);
     }
 
     public validateRuleObject(unprototypedObj: any) {

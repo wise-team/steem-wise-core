@@ -28,8 +28,8 @@ export class CustomRPCRule extends Rule {
         return Rule.Type.CustomRPC;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.reject(new ValidationException("CustomRPC rule is not yet implemented")); // TODO
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        throw new ValidationException("CustomRPC rule is not yet implemented"); // TODO
     }
 
     public validateRuleObject(unprototypedObj: any) {

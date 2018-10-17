@@ -26,33 +26,26 @@ export class PayoutRule extends Rule {
         return Rule.Type.Payout;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getPost())
-        .then((post: SteemPost) => {
-            const payout = PayoutRule._parsePayout(post.total_payout_value);
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const post = await context.getPost();
+        const payout = PayoutRule._parsePayout(post.total_payout_value);
 
-            if (this.mode == PayoutRule.Mode.EQUAL) {
-                if (payout !== this.value)
-                    throw new ValidationException("Payout rule: payout (" + payout + ") does not equal " + this.value);
-            }
-            else if (this.mode == PayoutRule.Mode.MORE_THAN) {
-                if (payout <= this.value)
-                throw new ValidationException("Payout rule: payout (" + payout + ") is not more than " + this.value);
-            }
-            else if (this.mode == PayoutRule.Mode.LESS_THAN) {
-                if (payout >= this.value)
-                throw new ValidationException("Payout rule: payout (" + payout + ") is not less than " + this.value);
-            }
-            else {
-                throw new Error("Unknown mode of payout rule: " + this.mode);
-            }
-        })
-        .catch((e: Error) => {
-            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
-            else throw e;
-        });
+        if (this.mode == PayoutRule.Mode.EQUAL) {
+            if (payout !== this.value)
+                throw new ValidationException("Payout rule: payout (" + payout + ") does not equal " + this.value);
+        }
+        else if (this.mode == PayoutRule.Mode.MORE_THAN) {
+            if (payout <= this.value)
+            throw new ValidationException("Payout rule: payout (" + payout + ") is not more than " + this.value);
+        }
+        else if (this.mode == PayoutRule.Mode.LESS_THAN) {
+            if (payout >= this.value)
+            throw new ValidationException("Payout rule: payout (" + payout + ") is not less than " + this.value);
+        }
+        else {
+            throw new Error("Unknown mode of payout rule: " + this.mode);
+        }
     }
 
     public validateRuleObject(unprototypedObj: any) {

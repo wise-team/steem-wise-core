@@ -26,27 +26,22 @@ export class AuthorsRule extends Rule {
         return Rule.Type.Authors;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getPost())
-        .then((post: SteemPost): Promise<void> => {
-            return new BluebirdPromise((resolve, reject) => {
-                const authorIsOnList: boolean = (this.authors.indexOf(post.author) !== -1);
-                if (this.mode == AuthorsRule.Mode.ALLOW) {
-                    if (authorIsOnList) resolve();
-                    else reject(new ValidationException("Author of the post is not on the allow list."));
-                }
-                else {
-                    if (authorIsOnList) reject(new ValidationException("Author of the post is on the deny list."));
-                    else resolve();
-                }
-            });
-        })
-        .catch((e: Error) => {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const post: SteemPost = await context.getPost();
+
+        const authorIsOnList: boolean = (this.authors.indexOf(post.author) !== -1);
+        if (this.mode == AuthorsRule.Mode.ALLOW) {
+            if (!authorIsOnList) throw new ValidationException("Author of the post is not on the allow list.");
+        }
+        else {
+            if (authorIsOnList) throw new ValidationException("Author of the post is on the deny list.");
+        }
+
+        /*.catch((e: Error) => {
             if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
             else throw e;
-        });
+        });*/
     }
 
     public validateRuleObject(unprototypedObj: any) {

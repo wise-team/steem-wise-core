@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -33,40 +30,36 @@ export class WeightForPeriodRule extends Rule {
         return Rule.Type.WeightForPeriod;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext, validationTimestamp: Date = new Date() /* for unit testing */): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => {
-            const unitMultiplier = (this.unit === WeightForPeriodRule.PeriodUnit.DAY ? 24 * 60 * 60 :
-                                   (this.unit === WeightForPeriodRule.PeriodUnit.HOUR ? 60 * 60 :
-                                   (this.unit === WeightForPeriodRule.PeriodUnit.MINUTE ? 60 :
-                                   1)));
-            const numberOfSeconds = this.period * unitMultiplier;
-            const until = new Date(validationTimestamp.getTime() - numberOfSeconds * 1000);
-            return context.getWiseOperations(context.getDelegatorUsername(), until);
-        })
-        .then((ops: EffectuatedWiseOperation []) => {
-            let sumOfWeightsForGivenPeriod = 0;
-            ops.forEach(op => {
-                if (ConfirmVote.isConfirmVote(op.command) && op.voter === context.getVoterUsername()) {
-                    const confirmVoteOp: ConfirmVote = op.command;
-                    // count only accepted vote confirmations:
-                    if (confirmVoteOp.accepted && ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(confirmVoteOp)) {
-                        sumOfWeightsForGivenPeriod += Math.abs(confirmVoteOp.vote.weight);
-                    }
+    public async validate (voteorder: SendVoteorder, context: ValidationContext, validationTimestamp: Date = new Date() /* for unit testing */): Promise<void> {
+        this.validateRuleObject(this);
+        const unitMultiplier = (this.unit === WeightForPeriodRule.PeriodUnit.DAY ? 24 * 60 * 60 :
+                                (this.unit === WeightForPeriodRule.PeriodUnit.HOUR ? 60 * 60 :
+                                (this.unit === WeightForPeriodRule.PeriodUnit.MINUTE ? 60 :
+                                1)));
+        const numberOfSeconds = this.period * unitMultiplier;
+        const until = new Date(validationTimestamp.getTime() - numberOfSeconds * 1000);
+        const ops: EffectuatedWiseOperation [] = await context.getWiseOperations(context.getDelegatorUsername(), until);
+
+        let sumOfWeightsForGivenPeriod = 0;
+        ops.forEach(op => {
+            if (ConfirmVote.isConfirmVote(op.command) && op.voter === context.getVoterUsername()) {
+                const confirmVoteOp: ConfirmVote = op.command;
+                // count only accepted vote confirmations:
+                if (confirmVoteOp.accepted && ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(confirmVoteOp)) {
+                    sumOfWeightsForGivenPeriod += Math.abs(confirmVoteOp.vote.weight);
                 }
-            });
-
-            const totalSum = sumOfWeightsForGivenPeriod + Math.abs(voteorder.weight);
-
-            if (totalSum > this.weight) {
-                throw new ValidationException(
-                    "WeightForPeriodRule: Sum of passed voteorders and the new voteorder (" + totalSum + ")"
-                    + " was higher than allowed (" + this.weight + ") in a period of "
-                    + this.period + " " + this.unit
-                );
             }
         });
+
+        const totalSum = sumOfWeightsForGivenPeriod + Math.abs(voteorder.weight);
+
+        if (totalSum > this.weight) {
+            throw new ValidationException(
+                "WeightForPeriodRule: Sum of passed voteorders and the new voteorder (" + totalSum + ")"
+                + " was higher than allowed (" + this.weight + ") in a period of "
+                + this.period + " " + this.unit
+            );
+        }
     }
 
     public validateRuleObject(unprototypedObj: any) {

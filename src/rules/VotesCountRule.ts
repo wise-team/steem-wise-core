@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -27,33 +24,26 @@ export class VotesCountRule extends Rule {
         return Rule.Type.VotesCount;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getPost())
-        .then((post: SteemPost) => {
-            const voteCount = post.active_votes.length;
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const post = await context.getPost();
+        const voteCount = post.active_votes.length;
 
-            if (this.mode == VotesCountRule.Mode.EQUAL) {
-                if (voteCount !== this.value)
-                    throw new ValidationException("Post votes count (" + voteCount + ") does not equal " + this.value);
-            }
-            else if (this.mode == VotesCountRule.Mode.MORE_THAN) {
-                if (voteCount <= this.value)
-                throw new ValidationException("Post votes count (" + voteCount + ") is not more than " + this.value);
-            }
-            else if (this.mode == VotesCountRule.Mode.LESS_THAN) {
-                if (voteCount >= this.value)
-                throw new ValidationException("Post votes count (" + voteCount + ") is not less than " + this.value);
-            }
-            else {
-                throw new Error("Unknown mode of votes count rule: " + this.mode);
-            }
-        })
-        .catch((e: Error) => {
-            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
-            else throw e;
-        });
+        if (this.mode == VotesCountRule.Mode.EQUAL) {
+            if (voteCount !== this.value)
+                throw new ValidationException("Post votes count (" + voteCount + ") does not equal " + this.value);
+        }
+        else if (this.mode == VotesCountRule.Mode.MORE_THAN) {
+            if (voteCount <= this.value)
+            throw new ValidationException("Post votes count (" + voteCount + ") is not more than " + this.value);
+        }
+        else if (this.mode == VotesCountRule.Mode.LESS_THAN) {
+            if (voteCount >= this.value)
+            throw new ValidationException("Post votes count (" + voteCount + ") is not less than " + this.value);
+        }
+        else {
+            throw new Error("Unknown mode of votes count rule: " + this.mode);
+        }
     }
 
     public validateRuleObject(unprototypedObj: any) {

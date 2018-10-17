@@ -26,19 +26,17 @@ export class ExpirationDateRule extends Rule {
         return Rule.Type.ExpirationDate;
     }
 
-    public validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
-        return BluebirdPromise.resolve()
-        .then(() => this.validateRuleObject(this))
-        .then(() => context.getPost())
-        .then((post: SteemPost) => {
-            const ruleDateParsed = new Date(Date.parse(this.date));
-            const nowDate = new Date(Date.now());
+    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        this.validateRuleObject(this);
+        const post = await context.getPost();
 
-            if (nowDate.getTime() > ruleDateParsed.getTime()) throw new ValidationException(
-                "ExpirationDateRule: This rule has expired (expiration datetime was " + ruleDateParsed.toISOString()
-                 + ", now is " + nowDate.toISOString() + ")."
-            );
-        });
+        const ruleDateParsed = new Date(Date.parse(this.date));
+        const nowDate = new Date(Date.now());
+
+        if (nowDate.getTime() > ruleDateParsed.getTime()) throw new ValidationException(
+            "ExpirationDateRule: This rule has expired (expiration datetime was " + ruleDateParsed.toISOString()
+                + ", now is " + nowDate.toISOString() + ")."
+        );
     }
 
     public validateRuleObject(unprototypedObj: any) {
