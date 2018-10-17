@@ -66,17 +66,15 @@ export class FakeApi extends Api {
         return "FakeApi";
     }
 
-    public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        return new BluebirdPromise<SteemPost>((resolve, reject) => {
-            for (let i = 0; i < this.posts.length; i++) {
-                if (this.posts[i].author === author && this.posts[i].permlink === permlink) {
-                    setTimeout(() => resolve(this.posts[i]), this.fakeDelayMs);
-                    return;
-                }
-            }
+    public async loadPost(author: string, permlink: string): Promise<SteemPost> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
 
-            reject(new NotFoundException("No such post @" + author + "/" + permlink));
-        });
+        for (let i = 0; i < this.posts.length; i++) {
+            if (this.posts[i].author === author && this.posts[i].permlink === permlink) {
+                return this.posts[i];
+            }
+        }
+        throw new NotFoundException("No such post @" + author + "/" + permlink);
     }
 
     public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
@@ -92,8 +90,9 @@ export class FakeApi extends Api {
         });
     }
 
-    public sendToBlockchain(operationsInTransaction: [string, object][]): Promise<SteemOperationNumber> {
-        return new BluebirdPromise((resolve, reject) => {
+    public async sendToBlockchain(operationsInTransaction: [string, object][]): Promise<SteemOperationNumber> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
             const blockNum = this.currentBlock + 1;
             const steemTrx: SteemTransaction = {
                 block_num: blockNum,
@@ -108,143 +107,130 @@ export class FakeApi extends Api {
             this.currentBlock = blockNum;
 
             Log.cheapDebug(() => "FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx));
-            setTimeout(() => resolve(new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1)), this.fakeDelayMs);
-        });
+            return new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1);
     }
 
-    public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        return new BluebirdPromise((resolve, reject) => {
-            const result: EffectuatedSetRules [] = [];
-            for (let i = 0; i < this.transactions.length; i++) {
-                const trx = this.transactions[i];
-                const handleResult = protocol.handleOrReject(trx);
-                if (handleResult) {
-                    for (let j = 0; j < handleResult.length; j++) {
-                        const effSo = handleResult[j];
-                        if (SetRules.isSetRules(effSo.command) &&
-                            effSo.delegator === delegator) {
-                            if (at.isGreaterOrEqual(effSo.moment)) {
-                                const effSetRules: EffectuatedSetRules = {
-                                    rulesets: effSo.command.rulesets,
-                                    voter: effSo.voter,
-                                    moment: effSo.moment
-                                };
-                                result.push(effSetRules);
-                            }
+    public async loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
+
+        const result: EffectuatedSetRules [] = [];
+        for (let i = 0; i < this.transactions.length; i++) {
+            const trx = this.transactions[i];
+            const handleResult = protocol.handleOrReject(trx);
+            if (handleResult) {
+                for (let j = 0; j < handleResult.length; j++) {
+                    const effSo = handleResult[j];
+                    if (SetRules.isSetRules(effSo.command) &&
+                        effSo.delegator === delegator) {
+                        if (at.isGreaterOrEqual(effSo.moment)) {
+                            const effSetRules: EffectuatedSetRules = {
+                                rulesets: effSo.command.rulesets,
+                                voter: effSo.voter,
+                                moment: effSo.moment
+                            };
+                            result.push(effSetRules);
                         }
                     }
                 }
             }
-            setTimeout(() => resolve(result), this.fakeDelayMs);
-        });
+        }
+        return result;
     }
 
-    public getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
-        return new BluebirdPromise((resolve, reject) => {
-            setTimeout(() => resolve(
-                this.transactions
+    public async getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
+        return this.transactions
+            .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
+            .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => (!!handledOrRejected))
+            .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
+            .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps))
+            .filter((effSop: EffectuatedWiseOperation) => ConfirmVote.isConfirmVote(effSop.command))
+            .map((effSop: EffectuatedWiseOperation) => effSop.moment)
+            .reduce((newest: SteemOperationNumber, current: SteemOperationNumber) => {
+                if (current.isGreaterThan(newest)) return current;
+                else return newest;
+            }, V1Handler.INTRODUCTION_OF_WISE_MOMENT);
+    }
+
+    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
+        if (blockNum > this.currentBlock + 1) throw new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)");
+
+        while (blockNum > this.currentBlock) await BluebirdPromise.delay(this.fakeDelayMs);
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
+        if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) {
+            return this.transactionsByBlock[blockNum + ""]
+                .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
                 .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
-                .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => (!!handledOrRejected))
+                .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => !!handledOrRejected)
                 .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
-                .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps))
-                .filter((effSop: EffectuatedWiseOperation) => ConfirmVote.isConfirmVote(effSop.command))
-                .map((effSop: EffectuatedWiseOperation) => effSop.moment)
-                .reduce((newest: SteemOperationNumber, current: SteemOperationNumber) => {
-                    if (current.isGreaterThan(newest)) return current;
-                    else return newest;
-                }, V1Handler.INTRODUCTION_OF_WISE_MOMENT)
-            ), this.fakeDelayMs);
-        });
+                .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps), [])
+                .filter((effSop: EffectuatedWiseOperation) => effSop.delegator === delegator);
+        }
+        else return [];
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
-        return new BluebirdPromise((resolve, reject) => {
-            if (blockNum > this.currentBlock + 1) reject(new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)"));
-            let awaitBlock: (thenFn: () => void) => void = () => {};
-            awaitBlock = (thenFn: () => void) => {
-                if (blockNum <= this.currentBlock) thenFn();
-                else {
-                    setTimeout(() => awaitBlock(thenFn), this.fakeDelayMs);
-                }
-            };
-            setTimeout(() => {
-                awaitBlock(() => {
-                    if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) resolve(
-                        this.transactionsByBlock[blockNum + ""]
-                        .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
-                        .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
-                        .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => !!handledOrRejected)
-                        .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
-                        .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps), [])
-                        .filter((effSop: EffectuatedWiseOperation) => effSop.delegator === delegator)
-                    );
-                    else resolve([]);
-                });
-                /*}
-                else {
-                    resolve([]);
-                }*/
-            }, this.fakeDelayMs);
-        });
+    public async getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
+        this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
+        this.dynamicGlobalProperties.head_block_number = this.currentBlock;
+        return _.cloneDeep(this.dynamicGlobalProperties);
     }
 
-    public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
-        return new BluebirdPromise((resolve, reject) => {
-            this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
-            this.dynamicGlobalProperties.head_block_number = this.currentBlock;
-            setTimeout(() => resolve(_.cloneDeep(this.dynamicGlobalProperties)), this.fakeDelayMs);
-        });
+    public async getAccountInfo(username: string): Promise<AccountInfo> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
+        const result = this.accounts.filter((info: AccountInfo) => info.name === username);
+        if (result.length === 0) throw new NotFoundException("Account " + username + " does not exist");
+        else return result[0];
     }
 
-    public getAccountInfo(username: string): Promise<AccountInfo> {
-        return new BluebirdPromise((resolve, reject) => {
-            const result = this.accounts.filter((info: AccountInfo) => info.name === username);
-            if (result.length === 0) setTimeout(() => reject(new NotFoundException("Account " + username + " does not exist")), this.fakeDelayMs);
-            else setTimeout(() => resolve(result[0]), this.fakeDelayMs);
-        });
-    }
+    public async getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
 
-    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
-        return new BluebirdPromise((resolve, reject) => {
-            const result: EffectuatedWiseOperation [] = [];
-            for (let i = 0; i < this.transactions.length; i++) {
-                const op = this.transactions[i];
-                const handleResult = protocol.handleOrReject(op);
-                if (handleResult) {
-                    for (let j = 0; j < handleResult.length; j++) {
-                        const effSo = handleResult[j];
-                        if ((effSo.delegator === username && ConfirmVote.isConfirmVote(effSo.command))
-                         || (effSo.voter === username)) {
-                            // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.cheapDebug(() => JSON.stringify(effSo));
-                            // (up) fake blockchain does not provide
-                            // information on who pushed the operation to blockchain,
-                            // so this hacky way is the only way to get this information.
-                            // fortunately FakeApi is only used for unit testing.
-                            if (effSo.timestamp.getTime() >= until.getTime()) {
-                                result.push(effSo);
-                            }
+        const result: EffectuatedWiseOperation [] = [];
+        for (let i = 0; i < this.transactions.length; i++) {
+            const op = this.transactions[i];
+            const handleResult = protocol.handleOrReject(op);
+            if (handleResult) {
+                for (let j = 0; j < handleResult.length; j++) {
+                    const effSo = handleResult[j];
+                    if ((effSo.delegator === username && ConfirmVote.isConfirmVote(effSo.command))
+                        || (effSo.voter === username)) {
+                        // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.cheapDebug(() => JSON.stringify(effSo));
+                        // (up) fake blockchain does not provide
+                        // information on who pushed the operation to blockchain,
+                        // so this hacky way is the only way to get this information.
+                        // fortunately FakeApi is only used for unit testing.
+                        if (effSo.timestamp.getTime() >= until.getTime()) {
+                            result.push(effSo);
                         }
                     }
                 }
             }
-            setTimeout(() => resolve(result), this.fakeDelayMs);
-        });
+        }
+        return result;
     }
 
-    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
-        return new BluebirdPromise((resolve, reject) => {
-            const result: BlogEntry [] = [];
-            let userI = 0;
-            for (let i = 0; i < this.blogEntries.length; i++) {
-                const entry = this.blogEntries[i];
-                if (entry.blog == username) {
-                    if (userI >= startFrom && userI < startFrom + limit)
-                        result.push(entry);
-                    userI++;
-                }
+    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+        await BluebirdPromise.delay(this.fakeDelayMs);
+
+        const result: BlogEntry [] = [];
+        let userI = 0;
+        for (let i = 0; i < this.blogEntries.length; i++) {
+            const entry = this.blogEntries[i];
+            if (entry.blog == username) {
+                if (userI >= startFrom && userI < startFrom + limit)
+                    result.push(entry);
+                userI++;
             }
-            setTimeout(() => resolve(result), this.fakeDelayMs);
-        });
+        }
+            return result;
     }
 
     public getCurrentBlockNum(): number {

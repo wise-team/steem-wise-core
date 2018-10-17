@@ -1,7 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
-
 import { SteemPost } from "../blockchain/SteemPost";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
@@ -22,43 +18,43 @@ export class DisabledApi extends Api {
         return "DisabledApi";
     }
 
-    public loadPost(author: string, permlink: string): Promise<SteemPost> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async loadPost(author: string, permlink: string): Promise<SteemPost> {
+        throw new Error("This api is disabled");
     }
 
-    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
+        throw new Error("This api is disabled");
     }
 
-    public sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
+        throw new Error("This api is disabled");
     }
 
-    public loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
+        throw new Error("This api is disabled");
     }
 
-    public getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
+        throw new Error("This api is disabled");
     }
 
-    public getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
+        throw new Error("This api is disabled");
     }
 
-    public getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+        throw new Error("This api is disabled");
     }
 
-    public getAccountInfo(username: string): Promise<AccountInfo> {
-        return new BluebirdPromise((resolve, reject) => reject(new Error("This api is disabled")));
+    public async getAccountInfo(username: string): Promise<AccountInfo> {
+        throw new Error("This api is disabled");
     }
 
-    public getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
-        return BluebirdPromise.reject(new Error("This api is disabled"));
+    public async getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+        throw new Error("This api is disabled");
     }
 
-    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
-        return BluebirdPromise.reject(new Error("This api is disabled"));
+    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+        throw new Error("This api is disabled");
     }
 }

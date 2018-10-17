@@ -32,11 +32,11 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
         return this;
     }
 
-    public start(): Promise<void> {
+    public async start(): Promise<void> {
         // load and iterate over blockchain
         this.loadFromOnlyIfConsumers(-1);
 
-        return new BluebirdPromise((resolve, reject) => {
+        await new BluebirdPromise((resolve, reject) => {
             this.onFinishCallback = (error: Error | undefined) => {
                 if (error) reject(error);
                 else resolve();
