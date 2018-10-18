@@ -22,6 +22,11 @@ import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 // TODO conform to JS convention that callback is the last argument. And use options array for optional arguments
 
 /**
+ * Setup logging
+ */
+Log.log().init();
+
+/**
  * Wise is a vote delegation system for steem blockchain. Wise allows you to securely grant other steemians your voting
  * power under conditions specified by you. For usage examples and more information please refer README. A complete cli
  * tool that enables performing all wise operations is available in package steem-wise-cli. A manual is available at
@@ -391,12 +396,6 @@ export type ProggressCallback = (msg: string, proggress: number) => void;
 
 
 /**
- * Setup logging
- */
-Log.configureLoggers();
-const log = Log.getLogger();
-
-/**
  * Prayer:
  *  Gloria Patri, et Filio, et Spiritui Sancto, sicut erat in principio et nunc et semper et in saecula
  *  saeculorum. Amen. In te, Domine, speravi: non confundar in aeternum.
@@ -446,7 +445,7 @@ export { ValidationContext } from "./validation/ValidationContext";
 export { NotFoundException } from "./util/NotFoundException";
 
 export { Synchronizer } from "./Synchronizer";
-export { Log } from "./util/log";
+export { AbstractLog } from "./util/AbstractLog";
 
 export * from "./protocol/versions/v2/wise-schema";
 

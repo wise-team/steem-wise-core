@@ -1,50 +1,24 @@
-import * as winston from "winston";
+import { AbstractLog } from "./AbstractLog";
 
-export class Log {
-    public static configureLoggers() {
-        Log.getLogger().add(
-            new winston.transports.Console({
-            format: winston.format.combine(
-                winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-                winston.format.printf(info => {
-                    return `${info.timestamp} [${info.level}]: ${info.message}`;
-                })
-            ),
-            timestamp: true,
-        } as object));
-        Log.getLogger().level = "warn";
+export class Log extends AbstractLog {
+    private static INSTANCE: Log = new Log();
+
+    private constructor() {
+        super("steem-wise-core");
     }
 
-    public static setLevel(level: string) {
-        Log.getLogger().level = level;
+    public init() {
+        if (process.env) { // node
+            super.init([ process.env.WISE_CORE_LOG_LEVEL, process.env.WISE_LOG_LEVEL, "info" ]);
+        }
+        else { // non-node, eg. browser
+            super.init([ "info" ]);
+        }
     }
 
-    public static getLogger(): winston.Logger {
-        return (winston.loggers as any).get("steem-wise-core");
-    }
-
-    public static cheapDebug(debugStringReturnerFn: () => string): void {
-        const logger = Log.getLogger();
-        if (logger.levels[logger.level] >= logger.levels["debug"]) logger.debug(debugStringReturnerFn());
-    }
-
-    public static isDebug() {
-        const logger = Log.getLogger();
-        return logger.levels[logger.level] >= logger.levels["debug"];
-    }
-
-    public static cheapInfo(infoStringReturnerFn: () => string): void {
-        const logger = Log.getLogger();
-        if (logger.levels[logger.level] >= logger.levels["info"]) logger.debug(infoStringReturnerFn());
-    }
-
-    public static promiseResolveDebug<T>(msgBeginning: string, result: T): T {
-        Log.cheapDebug(() => msgBeginning + JSON.stringify(result));
-        return result;
-    }
-
-    public static promiseRejectionDebug<T>(msgBeginning: string, error: T): T {
-        Log.cheapDebug(() => msgBeginning + JSON.stringify(error));
-        throw error;
+    public static log(): Log {
+        return Log.INSTANCE;
     }
 }
+
+Log.log().init();
