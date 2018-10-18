@@ -3,7 +3,7 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
 
-import { Log } from "./util/log"; const log = Log.getLogger();
+import { Log } from "./util/log";
 
 import { Api } from "./api/Api";
 import { Protocol } from "./protocol/Protocol";
@@ -42,14 +42,14 @@ export class Synchronizer {
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
     public start(since: SteemOperationNumber): Synchronizer {
-        log.debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({since: since}));
+        Log.log().debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({since: since}));
         this.lastProcessedOperationNum = since;
 
         (async () => {
             try {
                 const rules: EffectuatedSetRules [] = await this.api.loadAllRulesets(this.delegator, since, this.protocol);
 
-                log.debug("SYNCHRONIZER_INITIAL_RULESETS_LOADED=" + JSON.stringify(rules));
+                Log.log().debug("SYNCHRONIZER_INITIAL_RULESETS_LOADED=" + JSON.stringify(rules));
                 this.rules = rules;
                 this.processBlock(since.blockNum); // the loop is started
             } catch (error) {
@@ -115,16 +115,16 @@ export class Synchronizer {
             rulesets: cmd.rulesets
         };
         this.rules.push(es);
-        log.debug("SYNCHRONIZER_UPDATED_RULES=" + JSON.stringify(cmd.rulesets));
+        Log.log().debug("SYNCHRONIZER_UPDATED_RULES=" + JSON.stringify(cmd.rulesets));
         this.notify(undefined, { type: Synchronizer.EventType.RulesUpdated, moment: op.moment,
             message: "Change of rules on blockchain. Local rules were updated." });
     }
 
     private processVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
-        Log.cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
+        Log.log().cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
 
         const rules = this.determineRules(op, cmd);
-        Log.cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
+        Log.log().cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
 
         if (!rules) return this.rejectVoteorder(op, cmd, "There is no ruleset for you");
 
@@ -165,7 +165,7 @@ export class Synchronizer {
     }
 
     private voteAndConfirm(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
-        Log.cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd}));
+        Log.log().cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd}));
 
         const opsToSend: [string, object][] = [];
 
@@ -199,7 +199,7 @@ export class Synchronizer {
     }
 
     private rejectVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder, msg: string): Promise<void> {
-        Log.cheapDebug(() => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd, msg: msg}));
+        Log.log().cheapDebug(() => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd, msg: msg}));
 
         const confirmCmd: ConfirmVote = {
             voteorderTxId: op.transaction_id,
@@ -222,9 +222,9 @@ export class Synchronizer {
     }
 
     private async notify(error: Error | undefined, event: Synchronizer.Event) {
-        return await BluebirdPromise.resolve(); // spawn
-        if (error) log.error(JSON.stringify(error));
-        Log.cheapInfo(() => "SYNCHRONIZER_EVENT=" + JSON.stringify(event));
+        (async () => this.notifier(error, event))();
+        if (error) Log.log().error(JSON.stringify(error));
+        Log.log().cheapInfo(() => "SYNCHRONIZER_EVENT=" + JSON.stringify(event));
     }
 
     private continueIfRunning(fn: () => void) {
