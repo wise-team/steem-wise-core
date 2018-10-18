@@ -76,9 +76,6 @@ export class Wise {
      *
      * @param {string} voter - voter for whom these rulesets are set.
      * @param {Ruleset []} rules - an array of rulesets for this voter
-     * @param {(error: Error, result: SteemOperationNumber) => void} [callback=undefined] -
-     *      callback function that will be called when rules are properly set or an error occurs. Can be ommited or set
-     *      to undefined if you want to only use the returned promise.
      * @param {(msg: string, proggress: number) => void} [proggressCallback] proggress callback that will receive
      *      proggress notifications (useful for UI)
      *
@@ -87,14 +84,10 @@ export class Wise {
      */
     public uploadRulesetsForVoter = (
         voter: string, rulesets: Ruleset [],
-        callback?: Callback<SteemOperationNumber>, proggressCallback: ProggressCallback  = () => {}
+        proggressCallback: ProggressCallback  = () => {}
     ): Promise<SteemOperationNumber> => {
         return RulesUpdater.uploadRulesetsForVoter(
             this.api, this.protocol, this.account, voter, rulesets, proggressCallback
-        )
-        .then(
-            result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); return BluebirdPromise.reject(error); }
         );
     }
 
@@ -104,26 +97,18 @@ export class Wise {
      *
      * @param {string} delegator - the delegator account name
      * @param {string} voter - the voter account name
-     * @param {(error: Error, result: SteemOperationNumber) => void} [callback=undefined] -
-     *      callback function that will be called when rules are downloaded or an error occurs. Can be ommited or set
-     *      to undefined if you want to only use the returned promise.
      * @param {SteemOperationNumber} [atMoment = SteemOperationNumber.NOW] - a moment in blockchain (block, transaction,
      *      and operation number). Default is SteemOperationNumber.NOW.
      *
      * @returns {Promise<Ruleset []>} - a Promise that resolves with rulesets that are in effect at the specified moment
      *      or now.
      */
-    public downloadRulesetsForVoter = (
+    public downloadRulesetsForVoter = async (
         delegator: string, voter: string,
-        callback?: Callback<Ruleset []>,
         atMoment: SteemOperationNumber = SteemOperationNumber.NOW
     ): Promise<Ruleset []> => {
-        return this.api.loadRulesets(delegator, voter, atMoment, this.protocol)
-        .then(setRules => setRules.rulesets)
-        .then(
-            result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); throw error; }
-        );
+        const setRules = await this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
+        return setRules.rulesets;
     }
 
 
@@ -149,14 +134,9 @@ export class Wise {
      */
     public uploadAllRulesets = (
         rules: SetRulesForVoter [],
-        callback?: Callback<SteemOperationNumber | true>,
         proggressCallback: ProggressCallback = () => {}
     ): Promise<SteemOperationNumber | true> => {
-        return RulesUpdater.uploadAllRulesets(this.api, this.protocol, this.account, rules, proggressCallback)
-        .then(
-            result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); throw error; }
-        );
+        return RulesUpdater.uploadAllRulesets(this.api, this.protocol, this.account, rules, proggressCallback);
     }
 
 
@@ -166,9 +146,6 @@ export class Wise {
      *
      * @param {string} [delegator] - account name of the delegator (default is account name set in constructor of this
      *      Wise instance)
-     * @param {(error: Error, result: EffectuatedSetRules []) => void} [callback=undefined] -
-     *      callback function that will be called when rules are downloaded or an error occurs. Can be ommited or set
-     *      to undefined if you want to only use the returned promise.
      * @param {SteemOperationNumber} [atMoment = SteemOperationNumber.NOW] - a moment in blockchain (block, transaction,
      *      and operation number). Default is SteemOperationNumber.NOW.
      * @param {(msg: string, proggress: number) => void} [proggressCallback] proggress callback that will receive
@@ -180,19 +157,13 @@ export class Wise {
      */
     public downloadAllRulesets = (
         delegator: string = this.account,
-        callback?: Callback<EffectuatedSetRules []>,
         atMoment: SteemOperationNumber = SteemOperationNumber.NOW,
         proggressCallback: ProggressCallback = () => {}
     ): Promise<EffectuatedSetRules []> => {
         proggressCallback("Downloading all rulesets set by " + delegator, 0.0);
-        return RulesUpdater.downloadAllRulesets(this.api, this.protocol, delegator, atMoment)
-        .then(
-            result => {
-                proggressCallback("Downloaded all rulesets set by " + delegator, 1.0);
-                if (callback) callback(undefined, result); return result;
-            },
-            error => { if (callback) callback(error, undefined); throw error; }
-        );
+        const result =  RulesUpdater.downloadAllRulesets(this.api, this.protocol, delegator, atMoment);
+        proggressCallback("Downloaded all rulesets set by " + delegator, 1.0);
+        return result;
     }
 
 
@@ -203,9 +174,6 @@ export class Wise {
      * @param {string} delegator - account name of the delegator
      * @param {string} voter - account name of the voter
      * @param {SendVoteorder} voteorder - voteorder object
-     * @param {(error: Error, result: [string, object][]} [callback=undefined] -
-     *      callback function that will be called after validation, when voteorder object is generated. Can be omited
-     *      or set to undefined if you want to only use the returned promise.
      * @param {(msg: string, proggress: number) => void} [proggressCallback] proggress callback that will receive
      *      proggress notifications (useful for UI)
      * @param {boolean} [skipValidation=false] allows to skip validation (send is immediate and allows sending
@@ -217,38 +185,30 @@ export class Wise {
      */
     public generateVoteorderOperations = async (
         delegator: string, voter: string, voteorder: SendVoteorder,
-        callback?: Callback<[string, object][]>,
         proggressCallback: ProggressCallback = () => {},
         skipValidation: boolean = false): Promise<[string, object][]> => {
-        try {
-            proggressCallback("Validating voteorder...", 0.0);
+        proggressCallback("Validating voteorder...", 0.0);
 
-            const smOp: WiseOperation = {
-                voter: voter,
-                delegator: delegator,
-                command: voteorder
-            };
-            const steemOps = this.protocol.serializeToBlockchain(smOp);
-            if (steemOps.length !== 1) throw new Error("A voteorder should be a single blockchain operation");
-            if (!skipValidation && !this.protocol.validateOperation(steemOps[0]))
-                throw new Error("Operation object has invalid structure");
+        const smOp: WiseOperation = {
+            voter: voter,
+            delegator: delegator,
+            command: voteorder
+        };
+        const steemOps = this.protocol.serializeToBlockchain(smOp);
+        if (steemOps.length !== 1) throw new Error("A voteorder should be a single blockchain operation");
+        if (!skipValidation && !this.protocol.validateOperation(steemOps[0]))
+            throw new Error("Operation object has invalid structure");
 
-            if (!skipValidation) {
-                const validationResult: ValidationException | true = await this.validateVoteorder(
-                    delegator, voter, voteorder, SteemOperationNumber.FUTURE, undefined,
-                    proggressCallback
-                );
-                if (validationResult !== true) throw new Error("Validation error: " + validationResult.message);
-                proggressCallback("Voteorder validation done", 1.0);
+        if (!skipValidation) {
+            const validationResult: ValidationException | true = await this.validateVoteorder(
+                delegator, voter, voteorder, SteemOperationNumber.FUTURE,
+                proggressCallback
+            );
+            if (validationResult !== true) throw new Error("Validation error: " + validationResult.message);
+            proggressCallback("Voteorder validation done", 1.0);
 
-            }
-            if (callback) (async () => callback(undefined, steemOps))();
-            return steemOps;
         }
-        catch (error) {
-            if (callback) (async () => callback(error, undefined))();
-            throw error;
-        }
+        return steemOps;
     }
 
 
@@ -257,9 +217,6 @@ export class Wise {
      *
      * @param {string} delegator - account name of the delegator
      * @param {SendVoteorder} voteorder - voteorder object
-     * @param {(error: Error, result: SteemOperationNumber} [callback=undefined] -
-     *      callback function that will be called when voteorder is sent or an error occurs. Can be ommited or set
-     *      to undefined if you want to only use the returned promise.
      * @param {(msg: string, proggress: number) => void} [proggressCallback] proggress callback that will receive
      *      proggress notifications (useful for UI)
      * @param {boolean} [skipValidation=false] allows to skip validation (send is immediate and allows sending
@@ -268,26 +225,17 @@ export class Wise {
      * @returns {Promise<SteemOperationNumber>} - a Promise that resolves with SteemOperationNumber when the voteorder
      *      is sent successfully.
      */
-    public sendVoteorder = (
+    public sendVoteorder = async (
         delegator: string, voteorder: SendVoteorder,
-        callback?: Callback<SteemOperationNumber>,
         proggressCallback: ProggressCallback = () => {},
         skipValidation: boolean = false
     ): Promise<SteemOperationNumber> => {
 
-        return this.generateVoteorderOperations(delegator, this.account, voteorder, undefined,
-                                                proggressCallback, skipValidation)
-        .then(steemOps => {
-            proggressCallback("Sending voteorder...", 0.5);
-            return this.api.sendToBlockchain(steemOps);
-        })
-        .then(
-            result => {
-                proggressCallback("Sending voteorder done", 1.0);
-                if (callback) callback(undefined, result); return result;
-            },
-            error => { if (callback) callback(error, undefined); throw error; }
-        );
+        const steemOps = await this.generateVoteorderOperations(delegator, this.account, voteorder, proggressCallback, skipValidation);
+        proggressCallback("Sending voteorder...", 0.5);
+        const sentMoment = await this.api.sendToBlockchain(steemOps);
+        proggressCallback("Sending voteorder done", 1.0);
+        return sentMoment;
     }
 
 
@@ -300,9 +248,6 @@ export class Wise {
      * @param {SteemOperationNumber} atMoment - a moment in blockchain at which we are testing the voteorder validity
      *      (usually this is a moment at which the voteorder appeared on the blockchain). Set atMoment to
      *      SteemOperationNumber.FUTURE, which will indicate a potential (not sent) voteorder.
-     * @param {(error: Error, result: ValidationException | true)} [callback=undefined] -
-     *      callback function that will be called when voteorder is validated or an error occurs. Can be ommited or set
-     *      to undefined if you want to only use the returned promise. Result value is same as in returned Promise.
      * @param {(msg: string, proggress: number) => void} [proggressCallback] proggress callback that will receive
      *      proggress notifications (useful for UI)
      *
@@ -313,17 +258,13 @@ export class Wise {
      */
     public validateVoteorder = (
         delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
-        callback?: Callback<ValidationException | true>, proggressCallback: ProggressCallback = () => {}
+        proggressCallback: ProggressCallback = () => {}
     ): Promise<ValidationException | true> => {
 
         const v = new Validator(this.api, this.protocol);
         if (proggressCallback) v.withProggressCallback(proggressCallback);
 
-        return v.validate(delegator, voter, voteorder, atMoment)
-        .then(
-            result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); throw error; }
-        );
+        return v.validate(delegator, voter, voteorder, atMoment);
     }
 
 
@@ -339,15 +280,8 @@ export class Wise {
      * SteemOperationNumber. It resolves with undefined if this account has not sent any confirmations yet. Otherwise
      * it resolves with SteemOperationNumber pointing at the moment of the newest confirmation.
      */
-    public getLastConfirmationMoment = (
-        delegator: string,
-        callback?: Callback<undefined | SteemOperationNumber>
-    ): Promise<undefined | SteemOperationNumber> => {
-        return this.api.getLastConfirmationMoment(delegator, this.getProtocol())
-        .then(
-            result => { if (callback) callback(undefined, result); return result; },
-            error => { if (callback) callback(error, undefined); throw error; }
-        );
+    public getLastConfirmationMoment = (delegator: string): Promise<undefined | SteemOperationNumber> => {
+        return this.api.getLastConfirmationMoment(delegator, this.getProtocol());
     }
 
 
@@ -380,11 +314,6 @@ export class Wise {
         return this.protocol;
     }
 }
-
-/**
- * A callback
- */
-export type Callback<RESULT> = (error: Error | undefined, result: RESULT | undefined) => void;
 
 /**
  * A progress callback that is called every time a milestone in particular operation is achived. Msg is a textual
