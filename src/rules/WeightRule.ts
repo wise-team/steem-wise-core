@@ -25,7 +25,7 @@ export class WeightRule extends Rule {
         return Rule.Type.Weight;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
 
         if (voteorder.weight < this.min) throw new ValidationException("Weight is too low (" + voteorder.weight + " < " + this.min + ")");

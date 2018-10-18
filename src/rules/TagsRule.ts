@@ -25,7 +25,14 @@ export class TagsRule extends Rule {
 
     public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         this.validateRuleObject(this);
-        const post = await context.getPost();
+        let post;
+        try {
+            post = await context.getPost();
+        }
+        catch (e) {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
+        }
 
         const postMetadata: SteemPost.JSONMetadata = JSON.parse(post.json_metadata) as SteemPost.JSONMetadata;
 
@@ -60,10 +67,6 @@ export class TagsRule extends Rule {
             throw new ValidationException("None of the tags [" + postMetadata.tags.join() + "] is on the \"any\" tags list [" + this.tags.join() + "].");
         }
         else throw new ValidationException("Unknown mode in tags.");
-        /*.catch((e: Error) => {
-            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
-            else throw e;
-        });*/
     }
 
     public validateRuleObject(unprototypedObj: any) {

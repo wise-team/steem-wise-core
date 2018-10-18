@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -28,7 +25,7 @@ export class CustomRPCRule extends Rule {
         return Rule.Type.CustomRPC;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         throw new ValidationException("CustomRPC rule is not yet implemented"); // TODO
     }
 

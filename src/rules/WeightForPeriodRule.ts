@@ -30,7 +30,7 @@ export class WeightForPeriodRule extends Rule {
         return Rule.Type.WeightForPeriod;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext, validationTimestamp: Date = new Date() /* for unit testing */): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext, validationTimestamp: Date = new Date() /* for unit testing */) {
         this.validateRuleObject(this);
         const unitMultiplier = (this.unit === WeightForPeriodRule.PeriodUnit.DAY ? 24 * 60 * 60 :
                                 (this.unit === WeightForPeriodRule.PeriodUnit.HOUR ? 60 * 60 :

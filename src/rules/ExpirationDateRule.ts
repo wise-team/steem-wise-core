@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -8,6 +5,7 @@ import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { SteemPost } from "../blockchain/SteemPost";
+import { NotFoundException } from "../util/NotFoundException";
 
 /**
  * This rule expires the ruleset.
@@ -26,9 +24,16 @@ export class ExpirationDateRule extends Rule {
         return Rule.Type.ExpirationDate;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
-        const post = await context.getPost();
+        let post;
+        try {
+            post = await context.getPost();
+        }
+        catch (e) {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
+        }
 
         const ruleDateParsed = new Date(Date.parse(this.date));
         const nowDate = new Date(Date.now());

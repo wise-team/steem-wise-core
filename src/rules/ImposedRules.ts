@@ -1,7 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
-
 import { Rule } from "./Rule";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { ValidationContext } from "../validation/ValidationContext";
@@ -29,7 +25,7 @@ export namespace ImposedRules {
             this.voter = voter;
         }
 
-        public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+        public async validate (voteorder: SendVoteorder, context: ValidationContext) {
             const dynamicGlobalProperties = await context.getDynamicGlobalProperties();
             const accountInfo = await context.getAccountInfo(this.voter);
 

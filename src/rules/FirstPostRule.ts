@@ -22,7 +22,7 @@ export class FirstPostRule extends Rule {
         return Rule.Type.FirstPost;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
         const entries = await context.getBlogEntries(voteorder.author, 0, 250);
         const oldestEntry: BlogEntry = Util.definedOrThrow(

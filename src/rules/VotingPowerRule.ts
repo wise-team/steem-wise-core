@@ -23,7 +23,7 @@ export class VotingPowerRule extends Rule {
         return Rule.Type.VotingPower;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
         const delegatorAccount = await context.getAccountInfo(context.getDelegatorUsername());
         if (!delegatorAccount) throw new Error("Delegator account info is undefined");

@@ -23,9 +23,16 @@ export class VotersRule extends Rule {
         return Rule.Type.Voters;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
-        const post = await context.getPost();
+        let post;
+        try {
+            post = await context.getPost();
+        }
+        catch (e) {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
+        }
         const voters = post.active_votes.map(vote => vote.voter);
 
         if (this.mode === VotersRule.Mode.ONE) { // "one of" mode (every post voter must be within this list)

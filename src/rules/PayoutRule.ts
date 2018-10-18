@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -28,7 +25,14 @@ export class PayoutRule extends Rule {
 
     public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
         this.validateRuleObject(this);
-        const post = await context.getPost();
+        let post;
+        try {
+            post = await context.getPost();
+        }
+        catch (e) {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
+        }
         const payout = PayoutRule._parsePayout(post.total_payout_value);
 
         if (this.mode == PayoutRule.Mode.EQUAL) {

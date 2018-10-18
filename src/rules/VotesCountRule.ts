@@ -24,9 +24,16 @@ export class VotesCountRule extends Rule {
         return Rule.Type.VotesCount;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
-        const post = await context.getPost();
+        let post;
+        try {
+            post = await context.getPost();
+        }
+        catch (e) {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
+        }
         const voteCount = post.active_votes.length;
 
         if (this.mode == VotesCountRule.Mode.EQUAL) {

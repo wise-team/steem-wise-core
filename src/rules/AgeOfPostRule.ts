@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { Rule } from "./Rule";
@@ -8,6 +5,7 @@ import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { SteemPost } from "../blockchain/SteemPost";
+import { NotFoundException } from "../util/NotFoundException";
 
 /**
  * This rule limits age of the post.
@@ -30,9 +28,16 @@ export class AgeOfPostRule extends Rule {
         return Rule.Type.AgeOfPost;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
-        const post: SteemPost = await context.getPost();
+        let post;
+        try {
+            post = await context.getPost();
+        }
+        catch (e) {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
+        }
 
         const unitMultiplier = (this.unit === AgeOfPostRule.TimeUnit.DAY ? 24 * 60 * 60 :
                                 (this.unit === AgeOfPostRule.TimeUnit.HOUR ? 60 * 60 :

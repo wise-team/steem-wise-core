@@ -1,6 +1,3 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 
 import { ValidationException } from "../validation/ValidationException";
@@ -26,9 +23,16 @@ export class AuthorsRule extends Rule {
         return Rule.Type.Authors;
     }
 
-    public async validate (voteorder: SendVoteorder, context: ValidationContext): Promise<void> {
+    public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
-        const post: SteemPost = await context.getPost();
+        let post;
+        try {
+            post = await context.getPost();
+        }
+        catch (e) {
+            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
+            else throw e;
+        }
 
         const authorIsOnList: boolean = (this.authors.indexOf(post.author) !== -1);
         if (this.mode == AuthorsRule.Mode.ALLOW) {
@@ -37,11 +41,6 @@ export class AuthorsRule extends Rule {
         else {
             if (authorIsOnList) throw new ValidationException("Author of the post is on the deny list.");
         }
-
-        /*.catch((e: Error) => {
-            if ((e as NotFoundException).notFoundException) throw new ValidationException(e.message);
-            else throw e;
-        });*/
     }
 
     public validateRuleObject(unprototypedObj: any) {
