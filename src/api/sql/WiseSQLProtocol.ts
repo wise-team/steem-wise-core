@@ -1,3 +1,6 @@
+import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
+import * as url from "url";
+import * as _ from "lodash";
 import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
 import { WiseCommand } from "../../protocol/WiseCommand";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
@@ -22,28 +25,89 @@ export namespace WiseSQLProtocol {
          */
         export function isRow(o: any): o is Row {
             return typeof o === "object"
-                && (<Row>o).id !== undefined && typeof o.id === "number"
-                && (<Row>o).block_num !== undefined && typeof o.block_num === "number"
-                && (<Row>o).transaction_num !== undefined && typeof o.transaction_num === "number"
-                && (<Row>o).transaction_id !== undefined && typeof o.transaction_id === "string"
-                && (<Row>o).timestamp !== undefined && typeof o.timestamp === "number"
-                && (<Row>o).moment !== undefined && typeof o.moment === "number"
-                && (<Row>o).voter !== undefined && typeof o.voter === "string"
-                && (<Row>o).block_num !== undefined && typeof o.block_num === "string"
-                && (<Row>o).delegator !== undefined && typeof o.delegator === "string"
-                && (<Row>o).operation_type !== undefined && typeof o.operation_type === "string"
+                && typeof (<Row>o).id === "number"
+                && typeof (<Row>o).block_num === "number"
+                && typeof (<Row>o).transaction_num === "number"
+                && typeof (<Row>o).transaction_id === "string"
+                && typeof (<Row>o).timestamp === "string"
+                && typeof (<Row>o).moment === "number"
+                && typeof (<Row>o).voter === "string"
+                && typeof (<Row>o).delegator === "string"
+                && typeof (<Row>o).operation_type === "string"
                 && ([ "set_rules", "send_voteorder", "confirm_vote" ].indexOf((<Row>o).operation_type) !== -1)
-                && (<Row>o).json_str !== undefined && typeof o.json_str === "string"
+                && typeof (<Row>o).json_str === "string"
             ;
         }
     }
 
     export class Handler {
-        public static handleRow(protocolVersion: string, row: object): EffectuatedWiseOperation {
+        private static async query(params: {
+            endpointUrl: string, path: string, method: "get" | "post", params: object,
+            data: object
+        }, loadNextPages: boolean = true): Promise<EffectuatedWiseOperation []> {
+            const queryConfig: AxiosRequestConfig = {};
+
+            queryConfig.method = params.method;
+            if (params.params) queryConfig.params = params.params;
+            if (params.data) queryConfig.data = params.data;
+
+            const response = await axios(queryConfig);
+
+            if (!response.data) throw new Error("No response from server");
+            if (!Array.isArray(response.data)) throw new Error("Malformed response from server");
+            const protocolVersion = Handler.getProtocolVersionFromResponse(response);
+            const out = response.data.map(row => Handler.handleRow(protocolVersion, row));
+
+            if (loadNextPages && out.length > 0) {
+                const nextPageOffset = Handler.nextPageOffset(response); // this method decides if next page exists
+                if (nextPageOffset > 0) {
+                    const paginatedParams: any = _.cloneDeep(params);
+                    paginatedParams.params["offset"] = nextPageOffset + "";
+                    const nextPageOut = await Handler.query(paginatedParams, true);
+                    nextPageOut.forEach(responseOp => out.push(responseOp));
+                }
+            }
+
+            return out;
+        }
+
+        private static getProtocolVersionFromResponse(response: AxiosResponse): string {
+            if (!response.headers["wisesql-protocol-version"]) throw new Error("Response is missing the \"wisesql-protocol-version\" header. Check if it is a wiseSQL endpoint.");
+            return response.headers["wisesql-protocol-version"].trim();
+        }
+
+        private static nextPageOffset(response: AxiosResponse): number {
+            if (!response.headers["content-range"]) throw new Error("Response is missing the \"content-range\" header. Check if it is a wiseSQL endpoint.");
+            if (!response.headers["wisesql-max-rows-per-page"]) throw new Error("Response is missing the \"wisesql-max-rows-per-page\" header. Check if it is a wiseSQL endpoint.");
+
+            const contentRangeStr = response.headers["content-range"].trim();
+            const contentRangeRegExp: RegExp = /^([0-9]+)-?([0-9]*)\/?([0-9]*|\*)?$/giu;
+            const matches = contentRangeRegExp.exec(contentRangeStr);
+            if (!matches || matches.length < 3) throw new Error("Malformed content-range header: '" + contentRangeStr + "'");
+            const offset: number = parseInt(matches[1], 10);
+            const lastIndex: number = parseInt(matches[2], 10);
+
+            if (matches.length > 3 && matches[3] !== "*") { // this is the case when the server sends the full length of db query result
+                const fullLength = parseInt(matches[3], 10);
+                if (!((lastIndex + 1) === fullLength)) {
+                    return lastIndex + 1;
+                }
+            }
+            else {
+                const maxRowsPerPage = parseInt(response.headers["wisesql-max-rows-per-page"], 10);
+                const resultLength = lastIndex - offset + 1 /* we calculate length thats why add 1 */;
+                if (resultLength === maxRowsPerPage) {
+                    return lastIndex + 1;
+                }
+            }
+            return -1;
+        }
+
+        private static handleRow(protocolVersion: string, row: object): EffectuatedWiseOperation {
             if (protocolVersion !== "1.0") throw new Error("Unsupported protocol version " + protocolVersion + ". "
                 + "Consider updating steem-wise-core lib or contact wise-team. This version supports only v1.0 protocol.");
 
-            if (!Row.isRow(row)) throw new Error("Row is malformed");
+            if (!Row.isRow(row)) throw new Error("Row is malformed: " + JSON.stringify(row));
 
             const cmd = JSON.parse(row.json_str);
             if (!WiseCommand.isWiseCommand(cmd)) throw new Error("Malformed WiseCommand object in row.json_str");
