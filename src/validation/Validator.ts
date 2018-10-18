@@ -2,8 +2,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 
-import { Log } from "../util/log";  const log = Log.getLogger();
-
+import { Log } from "../util/log";
 import { Api } from "../api/Api";
 import { ValidationException } from "./ValidationException";
 import { Protocol } from "../protocol/Protocol";
@@ -39,30 +38,41 @@ export class Validator {
     }
 
     public provideRulesets(rulesets: EffectuatedSetRules) {
-        Log.cheapDebug(() => "VALIDATOR_PROVIDED_WITH_RULESETS=" + JSON.stringify(rulesets));
+        Log.log().cheapDebug(() => "VALIDATOR_PROVIDED_WITH_RULESETS=" + JSON.stringify(rulesets));
         this.providedRulesets = rulesets;
     }
 
     public async validate (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> {
-        Log.cheapDebug(() => "VALIDATOR_VALIDATE=" + JSON.stringify({delegator: delegator, voter: voter, voteorder: voteorder, atMoment: atMoment}));
-        const context = new ValidationContext(this.api, this.protocol, delegator, voter, voteorder);
+        Log.log().cheapDebug(() => "VALIDATOR_VALIDATE=" + JSON.stringify({delegator: delegator, voter: voter, voteorder: voteorder, atMoment: atMoment}));
+        try {
+            const context = new ValidationContext(this.api, this.protocol, delegator, voter, voteorder);
 
-        this.validateVoteorderObject(voteorder);
+            this.validateVoteorderObject(voteorder);
 
-        this.proggressCallback("Loading rulesets...", 0);
-        let rulesets: SetRules;
-        if (this.providedRulesets) rulesets = this.providedRulesets;
-        rulesets = await this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
+            this.proggressCallback("Loading rulesets...", 0);
+            let rulesets: SetRules;
+            if (this.providedRulesets) {
+                rulesets = this.providedRulesets;
+            }
+            else {
+                rulesets = await this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
+            }
+            Log.log().cheapDebug(() => "VALIDATOR_USING_RULESETS=" + JSON.stringify(rulesets));
 
-        let rules = this.selectRuleset(rulesets, voteorder); // select correct ruleset (using rulesetName)
-        rules = rules.concat(ImposedRules.getImposedRules(delegator, voter)); // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
+            let rules = this.selectRuleset(rulesets, voteorder); // select correct ruleset (using rulesetName)
+            rules = rules.concat(ImposedRules.getImposedRules(delegator, voter)); // apply imposed rules (this rules are necessary to prevent violations of some of the steem blockchain rules)
 
-        this.proggressCallback("Validating rules...", 0.3);
+            this.proggressCallback("Validating rules...", 0.3);
 
-        await this.validateRules(rules, voteorder, context);
+            await this.validateRules(rules, voteorder, context);
 
-        this.proggressCallback("Validation done", 1.0);
-        return true;
+            this.proggressCallback("Validation done", 1.0);
+            return true;
+        }
+        catch (error) {
+            if (ValidationException.isValidationException(error)) return error as ValidationException;
+            else throw error;
+        }
     }
 
     private validateVoteorderObject (voteorder: SendVoteorder) {
@@ -79,7 +89,7 @@ export class Validator {
         for (let i = 0; i < rulesets.rulesets.length; i++) {
             const ruleset = rulesets.rulesets[i];
             if (ruleset.name === voteorder.rulesetName) {
-                Log.cheapDebug(() => "VALIDATOR_SELECTED_RULESET=" + JSON.stringify(ruleset.rules));
+                Log.log().cheapDebug(() => "VALIDATOR_SELECTED_RULESET=" + JSON.stringify(ruleset.rules));
                 return ruleset.rules;
             }
         }
@@ -91,10 +101,10 @@ export class Validator {
         .map(async (rule) => {
             try {
                 await rule.validate(voteorder, context);
-                Log.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_SUCCEEDED=" + JSON.stringify(rule));
+                Log.log().cheapDebug(() => "VALIDATOR_RULE_VALIDATION_SUCCEEDED=" + JSON.stringify(rule));
             }
             catch (error) {
-                Log.cheapDebug(() => "VALIDATOR_RULE_VALIDATION_FAILED=" + JSON.stringify({ rule: rule, error: error.message }));
+                Log.log().cheapDebug(() => "VALIDATOR_RULE_VALIDATION_FAILED=" + JSON.stringify({ rule: rule, error: error.message }));
                     throw error;
             }
         }, {  concurrency: this.concurrency });

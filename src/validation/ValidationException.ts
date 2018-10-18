@@ -13,3 +13,12 @@ export class ValidationException extends Error {
         // "es6" it can be replaced with "Object.setPrototypeOf"
     }
 }
+
+export namespace ValidationException {
+    /**
+     * This is an TS 1.6+ TypeGuard as described here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
+     */
+    export function isValidationException(o: any): o is ValidationException {
+        return typeof o === "object" && !!(o as ValidationException).validationException;
+    }
+}
