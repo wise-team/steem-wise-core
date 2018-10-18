@@ -1,21 +1,24 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { AuthorsRule, SendVoteorder, Wise, ValidationException, Api } from "../../src/wise";
 import { ValidationContext } from "../../src/validation/ValidationContext";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 
-/* CONFIG */
-const delegator = "noisy";
-const voter = "perduta";
-const fakeApi: Api = FakeWiseFactory.buildFakeApi();
-const wise = new Wise(voter, fakeApi);
-
-
 describe("test/unit/rule-authors.spec.ts", () => {
+    const delegator = "noisy";
+    const voter = "perduta";
+    let fakeApi: Api;
+    let wise: Wise;
+
+    before(() => {
+        fakeApi = FakeWiseFactory.buildFakeApi();
+        wise = new Wise(voter, fakeApi);
+    });
+
     describe("AuthorsRule", function() {
         it("AllowMode: passes allowed author", () => {
             const rule = new AuthorsRule(AuthorsRule.Mode.ALLOW, ["noisy", "perduta"]);

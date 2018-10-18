@@ -5,7 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
 import "mocha";
-import { Log } from "../../src/util/log"; const log = Log.getLogger();
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, Ruleset } from "../../src/wise";
@@ -19,52 +19,41 @@ import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 /* PREPARE TESTING DATASETS */
 import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { SynchronizerTestToolkit } from "./util/SynchronizerTestToolkit";
 
 BluebirdPromise.onPossiblyUnhandledRejection(function(error) {
     throw error;
 });
 
 /**
- * Setup
- */
-const voter = "voter123";
-const delegator = "delegator456";
-const fakeDataset = FakeWiseFactory.loadDataset();
-const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
-const delegatorWise = new Wise(delegator, fakeApi as object as Api);
-const voterWise = new Wise(voter, fakeApi as object as Api);
-
-
-
-/**
  * Run!
  */
-let synchronizer: Synchronizer;
-
 describe("test/unit/synchronization.spec.ts", () => {
     describe("Synchronizer", function() {
         this.timeout(2000);
-        let synchronizationPromise: Promise<void>;
-        it("Starts synchronization without error", () => {
-            const synchronizationPromiseReturner = () => new BluebirdPromise<void>((resolve, reject) => {
-                synchronizer = delegatorWise.startDaemon(new SteemOperationNumber(fakeApi.getCurrentBlockNum(), 0, 0),
-                    (error: Error | undefined, event: Synchronizer.Event): void => {
-                    if (event.type === Synchronizer.EventType.SynchronizationStop) {
-                        resolve();
-                    }
-                    // log.info(event);
 
-                    if (error) {
-                        reject(error);
-                        synchronizer.stop();
-                    }
-                });
-                synchronizer.setTimeout(200);
-            });
-            synchronizationPromise = synchronizationPromiseReturner();
+        const voter = "voter123";
+        const delegator = "delegator456";
+        let fakeDataset: FakeApi.Dataset;
+        let fakeApi: FakeApi;
+        let delegatorWise: Wise;
+        let voterWise: Wise;
+        let synchronizerToolkit: SynchronizerTestToolkit;
+        const nowTime = new Date(Date.now());
+
+        before(function () {
+            fakeDataset = FakeWiseFactory.loadDataset();
+            fakeApi = FakeApi.fromDataset(fakeDataset);
+            delegatorWise = new Wise(delegator, fakeApi as object as Api);
+            voterWise = new Wise(voter, fakeApi as object as Api);
+            synchronizerToolkit = new SynchronizerTestToolkit(delegatorWise);
         });
 
-        it("rejects voteorder sent before rules", () => {
+        it("Starts synchronization without error", () => {
+            synchronizerToolkit.start((fakeApi as any as FakeApi).getCurrentBlockNum());
+        });
+
+        it("rejects voteorder sent before rules", async () => {
             const post: SteemPost = Util.definedOrThrow(_.sample(fakeDataset.posts), new Error("post is undefined"));
             const vo: SendVoteorder = {
                 rulesetName: "RulesetOneChangesContent",
@@ -74,21 +63,18 @@ describe("test/unit/synchronization.spec.ts", () => {
             };
 
             const skipValidation = true;
-            return voterWise.sendVoteorder(delegator, vo, undefined, () => {}, skipValidation)
-            .then((son: SteemOperationNumber) => {
-                expect(son.blockNum).to.be.greaterThan(0);
-            })
-            .then(() => BluebirdPromise.delay(80))
-            .then(() => {
-                const lastTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastTrx));
-                expect(handleResult).to.be.an("array").with.length(1);
-                expect(ConfirmVote.isConfirmVote(handleResult[0].command)).to.be.true;
-                expect((handleResult[0].command as ConfirmVote).accepted).to.be.false;
-            });
+            const moment = await voterWise.sendVoteorder(delegator, vo, undefined, () => {}, skipValidation);
+            expect(moment.blockNum).to.be.greaterThan(0);
+            await BluebirdPromise.delay(80);
+
+            const lastTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
+            const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastTrx));
+            expect(handleResult).to.be.an("array").with.length(1);
+            expect(ConfirmVote.isConfirmVote(handleResult[0].command)).to.be.true;
+            expect((handleResult[0].command as ConfirmVote).accepted).to.be.false;
         });
 
-        it("Delegator sets rules for voter", () => {
+        it("Delegator sets rules for voter", async () => {
             const sendRulesets: Ruleset [] = [
                 {
                     name: "RulesetOneChangesContent",
@@ -105,18 +91,13 @@ describe("test/unit/synchronization.spec.ts", () => {
                     ]
                 }
             ];
-            return delegatorWise.uploadRulesetsForVoter(voter, sendRulesets)
-            .then((son: SteemOperationNumber) => {
-                expect(son.blockNum).to.be.greaterThan(0);
-            })
-            .then(() => BluebirdPromise.delay(50))
-            .then(() => {
-                return voterWise.downloadRulesetsForVoter(delegator, voter);
-            })
-            .then((gotRulesets: Ruleset []) => {
-                expect(gotRulesets).to.be.an("array").with.length(sendRulesets.length);
-                sendRulesets.forEach((gotRule, i) => expect(gotRule.name).to.be.equal(sendRulesets[i].name));
-            });
+            const son = await delegatorWise.uploadRulesetsForVoter(voter, sendRulesets);
+            expect(son.blockNum).to.be.greaterThan(0);
+            await BluebirdPromise.delay(50);
+            const gotRulesets: Ruleset [] = await voterWise.downloadRulesetsForVoter(delegator, voter);
+
+            expect(gotRulesets).to.be.an("array").with.length(sendRulesets.length);
+            sendRulesets.forEach((gotRule, i) => expect(gotRule.name).to.be.equal(sendRulesets[i].name));
         });
 
         const validVoteorders1: SendVoteorder [] = [
@@ -133,19 +114,15 @@ describe("test/unit/synchronization.spec.ts", () => {
                 weight: 1
             }
         ];
-        validVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends valid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator passes them", () => {
-            return voterWise.sendVoteorder(delegator, voteorder)
-            .then((moment: SteemOperationNumber) => {
-                expect(moment.blockNum).to.be.greaterThan(0);
-            })
-            .then(() => BluebirdPromise.delay(100))
-            .then(() => {
-                const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
-                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
-                expect(ConfirmVote.isConfirmVote(lastHandledOp.command), "isConfirmVote").to.be.true;
-                expect((lastHandledOp.command as ConfirmVote).accepted, "accepted").to.be.true;
-            });
+        validVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends valid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator passes them", async () => {
+            const moment = await voterWise.sendVoteorder(delegator, voteorder);
+            expect(moment.blockNum).to.be.greaterThan(0);
+            await BluebirdPromise.delay(100);
+            const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
+            const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+            const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+            expect(ConfirmVote.isConfirmVote(lastHandledOp.command), "isConfirmVote").to.be.true;
+            expect((lastHandledOp.command as ConfirmVote).accepted, "accepted").to.be.true;
         }));
 
         const invalidVoteorders1: SendVoteorder [] = [
@@ -163,21 +140,19 @@ describe("test/unit/synchronization.spec.ts", () => {
             }
         ];
 
-        invalidVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends invalid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator rejects them", () => {
+        invalidVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends invalid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator rejects them", async () => {
             const skipValidation = true;
-            return voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation)
-            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => BluebirdPromise.delay(100))
-            .then(() => {
-                const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
-                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
-                expect(ConfirmVote.isConfirmVote(lastHandledOp.command), "last pushed op is confirm vote").to.be.true;
-                expect((lastHandledOp.command as ConfirmVote).accepted, "last pushed op is accepted confirm vote").to.be.false;
-            });
+            const moment = await voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation);
+            expect(moment.blockNum).to.be.greaterThan(0);
+            await BluebirdPromise.delay(100);
+            const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
+            const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+            const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+            expect(ConfirmVote.isConfirmVote(lastHandledOp.command), "last pushed op is confirm vote").to.be.true;
+            expect((lastHandledOp.command as ConfirmVote).accepted, "last pushed op is accepted confirm vote").to.be.false;
         }));
 
-        it("Delegator changes rules", () => {
+        it("Delegator changes rules", async () => {
             const sendRulesets: Ruleset [] = [
                 {
                     name: "RulesetOneChangesContent",
@@ -188,33 +163,26 @@ describe("test/unit/synchronization.spec.ts", () => {
                     ]
                 }
             ];
-            return delegatorWise.uploadRulesetsForVoter(voter, sendRulesets)
-            .then((son: SteemOperationNumber) => {
-                expect(son.blockNum).to.be.greaterThan(0);
-            })
-            .then(() => BluebirdPromise.delay(50))
-            .then(() => {
-                return voterWise.downloadRulesetsForVoter(delegator, voter);
-            })
-            .then((gotRulesets: Ruleset []) => {
-                expect(gotRulesets).to.be.an("array").with.length(sendRulesets.length);
-                sendRulesets.forEach((gotRule, i) => expect(gotRule.name).to.be.equal(sendRulesets[i].name));
-            });
+            const son = await delegatorWise.uploadRulesetsForVoter(voter, sendRulesets);
+            expect(son.blockNum).to.be.greaterThan(0);
+            await BluebirdPromise.delay(50);
+            const gotRulesets: Ruleset [] = await voterWise.downloadRulesetsForVoter(delegator, voter);
+            expect(gotRulesets).to.be.an("array").with.length(sendRulesets.length);
+            sendRulesets.forEach((gotRule, i) => expect(gotRule.name).to.be.equal(sendRulesets[i].name));
         });
 
         const previouslyValidNowInvalidVoteorders = validVoteorders1;
-        previouslyValidNowInvalidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends previously valid (but now invalid) voteorder (ruleset= " + voteorder.rulesetName + ") and delegator rejects them", () => {
+        previouslyValidNowInvalidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends previously valid (but now invalid) voteorder (ruleset= " + voteorder.rulesetName + ") and delegator rejects them", async () => {
             const skipValidation = true;
-            return voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation)
-            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => BluebirdPromise.delay(100))
-            .then(() => {
-                const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
-                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
-                expect(ConfirmVote.isConfirmVote(lastHandledOp.command)).to.be.true;
-                expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
-            });
+            const moment = await voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation);
+            expect(moment.blockNum).to.be.greaterThan(0);
+            await BluebirdPromise.delay(100);
+
+            const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
+            const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+            const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+            expect(ConfirmVote.isConfirmVote(lastHandledOp.command)).to.be.true;
+            expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
         }));
 
         const previouslyInalidNowValidVoteorders: SendVoteorder [] = [
@@ -225,20 +193,18 @@ describe("test/unit/synchronization.spec.ts", () => {
                 weight: 1
             }
         ];
-        previouslyInalidNowValidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends now valid (but previously invalid) voteorder (rulesetName= " + voteorder.rulesetName + ") and delegator passes them", () => {
-            return voterWise.sendVoteorder(delegator, voteorder)
-            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => BluebirdPromise.delay(100))
-            .then(() => {
-                const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
-                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
-                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
-                expect(ConfirmVote.isConfirmVote(lastHandledOp.command)).to.be.true;
-                expect((lastHandledOp.command as ConfirmVote).accepted).to.be.true;
-            });
+        previouslyInalidNowValidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends now valid (but previously invalid) voteorder (rulesetName= " + voteorder.rulesetName + ") and delegator passes them", async () => {
+            const moment = await voterWise.sendVoteorder(delegator, voteorder);
+            expect(moment.blockNum).to.be.greaterThan(0);
+            await BluebirdPromise.delay(100);
+            const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
+            const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+            const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+            expect(ConfirmVote.isConfirmVote(lastHandledOp.command)).to.be.true;
+            expect((lastHandledOp.command as ConfirmVote).accepted).to.be.true;
         }));
 
-        it("Delegator rejects nonexistent post with negative confirmation but without error", () => {
+        it("Delegator rejects nonexistent post with negative confirmation but without error", async () => {
             const voteorder: SendVoteorder = {
                 rulesetName: "RulesetOneChangesContent",
                 author: "perduta",
@@ -246,35 +212,32 @@ describe("test/unit/synchronization.spec.ts", () => {
                 weight: 5
             };
 
-            const skipValidation = true;
-            return voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation)
-            .then((moment: SteemOperationNumber) => expect(moment.blockNum).to.be.greaterThan(0))
-            .then(() => BluebirdPromise.delay(50), (e: Error) => {
-                if ((e as ValidationException).validationException) throw new Error("ValidationException present at send");
-                else throw e;
-            })
-            .then(() => {
+            try {
+                const skipValidation = true;
+                const moment = await voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation);
+                expect(moment.blockNum).to.be.greaterThan(0);
+                await BluebirdPromise.delay(120);
+
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(ConfirmVote.isConfirmVote(lastHandledOp.command)).to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
-            }, (e: Error) => {
+            }
+            catch (e) {
                 if ((e as ValidationException).validationException) throw new Error("Should not throw ValidationException, but pass it");
                 else throw e;
-            });
+            }
         });
 
-        it("Stops synchronization properly", () => {
-            synchronizer.stop();
-            return fakeApi.pushFakeBlock().then((son: SteemOperationNumber) => {
-                return synchronizationPromise.then(() => {});
-            }).then(() => {});
+        it("Stops synchronization properly", async () => {
+            synchronizerToolkit.getSynchronizer().stop();
+            await (fakeApi as any as FakeApi).pushFakeBlock();
+            await synchronizerToolkit.getSynchronizerPromise().then(() => {});
         });
 
-        it("Ends synchronization without error", () => {
-            return synchronizationPromise.then(() => {});
+        it("Ends synchronization without error", async () => {
+            await synchronizerToolkit.getSynchronizerPromise().then(() => {});
         });
-
     });
 });

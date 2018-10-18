@@ -5,7 +5,6 @@ import * as BluebirdPromise from "bluebird";
 import "mocha";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
 
 // wise imports
 import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedWiseOperation, Ruleset } from "../../src/wise";
@@ -16,6 +15,9 @@ import { FakeApi } from "../../src/api/FakeApi";
 import { wise_rule_weight_for_period, wise_rule_weight_for_period_encode, wise_rule_weight_for_period_decode } from "../../src/protocol/versions/v2/rules/rule-weight-for-period-schema";
 import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 import { ConfirmVoteBoundWithVote } from "../../src/protocol/ConfirmVoteBoundWithVote";
+import { SynchronizerTestToolkit } from "./util/SynchronizerTestToolkit";
+
+import { Log } from "../../src/util/log";
 
 /* CONFIG */
 const delegator = "nonexistentdelegator" + Date.now();
@@ -72,38 +74,21 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
             });
         });
 
-        tests.forEach(test => describe(test.name + ", unit: " + test.unit, () => {
+        const fakeDataset: FakeApi.Dataset = FakeWiseFactory.loadDataset();
+        tests.forEach((test, index) => describe(test.name + ", unit: " + test.unit, () => {
             let fakeApi: Api;
             let delegatorWise: Wise;
-
-            before(function () {
-                this.timeout(5000);
-                fakeApi = FakeWiseFactory.buildFakeApi();
-                delegatorWise = new Wise(delegator, fakeApi);
-            });
-
+            let synchronizerToolkit: SynchronizerTestToolkit;
             const nowTime = new Date(Date.now());
 
-            let synchronizer: Synchronizer;
-            let synchronizationPromise: Promise<void>;
+            before(function () {
+                fakeApi = FakeWiseFactory.buildFakeApiWithDataset(fakeDataset);
+                delegatorWise = new Wise(delegator, fakeApi);
+                synchronizerToolkit = new SynchronizerTestToolkit(delegatorWise);
+            });
 
             it("Starts synchronization without error", () => {
-                const synchronizationPromiseReturner = () => new BluebirdPromise<void>((resolve, reject) => {
-                    synchronizer = delegatorWise.startDaemon(new SteemOperationNumber((fakeApi as any as FakeApi).getCurrentBlockNum(), 0, 0),
-                        (error: Error | undefined, event: Synchronizer.Event): void => {
-                        if (event.type === Synchronizer.EventType.SynchronizationStop) {
-                            resolve();
-                        }
-                        // if (event.type === Synchronizer.EventType.OperarionsPushed) log.info(event);
-
-                        if (error) {
-                            reject(error);
-                            synchronizer.stop();
-                        }
-                    });
-                    synchronizer.setTimeout(800);
-                });
-                synchronizationPromise = synchronizationPromiseReturner();
+                synchronizerToolkit.start((fakeApi as any as FakeApi).getCurrentBlockNum());
             });
 
             it("Sets rules", () => {
@@ -132,7 +117,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     (fakeApi as any as FakeApi).setFakeTime(fakeTime);
                     return voterWise.generateVoteorderOperations(delegator, vo.voter, voteorder)
                     .then((ops: [string, object][]) => (fakeApi as any as FakeApi).sendToBlockchain(ops))
-                    .then(() => BluebirdPromise.delay(60))
+                    .then(() => BluebirdPromise.delay(100))
                     .then(() => (fakeApi as any as FakeApi).setFakeTime(new Date(nowTime.getTime())));
                 });
             });
@@ -201,15 +186,14 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                 });
             });
 
-            it("Stops synchronization properly", () => {
-                synchronizer.stop();
-                return (fakeApi as any as FakeApi).pushFakeBlock().then((son: SteemOperationNumber) => {
-                    return synchronizationPromise.then(() => {});
-                }).then(() => {});
+            it("Stops synchronization properly", async () => {
+                synchronizerToolkit.getSynchronizer().stop();
+                await (fakeApi as any as FakeApi).pushFakeBlock();
+                await synchronizerToolkit.getSynchronizerPromise().then(() => {});
             });
 
-            it("Ends synchronization without error", () => {
-                return synchronizationPromise.then(() => {});
+            it("Ends synchronization without error", async () => {
+                await synchronizerToolkit.getSynchronizerPromise().then(() => {});
             });
         }));
 

@@ -3,7 +3,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import "mocha";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { OneTimePromise } from "../../src/util/OneTimePromise";
@@ -13,8 +13,8 @@ describe("test/unit/util.spec.ts", () => {
     describe("OneTimePromise", function() {
         it("runs the promise exactly once", (done) => {
             let calls = 0;
-            const promiseReturner = () => {
-                return new BluebirdPromise<number>((resolve, reject) => {
+            const promiseReturner = async () => {
+                return await new BluebirdPromise<number>((resolve, reject) => {
                     setTimeout(() => {
                         calls++;
                         resolve(calls);
@@ -48,8 +48,8 @@ describe("test/unit/util.spec.ts", () => {
             let numOfRejects = 0;
             let numOfResolves = 0;
             let numOfCalls = 0;
-            const promiseReturner = () => {
-                return new BluebirdPromise<number>((resolve, reject) => {
+            const promiseReturner = async () => {
+                return await new BluebirdPromise<number>((resolve, reject) => {
                     setTimeout(() => {
                         numOfCalls++;
                         reject(new Error("Some error"));
@@ -82,8 +82,8 @@ describe("test/unit/util.spec.ts", () => {
 
         it("rejects on thrown errors", (done) => {
             let numOfRejects = 0;
-            const promiseReturner = () => {
-                return new BluebirdPromise<number>((resolve, reject) => {
+            const promiseReturner = async () => {
+                return await new BluebirdPromise<number>((resolve, reject) => {
                     throw new Error("Some error");
                 });
             };

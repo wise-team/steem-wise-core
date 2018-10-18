@@ -5,7 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
 import "mocha";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { Wise, SteemOperationNumber, Api } from "../../src/wise";
@@ -49,7 +49,7 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
         this.timeout(3000);
         let synchronizationPromise: Promise<void>;
         it("Starts synchronization without error", () => {
-            const synchronizationPromiseReturner = () => new BluebirdPromise<void>((resolve, reject) => {
+            const synchronizationPromiseReturner = async () => await new BluebirdPromise<void>((resolve, reject) => {
                 synchronizer = delegatorWise.startDaemon(new SteemOperationNumber(fromBlock, 0, 0),
                     (error: Error | undefined, event: Synchronizer.Event): void => {
                     if (event.type === Synchronizer.EventType.SynchronizationStop) {
@@ -62,9 +62,9 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
                         confirmations.push({ voteorderTx: event.voteorderTxId, accepted: false });
                     }
                     else if (event.type === Synchronizer.EventType.EndBlockProcessing) {
-                        if (event.blockNum % 5000 === 0) log.info(event);
+                        if (event.blockNum % 5000 === 0) Log.log().json(Log.level.info, event);
                         if (event.blockNum === toBlock) {
-                            log.info("Last block. Stopping synchronization");
+                            Log.log().info("Last block. Stopping synchronization");
                             synchronizer.stop();
                             fakeApi.pushFakeBlock().then((son: SteemOperationNumber) => {
                                 return synchronizationPromise.then(() => {});
@@ -72,7 +72,7 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
                         }
                     }
                     if (event.type !== Synchronizer.EventType.StartBlockProcessing
-                    && event.type !== Synchronizer.EventType.EndBlockProcessing) log.info(event);
+                    && event.type !== Synchronizer.EventType.EndBlockProcessing) Log.log().json(Log.level.info, event);
 
                     if (error) {
                         reject(error);

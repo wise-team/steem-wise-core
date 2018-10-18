@@ -5,7 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import { expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { AuthorsRule, SendVoteorder, TagsRule, WeightRule, CustomRPCRule, VotingPowerRule, ExpirationDateRule } from "../../src/wise";
@@ -15,7 +15,7 @@ import { RulePrototyper } from "../../src/rules/RulePrototyper";
 
 describe("test/unit/rules-prototyper.spec.ts", () => {
     describe("RulesPrototyper", () => {
-        it ("Unserialized rules are equal to serialized after prototyping", () => {
+        it("Unserialized rules are equal to serialized after prototyping", () => {
             const rulesPrimary: Rule [] = [
                 new WeightRule(0, 100),
                 new AuthorsRule(AuthorsRule.Mode.DENY, ["1"]),
@@ -39,8 +39,8 @@ describe("test/unit/rules-prototyper.spec.ts", () => {
             rulesPrototyped.forEach((rule: Rule) => expect(rule).to.have.property("validate"));
 
             expect(rulesUnprototyped).to.not.equal(rulesPrimary);
-            expect(rulesUnprototyped, "rulesUnprototyped").to.not.deep.equal(rulesPrimary, "rulesPrimary");
-            expect(rulesPrototyped, "rulesPrototyped").to.deep.equal(rulesPrimary, "rulesPrimary");
+            expect(_.isEqual(rulesUnprototyped, rulesPrimary)).to.be.false;
+            expect(_.isEqual(rulesPrototyped, rulesPrimary)).to.be.true;
         });
 
         const rulesForReprototypingTest: [Rule, string] [] = [
@@ -68,13 +68,13 @@ describe("test/unit/rules-prototyper.spec.ts", () => {
 
                 const ruleOmitedUnprototyped = JSON.parse(JSON.stringify(omitedRule));
                 expect(ruleOmitedUnprototyped).to.not.equal(omitedRule);
-                expect(ruleOmitedUnprototyped).to.not.deep.equal(omitedRule);
+                // expect(ruleOmitedUnprototyped).to.not.deep.equal(omitedRule);
 
                 let hadThrown: boolean = false;
                 try {
                     const ruleOmitedReprototyped = RulePrototyper.fromUnprototypedRule(ruleOmitedUnprototyped);
                     expect(ruleOmitedReprototyped).to.not.equal(rulePrimary);
-                    expect(ruleOmitedReprototyped).to.not.deep.equal(rulePrimary);
+                    expect(_.isEqual(ruleOmitedReprototyped, rulePrimary)).to.be.false;
                     expect(ruleOmitedReprototyped).to.have.property("validate");
                 } catch (e) {
                     hadThrown = true;
@@ -83,6 +83,4 @@ describe("test/unit/rules-prototyper.spec.ts", () => {
             });
         }));
     });
-
-    // TODO test CustomRPCRule
 });
