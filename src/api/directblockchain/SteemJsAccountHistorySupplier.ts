@@ -3,7 +3,7 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
 
-import { Log } from "../../util/log"; const log = Log.getLogger();
+import { Log } from "../../util/log";
 
 import { ChainableSupplier } from "../../chainable/Chainable";
 import { SteemTransaction } from "../../blockchain/SteemTransaction";
@@ -121,7 +121,7 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
             = _.reverse(_.sortBy(opsMappedToStemTransactions, ["block_num", "transaction_num"]));
 
         opsMappedToStemTransactionsSorted.forEach(trx => {
-            if (Log.isDebug()) {
+            if (Log.log().isDebug()) {
                 let hasAcceptedConfirmVote: boolean = false;
                 let hasVote: boolean = false;
 
@@ -134,7 +134,7 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
                     .filter(o => _.get(o[1], "accepted") as boolean === true).length > 0) hasAcceptedConfirmVote = true;
 
                 if (hasAcceptedConfirmVote && !hasVote) {
-                    log.debug("STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE=" + JSON.stringify(trx) + "\n"
+                    Log.log().debug("STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE=" + JSON.stringify(trx) + "\n"
                         + "STEEM_JS_ACCOUNT_HISTORY_SUPPLIER_MISSING_VOTE_ALL_OPS=" + JSON.stringify(ops));
                 }
             }

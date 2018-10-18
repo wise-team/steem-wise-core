@@ -5,13 +5,13 @@ import "mocha";
 import * as _ from "lodash";
 import { expect, assert } from "chai";
 
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
 
 
-describe.only("test/unit/SteemOperationNumber.spec.ts", () => {
+describe("test/unit/SteemOperationNumber.spec.ts", () => {
     describe("SteemOperationNumber", () => {
         describe("#compare", () => {
             it ("Sorting using #compare does it in correct order", () => {

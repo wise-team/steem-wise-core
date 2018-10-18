@@ -1,7 +1,7 @@
 // 3rd party imports
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { SendVoteorder, Wise, WeightRule, Api } from "../../src/wise";

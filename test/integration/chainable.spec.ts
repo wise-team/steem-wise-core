@@ -5,7 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import { expect } from "chai";
 import "mocha";
 import * as steem from "steem";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/Log";
 
 // wise imports
 import { SimpleTaker } from "../../src/chainable/Chainable";
@@ -113,7 +113,7 @@ describe("test/integration/chainable.spec.ts", () => {
                                 if (indexInSamples !== -1) {
                                     if (indexInSamples !== 0) {
                                         const error = new Error("Votes returned in wrogn order. Received " + vote.permlink + ", sholudReceive: " + randomVoteOperationsInDescendingTimeOrder[0]);
-                                        log.error(error);
+                                        Log.log().exception(error, Log.level.error);
                                         throw error;
                                         continueLoading = false;
                                     }

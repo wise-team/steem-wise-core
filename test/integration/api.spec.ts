@@ -2,8 +2,7 @@
 import { assert, expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../../src/util/log"; const log = Log.getLogger();
-Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { Wise, EffectuatedSetRules } from "../../src/wise";
@@ -39,7 +38,7 @@ describe.only("test/integration/api.spec.ts", function () {
     this.timeout(30000);
 
     const apis: Api [] = [
-        new DirectBlockchainApi(postingWif),
+        // new DirectBlockchainApi(postingWif),
         // FakeWiseFactory.buildFakeApi(),
         new WiseSQLApi(wiseSqlEndpoint, Wise.constructDefaultProtocol(), new DirectBlockchainApi(postingWif))
     ];
@@ -152,7 +151,7 @@ describe.only("test/integration/api.spec.ts", function () {
             });
         });
 
-        describe.only("#loadAllRulesets", () => {
+        describe("#loadAllRulesets", () => {
             it("Loads properly all rulesets from protocol-v1-testing-sequence", () => {
                 const requiredRulesets: { ruleset: v1TestingSequence.RulesetsAtMoment, found: boolean } [] = [
                     // { ruleset: v1TestingSequence.stage1_0_Rulesets, found: false },
@@ -176,7 +175,7 @@ describe.only("test/integration/api.spec.ts", function () {
                 });
             });
 
-            it.only("Does load properly rulesets that were current for noisy at b23589679", () => {
+            it("Does load properly rulesets that were current for noisy at b23589679", () => {
                 return api.loadAllRulesets("noisy", new SteemOperationNumber(23589679, 0, 0), Wise.constructDefaultProtocol())
                 .then((result: EffectuatedSetRules []) => {
                     result.forEach(esr => {
@@ -365,7 +364,7 @@ describe.only("test/integration/api.spec.ts", function () {
                             const confirmVoteCmd: ConfirmVote = op.command;
                             if (confirmVoteCmd.accepted) {
                                 /*if (!isConfirmVoteBoundWithVote(confirmVoteCmd)) {
-                                    log.debug("CONFIRM_VOTE_NOT_BOUND_WITH_VOTE=" + JSON.stringify(op));
+                                    Log.log().debug("CONFIRM_VOTE_NOT_BOUND_WITH_VOTE=" + JSON.stringify(op));
                                 }*/
                                 expect(ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(confirmVoteCmd), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
                                 expect (confirmVoteCmd).to.haveOwnProperty("vote");

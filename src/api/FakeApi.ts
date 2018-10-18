@@ -3,7 +3,7 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
 
-import { Log } from "../util/log"; const log = Log.getLogger();
+import { Log } from "../util/log";
 import { SteemPost } from "../blockchain/SteemPost";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
@@ -106,7 +106,7 @@ export class FakeApi extends Api {
             this.transactionsByBlock[blockNum + ""] = [steemTrx];
             this.currentBlock = blockNum;
 
-            Log.cheapDebug(() => "FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx));
+            Log.log().cheapDebug(() => "FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx));
             return new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1);
     }
 
@@ -202,7 +202,7 @@ export class FakeApi extends Api {
                     const effSo = handleResult[j];
                     if ((effSo.delegator === username && ConfirmVote.isConfirmVote(effSo.command))
                         || (effSo.voter === username)) {
-                        // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.cheapDebug(() => JSON.stringify(effSo));
+                        // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.log().cheapDebug(() => JSON.stringify(effSo));
                         // (up) fake blockchain does not provide
                         // information on who pushed the operation to blockchain,
                         // so this hacky way is the only way to get this information.

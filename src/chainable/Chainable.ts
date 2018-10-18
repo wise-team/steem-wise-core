@@ -1,4 +1,4 @@
-import { Log } from "../util/log"; const log = Log.getLogger();
+import { Log } from "../util/log";
 
 export abstract class Chainable<FROM, TO, IMPLEMENTERCLASS extends Chainable<FROM, TO, IMPLEMENTERCLASS>> {
     // ABSTRACT MEMBERS
@@ -127,7 +127,7 @@ export class SimpleTaker<T> extends ChainableTaker<T, SimpleTaker<T>> {
         }
         catch (error) {
             this.onErrorCallback(error);
-            log.error(error);
+            Log.log().exception(error, Log.level.error);
             return false;
         }
     }

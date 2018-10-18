@@ -7,7 +7,7 @@ import { AccountInfo } from "../blockchain/AccountInfo";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { Protocol } from "../protocol/Protocol";
 import { BlogEntry } from "../blockchain/BlogEntry";
-import { Log } from "../util/log"; const log = Log.getLogger();
+import { Log } from "../util/log";
 
 export class ValidationContext {
     private api: Api;
@@ -26,7 +26,7 @@ export class ValidationContext {
         this.voter = voter;
         this.voteorder = voteorder;
 
-        Log.cheapDebug(() => "ValidationContext.construct(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + JSON.stringify(voteorder, undefined, 2));
+        Log.log().cheapDebug(() => "ValidationContext.construct(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + JSON.stringify(voteorder, undefined, 2));
     }
 
     public getPost(): Promise<SteemPost> {

@@ -1,7 +1,7 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../../src/util/log"; const log = Log.getLogger(); Log.setLevel("info");
+import { Log } from "../../src/util/log";
 
 // wise imports
 import { AgeOfPostRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";

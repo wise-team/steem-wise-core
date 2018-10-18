@@ -50,13 +50,13 @@ export class DirectBlockchainApi extends Api {
     }
 
     public setSendEnabled(enabled: boolean) {
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_SET_SEND_ENABLED=" + enabled);
+        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_SET_SEND_ENABLED=" + enabled);
 
         this.sendEnabled = enabled;
     }
 
     public async loadPost(author: string, permlink: string): Promise<SteemPost> {
-        Log.cheapDebug(
+        Log.log().cheapDebug(
             () => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink })
         );
 
@@ -70,7 +70,7 @@ export class DirectBlockchainApi extends Api {
     public async loadRulesets(
         delegator: string, voter: string, atMoment: SteemOperationNumber, protocol: Protocol
     ): Promise<SetRules> {
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS="
+        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS="
             + JSON.stringify({ delegator: delegator, voter: voter, atMoment: atMoment }));
 
         if (typeof delegator === "undefined" || delegator.length == 0)
@@ -112,11 +112,11 @@ export class DirectBlockchainApi extends Api {
 
     public async sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
         if (!this.sendEnabled) {
-            Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_DISABLED=" + JSON.stringify(operations));
+            Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_DISABLED=" + JSON.stringify(operations));
             return SteemOperationNumber.NEVER;
         }
 
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
+        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
         this.updateOptions();
         const result: { id: string, block_num: number, trx_num: number }
         = await steem.broadcast.sendAsync(
@@ -128,7 +128,7 @@ export class DirectBlockchainApi extends Api {
     }
 
     public async loadAllRulesets(delegator: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS=" + JSON.stringify({ delegator: delegator, atMoment: atMoment }));
+        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS=" + JSON.stringify({ delegator: delegator, atMoment: atMoment }));
 
         if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
@@ -167,7 +167,7 @@ export class DirectBlockchainApi extends Api {
     }
 
     public async getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
-        Log.cheapDebug(() => "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator }));
+        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator }));
 
         if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
