@@ -52,10 +52,10 @@ export abstract class AbstractLog {
             ]
         });
 
-            // if (logger.levels[logger.level] >= logger.levels[AbstractLog.level.verbose]) {
+        if (this.logger.levels[this.logger.level] >= this.logger.levels[AbstractLog.level.verbose]) {
                 console.log("log.level[\"" + this.name + "\"]=\"" + this.logger.level +  "\"");
                 console.error("log.level[\"" + this.name + "\"]=\"" + this.logger.level +  "\"");
-            // }
+        }
     }
 
     public setVerboseOutput(verboseOutput: boolean) {

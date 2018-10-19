@@ -23,7 +23,7 @@ export abstract class Api {
      * @param username - steem username
      * @param until - the oldest date to search for operations.
      */
-    public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []>; // TODO test
+    public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []>;
 
     /**
      * Returns last user blog entries from follow_api. They are sorted from the newest to the oldest,

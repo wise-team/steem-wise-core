@@ -20,7 +20,6 @@ import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 
-// TODO conform to JS convention that callback is the last argument. And use options array for optional arguments
 
 /**
  * Setup logging
