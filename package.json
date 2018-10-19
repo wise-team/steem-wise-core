@@ -53,7 +53,7 @@
     "build-browser-dev": "npm run check && rm -rf dist/browser/ && NODE_ENV=development webpack --config webpack.config.js",
     "test": "npm run check && TS_NODE_FILES=true mocha -r ts-node/register test/unit/**/*.spec.ts",
     "verify": "npm run check && TS_NODE_FILES=true mocha -r ts-node/register test/integration/**/*.spec.ts",
-    "generate-fake-blockchain-file": "npm run check && ts-node test/tools/generate-fake-blockchain-file.ts",
+    "generate-fake-blockchain-file": "npm run check && TS_NODE_FILES=true ts-node test/tools/generate-fake-blockchain-file.ts",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "debug": "npm run check && npm run build && npm run watch-debug",
     "prepare": "NODE_ENV=production npm run build",
