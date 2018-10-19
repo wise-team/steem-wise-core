@@ -143,7 +143,7 @@ describe("test/integration/api.spec.ts", function () {
             });
         });
 
-        describe.only("#loadRulesets (for delegator and all voters)", () => {
+        describe("#loadRulesets (for delegator and all voters)", () => {
             it("Loads properly all rulesets from protocol-v1-testing-sequence", async () => {
                 const requiredRulesets: { ruleset: v1TestingSequence.RulesetsAtMoment, found: boolean } [] = [
                     // { ruleset: v1TestingSequence.stage1_0_Rulesets, found: false },
