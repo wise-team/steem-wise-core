@@ -26,19 +26,23 @@ import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransactio
 
 export class DirectBlockchainApi extends Api {
     private steem: steem.api.Steem;
-    private steemOptions?: steem.SteemJsOptions;
     private postingWif: string | undefined;
     private sendEnabled: boolean = true;
 
     public constructor(postingWif?: string, steemOptions?: steem.SteemJsOptions) {
         super();
 
-        this.steem = new steem.api.Steem(steemOptions || { url: wise.config.steem.defaultApiUrl });
         this.postingWif = postingWif;
 
         if (steemOptions) {
-            this.steemOptions = steemOptions;
+            this.steem = new steem.api.Steem(steemOptions);
         }
+        else this.steem = new steem.api.Steem({
+            url: wise.config.steem.defaultApiUrl,
+            logger: (...args: any []) => {
+                Log.log().efficient(Log.level.silly, () => JSON.stringify(args));
+            }
+        });
     }
 
     public name(): string {

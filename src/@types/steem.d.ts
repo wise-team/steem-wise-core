@@ -6,11 +6,11 @@ declare module 'steem' {
          * When url is used steem-js decides where to put it into the uri param or websocket param,
          * and sets the transport var by default
          */
-        url?: string;
+        url: string;
         uri?: string;
         websocket?: string;
         transport?: "ws" | "http";
-        logger?: (...args: any []) => {}
+        logger?: (...args: any []) => void
     }
 
     export interface AccountInfo {
