@@ -1,4 +1,4 @@
-import { AbstractLog } from "./AbstractLog";
+import { AbstractLog } from "./Abstractlog";
 
 export class Log extends AbstractLog {
     private static INSTANCE: Log = new Log();

@@ -6,7 +6,7 @@ import { expect, assert } from "chai";
 import * as _ from "lodash";
 import * as steem from "steem";
 import "mocha";
-import { Log } from "../../src/util/log";
+import { Log } from "../../src/log/log";
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, Ruleset } from "../../src/wise";

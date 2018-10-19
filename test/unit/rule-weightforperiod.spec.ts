@@ -18,7 +18,7 @@ import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 import { ConfirmVoteBoundWithVote } from "../../src/protocol/ConfirmVoteBoundWithVote";
 import { SynchronizerTestToolkit } from "./util/SynchronizerTestToolkit";
 
-import { Log } from "../../src/util/log";
+import { Log } from "../../src/log/log";
 
 /* CONFIG */
 const delegator = "nonexistentdelegator" + Date.now();

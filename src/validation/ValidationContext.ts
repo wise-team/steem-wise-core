@@ -4,7 +4,7 @@ import { SendVoteorder } from "../protocol/SendVoteorder";
 import { Api } from "../api/Api";
 import { OneTimePromise } from "../util/OneTimePromise";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
-import { Log } from "../util/log";
+import { Log } from "../log/log";
 
 export class ValidationContext {
     private api: Api;

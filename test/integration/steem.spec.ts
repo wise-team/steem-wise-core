@@ -3,7 +3,7 @@ import { expect } from "chai";
 import "mocha";
 import * as steemJs from "steem";
 import { data as wise } from "../../src/wise-config.gen";
-import { Log } from "../../src/util/Log";
+import { Log } from "../../src/log/log";
 
 // wise imports
 import { BlockchainConfig } from "../../src/blockchain/BlockchainConfig";

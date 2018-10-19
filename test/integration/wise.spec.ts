@@ -8,7 +8,7 @@ import "mocha";
 import * as _ from "lodash";
 
 // wise imports
-import { Log } from "../../src/util/Log";
+import { Log } from "../../src/log/log";
 import { DirectBlockchainApi, Wise, SteemOperationNumber, ValidationException, WeightRule, TagsRule, Ruleset, SetRulesForVoter, SendVoteorder } from "../../src/wise";
 import { DisabledApi } from "../../src/api/DisabledApi";
 

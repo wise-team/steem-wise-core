@@ -1,4 +1,4 @@
-import { Log } from "../util/log";
+import { Log } from "../log/log";
 
 export abstract class Chainable<FROM, TO, IMPLEMENTERCLASS extends Chainable<FROM, TO, IMPLEMENTERCLASS>> {
     // ABSTRACT MEMBERS

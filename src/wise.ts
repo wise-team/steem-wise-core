@@ -15,7 +15,7 @@ import { Validator } from "./validation/Validator";
 import { Synchronizer } from "./Synchronizer";
 import { V2Handler } from "./protocol/versions/v2/V2Handler";
 import { RulesUpdater } from "./RulesUpdater";
-import { Log } from "./util/log";
+import { Log } from "./log/log";
 import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
@@ -375,7 +375,7 @@ export { ValidationContext } from "./validation/ValidationContext";
 export { NotFoundException } from "./util/NotFoundException";
 
 export { Synchronizer } from "./Synchronizer";
-export { AbstractLog } from "./util/AbstractLog";
+export { AbstractLog } from "./log/Abstractlog";
 
 export * from "./protocol/versions/v2/wise-schema";
 

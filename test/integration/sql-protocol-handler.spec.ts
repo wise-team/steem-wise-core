@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { data as wise } from "../../src/wise-config.gen";
 import { d } from "../../src/util/util";
 
-import { Log } from "../../src/util/log";
+import { Log } from "../../src/log/log";
 
 // wise imports
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";

@@ -4,7 +4,7 @@ import * as BluebirdPromise from "bluebird";
 import * as _ from "lodash";
 import * as steem from "steem";
 
-import { Log } from "../../util/log";
+import { Log } from "../../log/log";
 
 import { ChainableSupplier } from "../../chainable/Chainable";
 import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";

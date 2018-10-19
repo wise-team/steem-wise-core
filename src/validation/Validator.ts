@@ -2,7 +2,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 
-import { Log } from "../util/log";
+import { Log } from "../log/log";
 import { Api } from "../api/Api";
 import { ValidationException } from "./ValidationException";
 import { Protocol } from "../protocol/Protocol";

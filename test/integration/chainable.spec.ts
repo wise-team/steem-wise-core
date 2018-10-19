@@ -6,7 +6,7 @@ import { expect } from "chai";
 import "mocha";
 import * as steemJs from "steem";
 import { data as wiseConf } from "../../src/wise-config.gen";
-import { Log } from "../../src/util/Log";
+import { Log } from "../../src/log/log";
 
 // wise imports
 import { SimpleTaker } from "../../src/chainable/Chainable";

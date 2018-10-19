@@ -1,7 +1,7 @@
 import * as ajv from "ajv";
 import * as _ from "lodash";
 
-import { Log } from "../../../util/log";
+import { Log } from "../../../log/log";
 import { ProtocolVersionHandler } from "../ProtocolVersionHandler";
 import { WiseOperation } from "../../WiseOperation";
 import { SendVoteorder } from "../../SendVoteorder";
