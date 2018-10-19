@@ -8,7 +8,7 @@ import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { SetRules } from "./protocol/SetRules";
 import { Protocol } from "./protocol/Protocol";
 import { WiseOperation } from "./protocol/WiseOperation";
-import { ProggressCallback, Callback, Wise } from "./wise";
+import { ProggressCallback } from "./wise";
 import { Util } from "./util/util";
 import { RulePrototyper } from "./rules/RulePrototyper";
 import { Ruleset } from "./protocol/Ruleset";
