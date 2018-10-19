@@ -1,13 +1,10 @@
-import { SteemPost } from "../blockchain/SteemPost";
+import * as steem from "steem";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { Api } from "./Api";
 import { Protocol } from "../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
-import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
-import { AccountInfo } from "../blockchain/AccountInfo";
-import { BlogEntry } from "../blockchain/BlogEntry";
 
 export class DisabledApi extends Api {
     public constructor() {
@@ -18,7 +15,7 @@ export class DisabledApi extends Api {
         return "DisabledApi";
     }
 
-    public async loadPost(author: string, permlink: string): Promise<SteemPost> {
+    public async loadPost(author: string, permlink: string): Promise<steem.SteemPost> {
         throw new Error("This api is disabled");
     }
 
@@ -26,7 +23,7 @@ export class DisabledApi extends Api {
         throw new Error("This api is disabled");
     }
 
-    public async sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber> {
+    public async sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
         throw new Error("This api is disabled");
     }
 
@@ -42,11 +39,11 @@ export class DisabledApi extends Api {
         throw new Error("This api is disabled");
     }
 
-    public async getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+    public async getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties> {
         throw new Error("This api is disabled");
     }
 
-    public async getAccountInfo(username: string): Promise<AccountInfo> {
+    public async getAccountInfo(username: string): Promise<steem.AccountInfo> {
         throw new Error("This api is disabled");
     }
 
@@ -54,7 +51,7 @@ export class DisabledApi extends Api {
         throw new Error("This api is disabled");
     }
 
-    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []> {
         throw new Error("This api is disabled");
     }
 }

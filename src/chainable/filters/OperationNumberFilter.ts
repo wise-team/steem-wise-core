@@ -1,8 +1,8 @@
 import { ChainableFilter } from "../Chainable";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
-import { SteemTransaction } from "../../blockchain/SteemTransaction";
+import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
 
-export class OperationNumberFilter extends ChainableFilter<SteemTransaction, OperationNumberFilter> {
+export class OperationNumberFilter extends ChainableFilter<UnifiedSteemTransaction, OperationNumberFilter> {
     private tn: SteemOperationNumber;
     private mode: "<" | "<_solveOpInTrxBug" | "<=" | ">" | ">=";
     private limiter: boolean = false;
@@ -17,7 +17,7 @@ export class OperationNumberFilter extends ChainableFilter<SteemTransaction, Ope
         return this;
     }
 
-    protected take(error: Error | undefined, rawTx: SteemTransaction): boolean {
+    protected take(error: Error | undefined, rawTx: UnifiedSteemTransaction): boolean {
         if (error) throw error;
 
         const tn = SteemOperationNumber.fromTransaction(rawTx);

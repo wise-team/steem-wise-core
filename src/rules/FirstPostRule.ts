@@ -1,10 +1,10 @@
 import * as _ from "lodash";
+import * as steem from "steem";
 
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { BlogEntry } from "../blockchain/BlogEntry";
 import { Util } from "../util/util";
 
 /**
@@ -25,7 +25,7 @@ export class FirstPostRule extends Rule {
     public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
         const entries = await context.getBlogEntries(voteorder.author, 0, 250);
-        const oldestEntry: BlogEntry = Util.definedOrThrow(
+        const oldestEntry: steem.BlogEntry = Util.definedOrThrow(
             _.last(entries),
             new ValidationException("This author (" + voteorder.author + ") has no blog entries.")
         );

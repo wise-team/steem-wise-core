@@ -7,6 +7,7 @@ typescript-json-schema \
     --strictNullChecks \
     --required \
     --include "$DIR/*.schema.ts" \
+    --include "$DIR/../../../../@types/*.d.ts" \
     --out "$DIR/smartvotes.schema.json" \
     "$DIR/../../../../tsconfig.json" \
      "smartvotes_operation"

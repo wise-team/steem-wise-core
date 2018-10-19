@@ -55,7 +55,10 @@ export namespace WiseSQLProtocol {
         public static async query(params: Handler.QueryParams, loadNextPages: boolean = true, offset: number = 0): Promise<EffectuatedWiseOperation []> {
             const queryConfig: AxiosRequestConfig = {};
 
-            queryConfig.url = params.endpointUrl + params.path;
+            queryConfig.url =
+                 params.endpointUrl
+                 + ( params.endpointUrl.substr(-1) !== "/" && params.path.substr(0, 1) !== "/" ? "/" : "" )
+                 + params.path;
             queryConfig.method = params.method;
             if (params.params) queryConfig.params = params.params;
             if (params.data) queryConfig.data = params.data;

@@ -3,7 +3,6 @@ import * as _ from "lodash";
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
-import { SteemPost } from "../blockchain/SteemPost";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { NotFoundException } from "../util/NotFoundException";
 

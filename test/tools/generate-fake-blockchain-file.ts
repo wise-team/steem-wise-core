@@ -98,7 +98,7 @@ BluebirdPromise.resolve()
     .then(() => {
         console.log("Loading transactions of @" + username + "...");
 
-        return new SteemJsAccountHistorySupplier(steem, username)
+        return new SteemJsAccountHistorySupplier(new steem.api.Steem({}), username)
         .branch((historySupplier) => {
             historySupplier
             .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)

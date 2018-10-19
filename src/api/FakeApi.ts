@@ -2,43 +2,40 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
+import * as steem from "steem";
 
 import { Log } from "../util/log";
-import { SteemPost } from "../blockchain/SteemPost";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
-import { SteemTransaction } from "../blockchain/SteemTransaction";
 import { Api } from "../api/Api";
 import { Protocol } from "../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
-import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
-import { AccountInfo } from "../blockchain/AccountInfo";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
-import { BlogEntry } from "../blockchain/BlogEntry";
 import { ConfirmVote } from "../protocol/ConfirmVote";
+import { UnifiedSteemTransaction } from "../blockchain/UnifiedSteemTransaction";
 
 export class FakeApi extends Api {
-    private posts: SteemPost [];
-    private transactions: SteemTransaction [];
-    private dynamicGlobalProperties: DynamicGlobalProperties;
-    private accounts: AccountInfo [];
-    private blogEntries: BlogEntry [];
+    private posts: steem.SteemPost [];
+    private transactions: UnifiedSteemTransaction [];
+    private dynamicGlobalProperties: steem.DynamicGlobalProperties;
+    private accounts: steem.AccountInfo [];
+    private blogEntries: steem.BlogEntry [];
     private currentBlock = 0;
-    private pushedOperations: SteemTransaction [] = [];
+    private pushedOperations: UnifiedSteemTransaction [] = [];
     private fakeTime: Date | undefined = undefined;
     private fakeDelayMs: number = 5;
-    private transactionsByBlock: { [key: string]: SteemTransaction [] } = {};
+    private transactionsByBlock: { [key: string]: UnifiedSteemTransaction [] } = {};
 
-    public constructor(posts: SteemPost [], dynamicGlobalProperties: DynamicGlobalProperties, accounts: AccountInfo [], transactions: SteemTransaction [], blogEntries: BlogEntry []) {
+    public constructor(posts: steem.SteemPost [], dynamicGlobalProperties: steem.DynamicGlobalProperties, accounts: steem.AccountInfo [], transactions: UnifiedSteemTransaction [], blogEntries: steem.BlogEntry []) {
         super();
 
         this.posts = posts;
         this.dynamicGlobalProperties = dynamicGlobalProperties;
         this.accounts = accounts;
         this.transactions = transactions;
-        this.transactions = this.transactions.map((trx: SteemTransaction) => {
+        this.transactions = this.transactions.map((trx: UnifiedSteemTransaction) => {
             trx.timestamp = new Date(trx.timestamp as any); // prototype timestamp loaded from json
             return trx;
         });
@@ -66,7 +63,7 @@ export class FakeApi extends Api {
         return "FakeApi";
     }
 
-    public async loadPost(author: string, permlink: string): Promise<SteemPost> {
+    public async loadPost(author: string, permlink: string): Promise<steem.SteemPost> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         for (let i = 0; i < this.posts.length; i++) {
@@ -90,11 +87,11 @@ export class FakeApi extends Api {
         });
     }
 
-    public async sendToBlockchain(operationsInTransaction: [string, object][]): Promise<SteemOperationNumber> {
+    public async sendToBlockchain(operationsInTransaction: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
             const blockNum = this.currentBlock + 1;
-            const steemTrx: SteemTransaction = {
+            const steemTrx: UnifiedSteemTransaction = {
                 block_num: blockNum,
                 transaction_num: 0,
                 transaction_id: "",
@@ -142,7 +139,7 @@ export class FakeApi extends Api {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         return this.transactions
-            .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
+            .map((trx: UnifiedSteemTransaction) => protocol.handleOrReject(trx))
             .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => (!!handledOrRejected))
             .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
             .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps))
@@ -164,8 +161,8 @@ export class FakeApi extends Api {
 
         if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) {
             return this.transactionsByBlock[blockNum + ""]
-                .filter ((trx: SteemTransaction) => trx.block_num === blockNum)
-                .map((trx: SteemTransaction) => protocol.handleOrReject(trx))
+                .filter ((trx: UnifiedSteemTransaction) => trx.block_num === blockNum)
+                .map((trx: UnifiedSteemTransaction) => protocol.handleOrReject(trx))
                 .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => !!handledOrRejected)
                 .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
                 .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps), [])
@@ -174,7 +171,7 @@ export class FakeApi extends Api {
         else return [];
     }
 
-    public async getDynamicGlobalProperties(): Promise<DynamicGlobalProperties> {
+    public async getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         this.dynamicGlobalProperties.time = new Date().toISOString().replace("Z", "");
@@ -182,10 +179,10 @@ export class FakeApi extends Api {
         return _.cloneDeep(this.dynamicGlobalProperties);
     }
 
-    public async getAccountInfo(username: string): Promise<AccountInfo> {
+    public async getAccountInfo(username: string): Promise<steem.AccountInfo> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
-        const result = this.accounts.filter((info: AccountInfo) => info.name === username);
+        const result = this.accounts.filter((info: steem.AccountInfo) => info.name === username);
         if (result.length === 0) throw new NotFoundException("Account " + username + " does not exist");
         else return result[0];
     }
@@ -217,10 +214,10 @@ export class FakeApi extends Api {
         return result;
     }
 
-    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []> {
+    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
-        const result: BlogEntry [] = [];
+        const result: steem.BlogEntry [] = [];
         let userI = 0;
         for (let i = 0; i < this.blogEntries.length; i++) {
             const entry = this.blogEntries[i];
@@ -238,14 +235,14 @@ export class FakeApi extends Api {
     }
 
     public pushFakeBlock(): Promise<SteemOperationNumber> {
-        const op: [string, object] = ["fake", {}];
+        const op: steem.OperationWithDescriptor = ["fake", {}];
         return this.sendToBlockchain([op]);
     }
 
     /**
      * Returns all operations that were pushed using #sentToBlockchain() after initialization of FakeApi.
      */
-    public getPushedTransactions(): SteemTransaction [] {
+    public getPushedTransactions(): UnifiedSteemTransaction [] {
         return this.pushedOperations;
     }
 
@@ -260,10 +257,10 @@ export class FakeApi extends Api {
 
 export namespace FakeApi {
     export interface Dataset {
-        posts: SteemPost [];
-        dynamicGlobalProperties: DynamicGlobalProperties;
-        accounts: AccountInfo [];
-        transactions: SteemTransaction [];
-        blogEntries: BlogEntry [];
+        posts: steem.SteemPost [];
+        dynamicGlobalProperties: steem.DynamicGlobalProperties;
+        accounts: steem.AccountInfo [];
+        transactions: UnifiedSteemTransaction [];
+        blogEntries: steem.BlogEntry [];
     }
 }

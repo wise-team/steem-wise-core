@@ -5,6 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import "mocha";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
+import * as steem from "steem";
 
 // wise imports
 import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedWiseOperation, Ruleset } from "../../src/wise";
@@ -116,7 +117,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     const voterWise = new Wise(vo.voter, fakeApi);
                     (fakeApi as any as FakeApi).setFakeTime(fakeTime);
                     return voterWise.generateVoteorderOperations(delegator, vo.voter, voteorder)
-                    .then((ops: [string, object][]) => (fakeApi as any as FakeApi).sendToBlockchain(ops))
+                    .then((ops: steem.OperationWithDescriptor[]) => (fakeApi as any as FakeApi).sendToBlockchain(ops))
                     .then(() => BluebirdPromise.delay(100))
                     .then(() => (fakeApi as any as FakeApi).setFakeTime(new Date(nowTime.getTime())));
                 });

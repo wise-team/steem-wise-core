@@ -7,15 +7,15 @@ import { WiseOperation } from "../../WiseOperation";
 import { SendVoteorder } from "../../SendVoteorder";
 import { SetRules } from "../../SetRules";
 import { Rule } from "../../../rules/Rule";
-import { SteemTransaction } from "../../../blockchain/SteemTransaction";
-import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedWiseOperation } from "../../EffectuatedWiseOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { ConfirmVote } from "../../ConfirmVote";
 import { wise_operation, wise_set_rules, wise_rule, wise_send_voteorder_operation, wise_set_rules_operation, wise_confirm_vote_operation } from "./wise-schema";
 import { wise_rule_decode, wise_rule_encode } from "./rules-schema";
-import { VoteOperation, isVoteOperation } from "../../../blockchain/VoteOperation";
+import { VoteOperation } from "../../../blockchain/VoteOperation";
  import { ConfirmVoteBoundWithVote } from "../../ConfirmVoteBoundWithVote";
+import * as steem from "steem";
+import { UnifiedSteemTransaction } from "../../../blockchain/UnifiedSteemTransaction";
 
 class WiseConstants {
     public static wise_send_voteorder_descriptor: string = "v2:send_voteorder";
@@ -36,29 +36,29 @@ const validate = aajv.compile(require("./wise-schema.json"));
 export class V2Handler implements ProtocolVersionHandler {
     public static CUSTOM_JSON_ID = "wise";
 
-    public handleOrReject = (transaction: SteemTransaction): EffectuatedWiseOperation [] | undefined => {
+    public handleOrReject = (transaction: UnifiedSteemTransaction): EffectuatedWiseOperation [] | undefined => {
         if (transaction.block_num <= 22710498) return undefined;
 
-        let wiseCustomJsonOp: CustomJsonOperation | undefined = undefined;
+        let wiseCustomJsonOp: steem.CustomJsonOperation | undefined = undefined;
 
         transaction.ops.forEach(op => {
-            if (op[0] != "custom_json" || (op[1] as CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) {
+            if (op[0] != "custom_json" || (op[1] as steem.CustomJsonOperation).id != V2Handler.CUSTOM_JSON_ID) {
                 return undefined;
             }
 
-            if ((op[1] as CustomJsonOperation).required_posting_auths.length != 1) {
+            if ((op[1] as steem.CustomJsonOperation).required_posting_auths.length != 1) {
                 return undefined; // must be authorized by single user
             }
 
-            if (!this.isMyOperation((op[1] as CustomJsonOperation).json)) {
+            if (!this.isMyOperation((op[1] as steem.CustomJsonOperation).json)) {
                 return undefined;
             }
 
-            if (!wiseCustomJsonOp) wiseCustomJsonOp = (op[1] as CustomJsonOperation);
+            if (!wiseCustomJsonOp) wiseCustomJsonOp = (op[1] as steem.CustomJsonOperation);
         });
 
         if (wiseCustomJsonOp) {
-            const wiseCustomJsonOp_: CustomJsonOperation = wiseCustomJsonOp; // allow ts compiler resolve types properly
+            const wiseCustomJsonOp_: steem.CustomJsonOperation = wiseCustomJsonOp; // allow ts compiler resolve types properly
             const jsonObj = JSON.parse(wiseCustomJsonOp_.json);
             if (!this.validateJSON(jsonObj)) {
                 return undefined;
@@ -82,7 +82,7 @@ export class V2Handler implements ProtocolVersionHandler {
         return validate(input) as boolean;
     }
 
-    private decode = (transaction: SteemTransaction, wiseOp: wise_operation, sender: string): EffectuatedWiseOperation [] | undefined => {
+    private decode = (transaction: UnifiedSteemTransaction, wiseOp: wise_operation, sender: string): EffectuatedWiseOperation [] | undefined => {
         if (wiseOp[0] == WiseConstants.wise_confirm_vote_descriptor) {
             return this.decodeConfirmVote(transaction, wiseOp as wise_confirm_vote_operation, sender);
         }
@@ -95,7 +95,7 @@ export class V2Handler implements ProtocolVersionHandler {
         else return undefined;
     }
 
-    private decodeSetRules = (transaction: SteemTransaction, wiseOp: wise_set_rules_operation, sender: string): EffectuatedWiseOperation [] => {
+    private decodeSetRules = (transaction: UnifiedSteemTransaction, wiseOp: wise_set_rules_operation, sender: string): EffectuatedWiseOperation [] => {
         const rulesets: { name: string, rules: Rule []} [] = [];
 
         for (let i = 0; i < (wiseOp[1] as wise_set_rules).rulesets.length; i++) {
@@ -131,7 +131,7 @@ export class V2Handler implements ProtocolVersionHandler {
         return {name: ruleset[0], rules};
     }
 
-    private decodeSendVoteorder = (transaction: SteemTransaction, wiseOp: wise_send_voteorder_operation, sender: string): EffectuatedWiseOperation [] => {
+    private decodeSendVoteorder = (transaction: UnifiedSteemTransaction, wiseOp: wise_send_voteorder_operation, sender: string): EffectuatedWiseOperation [] => {
         const cmd: SendVoteorder = {
             rulesetName: wiseOp[1].ruleset,
             permlink: wiseOp[1].permlink,
@@ -150,12 +150,12 @@ export class V2Handler implements ProtocolVersionHandler {
         } as EffectuatedWiseOperation];
     }
 
-    private decodeConfirmVote = (transaction: SteemTransaction, wiseOp: wise_confirm_vote_operation, sender: string): EffectuatedWiseOperation [] => {
-        let voteOp: VoteOperation | undefined = undefined;
+    private decodeConfirmVote = (transaction: UnifiedSteemTransaction, wiseOp: wise_confirm_vote_operation, sender: string): EffectuatedWiseOperation [] => {
+        let voteOp: steem.VoteOperation | undefined = undefined;
         if (transaction.ops.length > 1) {
-            transaction.ops.forEach((op: [string, object]) => {
+            transaction.ops.forEach((op: steem.OperationWithDescriptor) => {
                 const potentialVoteOp: object = op[1];
-                if (isVoteOperation(potentialVoteOp)) {
+                if (VoteOperation.isVoteOperation(potentialVoteOp)) {
                     if (!voteOp) voteOp = potentialVoteOp;
                 }
             });
@@ -192,7 +192,7 @@ export class V2Handler implements ProtocolVersionHandler {
         } as EffectuatedWiseOperation];
     }
 
-    public serializeToBlockchain = (op: WiseOperation): [string, object][] => {
+    public serializeToBlockchain = (op: WiseOperation): steem.OperationWithDescriptor[] => {
         let senderUsername = "";
         let jsonObj: wise_operation;
 
@@ -232,12 +232,12 @@ export class V2Handler implements ProtocolVersionHandler {
         }
         else throw new Error("Unknown type of command");
 
-        const completeOp: [string, object] = ["custom_json", {
+        const completeOp: steem.OperationWithDescriptor = ["custom_json", {
             id: V2Handler.CUSTOM_JSON_ID,
             json: JSON.stringify(jsonObj),
             required_auths: [],
             required_posting_auths: [ senderUsername ]
-        } as CustomJsonOperation];
+        } as steem.CustomJsonOperation];
 
         validate(completeOp);
         return [ completeOp ];

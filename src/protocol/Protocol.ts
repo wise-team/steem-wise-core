@@ -1,7 +1,8 @@
-import { SteemTransaction } from "../blockchain/SteemTransaction";
+import * as steem from "steem";
 import { WiseOperation } from "./WiseOperation";
 import { ProtocolVersionHandler } from "./versions/ProtocolVersionHandler";
 import { EffectuatedWiseOperation } from "./EffectuatedWiseOperation";
+import { UnifiedSteemTransaction } from "../blockchain/UnifiedSteemTransaction";
 
 export class Protocol {
     private registry: ProtocolVersionHandler [];
@@ -15,7 +16,7 @@ export class Protocol {
         if (this.registry.length == 0) throw new Error("You must specify at least one protocol version handler");
     }
 
-    public handleOrReject(transaction: SteemTransaction): EffectuatedWiseOperation [] | undefined {
+    public handleOrReject(transaction: UnifiedSteemTransaction): EffectuatedWiseOperation [] | undefined {
         for (const pv of this.registry) {
             const result = pv.handleOrReject(transaction);
             if (result) {
@@ -25,16 +26,16 @@ export class Protocol {
         return undefined;
     }
 
-    public serializeToBlockchain(op: WiseOperation): [string, object][] {
+    public serializeToBlockchain(op: WiseOperation): steem.OperationWithDescriptor[] {
         return this.registry[0].serializeToBlockchain(op);
     }
 
     /**
      * Validated if steem operation it is a valid wise
-     * @param op - an steem operation in format: [string, object] object (if it is a pending operation block_num should equal Infinity)
+     * @param op - an steem operation in format: steem.OperationWithDescriptor object (if it is a pending operation block_num should equal Infinity)
      */
-     public validateOperation = (op: [string, object]): boolean => {
-        const so: SteemTransaction = {
+     public validateOperation = (op: steem.OperationWithDescriptor): boolean => {
+        const so: UnifiedSteemTransaction = {
             block_num: Infinity,
             transaction_num: 0,
             transaction_id: "",
@@ -48,7 +49,7 @@ export class Protocol {
      * Validated if steem operation (object with blockchain data and timestamp) it is a valid wise
      * @param op - an steem operation object that implements SteemTransaction interface
      */ // TODO test
-    public validateSteemTransaction = (so: SteemTransaction): boolean => {
+    public validateSteemTransaction = (so: UnifiedSteemTransaction): boolean => {
         const res = this.handleOrReject(so);
         return res != undefined;
     }

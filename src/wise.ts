@@ -2,6 +2,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
+import * as steem from "steem";
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { Protocol } from "./protocol/Protocol";
@@ -179,14 +180,14 @@ export class Wise {
      * @param {boolean} [skipValidation=false] allows to skip validation (send is immediate and allows sending
      *      invalid voteorder).
      *
-     * @returns {Promise<[string, object][]>} - a Promise that resolves with an array of steem operations that can
+     * @returns {Promise<steem.OperationWithDescriptor[]>} - a Promise that resolves with an array of steem operations that can
      * be directly sent to the blockchain using broadcast send in RPC/WS, or using external tool such as vessel
      * or steemconnect.
      */
     public generateVoteorderOperations = async (
         delegator: string, voter: string, voteorder: SendVoteorder,
         proggressCallback: ProggressCallback = () => {},
-        skipValidation: boolean = false): Promise<[string, object][]> => {
+        skipValidation: boolean = false): Promise<steem.OperationWithDescriptor[]> => {
         proggressCallback("Validating voteorder...", 0.0);
 
         const smOp: WiseOperation = {
@@ -339,7 +340,7 @@ export { WiseSQLApi } from "./api/sql/WiseSQLApi";
 export { WiseSQLProtocol } from "./api/sql/WiseSQLProtocol";
 export { DisabledApi } from "./api/DisabledApi";
 
-export { SteemTransaction } from "./blockchain/SteemTransaction";
+export { UnifiedSteemTransaction } from "./blockchain/UnifiedSteemTransaction";
 export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 
 export { Protocol } from "./protocol/Protocol";

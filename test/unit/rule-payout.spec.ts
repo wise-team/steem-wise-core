@@ -7,7 +7,6 @@ import { Log } from "../../src/util/log";
 import { PayoutRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";
 import { ValidationContext } from "../../src/validation/ValidationContext";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
-import { AccountInfo } from "../../src/blockchain/AccountInfo";
 import { wise_rule_payout_encode, wise_rule_payout, wise_rule_payout_decode } from "../../src/protocol/versions/v2/rules/rule-payout-schema";
 
 /* CONFIG */

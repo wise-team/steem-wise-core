@@ -4,7 +4,6 @@ import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { NotFoundException } from "../util/NotFoundException";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { SteemPost } from "../blockchain/SteemPost";
 import { Rule } from "./Rule";
 
 export class AuthorsRule extends Rule {

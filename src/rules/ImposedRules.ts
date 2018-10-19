@@ -1,8 +1,6 @@
 import { Rule } from "./Rule";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { ValidationContext } from "../validation/ValidationContext";
-import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
-import { AccountInfo } from "../blockchain/AccountInfo";
 import { ValidationException } from "../validation/ValidationException";
 import { BlockchainConfig } from "../blockchain/BlockchainConfig";
 

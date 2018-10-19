@@ -1,4 +1,4 @@
-import { SteemTransaction } from "./SteemTransaction";
+import { UnifiedSteemTransaction } from "./UnifiedSteemTransaction";
 
 export class SteemOperationNumber {
     public blockNum: number;
@@ -79,7 +79,7 @@ export class SteemOperationNumber {
         return "[b=" + this.blockNum + ", tx=" + this.transactionNum + ", op=" + this.operationNum + "]";
     }
 
-    public static fromTransaction(op: SteemTransaction, operationNum: number = 0): SteemOperationNumber {
+    public static fromTransaction(op: UnifiedSteemTransaction, operationNum: number = 0): SteemOperationNumber {
         return new SteemOperationNumber(op.block_num, op.transaction_num, operationNum);
     }
 

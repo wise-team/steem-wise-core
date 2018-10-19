@@ -1,8 +1,9 @@
-import { SteemTransaction } from "../../blockchain/SteemTransaction";
+import * as steem from "steem";
 import { WiseOperation } from "../WiseOperation";
 import { EffectuatedWiseOperation } from "../EffectuatedWiseOperation";
+import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
 
 export interface ProtocolVersionHandler {
-  handleOrReject: (tx: SteemTransaction) => EffectuatedWiseOperation [] | undefined;
-  serializeToBlockchain: (op: WiseOperation) => [string, object][];
+  handleOrReject: (tx: UnifiedSteemTransaction) => EffectuatedWiseOperation [] | undefined;
+  serializeToBlockchain: (op: WiseOperation) => steem.OperationWithDescriptor[];
 }

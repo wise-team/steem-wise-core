@@ -155,19 +155,11 @@ describe("test/integration/wise.spec.ts", () => {
             ];
             tests.forEach(test => it(test.name, () => {
                 let proggressCallbackCalled: boolean = false;
-                let resultCallback: any = false;
                 let resultPromise: any = false;
-                let errorCallback: any = false;
                 let errorPromise: any = false;
 
                 return wise.uploadRulesetsForVoter(
                     config.username, test.rulesets as any as Ruleset [],
-
-                    (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
-                        errorCallback = error;
-                        resultCallback = result;
-                    },
-
                     (msg: string, proggress: number): void => {
                         proggressCallbackCalled = true;
                     },
@@ -178,26 +170,18 @@ describe("test/integration/wise.spec.ts", () => {
                 )
                 .then(() => BluebirdPromise.delay(10))
                 .then(() => {
-                    expect(resultCallback, "resultCallback").to.not.equal(false);
-                    expect(errorCallback, "errorCallback").to.not.equal(false);
                     expect(resultPromise, "resultPromise").to.not.equal(false);
                     expect(errorPromise, "errorPromise").to.not.equal(false);
                     if (test.pass) {
-                        if (errorPromise || errorCallback) throw errorPromise;
-                        expect(resultCallback, "resultCallback").is.instanceof(SteemOperationNumber);
+                        if (errorPromise) throw errorPromise;
                         expect(resultPromise, "resultPromise").is.instanceof(SteemOperationNumber);
-                        expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
-                        expect(errorCallback, "errorCallback").to.be.undefined;
                         expect(errorPromise, "errorPromise").to.be.undefined;
                         expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
                     }
                     else {
-                        if (resultCallback || resultPromise) throw new Error("Should fail");
-                        expect(resultCallback, "resultCallback").to.be.undefined;
+                        if (resultPromise) throw new Error("Should fail");
                         expect(resultPromise, "resultPromise").to.be.undefined;
-                        expect(errorCallback, "errorCallback").to.be.instanceof(Error);
                         expect(errorPromise, "errorPromise").to.be.instanceof(Error);
-                        expect(errorCallback, "errorCallback=(deep)=errorPromise").deep.equals(errorPromise);
                     }
                 });
             }));
@@ -210,15 +194,9 @@ describe("test/integration/wise.spec.ts", () => {
                 const moment = new SteemOperationNumber(22900000, 0, 0);
                 const validRulesetName = "co robia lekarze w kuchni? Leczo!";
 
-                let resultCallback: any = false;
                 let resultPromise: any = false;
-                let errorCallback: any = false;
                 let errorPromise: any = false;
                 return wise.downloadRulesetsForVoter(delegator, voter,
-                    (error: Error | undefined, result: Ruleset [] | undefined): void => {
-                        errorCallback = error;
-                        resultCallback = result;
-                    },
                     moment
                 )
                 .then(
@@ -227,11 +205,9 @@ describe("test/integration/wise.spec.ts", () => {
                 )
                 .then(() => BluebirdPromise.delay(10))
                 .then(() => {
-                    if (errorPromise || errorCallback) throw errorPromise;
-                    expect(resultCallback, "resultCallback").is.an("array").with.length(1);
-                    expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
-                    expect(resultCallback[0].name, "ruleset[0].name").to.be.equal(validRulesetName);
-                    expect(errorCallback, "errorCallback").to.be.undefined;
+                    if (errorPromise) throw errorPromise;
+                    expect(resultPromise, "resultCallback").is.an("array").with.length(1);
+                    expect(resultPromise[0].name, "ruleset[0].name").to.be.equal(validRulesetName);
                     expect(errorPromise, "errorPromise").to.be.undefined;
                 });
             });
@@ -245,9 +221,7 @@ describe("test/integration/wise.spec.ts", () => {
                 .then(() => console.log("20 seconds left..."))
                 .then(() => BluebirdPromise.delay(20 * 1000))
                 .then(() => console.log("Done waiting"))
-                .then(() => wise.downloadRulesetsForVoter(config.username, config.username,
-                    undefined, SteemOperationNumber.NOW
-                ))
+                .then(() => wise.downloadRulesetsForVoter(config.username, config.username, SteemOperationNumber.NOW))
                 .then(result => {
                     expect(result, "result").is.an("array").with.length(1);
                     expect(result[0].name, "ruleset[0].name").to.be.equal(config.validRulesetName);
@@ -271,19 +245,11 @@ describe("test/integration/wise.spec.ts", () => {
             });
             tests.forEach(test => it(test.name, () => {
                 let proggressCallbackCalled: boolean = false;
-                let resultCallback: any = false;
                 let resultPromise: any = false;
-                let errorCallback: any = false;
                 let errorPromise: any = false;
 
                 return wise.uploadAllRulesets(
                     test.rulesets as any as SetRulesForVoter [],
-
-                    (error: Error | undefined, result: SteemOperationNumber | true | undefined): void => {
-                        errorCallback = error;
-                        resultCallback = result;
-                    },
-
                     (msg: string, proggress: number): void => {
                         proggressCallbackCalled = true;
                     },
@@ -294,26 +260,18 @@ describe("test/integration/wise.spec.ts", () => {
                 )
                 .then(() => BluebirdPromise.delay(10))
                 .then(() => {
-                    expect(resultCallback, "resultCallback").to.not.equal(false);
-                    expect(errorCallback, "errorCallback").to.not.equal(false);
                     expect(resultPromise, "resultPromise").to.not.equal(false);
                     expect(errorPromise, "errorPromise").to.not.equal(false);
                     if (test.pass) {
-                        if (errorPromise || errorCallback) throw errorPromise;
-                        expect(resultCallback, "resultCallback").is.instanceof(SteemOperationNumber);
+                        if (errorPromise) throw errorPromise;
                         expect(resultPromise, "resultPromise").is.instanceof(SteemOperationNumber);
-                        expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
-                        expect(errorCallback, "errorCallback").to.be.undefined;
                         expect(errorPromise, "errorPromise").to.be.undefined;
                         expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
                     }
                     else {
-                        if (resultCallback || resultPromise) throw new Error("Should fail");
-                        expect(resultCallback, "resultCallback").to.be.undefined;
+                        if (resultPromise) throw new Error("Should fail");
                         expect(resultPromise, "resultPromise").to.be.undefined;
-                        expect(errorCallback, "errorCallback").to.be.instanceof(Error);
                         expect(errorPromise, "errorPromise").to.be.instanceof(Error);
-                        expect(errorCallback, "errorCallback=(deep)=errorPromise").deep.equals(errorPromise);
                     }
                 });
             }));
@@ -328,16 +286,10 @@ describe("test/integration/wise.spec.ts", () => {
                     "noisy2", "andrejcibik"
                 ];
 
-                let resultCallback: any = false;
                 let resultPromise: any = false;
-                let errorCallback: any = false;
                 let errorPromise: any = false;
                 let proggressCallbackCalled: boolean = false;
                 return wise.downloadAllRulesets(delegator,
-                    (error: Error | undefined, result: SetRulesForVoter [] | undefined): void => {
-                        errorCallback = error;
-                        resultCallback = result;
-                    },
                     moment,
                     (msg: string, proggress: number) => { proggressCallbackCalled = true; }
                 )
@@ -345,17 +297,14 @@ describe("test/integration/wise.spec.ts", () => {
                     result => { resultPromise = result; errorPromise = undefined; },
                     error => { errorPromise = error; resultPromise = undefined; }
                 )
-                .then(() => BluebirdPromise.delay(10))
                 .then(() => {
-                    if (errorPromise || errorCallback) throw errorPromise;
-                    expect(resultCallback, "resultCallback").is.an("array").with.length.gt(1);
-                    expect(resultCallback[0].rulesets, "resultCallback[0].rulesets").is.an("array").with.length.gte(1);
+                    if (errorPromise) throw errorPromise;
+                    expect(resultPromise, "resultCallback").is.an("array").with.length.gt(1);
+                    expect(resultPromise[0].rulesets, "resultCallback[0].rulesets").is.an("array").with.length.gte(1);
 
                     const voters = resultPromise.map((rfv: SetRulesForVoter) => rfv.voter);
                     expect(voters).to.be.an("array").with.length(properVoters.length).that.has.members(properVoters);
 
-                    expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
-                    expect(errorCallback, "errorCallback").to.be.undefined;
                     expect(errorPromise, "errorPromise").to.be.undefined;
                     expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
                 });
@@ -386,7 +335,7 @@ describe("test/integration/wise.spec.ts", () => {
         describe("#generateVoteorderOperations", () => {
             it("generated weight is a number, not a string", () => {
                 return wise.generateVoteorderOperations(
-                    config.username, config.username, config.validVoteorder, undefined, () => {}, true
+                    config.username, config.username, config.validVoteorder, () => {}, true
                 )
                 .then((ops: { [key: string]: any } []) => {
                     expect(ops).to.be.an("array").with.length(1);
@@ -398,9 +347,7 @@ describe("test/integration/wise.spec.ts", () => {
 
         describe("#sendVoteorder", () => {
             let proggressCallbackCalled: boolean = false;
-            let resultCallback: any = false;
             let resultPromise: any = false;
-            let errorCallback: any = false;
             let errorPromise: any = false;
 
             const tests: { name: string; voteorder: SendVoteorder; skipValidation: boolean; pass: boolean; } [] = [
@@ -426,10 +373,6 @@ describe("test/integration/wise.spec.ts", () => {
 
             tests.forEach(test => it(test.name, () => {
                 return wise.sendVoteorder(config.username, test.voteorder,
-                    (error: Error | undefined, result: SteemOperationNumber | undefined): void => {
-                        errorCallback = error;
-                        resultCallback = result;
-                    },
                     (msg: string, proggress: number) => { proggressCallbackCalled = true; },
                     test.skipValidation
                 )
@@ -439,26 +382,18 @@ describe("test/integration/wise.spec.ts", () => {
                 )
                 .then(() => BluebirdPromise.delay(10))
                 .then(() => {
-                    expect(resultCallback, "resultCallback").to.not.equal(false);
-                    expect(errorCallback, "errorCallback").to.not.equal(false);
                     expect(resultPromise, "resultPromise").to.not.equal(false);
                     expect(errorPromise, "errorPromise").to.not.equal(false);
                     if (test.pass) {
-                        if (errorPromise || errorCallback) throw errorPromise;
-                        expect(resultCallback, "resultCallback").is.instanceof(SteemOperationNumber);
+                        if (errorPromise) throw errorPromise;
                         expect(resultPromise, "resultPromise").is.instanceof(SteemOperationNumber);
-                        expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
-                        expect(errorCallback, "errorCallback").to.be.undefined;
                         expect(errorPromise, "errorPromise").to.be.undefined;
                         expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
                     }
                     else {
-                        if (resultCallback || resultPromise) throw new Error("Should fail");
-                        expect(resultCallback, "resultCallback").to.be.undefined;
+                        if (resultPromise) throw new Error("Should fail");
                         expect(resultPromise, "resultPromise").to.be.undefined;
-                        expect(errorCallback, "errorCallback").to.be.instanceof(Error);
                         expect(errorPromise, "errorPromise").to.be.instanceof(Error);
-                        expect(errorCallback, "errorCallback=(deep)=errorPromise").deep.equals(errorPromise);
                     }
                 });
             }));
@@ -466,9 +401,7 @@ describe("test/integration/wise.spec.ts", () => {
 
         describe("#validateVoteorder", () => {
             let proggressCallbackCalled: boolean = false;
-            let resultCallback: any = false;
             let resultPromise: any = false;
-            let errorCallback: any = false;
             let errorPromise: any = false;
 
             const tests: { name: string; voteorder: SendVoteorder; skipValidation: boolean; pass: boolean; } [] = [
@@ -487,10 +420,6 @@ describe("test/integration/wise.spec.ts", () => {
             tests.forEach(test => it(test.name, () => {
                 return wise.validateVoteorder(
                     config.username, config.username, test.voteorder, SteemOperationNumber.NOW,
-                    (error: Error | undefined, result: ValidationException | true | undefined): void => {
-                        errorCallback = error;
-                        resultCallback = result;
-                    },
                     (msg: string, proggress: number) => { proggressCallbackCalled = true; },
                 )
                 .then(
@@ -499,22 +428,16 @@ describe("test/integration/wise.spec.ts", () => {
                 )
                 .then(() => BluebirdPromise.delay(10))
                 .then(() => {
-                    expect(resultCallback, "resultCallback").to.not.equal(false);
-                    expect(errorCallback, "errorCallback").to.not.equal(false);
                     expect(resultPromise, "resultPromise").to.not.equal(false);
                     expect(errorPromise, "errorPromise").to.not.equal(false);
-                    expect(errorCallback, "errorCallback").to.be.undefined;
                     expect(errorPromise, "errorPromise").to.be.undefined;
                     expect(proggressCallbackCalled, "proggressCallbackCalled").to.be.true;
-                    expect(resultCallback, "resultCallback=(deep)=resultPromise").deep.equals(resultPromise);
-                    if (errorPromise || errorCallback) throw errorPromise;
+                    if (errorPromise) throw errorPromise;
 
                     if (test.pass) {
-                        expect(resultCallback, "resultCallback").is.equal(true);
                         expect(resultPromise, "resultPromise").is.equal(true);
                     }
                     else {
-                        expect(resultCallback, "resultCallback").is.instanceof(ValidationException);
                         expect(resultPromise, "resultPromise").is.instanceof(ValidationException);
                     }
                 });

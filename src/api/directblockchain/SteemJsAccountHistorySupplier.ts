@@ -2,20 +2,20 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
+import * as steem from "steem";
 
 import { Log } from "../../util/log";
 
 import { ChainableSupplier } from "../../chainable/Chainable";
-import { SteemTransaction } from "../../blockchain/SteemTransaction";
-import { CustomJsonOperation } from "../../blockchain/CustomJsonOperation";
+import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
 
-export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransaction, SteemJsAccountHistorySupplier> {
-    private steem: any;
+export class SteemJsAccountHistorySupplier extends ChainableSupplier<UnifiedSteemTransaction, SteemJsAccountHistorySupplier> {
+    private steem: steem.api.Steem;
     private username: string;
     private batchSize: number = 1000;
     private onFinishCallback: ((error: Error | undefined) => void) = () => {};
 
-    constructor(steem: any, username: string) {
+    constructor(steem: steem.api.Steem, username: string) {
         super();
         this.steem = steem;
         this.username = username;
@@ -54,12 +54,9 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
         // Sometimes at the end of account history "from" can be lower than 1000. In that case we should set limit to "from". It will simply load operations including the oldest one.
         const batchLimit = (from === -1 ? this.batchSize : Math.min(this.batchSize, from));
 
-        this.steem.api.getAccountHistory(this.username, from, batchLimit, (error: Error, result: any) => {
-            if (error) {
-                const continueOnThisError = this.give(error, undefined);
-                if (!continueOnThisError) this.onFinishCallback(error);
-            }
-            else {
+        this.steem.getAccountHistoryAsync(this.username, from, batchLimit)
+        .then(
+            (result: steem.AccountHistory.Operation []) => {
                 if (result.length == 0) {
                     this.onFinishCallback(undefined);
                 }
@@ -77,16 +74,20 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
                         this.onFinishCallback(undefined);
                     }
                 }
+            },
+            error => {
+                const continueOnThisError = this.give(error, undefined);
+                if (!continueOnThisError) this.onFinishCallback(error);
             }
-        });
+        );
     }
 
     /**
      * This is to prevent the situation in which a custom_json is placed at the end of one batch, and vote is placed at the start of the next batch.
      */
-    private previousBatchLeftoverCustomJson: RawOperation | undefined = undefined;
+    private previousBatchLeftoverCustomJson: steem.AccountHistory.Operation | undefined = undefined;
 
-    private processBatch(ops: RawOperation []): boolean {
+    private processBatch(ops: steem.AccountHistory.Operation []): boolean {
         let loadNext: boolean = true;
 
         if (this.previousBatchLeftoverCustomJson) {
@@ -95,29 +96,29 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
         }
 
         if (ops[ops.length - 1][1].op[0] === "custom_json") {
-            const lastOp: RawOperation = ops.pop() as RawOperation;
+            const lastOp = ops.pop();
             this.previousBatchLeftoverCustomJson = lastOp;
         }
 
-        const opsGroupedByTransactionNum: { [key: number]: RawOperation [] }
-            = _.groupBy(ops, (op: RawOperation) => op[1].trx_id);
+        const opsGroupedByTransactionNum: { [key: number]: steem.AccountHistory.Operation [] }
+            = _.groupBy(ops, (op: steem.AccountHistory.Operation) => op[1].trx_id);
             /* we use trx_id as it is purely unique */
 
-        const opsMappedToStemTransactions: SteemTransaction []
+        const opsMappedToStemTransactions: UnifiedSteemTransaction []
             = _.values(opsGroupedByTransactionNum) // we count only single transactions
-            .map((txOps: RawOperation []) => {
-                const transaction: SteemTransaction = {
+            .map((txOps: steem.AccountHistory.Operation []) => {
+                const transaction: UnifiedSteemTransaction = {
                     block_num: txOps[0][1].block, // there is at least one operation in transaction
                     transaction_num: txOps[0][1].trx_in_block,
                     transaction_id: txOps[0][1].trx_id,
                     timestamp: new Date(txOps[0][1].timestamp + "Z"), // this is UTC time (Z marks it so that it can be converted to local time properly)
-                    ops: _.reverse(txOps.map((op: RawOperation) => op[1].op)) // map operations,
+                    ops: _.reverse(txOps.map((op: steem.AccountHistory.Operation) => op[1].op)) // map operations,
                     // they have to be reversed (we want transactions from the newset to the oldest, but operations in reversed order: from the oldest to the newset)
                 };
                 return transaction;
             });
 
-        const opsMappedToStemTransactionsSorted: SteemTransaction []
+        const opsMappedToStemTransactionsSorted: UnifiedSteemTransaction []
             = _.reverse(_.sortBy(opsMappedToStemTransactions, ["block_num", "transaction_num"]));
 
         opsMappedToStemTransactionsSorted.forEach(trx => {
@@ -127,8 +128,8 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
 
                 if (trx.ops.filter(op => op[0] === "vote").length > 0) hasVote = true;
                 if (trx.ops.filter(op => op[0] === "custom_json")
-                    .map(op => op[1] as CustomJsonOperation)
-                    .filter((cjop: CustomJsonOperation) => cjop.id === "wise")
+                    .map(op => op[1] as steem.CustomJsonOperation)
+                    .filter((cjop: steem.CustomJsonOperation) => cjop.id === "wise")
                     .map(cjop => JSON.parse(cjop.json) as string [])
                     .filter(o => o[0] === "v2:confirm_vote")
                     .filter(o => _.get(o[1], "accepted") as boolean === true).length > 0) hasAcceptedConfirmVote = true;
@@ -145,17 +146,3 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<SteemTransa
         return loadNext;
     }
 }
-
-export type RawOperation =
-    [
-        number,
-        {
-            block: number,
-            op: [string, object],
-            op_in_trx: number,
-            timestamp: string,
-            trx_id: string,
-            trx_in_block: number,
-            virtual_op: number
-        }
-    ];

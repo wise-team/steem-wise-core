@@ -1,24 +1,22 @@
-import { SteemPost } from "../blockchain/SteemPost";
+import * as steem from "steem";
+
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { Protocol } from "../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
-import { DynamicGlobalProperties } from "../blockchain/DynamicGlobalProperties";
-import { AccountInfo } from "../blockchain/AccountInfo";
-import { BlogEntry } from "../blockchain/BlogEntry";
 
 // TODO comment
 export abstract class Api {
     public abstract name(): string;
-    public abstract loadPost(author: string, permlink: string): Promise<SteemPost>; // throws NotFoundException
+    public abstract loadPost(author: string, permlink: string): Promise<steem.SteemPost>; // throws NotFoundException
     public abstract loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules>;
     public abstract loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []>;
-    public abstract sendToBlockchain(operations: [string, object][]): Promise<SteemOperationNumber>;
+    public abstract sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber>;
     public abstract getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber>;
     public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []>;
-    public abstract getDynamicGlobalProperties(): Promise<DynamicGlobalProperties>;
-    public abstract getAccountInfo(username: string): Promise<AccountInfo>; // throws NotFoundException
+    public abstract getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties>;
+    public abstract getAccountInfo(username: string): Promise<steem.AccountInfo>; // throws NotFoundException
 
     /**
      * Returns WISE operations related to given username that are newer than until.
@@ -35,5 +33,5 @@ export abstract class Api {
      *      (startFrom=0 will return the newest entry)
      * @param limit - limit the number of returned entries (maximal limit is 500).
      */
-    public abstract getBlogEntries(username: string, startFrom: number, limit: number): Promise<BlogEntry []>;
+    public abstract getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []>;
 }

@@ -1,10 +1,11 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
+import * as steem from "steem";
 import { Log } from "../../src/util/log";
 
 // wise imports
-import { Wise, SteemTransaction } from "../../src/wise";
+import { Wise, UnifiedSteemTransaction } from "../../src/wise";
 import { DisabledApi } from "../../src/api/DisabledApi";
 
 
@@ -44,17 +45,17 @@ describe("test/unit/protocol.spec.ts", function() {
             });
 
             /* tslint:disable:whitespace */
-            const validV2Ops: [string, object][] = [
+            const validV2Ops: steem.OperationWithDescriptor[] = [
                 ["custom_json",{id:"wise",json:"[\"v2:send_voteorder\",{\"delegator\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
                 ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"weight\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":1000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}]
             ];
-            validV2Ops.forEach((op: [string, object]) => {
+            validV2Ops.forEach((op: steem.OperationWithDescriptor) => {
                 it("passes valid v2 operation", () => {
                     expect(protocol.validateOperation(op)).to.be.true;
                 });
             });
 
-            const invalidV2Ops: [string, object][] = [
+            const invalidV2Ops: steem.OperationWithDescriptor[] = [
                 ["custom_json",{id:"wise",json:"[\"v2:send_voteorde\",{\"delegator\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
                 ["custom_json",{id:"wise",json:"[\"v3:send_voteorder\",{\"delegator\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
                 ["custom_json",{id:"wise",json:"[\"v2:send_voteorder\",{\"deleg\":\"guest123\",\"ruleset\":\"test_purpose_ruleset\",\"author\":\"urbangladiator\",\"permlink\":\"hyperfundit-a-kickstarter-like-funding-investment-platform-for-steem\",\"weight\":1000,\"sth_wrong\":1000}]",required_auths:[],required_posting_auths:["guest123"]}],
@@ -62,7 +63,7 @@ describe("test/unit/protocol.spec.ts", function() {
                 ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"strange_rule\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":1000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}],
                 ["custom_json",{id:"wise",json:"[\"v2:set_rules\",{\"voter\":\"guest123\",\"rulesets\":[[\"test_purpose_ruleset\",[{\"rule\":\"weight\",\"mode\":\"single_vote_weight\",\"min\":0,\"max\":20000},{\"rule\":\"tags\",\"mode\":\"require\",\"tags\":[\"steemprojects\"]}]]]}]",required_auths:[],required_posting_auths:["guest123"]}]
             ];
-            invalidV2Ops.forEach((op: [string, object]) => {
+            invalidV2Ops.forEach((op: steem.OperationWithDescriptor) => {
                 it("rejects invalid v2 operation", () => {
                     expect(protocol.validateOperation(op)).to.be.false;
                 });
@@ -79,11 +80,11 @@ interface SteemOperation {
     transaction_num: number;
     transaction_id: string;
     timestamp: Date;
-    op: [string, object];
+    op: steem.OperationWithDescriptor;
 }
 
-function operationToTransaction(op: SteemOperation): SteemTransaction {
-    const tx: SteemTransaction = {
+function operationToTransaction(op: SteemOperation): UnifiedSteemTransaction {
+    const tx: UnifiedSteemTransaction = {
         block_num: op.block_num,
         transaction_num: op.transaction_num,
         transaction_id: op.transaction_id,

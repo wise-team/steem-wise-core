@@ -2,6 +2,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
+import * as steem from "steem";
 
 import { Api } from "./api/Api";
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
@@ -45,7 +46,7 @@ export class RulesUpdater {
             delegator: delegator,
             command: { rulesets: rulesets } as SetRules
         };
-        const steemOps: [string, object][] = protocol.serializeToBlockchain(wiseOp);
+        const steemOps: steem.OperationWithDescriptor[] = protocol.serializeToBlockchain(wiseOp);
         if (steemOps.length !== 1) throw new Error("SetRules should be a single blockchain operation");
         if (!protocol.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
         if (proggressCallback) proggressCallback("Sending rules to blockchain...", 0.0);

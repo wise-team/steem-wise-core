@@ -1,6 +1,7 @@
+import * as steem from "steem";
 import { SetRules } from "./SetRules";
 import { SendVoteorder } from "./SendVoteorder";
-import { VoteOperation, isVoteOperation } from "../blockchain/VoteOperation";
+import { VoteOperation } from "../blockchain/VoteOperation";
 import { ConfirmVote } from "./ConfirmVote";
 
 /**
@@ -8,7 +9,7 @@ import { ConfirmVote } from "./ConfirmVote";
  * together with custom_json operation in a single transaction).
  */
 export interface ConfirmVoteBoundWithVote extends ConfirmVote {
-    vote: VoteOperation;
+    vote: steem.VoteOperation;
 }
 
 export namespace ConfirmVoteBoundWithVote {
@@ -18,6 +19,6 @@ export namespace ConfirmVoteBoundWithVote {
     export function isConfirmVoteBoundWithVote(cmd: SetRules | SendVoteorder | ConfirmVote | ConfirmVoteBoundWithVote): cmd is ConfirmVoteBoundWithVote {
         return ConfirmVote.isConfirmVote(cmd)
         && (<ConfirmVoteBoundWithVote>cmd).vote !== undefined
-        && isVoteOperation((<ConfirmVoteBoundWithVote>cmd).vote);
+        && VoteOperation.isVoteOperation((<ConfirmVoteBoundWithVote>cmd).vote);
     }
 }

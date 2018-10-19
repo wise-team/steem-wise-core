@@ -2,12 +2,12 @@
 import { expect } from "chai";
 import "mocha";
 import { Log } from "../../src/util/log";
+import * as steem from "steem";
 
 // wise imports
 import { VotingPowerRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";
 import { ValidationContext } from "../../src/validation/ValidationContext";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
-import { AccountInfo } from "../../src/blockchain/AccountInfo";
 import { wise_rule_voting_power_encode, wise_rule_voting_power_decode, wise_rule_voting_power } from "../../src/protocol/versions/v2/rules/rule-voting-power-schema";
 
 /* CONFIG */
@@ -53,17 +53,17 @@ describe("test/unit/rule-votingpower.spec.ts", () => {
                 "VotingPowerRule " + ( testMode.pass ? "should pass" : "should fail" ) + ": " +
                 testMode.testValue + " " + testMode.mode + " " + testMode.ruleValue, () => {
             const rule = new VotingPowerRule(testMode.mode, testMode.ruleValue);
-            const delegator = {
+            const delegatorAI = {
                 name: "delegator-" + i,
                 voting_power: testMode.testValue
             };
-            fakeDataset.accounts.push(delegator as object as AccountInfo);
+            fakeDataset.accounts.push(delegatorAI as object as steem.AccountInfo);
             const voteorder: SendVoteorder = {
                 rulesetName: "", weight: 1,
                 author: "noisy",
                 permlink: "dear-whales-please-consider-declining-all-comment-rewards-by-default-in-settings-5-reasons-to-do-that"
             };
-            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator.name, voter, voteorder);
+            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegatorAI.name, voter, voteorder);
 
             return rule.validate(voteorder, context)
             .then(() => { // passed

@@ -2,6 +2,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
+import * as steem from "steem";
 
 import { Log } from "./util/log";
 
@@ -167,7 +168,7 @@ export class Synchronizer {
     private voteAndConfirm(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
         Log.log().cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd}));
 
-        const opsToSend: [string, object][] = [];
+        const opsToSend: steem.OperationWithDescriptor[] = [];
 
         const confirmCmd: ConfirmVote = {
             voteorderTxId: op.transaction_id,
@@ -211,7 +212,7 @@ export class Synchronizer {
             delegator: this.delegator,
             command: confirmCmd
         };
-        const opsToSend: [string, object][] = this.protocol.serializeToBlockchain(wiseOp);
+        const opsToSend: steem.OperationWithDescriptor[] = this.protocol.serializeToBlockchain(wiseOp);
 
         this.notify(undefined, { type: Synchronizer.EventType.VoteorderRejected, voteorder: cmd, voteorderTxId: op.transaction_id, moment: op.moment, voter: op.voter, message: "Voteorder rejected: " + msg, validationException: undefined });
 
@@ -278,7 +279,7 @@ export namespace Synchronizer {
 
     export interface OperarionsPushedEvent {
         type: EventType.OperarionsPushed;
-        operations: [string, object][];
+        operations: steem.OperationWithDescriptor[];
         moment: SteemOperationNumber;
         message: string;
     }

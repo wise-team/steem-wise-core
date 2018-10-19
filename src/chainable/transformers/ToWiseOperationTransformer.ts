@@ -1,9 +1,9 @@
 import { ChainableTransformer } from "../Chainable";
-import { SteemTransaction } from "../../blockchain/SteemTransaction";
 import { Protocol } from "../../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
+import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
 
-export class ToWiseOperationTransformer extends ChainableTransformer<SteemTransaction, EffectuatedWiseOperation, ToWiseOperationTransformer> {
+export class ToWiseOperationTransformer extends ChainableTransformer<UnifiedSteemTransaction, EffectuatedWiseOperation, ToWiseOperationTransformer> {
     private protocol: Protocol;
 
     public constructor(protocol: Protocol) {
@@ -16,7 +16,7 @@ export class ToWiseOperationTransformer extends ChainableTransformer<SteemTransa
         return this;
     }
 
-    protected take(error: Error | undefined, steemTrx: SteemTransaction): boolean {
+    protected take(error: Error | undefined, steemTrx: UnifiedSteemTransaction): boolean {
         if (error) throw error;
 
         const handledOrRejected: EffectuatedWiseOperation [] | undefined = this.protocol.handleOrReject(steemTrx);

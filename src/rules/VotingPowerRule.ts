@@ -4,8 +4,6 @@ import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { NotFoundException } from "../util/NotFoundException";
-import { AccountInfo } from "../blockchain/AccountInfo";
 
 export class VotingPowerRule extends Rule {
     public rule: string = Rule.Type.VotingPower;

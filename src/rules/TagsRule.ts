@@ -1,9 +1,9 @@
 import * as _ from "lodash";
+import * as steem from "steem";
 
 import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
-import { SteemPost } from "../blockchain/SteemPost";
 import { SendVoteorder } from "../protocol/SendVoteorder";
 import { NotFoundException } from "../util/NotFoundException";
 
@@ -34,7 +34,7 @@ export class TagsRule extends Rule {
             else throw e;
         }
 
-        const postMetadata: SteemPost.JSONMetadata = JSON.parse(post.json_metadata) as SteemPost.JSONMetadata;
+        const postMetadata: steem.SteemPost.JSONMetadata = JSON.parse(post.json_metadata) as steem.SteemPost.JSONMetadata;
 
         if (this.mode === TagsRule.Mode.ALLOW) { // allow mode (every post tag must be within this list)
             for (let i = 0; i < postMetadata.tags.length; i++) {

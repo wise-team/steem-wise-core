@@ -9,12 +9,12 @@ import { Rule } from "../../../rules/Rule";
 import { TagsRule } from "../../../rules/TagsRule";
 import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
-import { SteemTransaction } from "../../../blockchain/SteemTransaction";
-import { CustomJsonOperation } from "../../../blockchain/CustomJsonOperation";
 import { EffectuatedWiseOperation } from "../../EffectuatedWiseOperation";
 import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
 import { ConfirmVote } from "../../ConfirmVote";
 import { WeightRule } from "../../../rules/WeightRule";
+import { UnifiedSteemTransaction } from "../../../blockchain/UnifiedSteemTransaction";
+import { CustomJsonOperation, OperationWithDescriptor } from "steem";
 
 const aajv: ajv.Ajv = new ajv();
 aajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"));
@@ -23,7 +23,7 @@ const validate = aajv.compile(require("./smartvotes.schema.json"));
 export class V1Handler implements ProtocolVersionHandler {
     public static INTRODUCTION_OF_WISE_MOMENT: SteemOperationNumber = new SteemOperationNumber(21622860, 26, 0);
 
-    public handleOrReject(transaction: SteemTransaction): EffectuatedWiseOperation [] | undefined {
+    public handleOrReject(transaction: UnifiedSteemTransaction): EffectuatedWiseOperation [] | undefined {
         if (transaction.block_num > 22710498) return undefined; // this protocol version is disabled for new transactions
 
         if (transaction.ops[0][0] != "custom_json" || (transaction.ops[0][1] as CustomJsonOperation).id != "smartvote") return undefined;
@@ -41,7 +41,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return validate(input) as boolean;
     }
 
-    private transform(op: SteemTransaction, smartvotesOp: smartvotes_operation, sender: string): EffectuatedWiseOperation [] | undefined {
+    private transform(op: UnifiedSteemTransaction, smartvotesOp: smartvotes_operation, sender: string): EffectuatedWiseOperation [] | undefined {
         if (smartvotesOp.name == "set_rules") { // sort for every voter
             return this.transformSetRules(op, smartvotesOp, sender);
         }
@@ -54,7 +54,7 @@ export class V1Handler implements ProtocolVersionHandler {
         else return undefined;
     }
 
-    private transformSetRules(op: SteemTransaction, smartvotesOp: smartvotes_command_set_rules, sender: string): EffectuatedWiseOperation [] {
+    private transformSetRules(op: UnifiedSteemTransaction, smartvotesOp: smartvotes_command_set_rules, sender: string): EffectuatedWiseOperation [] {
         const rulesPerVoter: [string, {name: string, rules: Rule []}[]][] = [];
 
         for (let i = 0; i < smartvotesOp.rulesets.length; i++) {
@@ -121,7 +121,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return {name: ruleset.name, rules: rules};
     }
 
-    private transformSendVoteorder(op: SteemTransaction, smartvotesOp: smartvotes_command_send_voteorder, sender: string): EffectuatedWiseOperation [] {
+    private transformSendVoteorder(op: UnifiedSteemTransaction, smartvotesOp: smartvotes_command_send_voteorder, sender: string): EffectuatedWiseOperation [] {
         const cmd: SendVoteorder = {
             rulesetName: smartvotesOp.voteorder.ruleset_name,
             permlink: smartvotesOp.voteorder.permlink,
@@ -140,7 +140,7 @@ export class V1Handler implements ProtocolVersionHandler {
         } as EffectuatedWiseOperation];
     }
 
-    private transformConfirmVotes(op: SteemTransaction, smartvotesOp: smartvotes_command_confirm_votes, sender: string): EffectuatedWiseOperation [] {
+    private transformConfirmVotes(op: UnifiedSteemTransaction, smartvotesOp: smartvotes_command_confirm_votes, sender: string): EffectuatedWiseOperation [] {
         const out: EffectuatedWiseOperation [] = [];
 
         for (let i = 0; i < smartvotesOp.voteorders.length; i++) {
@@ -167,7 +167,7 @@ export class V1Handler implements ProtocolVersionHandler {
         return out;
     }
 
-    public serializeToBlockchain(op: WiseOperation): [string, object][] {
+    public serializeToBlockchain(op: WiseOperation): OperationWithDescriptor [] {
         throw new Error("Protocol version V1 is disabled");
     }
 }

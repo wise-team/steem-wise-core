@@ -1,7 +1,8 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import * as steem from "steem";
+import * as steemJs from "steem";
+import { data as wise } from "../../src/wise-config.gen";
 import { Log } from "../../src/util/Log";
 
 // wise imports
@@ -12,7 +13,8 @@ describe("test/integration/steem.spec.ts", () => {
     describe("account_history_api.get_account_history", () => {
         it("Returns incorrect op_in_trx", function(done) {
             this.timeout(15000);
-            steem.api.getAccountHistory("steemprojects1", 40, 0, (error: Error, result: any) => {
+            const steem: steemJs.api.Steem = new steemJs.api.Steem({ url: wise.config.steem.defaultApiUrl });
+            steem.getAccountHistory("steemprojects1", 40, 0, (error: Error, result: any) => {
                 if (error) {
                     done(error);
                 }
@@ -40,7 +42,8 @@ describe("test/integration/steem.spec.ts", () => {
 
     describe("BlockchainConfig", () => {
         it("contains correct values", (done) => {
-            steem.api.getConfig((error: Error | undefined, result: { [s: string]: string; }) => {
+            const steem: steemJs.api.Steem = new steemJs.api.Steem({ url: wise.config.steem.defaultApiUrl });
+            steem.getConfig((error: Error | undefined, result: { [s: string]: string; }) => {
                 if (error) done(error);
                 else {
                     try {

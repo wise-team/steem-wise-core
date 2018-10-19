@@ -4,7 +4,6 @@ import { Rule } from "./Rule";
 import { ValidationException } from "../validation/ValidationException";
 import { ValidationContext } from "../validation/ValidationContext";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { SteemPost } from "../blockchain/SteemPost";
 import { NotFoundException } from "../util/NotFoundException";
 
 /**
