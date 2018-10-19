@@ -3,6 +3,7 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as steem from "steem";
 import * as _ from "lodash";
+import { data as wise } from "../../wise-config.gen";
 
 import { SetRules } from "../../protocol/SetRules";
 import { EffectuatedSetRules } from "../../protocol/EffectuatedSetRules";
@@ -32,7 +33,7 @@ export class DirectBlockchainApi extends Api {
     public constructor(postingWif?: string, steemOptions?: steem.SteemJsOptions) {
         super();
 
-        this.steem = new steem.api.Steem(steemOptions || {});
+        this.steem = new steem.api.Steem(steemOptions || { url: wise.config.steem.defaultApiUrl });
         this.postingWif = postingWif;
 
         if (steemOptions) {
