@@ -54,6 +54,8 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<UnifiedStee
         // Sometimes at the end of account history "from" can be lower than 1000. In that case we should set limit to "from". It will simply load operations including the oldest one.
         const batchLimit = (from === -1 ? this.batchSize : Math.min(this.batchSize, from));
 
+        Log.log().debug("STEEMJSACCOUNTHISTORYSUPPLIER_GET_ACCOUNT_HISTORY_ASYNC="
+            + JSON.stringify({ username: this.username, from: from, batchLimit: batchLimit }));
         this.steem.getAccountHistoryAsync(this.username, from, batchLimit)
         .then(
             (result: steem.AccountHistory.Operation []) => {
