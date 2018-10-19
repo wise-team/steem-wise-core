@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import * as url from "url";
 import * as _ from "lodash";
+import { Log } from "../../util/Log";
 import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
 import { WiseCommand } from "../../protocol/WiseCommand";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
@@ -40,30 +41,43 @@ export namespace WiseSQLProtocol {
         }
     }
 
+    export namespace Handler {
+        export interface QueryParams {
+            endpointUrl: string;
+            path: string; method: "get" | "post";
+            params?: object;
+            data?: object;
+            limit: number;
+        }
+    }
+
     export class Handler {
-        private static async query(params: {
-            endpointUrl: string, path: string, method: "get" | "post", params: object,
-            data: object
-        }, loadNextPages: boolean = true): Promise<EffectuatedWiseOperation []> {
+        public static async query(params: Handler.QueryParams, loadNextPages: boolean = true, offset: number = 0): Promise<EffectuatedWiseOperation []> {
             const queryConfig: AxiosRequestConfig = {};
 
+            queryConfig.url = params.endpointUrl + params.path;
             queryConfig.method = params.method;
             if (params.params) queryConfig.params = params.params;
             if (params.data) queryConfig.data = params.data;
+            queryConfig.headers = {
+                "Range-Unit": "items",
+                "Range":  offset + "-" + (params.limit - 1)
+            };
 
+            Log.log().efficient(Log.level.http, () => "HTTP_REQUEST=" + JSON.stringify(queryConfig));
             const response = await axios(queryConfig);
+            Log.log().efficient(Log.level.http, () => "HTTP_RESPONSE_HEADERS=" + JSON.stringify(response.headers));
+            Log.log().efficient(Log.level.http, () => "HTTP_RESPONSE_DATA_LENGTH=" + JSON.stringify(response.data.length));
 
             if (!response.data) throw new Error("No response from server");
             if (!Array.isArray(response.data)) throw new Error("Malformed response from server");
             const protocolVersion = Handler.getProtocolVersionFromResponse(response);
             const out = response.data.map(row => Handler.handleRow(protocolVersion, row));
 
-            if (loadNextPages && out.length > 0) {
+            if (loadNextPages && out.length > 0 && out.length + offset < params.limit) {
                 const nextPageOffset = Handler.nextPageOffset(response); // this method decides if next page exists
                 if (nextPageOffset > 0) {
-                    const paginatedParams: any = _.cloneDeep(params);
-                    paginatedParams.params["offset"] = nextPageOffset + "";
-                    const nextPageOut = await Handler.query(paginatedParams, true);
+                    const nextPageOut = await Handler.query(params, true, nextPageOffset);
                     nextPageOut.forEach(responseOp => out.push(responseOp));
                 }
             }
