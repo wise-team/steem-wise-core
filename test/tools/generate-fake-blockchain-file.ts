@@ -3,17 +3,14 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as steem from "steem";
 import * as fs from "fs";
+import { data as wise } from "../../src/wise-config.gen";
 
-import { DirectBlockchainApi, SteemTransaction } from "../../src/wise";
-import { SteemPost } from "../../src/blockchain/SteemPost";
-import { AccountInfo } from "../../src/blockchain/AccountInfo";
-import { DynamicGlobalProperties } from "../../src/blockchain/DynamicGlobalProperties";
+import { DirectBlockchainApi, UnifiedSteemTransaction } from "../../src/wise";
 import { SteemJsAccountHistorySupplier } from "../../src/api/directblockchain/SteemJsAccountHistorySupplier";
 import { OperationNumberFilter } from "../../src/chainable/filters/OperationNumberFilter";
 import { V1Handler } from "../../src/protocol/versions/v1/V1Handler";
 import { SimpleTaker } from "../../src/chainable/Chainable";
 import { FakeApi } from "../../src/api/FakeApi";
-import { BlogEntry } from "../../src/blockchain/BlogEntry";
 
 const outFilePath = __dirname + "/../data/fake-blockchain.json";
 
@@ -50,17 +47,13 @@ const postLinks: [string, string][] = [
     ["artemistau", "wielcy-polacy-professor-zbigniew-religa"]
 ];
 
-let posts: SteemPost [] = [];
-let accounts: AccountInfo [] = [];
-let dynamicGlobalProperties: DynamicGlobalProperties | undefined = undefined;
-let transactions: SteemTransaction [] = [];
-let blogEntries: BlogEntry [] = [];
+let posts: steem.SteemPost [] = [];
+let accounts: steem.AccountInfo [] = [];
+let dynamicGlobalProperties: steem.DynamicGlobalProperties | undefined = undefined;
+let transactions: UnifiedSteemTransaction [] = [];
+let blogEntries: steem.BlogEntry [] = [];
 
-const api = new DirectBlockchainApi("", /*{
-    transport: "http",
-    uri: "https://gtg.steem.house:8090",
-    url: "https://gtg.steem.house:8090"
-}*/);
+const api = new DirectBlockchainApi("");
 
 BluebirdPromise.resolve()
 .then(() => console.log("Loading posts..."))
@@ -69,7 +62,7 @@ BluebirdPromise.resolve()
     const link = link_ as [string, string];
     return api.loadPost(link[0], link[1]);
 })
-.then((values: SteemPost []) => {
+.then((values: steem.SteemPost []) => {
     posts = values;
 })
 
@@ -78,7 +71,7 @@ BluebirdPromise.resolve()
 .map((username: any /* bluebird bug */) => {
     return api.getAccountInfo(username);
 })
-.then((values: AccountInfo []) => {
+.then((values: steem.AccountInfo []) => {
     accounts = values;
 })
 
@@ -86,23 +79,23 @@ BluebirdPromise.resolve()
 .then(() => {
     return api.getDynamicGlobalProperties();
 })
-.then((value: DynamicGlobalProperties) => {
+.then((value: steem.DynamicGlobalProperties) => {
     dynamicGlobalProperties = value;
 })
 
 .then(() => console.log("Loading transactions..."))
 .then(() => usernames) // for each username return a promise that returns transactions
 .mapSeries((username: any  /* bluebird bug */) => {
-    const trxs: SteemTransaction [] = [];
+    const trxs: UnifiedSteemTransaction [] = [];
     return BluebirdPromise.delay(2000)
     .then(() => {
         console.log("Loading transactions of @" + username + "...");
 
-        return new SteemJsAccountHistorySupplier(new steem.api.Steem({}), username)
+        return new SteemJsAccountHistorySupplier(new steem.api.Steem({ url: wise.config.steem.defaultApiUrl }), username)
         .branch((historySupplier) => {
             historySupplier
             .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
-            .chain(new SimpleTaker((trx: SteemTransaction): boolean => {
+            .chain(new SimpleTaker((trx: UnifiedSteemTransaction): boolean => {
                 trxs.push(trx);
                 return true;
             }))
@@ -115,10 +108,10 @@ BluebirdPromise.resolve()
         return trxs;
     });
 })
-.then((values: SteemTransaction [][]) => {
-    return values.reduce((allTrxs: SteemTransaction [], nextTrxs: SteemTransaction []) => allTrxs.concat(nextTrxs));
+.then((values: UnifiedSteemTransaction [][]) => {
+    return values.reduce((allTrxs: UnifiedSteemTransaction [], nextTrxs: UnifiedSteemTransaction []) => allTrxs.concat(nextTrxs));
 })
-.then((trxs: SteemTransaction []) => {
+.then((trxs: UnifiedSteemTransaction []) => {
     transactions = trxs;
 })
 
@@ -127,10 +120,10 @@ BluebirdPromise.resolve()
 .map((username: any  /* bluebird bug */) => {
     return api.getBlogEntries(username, 0, 500);
 })
-.then((values: BlogEntry [][]) => {
-    return values.reduce((allEntries: BlogEntry [], nextEntries: BlogEntry []) => allEntries.concat(nextEntries));
+.then((values: steem.BlogEntry [][]) => {
+    return values.reduce((allEntries: steem.BlogEntry [], nextEntries: steem.BlogEntry []) => allEntries.concat(nextEntries));
 })
-.then((blogEntries_: BlogEntry []) => {
+.then((blogEntries_: steem.BlogEntry []) => {
     blogEntries = blogEntries_;
 })
 
