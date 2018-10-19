@@ -56,7 +56,7 @@ describe("test/unit/rule-voters.spec.ts", () => {
                 rulesetName: "", weight: 1,
                 author: test.author, permlink: test.permlink
             };
-            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
             return rule.validate(voteorder, context).then(
                 () => { if (!test.pass) throw new Error("Should fail"); },
                 (error: Error) => {
@@ -84,7 +84,7 @@ describe("test/unit/rule-voters.spec.ts", () => {
                 author: "noisy",
                 permlink: "nonexistent-post-" + Date.now()
             };
-            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
             return rule.validate(voteorder, context)
             .then(() => { throw new Error("Should fail"); },
                   (e: Error) => { expect((e as ValidationException).validationException).to.be.true; });

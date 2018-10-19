@@ -3,18 +3,21 @@ import * as steem from "steem";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
-import { Protocol } from "../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 
 // TODO comment
 export abstract class Api {
     public abstract name(): string;
     public abstract loadPost(author: string, permlink: string): Promise<steem.SteemPost>; // throws NotFoundException
-    public abstract loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules>;
-    public abstract loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []>;
+    /**
+     * Load rulesets
+     * @param forWhom - specify the delegator, the voter or both of them
+     * @param at - the moment at which the rulesets were the most current rulesets for specified voter/delegator/pair
+     */
+    public abstract loadRulesets(forWhom: { delegator?: string, voter?: string }, at: SteemOperationNumber): Promise<EffectuatedSetRules []>;
     public abstract sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber>;
-    public abstract getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber>;
-    public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []>;
+    public abstract getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber>;
+    public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []>;
     public abstract getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties>;
     public abstract getAccountInfo(username: string): Promise<steem.AccountInfo>; // throws NotFoundException
 
@@ -23,7 +26,7 @@ export abstract class Api {
      * @param username - steem username
      * @param until - the oldest date to search for operations.
      */
-    public abstract getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []>;
+    public abstract getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []>;
 
     /**
      * Returns last user blog entries from follow_api. They are sorted from the newest to the oldest,

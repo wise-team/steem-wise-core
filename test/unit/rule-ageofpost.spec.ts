@@ -84,7 +84,7 @@ describe("test/unit/rule-ageofpost.spec.ts", () => {
                 author: post.author,
                 permlink: post.permlink
             };
-            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
 
             return rule.validate(voteorder, context)
             .then(() => { // passed

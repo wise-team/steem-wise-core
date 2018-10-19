@@ -13,11 +13,11 @@ export class FakeWiseFactory {
     }
 
     public static buildFakeApiWithDataset(dataset: FakeApi.Dataset): Api {
-        return FakeApi.fromDataset(dataset);
+        return FakeApi.fromDataset(Wise.constructDefaultProtocol(), dataset);
     }
 
     public static buildFakeApi(): Api {
-        return FakeApi.fromDataset(FakeWiseFactory.loadDataset());
+        return FakeApi.fromDataset(Wise.constructDefaultProtocol(), FakeWiseFactory.loadDataset());
     }
 
     public static buildFakeWise(username: string): Wise {

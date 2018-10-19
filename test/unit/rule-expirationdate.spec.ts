@@ -35,7 +35,7 @@ describe("test/unit/rule-expirationdate.spec.ts", () => {
                 author: fakeDataset.posts[0].author,
                 permlink: fakeDataset.posts[0].permlink
             };
-            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
 
             return rule.validate(voteorder, context)
             .then(() => { // passed

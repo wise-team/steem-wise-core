@@ -8,7 +8,7 @@ import { data as wise } from "../../wise-config.gen";
 import { SetRules } from "../../protocol/SetRules";
 import { EffectuatedSetRules } from "../../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
-import { SimpleTaker } from "../../chainable/Chainable";
+import { SimpleTaker, Chainable } from "../../chainable/Chainable";
 import { Api } from "../Api";
 import { Protocol } from "../../protocol/Protocol";
 import { V1Handler } from "../../protocol/versions/v1/V1Handler";
@@ -23,16 +23,19 @@ import { NotFoundException } from "../../util/NotFoundException";
 import { DateLimiter } from "./DateLimiter";
 import { Log } from "../../util/log";
 import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
+import Wise from "../../wise";
 
 export class DirectBlockchainApi extends Api {
     private steem: steem.api.Steem;
     private postingWif: string | undefined;
     private sendEnabled: boolean = true;
+    private protocol: Protocol;
 
-    public constructor(postingWif?: string, steemOptions?: steem.SteemJsOptions) {
+    public constructor(protocol: Protocol, postingWif?: string, steemOptions?: steem.SteemJsOptions) {
         super();
 
-        this.postingWif = postingWif;
+        this.protocol = protocol;
+        if (postingWif) this.postingWif = postingWif;
 
         if (steemOptions) {
             this.steem = new steem.api.Steem(steemOptions);
@@ -67,31 +70,42 @@ export class DirectBlockchainApi extends Api {
     }
 
     public async loadRulesets(
-        delegator: string, voter: string, atMoment: SteemOperationNumber, protocol: Protocol
-    ): Promise<SetRules> {
+        forWhom: { delegator?: string, voter?: string }, atMoment: SteemOperationNumber
+    ): Promise<EffectuatedSetRules []> {
         Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS="
-            + JSON.stringify({ delegator: delegator, voter: voter, atMoment: atMoment }));
+            + JSON.stringify({ forWhom: forWhom, atMoment: atMoment }));
 
-        if (typeof delegator === "undefined" || delegator.length == 0)
-            throw new Error("Delegator must not be empty");
-        if (typeof voter === "undefined" || voter.length == 0)
-            throw new Error("Voter must not be empty");
+        if (!forWhom.delegator)
+            throw new Error("Direct blockchain api can only load rulesets for one voter."
+                + " Use other api to load rulesets from many delegators");
 
-        const loadedRulesets: SetRules [] = [];
-        const supplier = new SteemJsAccountHistorySupplier(this.steem, delegator)
+
+        const loadedRulesets: EffectuatedSetRules [] = [];
+        const supplier = new SteemJsAccountHistorySupplier(this.steem, forWhom.delegator)
             .branch((historySupplier) => {
-                historySupplier
+                let chain: Chainable<any, any, any> = historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
                 // this is limiter (restricts lookup to the period of wise presence):
                 .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter())
-                .chain(new ToWiseOperationTransformer(protocol))
-                .chain(new VoterFilter(voter))
-                .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(
+                .chain(new ToWiseOperationTransformer(this.protocol));
+
+                if (forWhom.voter) chain = chain.chain(new VoterFilter(forWhom.voter));
+
+                chain = chain.chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(
                     WiseOperationTypeFilter.OperationType.SetRules)
-                )
-                .chain(new ChainableLimiter(1))
-                .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
-                    loadedRulesets.push(item.command as SetRules);
+                );
+
+                if (forWhom.voter) chain = chain.chain(new ChainableLimiter(1));
+
+                chain.chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
+                    const setRules = item.command as SetRules;
+                    const esr: EffectuatedSetRules = {
+                        rulesets: setRules.rulesets,
+                        voter: item.voter,
+                        delegator: item.delegator,
+                        moment: item.moment
+                    };
+                    loadedRulesets.push(esr);
                     return false;
                 }))
                 .catch((error: Error) => false); // if we return false on error, the Promise will be rejected
@@ -100,11 +114,13 @@ export class DirectBlockchainApi extends Api {
 
         await supplier.start();
 
-        if (loadedRulesets.length > 0) return loadedRulesets[0];
-        else {
-            const emptyResult: SetRules = { rulesets: [] };
-            return emptyResult;
-        }
+        const allRulesGrouppedByVoter: { [voter: string]: EffectuatedSetRules [] } = _.groupBy(loadedRulesets, "voter");
+
+        const out: EffectuatedSetRules [] = [];
+        _.forOwn(allRulesGrouppedByVoter, (esr: EffectuatedSetRules [], voter: string) => {
+            out.push(esr.sort((a, b) => SteemOperationNumber.compare(a.moment, b.moment)).reverse()[0]);
+        });
+        return out;
     }
 
     public async sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
@@ -123,45 +139,7 @@ export class DirectBlockchainApi extends Api {
         return new SteemOperationNumber(result.block_num, result.trx_num, operations.length - 1);
     }
 
-    public async loadAllRulesets(delegator: string, atMoment: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_LOAD_ALL_RULESETS=" + JSON.stringify({ delegator: delegator, atMoment: atMoment }));
-
-        if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
-
-        const allRules: EffectuatedSetRules [] = [];
-
-        const supplier = new SteemJsAccountHistorySupplier(this.steem, delegator)
-            .branch((historySupplier) => {
-                historySupplier
-                .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
-                .chain(new ToWiseOperationTransformer(protocol))
-                .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.SetRules))
-                .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
-                    const out: EffectuatedSetRules = {
-                        rulesets: (item.command as SetRules).rulesets,
-                        moment: item.moment,
-                        voter: item.voter
-                    };
-                    allRules.push(out);
-
-                    return true;
-                }))
-                .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
-            }
-        );
-        await supplier.start();
-
-        const allRulesGrouppedByVoter: { [voter: string]: EffectuatedSetRules [] } = _.groupBy(allRules, "voter");
-
-        const out: EffectuatedSetRules [] = [];
-        _.forOwn(allRulesGrouppedByVoter, (esr: EffectuatedSetRules [], voter: string) => {
-            out.push(esr.sort((a, b) => SteemOperationNumber.compare(a.moment, b.moment)).reverse()[0]);
-        });
-        return out;
-    }
-
-    public async getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
+    public async getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
         Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator }));
 
         if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
@@ -172,7 +150,7 @@ export class DirectBlockchainApi extends Api {
         .branch((historySupplier) => {
             historySupplier
             .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
-            .chain(new ToWiseOperationTransformer(protocol))
+            .chain(new ToWiseOperationTransformer(this.protocol))
             .chain(new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.ConfirmVote))
             .chain(new ChainableLimiter(1))
             .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
@@ -186,7 +164,7 @@ export class DirectBlockchainApi extends Api {
         return result;
     }
 
-    public async getWiseOperations(account: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperations(account: string, until: Date): Promise<EffectuatedWiseOperation []> {
         if (typeof account === "undefined" || account.length == 0) throw new Error("Username must not be empty");
 
         const result: EffectuatedWiseOperation [] = [];
@@ -196,7 +174,7 @@ export class DirectBlockchainApi extends Api {
             historySupplier
             .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
             .chain(new DateLimiter(until))
-            .chain(new ToWiseOperationTransformer(protocol))
+            .chain(new ToWiseOperationTransformer(this.protocol))
             .chain(new SimpleTaker((item: EffectuatedWiseOperation): boolean => {
                 result.push(item);
                 return true;
@@ -209,19 +187,19 @@ export class DirectBlockchainApi extends Api {
         return result;
     }
 
-    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol, skipDelegatorCheck: boolean = false): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, skipDelegatorCheck: boolean = false): Promise<EffectuatedWiseOperation []> {
         const block: steem.GetBlock.Block = await this.steem.getBlockAsync(blockNum);
 
         if (!block) {
             return BluebirdPromise.delay(1500)
-            .then(() => this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, protocol, skipDelegatorCheck));
+            .then(() => this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, skipDelegatorCheck));
         }
         else {
-            return this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, protocol, skipDelegatorCheck);
+            return this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, skipDelegatorCheck);
         }
     }
 
-    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: steem.GetBlock.Block, protocol: Protocol, skipDelegatorCheck: boolean): EffectuatedWiseOperation [] {
+    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: steem.GetBlock.Block, skipDelegatorCheck: boolean): EffectuatedWiseOperation [] {
         let out: EffectuatedWiseOperation [] = [];
 
         const block_num = blockNum;
@@ -231,7 +209,7 @@ export class DirectBlockchainApi extends Api {
 
             out = out.concat(this.getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
                 delegator, blockNum, transaction_num, transaction,
-                new Date(timestampUtc + "Z" /* this is UTC date */), protocol, skipDelegatorCheck
+                new Date(timestampUtc + "Z" /* this is UTC date */), skipDelegatorCheck
             ));
         }
 
@@ -240,7 +218,7 @@ export class DirectBlockchainApi extends Api {
 
     private getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
         delegator: string, blockNum: number, transactionNum: number, transaction: steem.GetBlock.Transaction,
-        timestamp: Date, protocol: Protocol, skipDelegatorCheck: boolean
+        timestamp: Date, skipDelegatorCheck: boolean
     ): EffectuatedWiseOperation [] {
         const out: EffectuatedWiseOperation [] = [];
         const steemTx: UnifiedSteemTransaction = {
@@ -250,7 +228,7 @@ export class DirectBlockchainApi extends Api {
             timestamp: timestamp,
             ops: transaction.operations
         };
-        const handleResult = protocol.handleOrReject(steemTx);
+        const handleResult = this.protocol.handleOrReject(steemTx);
 
         if (handleResult) {
             handleResult.forEach(wiseOp => {
@@ -268,7 +246,7 @@ export class DirectBlockchainApi extends Api {
      * @param protocol - Protocol object.
      */
     public getAllWiseOperationsInBlock(blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
-        return this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, protocol, true /* skip delegator check */);
+        return this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, true /* skip delegator check */);
     }
 
     public async getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties> {

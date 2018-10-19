@@ -39,38 +39,28 @@ export class WiseSQLApi extends Api {
         return this.directBlockchainApi.loadPost(author, permlink);
     }
 
-    public async loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
-        const ops: EffectuatedWiseOperation [] = await WiseSQLProtocol.Handler.query(
-            { endpointUrl: this.endpointUrl, path: "/rpc/rulesets_by_delegator_for_voter_at_moment",
-            method: "post", limit: 9999, data: { delegator: delegator, voter: voter, moment: this.formatMoment(at) } }
-        );
+    public async loadRulesets(forWhom: { voter?: string, delegator?: string }, at: SteemOperationNumber): Promise<EffectuatedSetRules []> {
+        let ops: EffectuatedWiseOperation [];
+        let path: string = "";
+        let data: object = {};
 
-        if (ops.length === 0) return { rulesets: [] };
-        if (ops.length > 1) throw new Error("Too many rows returned from server");
-        const setRules = ops[0].command;
-        if (!SetRules.isSetRules(setRules)) throw new Error("Returned operation is not an instance of SetRules");
+        if (forWhom.delegator && forWhom.voter) {
+            path = "/rpc/rulesets_by_delegator_for_voter_at_moment";
+            data = { delegator: forWhom.delegator, voter: forWhom.voter, moment: this.formatMoment(at) };
+        }
+        else if (forWhom.delegator && !forWhom.voter) {
+            path = "/rpc/rulesets_by_delegator_at_moment";
+            data = { delegator: forWhom.delegator, moment: this.formatMoment(at) };
+        }
+        else if (!forWhom.delegator && forWhom.voter) {
+            path = "/rpc/rulesets_by_all_delegators_for_voter_at_moment";
+            data = { voter: forWhom.voter, moment: this.formatMoment(at) };
+        }
+        else throw new Error("You have to specify either a voter, a delegator or both of them.");
 
-        const prototypedRulesets = setRules.rulesets.map(unprototypedRuleset => RulePrototyper.prototypeRuleset(unprototypedRuleset));
-
-        const out: EffectuatedSetRules = {
-            moment: ops[0].moment,
-            voter: ops[0].voter,
-            rulesets: prototypedRulesets
-        };
-
-        return out;
-    }
-
-    public async sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
-        if (!this.directBlockchainApi) throw new Error("To use #sendToBlockchain method you have to specify a DirectBlockchainApi in constructor");
-        return this.directBlockchainApi.sendToBlockchain(operations);
-    }
-
-    public async loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
-        const ops: EffectuatedWiseOperation [] = await WiseSQLProtocol.Handler.query(
-            { endpointUrl: this.endpointUrl, path: "/rpc/rulesets_by_delegator_at_moment",
-            method: "post", limit: 9999, params: { order: "moment.desc" },
-            data: { delegator: delegator, moment: this.formatMoment(at) } }
+        ops = await WiseSQLProtocol.Handler.query(
+            { endpointUrl: this.endpointUrl, path: path,
+            method: "post", limit: 9999, data: data }
         );
 
         return ops.map((op: EffectuatedWiseOperation) => {
@@ -80,12 +70,18 @@ export class WiseSQLApi extends Api {
             const prototypedRulesets = setRules.rulesets.map(unprototypedRuleset => RulePrototyper.prototypeRuleset(unprototypedRuleset));
 
             const out: EffectuatedSetRules = {
-                moment: ops[0].moment,
-                voter: ops[0].voter,
+                moment: op.moment,
+                voter: op.voter,
+                delegator: op.delegator,
                 rulesets: prototypedRulesets
             };
             return out;
         });
+    }
+
+    public async sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
+        if (!this.directBlockchainApi) throw new Error("To use #sendToBlockchain method you have to specify a DirectBlockchainApi in constructor");
+        return this.directBlockchainApi.sendToBlockchain(operations);
     }
 
     public async getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {

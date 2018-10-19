@@ -130,7 +130,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     author: "",
                     permlink: ""
                 };
-                const context = new ValidationContext(fakeApi, delegatorWise.getProtocol(), delegator, test.voter, emptyVoteorder);
+                const context = new ValidationContext(fakeApi, delegator, test.voter, emptyVoteorder);
                 const until = new Date(nowTime.getTime() - 50 * 24 * 3600 * 1000);
                 // calculate for all voters
                 const voters: string [] = _.uniq(test.voteorders.map(vo => vo.voter));
@@ -154,7 +154,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     permlink: ""
                 };
 
-                const context = new ValidationContext(fakeApi, delegatorWise.getProtocol(), delegator, test.voter, emptyVoteorder);
+                const context = new ValidationContext(fakeApi, delegator, test.voter, emptyVoteorder);
                 const until = new Date(nowTime.getTime() - 50 * 24 * 3600 * 1000);
 
                 return context.getWiseOperations(context.getDelegatorUsername(), until)
@@ -174,7 +174,7 @@ describe("test/unit/rule-weightforperiod.spec.ts", () => {
                     author: "noisy",
                     permlink: "nonexistent-post-" + Date.now()
                 };
-                const context = new ValidationContext(fakeApi, delegatorWise.getProtocol(), delegator, test.voter, voteorder);
+                const context = new ValidationContext(fakeApi, delegator, test.voter, voteorder);
                 const rule = new WeightForPeriodRule(test.period, test.unit, test.ruleWeight);
                 return rule.validate(voteorder, context, nowTime)
                 .then (() => {

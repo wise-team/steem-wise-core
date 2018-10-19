@@ -43,7 +43,7 @@ describe("test/unit/rule-firstpost.spec.ts", () => {
                 author: test.author,
                 permlink: test.permlink
             };
-            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
+            const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
 
             return rule.validate(voteorder, context)
             .then(() => { // passed

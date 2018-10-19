@@ -4,12 +4,10 @@ import { SendVoteorder } from "../protocol/SendVoteorder";
 import { Api } from "../api/Api";
 import { OneTimePromise } from "../util/OneTimePromise";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
-import { Protocol } from "../protocol/Protocol";
 import { Log } from "../util/log";
 
 export class ValidationContext {
     private api: Api;
-    private protocol: Protocol;
     private delegator: string;
     private voter: string;
     private voteorder: SendVoteorder;
@@ -17,9 +15,8 @@ export class ValidationContext {
     private dgpLoader = new OneTimePromise<steem.DynamicGlobalProperties>(10 * 1000);
     private accountInfoLoaders: [string, OneTimePromise<steem.AccountInfo>][] = [];
 
-    public constructor(api: Api, protocol: Protocol, delegator: string, voter: string, voteorder: SendVoteorder) {
+    public constructor(api: Api, delegator: string, voter: string, voteorder: SendVoteorder) {
         this.api = api;
-        this.protocol = protocol;
         this.delegator = delegator;
         this.voter = voter;
         this.voteorder = voteorder;
@@ -61,7 +58,7 @@ export class ValidationContext {
      * @param until - the oldest date to search for operations.
      */
     public getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
-        return this.api.getWiseOperations(username, until, this.protocol);
+        return this.api.getWiseOperations(username, until);
     }
 
     /**

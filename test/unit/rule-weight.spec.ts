@@ -24,7 +24,7 @@ describe("test/unit/rule-weight.spec.ts", () => {
             author: "noisy",
             permlink: "nonexistent-post-" + Date.now()
         };
-        const context = new ValidationContext(fakeApi, wise.getProtocol(), delegator, voter, voteorder);
+        const context = new ValidationContext(fakeApi, delegator, voter, voteorder);
 
         it ("allows 0 <= 50 <= 100", () => {
             const rule = new WeightRule(0, 100);

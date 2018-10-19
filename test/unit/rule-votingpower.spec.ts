@@ -63,7 +63,7 @@ describe("test/unit/rule-votingpower.spec.ts", () => {
                 author: "noisy",
                 permlink: "dear-whales-please-consider-declining-all-comment-rewards-by-default-in-settings-5-reasons-to-do-that"
             };
-            const context = new ValidationContext(fakeApi, wise.getProtocol(), delegatorAI.name, voter, voteorder);
+            const context = new ValidationContext(fakeApi, delegatorAI.name, voter, voteorder);
 
             return rule.validate(voteorder, context)
             .then(() => { // passed

@@ -25,7 +25,7 @@ BluebirdPromise.onPossiblyUnhandledRejection(function(error) {
  */
 const delegator = "noisy";
 const fakeDataset = FakeWiseFactory.loadDataset();
-const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
+const fakeApi: FakeApi = FakeApi.fromDataset(Wise.constructDefaultProtocol(), fakeDataset);
 fakeApi.setFakeDelayMs(0);
 const delegatorWise = new Wise(delegator, fakeApi as object as Api);
 

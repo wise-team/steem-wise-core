@@ -107,8 +107,9 @@ export class Wise {
         delegator: string, voter: string,
         atMoment: SteemOperationNumber = SteemOperationNumber.NOW
     ): Promise<Ruleset []> => {
-        const setRules = await this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
-        return setRules.rulesets;
+        const setRules = await this.api.loadRulesets({ delegator: delegator, voter: voter }, atMoment);
+        if (setRules.length > 0) return setRules[0].rulesets;
+        else return [];
     }
 
 
@@ -161,7 +162,7 @@ export class Wise {
         proggressCallback: ProggressCallback = () => {}
     ): Promise<EffectuatedSetRules []> => {
         proggressCallback("Downloading all rulesets set by " + delegator, 0.0);
-        const result =  RulesUpdater.downloadAllRulesets(this.api, this.protocol, delegator, atMoment);
+        const result =  RulesUpdater.downloadAllRulesets(this.api, delegator, atMoment);
         proggressCallback("Downloaded all rulesets set by " + delegator, 1.0);
         return result;
     }
@@ -261,7 +262,7 @@ export class Wise {
         proggressCallback: ProggressCallback = () => {}
     ): Promise<ValidationException | true> => {
 
-        const v = new Validator(this.api, this.protocol);
+        const v = new Validator(this.api);
         if (proggressCallback) v.withProggressCallback(proggressCallback);
 
         return v.validate(delegator, voter, voteorder, atMoment);
@@ -281,7 +282,7 @@ export class Wise {
      * it resolves with SteemOperationNumber pointing at the moment of the newest confirmation.
      */
     public getLastConfirmationMoment = (delegator: string): Promise<undefined | SteemOperationNumber> => {
-        return this.api.getLastConfirmationMoment(delegator, this.getProtocol());
+        return this.api.getLastConfirmationMoment(delegator);
     }
 
 

@@ -19,15 +19,11 @@ export class DisabledApi extends Api {
         throw new Error("This api is disabled");
     }
 
-    public async loadRulesets(delegator: string, voter: string, at: SteemOperationNumber): Promise<SetRules> {
+    public async loadRulesets(forWhom: { voter?: string; delegator?: string }, at: SteemOperationNumber): Promise<EffectuatedSetRules []> {
         throw new Error("This api is disabled");
     }
 
     public async sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
-        throw new Error("This api is disabled");
-    }
-
-    public async loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
         throw new Error("This api is disabled");
     }
 
@@ -47,7 +43,7 @@ export class DisabledApi extends Api {
         throw new Error("This api is disabled");
     }
 
-    public async getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
         throw new Error("This api is disabled");
     }
 

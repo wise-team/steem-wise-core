@@ -16,15 +16,16 @@ const fakeDataset = FakeWiseFactory.loadDataset();
 /* CONFIG */
 const delegator = "noisy";
 const voter = "perduta";
-const fakeApi: FakeApi = FakeApi.fromDataset(fakeDataset);
+const fakeApi: FakeApi = FakeApi.fromDataset(Wise.constructDefaultProtocol(), fakeDataset);
 const wise = new Wise(voter, fakeApi as any as Api);
 
 
 describe("test/unit/validator.spec.ts", () => {
     describe("Validator", () => {
-        const validator = new Validator(fakeApi as any as Api, wise.getProtocol());
+        const validator = new Validator(fakeApi as any as Api);
         validator.provideRulesets({
             voter: voter,
+            delegator: delegator,
             moment: new SteemOperationNumber(0, 0, 0),
             rulesets: [{ name: "ruleset", rules: [] }]
         });

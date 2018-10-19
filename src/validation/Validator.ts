@@ -17,14 +17,12 @@ import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 
 export class Validator {
     private api: Api;
-    private protocol: Protocol;
     private proggressCallback: ProggressCallback = (msg: string, proggress: number): void => {};
     private concurrency: number = 4;
     private providedRulesets: EffectuatedSetRules | undefined = undefined;
 
-    public constructor(api: Api, protocol: Protocol) {
+    public constructor(api: Api) {
         this.api = api;
-        this.protocol = protocol;
     }
 
     public withConcurrency(concurrency: number): Validator {
@@ -45,7 +43,7 @@ export class Validator {
     public async validate (delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber): Promise<ValidationException | true> {
         Log.log().cheapDebug(() => "VALIDATOR_VALIDATE=" + JSON.stringify({delegator: delegator, voter: voter, voteorder: voteorder, atMoment: atMoment}));
         try {
-            const context = new ValidationContext(this.api, this.protocol, delegator, voter, voteorder);
+            const context = new ValidationContext(this.api, delegator, voter, voteorder);
 
             this.validateVoteorderObject(voteorder);
 
@@ -55,7 +53,8 @@ export class Validator {
                 rulesets = this.providedRulesets;
             }
             else {
-                rulesets = await this.api.loadRulesets(delegator, voter, atMoment, this.protocol);
+                const esrArray = await this.api.loadRulesets( { delegator: delegator, voter: voter }, atMoment);
+                rulesets = ( esrArray.length > 0 ? esrArray[0] : { rulesets: [] });
             }
             Log.log().cheapDebug(() => "VALIDATOR_USING_RULESETS=" + JSON.stringify(rulesets));
 

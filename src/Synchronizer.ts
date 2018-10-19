@@ -20,9 +20,8 @@ import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 
 export class Synchronizer {
     private timeoutMs = 12000;
-
-    private api: Api;
     private protocol: Protocol;
+    private api: Api;
     private delegator: string;
     private notifier: Synchronizer.NotifierCallback;
 
@@ -48,7 +47,7 @@ export class Synchronizer {
 
         (async () => {
             try {
-                const rules: EffectuatedSetRules [] = await this.api.loadAllRulesets(this.delegator, since, this.protocol);
+                const rules: EffectuatedSetRules [] = await this.api.loadRulesets({ delegator: this.delegator }, since);
 
                 Log.log().debug("SYNCHRONIZER_INITIAL_RULESETS_LOADED=" + JSON.stringify(rules));
                 this.rules = rules;
@@ -70,7 +69,7 @@ export class Synchronizer {
     private processBlock(blockNum: number) {
         this.notify(undefined, { type: Synchronizer.EventType.StartBlockProcessing, blockNum: blockNum, message: "Start processing block " + blockNum });
         this.continueIfRunning(() => BluebirdPromise.resolve()
-            .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum, this.protocol))
+            .then(() => this.api.getWiseOperationsRelatedToDelegatorInBlock(this.delegator, blockNum))
             .mapSeries((op: any /* bug in bluebird */) =>
                 this.processOperation(op as EffectuatedWiseOperation)
             )
@@ -113,6 +112,7 @@ export class Synchronizer {
         const es: EffectuatedSetRules = {
             moment: op.moment,
             voter: op.voter,
+            delegator: op.delegator,
             rulesets: cmd.rulesets
         };
         this.rules.push(es);
@@ -129,7 +129,7 @@ export class Synchronizer {
 
         if (!rules) return this.rejectVoteorder(op, cmd, "There is no ruleset for you");
 
-        const v = new Validator(this.api, this.protocol);
+        const v = new Validator(this.api);
         // provide already loaded rulesets (there is no need to call blockchain for them every single voteorder)
         v.provideRulesets(rules);
 

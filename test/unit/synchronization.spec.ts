@@ -43,7 +43,7 @@ describe("test/unit/synchronization.spec.ts", () => {
 
         before(function () {
             fakeDataset = FakeWiseFactory.loadDataset();
-            fakeApi = FakeApi.fromDataset(fakeDataset);
+            fakeApi = FakeApi.fromDataset(Wise.constructDefaultProtocol(), fakeDataset);
             delegatorWise = new Wise(delegator, fakeApi as object as Api);
             voterWise = new Wise(voter, fakeApi as object as Api);
             synchronizerToolkit = new SynchronizerTestToolkit(delegatorWise);

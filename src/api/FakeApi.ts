@@ -17,6 +17,7 @@ import { ConfirmVote } from "../protocol/ConfirmVote";
 import { UnifiedSteemTransaction } from "../blockchain/UnifiedSteemTransaction";
 
 export class FakeApi extends Api {
+    private protocol: Protocol;
     private posts: steem.SteemPost [];
     private transactions: UnifiedSteemTransaction [];
     private dynamicGlobalProperties: steem.DynamicGlobalProperties;
@@ -28,9 +29,10 @@ export class FakeApi extends Api {
     private fakeDelayMs: number = 5;
     private transactionsByBlock: { [key: string]: UnifiedSteemTransaction [] } = {};
 
-    public constructor(posts: steem.SteemPost [], dynamicGlobalProperties: steem.DynamicGlobalProperties, accounts: steem.AccountInfo [], transactions: UnifiedSteemTransaction [], blogEntries: steem.BlogEntry []) {
+    public constructor(protocol: Protocol, posts: steem.SteemPost [], dynamicGlobalProperties: steem.DynamicGlobalProperties, accounts: steem.AccountInfo [], transactions: UnifiedSteemTransaction [], blogEntries: steem.BlogEntry []) {
         super();
 
+        this.protocol = protocol;
         this.posts = posts;
         this.dynamicGlobalProperties = dynamicGlobalProperties;
         this.accounts = accounts;
@@ -55,8 +57,8 @@ export class FakeApi extends Api {
         });
     }
 
-    public static fromDataset(dataset: FakeApi.Dataset): FakeApi {
-        return new FakeApi(dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.transactions, dataset.blogEntries);
+    public static fromDataset(protocol: Protocol, dataset: FakeApi.Dataset): FakeApi {
+        return new FakeApi(protocol, dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.transactions, dataset.blogEntries);
     }
 
     public name(): string {
@@ -74,18 +76,18 @@ export class FakeApi extends Api {
         throw new NotFoundException("No such post @" + author + "/" + permlink);
     }
 
-    public loadRulesets(delegator: string, voter: string, at: SteemOperationNumber, protocol: Protocol): Promise<SetRules> {
+    /*public loadRulesets(forWh, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules> {
         return this.loadAllRulesets(delegator, at, protocol).then((rulesets: EffectuatedSetRules []) => {
             const votersRulesets: EffectuatedSetRules[] =  rulesets
                 .filter((ruleset: EffectuatedSetRules) => ruleset.voter == voter);
 
-            if (votersRulesets.length == 0) return { rulesets: [] } as SetRules;
+            if (votersRulesets.length == 0) return { rulesets: [], moment: SteemOperationNumber.NEVER, voter: "", delegator: "" } as EffectuatedSetRules;
             else return votersRulesets.reduce((result: EffectuatedSetRules, ruleset: EffectuatedSetRules) => {
                 if (ruleset.moment.isGreaterThan(result.moment)) return ruleset;
                 else return result;
             });
         });
-    }
+    }*/
 
     public async sendToBlockchain(operationsInTransaction: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
         await BluebirdPromise.delay(this.fakeDelayMs);
@@ -107,26 +109,34 @@ export class FakeApi extends Api {
             return new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1);
     }
 
-    public async loadAllRulesets(delegator: string, at: SteemOperationNumber, protocol: Protocol): Promise<EffectuatedSetRules []> {
+    public async loadRulesets(forWhom: { voter: string; delegator: string; }, at: SteemOperationNumber): Promise<EffectuatedSetRules []> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
+        if (!forWhom.voter && ! forWhom.delegator)
+            throw new Error("You have to specify either a voter, a delegator or both of them.");
 
         const allRules: EffectuatedSetRules [] = [];
         for (let i = 0; i < this.transactions.length; i++) {
             const trx = this.transactions[i];
-            const handleResult = protocol.handleOrReject(trx);
+            const handleResult = this.protocol.handleOrReject(trx);
             if (handleResult) {
                 for (let j = 0; j < handleResult.length; j++) {
                     const effSo = handleResult[j];
-                    if (SetRules.isSetRules(effSo.command) &&
-                        effSo.delegator === delegator) {
-                        if (at.isGreaterOrEqual(effSo.moment)) {
-                            const effSetRules: EffectuatedSetRules = {
-                                rulesets: effSo.command.rulesets,
-                                voter: effSo.voter,
-                                moment: effSo.moment
-                            };
-                            allRules.push(effSetRules);
+                    if (SetRules.isSetRules(effSo.command)) {
+                        if (
+                            (forWhom.delegator && forWhom.voter && effSo.delegator === forWhom.delegator && effSo.voter === forWhom.voter) ||
+                            (forWhom.delegator && effSo.delegator === forWhom.delegator) ||
+                            (forWhom.voter && effSo.voter === forWhom.voter)
+                        ) {
+                            if (at.isGreaterOrEqual(effSo.moment)) {
+                                const effSetRules: EffectuatedSetRules = {
+                                    rulesets: effSo.command.rulesets,
+                                    voter: effSo.voter,
+                                    delegator: effSo.delegator,
+                                    moment: effSo.moment
+                                };
+                                allRules.push(effSetRules);
+                            }
                         }
                     }
                 }
@@ -142,11 +152,11 @@ export class FakeApi extends Api {
         return out;
     }
 
-    public async getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
+    public async getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         return this.transactions
-            .map((trx: UnifiedSteemTransaction) => protocol.handleOrReject(trx))
+            .map((trx: UnifiedSteemTransaction) => this.protocol.handleOrReject(trx))
             .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => (!!handledOrRejected))
             .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
             .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps))
@@ -158,7 +168,7 @@ export class FakeApi extends Api {
             }, V1Handler.INTRODUCTION_OF_WISE_MOMENT);
     }
 
-    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         if (blockNum > this.currentBlock + 1) throw new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)");
@@ -169,7 +179,7 @@ export class FakeApi extends Api {
         if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) {
             return this.transactionsByBlock[blockNum + ""]
                 .filter ((trx: UnifiedSteemTransaction) => trx.block_num === blockNum)
-                .map((trx: UnifiedSteemTransaction) => protocol.handleOrReject(trx))
+                .map((trx: UnifiedSteemTransaction) => this.protocol.handleOrReject(trx))
                 .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => !!handledOrRejected)
                 .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
                 .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps), [])
@@ -194,13 +204,13 @@ export class FakeApi extends Api {
         else return result[0];
     }
 
-    public async getWiseOperations(username: string, until: Date, protocol: Protocol): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         const result: EffectuatedWiseOperation [] = [];
         for (let i = 0; i < this.transactions.length; i++) {
             const op = this.transactions[i];
-            const handleResult = protocol.handleOrReject(op);
+            const handleResult = this.protocol.handleOrReject(op);
             if (handleResult) {
                 for (let j = 0; j < handleResult.length; j++) {
                     const effSo = handleResult[j];

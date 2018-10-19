@@ -56,8 +56,8 @@ export class RulesUpdater {
         return resultSon;
     }
 
-    public static async downloadAllRulesets(api: Api, protocol: Protocol, delegator: string, moment: SteemOperationNumber = SteemOperationNumber.FUTURE): Promise<EffectuatedSetRules []> {
-        const currentRulesets = await api.loadAllRulesets(delegator, moment, protocol);
+    public static async downloadAllRulesets(api: Api, delegator: string, moment: SteemOperationNumber = SteemOperationNumber.FUTURE): Promise<EffectuatedSetRules []> {
+        const currentRulesets = await api.loadRulesets({ delegator: delegator }, moment);
         if (currentRulesets.length == 0) return [];
 
         const rulesByVoter: [string, EffectuatedSetRules []][] = _.toPairs(_.groupBy(currentRulesets, (r: EffectuatedSetRules) => r.voter));
@@ -106,7 +106,7 @@ export class RulesUpdater {
         /**
          * Download current rules
          */
-        const currentRules: EffectuatedSetRules [] = await RulesUpdater.downloadAllRulesets(api, protocol, delegator);
+        const currentRules: EffectuatedSetRules [] = await RulesUpdater.downloadAllRulesets(api, delegator);
 
         /**
          * Decide which rules to send

@@ -2,6 +2,8 @@ import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { SetRulesForVoter } from "./SetRulesForVoter";
 
 export interface EffectuatedSetRules extends SetRulesForVoter {
+    delegator: string; // pre-sent rulesets can have a voter, but delegator is a property that can be told with
+    // full certanity only when the rulesets are retreived from blockchain
     moment: SteemOperationNumber;
 }
 
