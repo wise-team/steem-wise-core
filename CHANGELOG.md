@@ -1,3 +1,24 @@
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/wise-team/steem-wise-core/compare/v2.1.0...v2.2.0) (2018-10-19)
+
+
+### Bug Fixes
+
+* **direct blockchain api:** fix ruleset loading for sole voter ([54b6043](https://github.com/wise-team/steem-wise-core/commit/54b6043))
+* **fake api:** fix other voter ruleset loading ([074fdf9](https://github.com/wise-team/steem-wise-core/commit/074fdf9))
+
+
+### Code Refactoring
+
+* **api:** loadAllRulesets + loadRulesets -> loadRulesets(forWhom) ([5a57039](https://github.com/wise-team/steem-wise-core/commit/5a57039))
+
+
+### BREAKING CHANGES
+
+* **api:** Api.loadAllRulesets + Api.loadRulesets now becomes one method #loadRulesets(forWhom: { delegator?, voter?}, moment)
+
+
+
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/wise-team/steem-wise-core/compare/v2.0.0...v2.1.0) (2018-10-19)
 
