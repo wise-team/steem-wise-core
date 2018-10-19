@@ -1,3 +1,62 @@
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/wise-team/steem-wise-core/compare/v2.0.0...v2.1.0) (2018-10-19)
+
+
+### Bug Fixes
+
+* **abstract log:** skip stdout level info on low-verbosity levels ([7d4e8e9](https://github.com/wise-team/steem-wise-core/commit/7d4e8e9))
+* **direct blockchain api:** fix #getAllRulesets filtering ([1e2dd37](https://github.com/wise-team/steem-wise-core/commit/1e2dd37))
+* **direct blockchain api:** fix steem object configuration ([cb22efa](https://github.com/wise-team/steem-wise-core/commit/cb22efa))
+* unit tests that used old then api use async/await ([69b421b](https://github.com/wise-team/steem-wise-core/commit/69b421b))
+* **fake blockchain api:** fix #loadAllRulesets filter ([8fa0665](https://github.com/wise-team/steem-wise-core/commit/8fa0665))
+* **generate fake blockchain file script:** append new types ([08f915d](https://github.com/wise-team/steem-wise-core/commit/08f915d))
+* **generate fake blockchain file script:** fix d.ts resolution ([3ab0950](https://github.com/wise-team/steem-wise-core/commit/3ab0950))
+* **schema:** fix schema building script - new types issue ([1f134fc](https://github.com/wise-team/steem-wise-core/commit/1f134fc))
+* **synchronizer:** fix missing notifier call ([9d70036](https://github.com/wise-team/steem-wise-core/commit/9d70036))
+* **unit and integration tests:** make ts-node in mocha load tsconfig ([511bf56](https://github.com/wise-team/steem-wise-core/commit/511bf56))
+* **validator:** make validation exception be returned ([af40c74](https://github.com/wise-team/steem-wise-core/commit/af40c74))
+* **wisesql protocol:** fix pagination in WiseSQLProtocol.Handler ([43c1179](https://github.com/wise-team/steem-wise-core/commit/43c1179))
+* fix integration tests (relative to the changes in typings) ([1301349](https://github.com/wise-team/steem-wise-core/commit/1301349))
+* fix v1 and v2 schema generation ([ccf719c](https://github.com/wise-team/steem-wise-core/commit/ccf719c))
+
+
+### Code Refactoring
+
+* move steem-related type defs to steem-js declaration file ([dc5552b](https://github.com/wise-team/steem-wise-core/commit/dc5552b))
+
+
+### Features
+
+* **logging:** advanced abstract logging system for all wise projects ([c279253](https://github.com/wise-team/steem-wise-core/commit/c279253))
+* add SteemOperationNumber.compare for sorting ([52cbdf2](https://github.com/wise-team/steem-wise-core/commit/52cbdf2))
+* conform rest of classes to es6 async/await ([1408d7e](https://github.com/wise-team/steem-wise-core/commit/1408d7e))
+* conform RulesUpdater to es6 async/await ([9788cd4](https://github.com/wise-team/steem-wise-core/commit/9788cd4))
+* fully functional WiseSQLApi ([e4cf4ad](https://github.com/wise-team/steem-wise-core/commit/e4cf4ad))
+* rewrite rules to comply es6 async/await ([9e739c9](https://github.com/wise-team/steem-wise-core/commit/9e739c9))
+* **abstract log:** add efficient() fn for cost-effective logging ([a1cfb40](https://github.com/wise-team/steem-wise-core/commit/a1cfb40))
+* handle nonexistent posts as validation exception in rules ([bf0243b](https://github.com/wise-team/steem-wise-core/commit/bf0243b))
+* make DirectBlockchainApi compliant with ES6 async/await ([4c97b59](https://github.com/wise-team/steem-wise-core/commit/4c97b59))
+* make FakeApi and DisabledApi compliant with es6 async/await ([2d57ef5](https://github.com/wise-team/steem-wise-core/commit/2d57ef5))
+* move from ES5 -> ES6 ([2cf2f55](https://github.com/wise-team/steem-wise-core/commit/2cf2f55))
+* remove callbacks from Wise main class ([cae789c](https://github.com/wise-team/steem-wise-core/commit/cae789c))
+* separate WiseCommand from WiseOperation (easier type manipulation) ([3b4462c](https://github.com/wise-team/steem-wise-core/commit/3b4462c))
+* **direct blockchain api:** add logger to steem-js object ([f4d6530](https://github.com/wise-team/steem-wise-core/commit/f4d6530))
+* update many dependencies to next major versions ([c180a0d](https://github.com/wise-team/steem-wise-core/commit/c180a0d))
+* **logging:** allow log level configuration via env ([3f5961e](https://github.com/wise-team/steem-wise-core/commit/3f5961e))
+* **sql api:** paginated WiseSQLProtocol handler ([de5c123](https://github.com/wise-team/steem-wise-core/commit/de5c123))
+* **wise sql api:** add WiseSQLProtocol version handling ([f89e149](https://github.com/wise-team/steem-wise-core/commit/f89e149))
+* use the new logger and comply to standard NPM logging levels ([a2e7e03](https://github.com/wise-team/steem-wise-core/commit/a2e7e03))
+
+
+### BREAKING CHANGES
+
+* only for typescript users who imported types from internal wise files
+* now the only way to wait for results of wise operations is via the promises. It is a step towards modern javascript. Callbacks cause many hard to debug errors ans should be avoided.
+* Update many dependencies to next major versions
+* Steem-wise-core is now compiled to ES6 js standard. Old browsers (including all versions of Internet explorer are now unsupported). I kindly remind you that now NodeJS 10 is the minimal node version to run steem-wise-core and other wise tools.
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/wise-team/steem-wise-core/compare/v1.2.1...v2.0.0) (2018-10-16)
 
