@@ -4,7 +4,7 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import { expect } from "chai";
 import "mocha";
-import * as steem from "steem";
+import * as steemJs from "steem";
 import { data as wiseConf } from "../../src/wise-config.gen";
 import { Log } from "../../src/util/Log";
 
@@ -19,7 +19,9 @@ import { ChainableLimiter } from "../../src/chainable/limiters/ChainableLimiter"
 
 
 describe("test/integration/chainable.spec.ts", () => {
+    const steem = new steemJs.api.Steem({ url: wiseConf.config.steem.defaultApiUrl });
     describe("SteemJsAccountHistorySupplier", () => {
+
         describe("SteemJsAccountHistorySupplier [username = steemprojects1]", () => {
             const wise = new Wise("steemprojects1", new DisabledApi());
             const protocol = wise.getProtocol();
@@ -28,7 +30,7 @@ describe("test/integration/chainable.spec.ts", () => {
 
             before(function () {
                 this.timeout(15000);
-                return new SteemJsAccountHistorySupplier(new steem.api.Steem({ url: wiseConf.config.steem.defaultApiUrl }), "steemprojects1")
+                return new SteemJsAccountHistorySupplier(steem, "steemprojects1")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
@@ -66,7 +68,7 @@ describe("test/integration/chainable.spec.ts", () => {
                     .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
                     .chain(new SimpleTaker((rawTrx: UnifiedSteemTransaction): boolean => {
                         let continueLoading: boolean = true;
-                        rawTrx.ops.forEach((op: steem.OperationWithDescriptor) => {
+                        rawTrx.ops.forEach((op: steemJs.OperationWithDescriptor) => {
                             if (op[0] === "vote") {
                                 const vote: {permlink: string} = op[1] as {permlink: string} ;
 
@@ -100,13 +102,13 @@ describe("test/integration/chainable.spec.ts", () => {
 
             it("Loads operations in correct order: from the newest to the oldest", function() {
                 this.timeout(25000);
-                return new SteemJsAccountHistorySupplier(new steem.api.Steem({ url: wiseConf.config.steem.defaultApiUrl }), "guest123")
+                return new SteemJsAccountHistorySupplier(steem, "guest123")
                 .branch((historySupplier) => {
                     historySupplier
                     .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
                     .chain(new SimpleTaker((rawTrx: UnifiedSteemTransaction): boolean => {
                         let continueLoading: boolean = true;
-                        rawTrx.ops.forEach((op: steem.OperationWithDescriptor) => {
+                        rawTrx.ops.forEach((op: steemJs.OperationWithDescriptor) => {
                             if (op[0] === "vote") {
                                 const vote: {permlink: string} = op[1] as {permlink: string};
 
@@ -144,7 +146,7 @@ describe("test/integration/chainable.spec.ts", () => {
     describe("OperationNumberFilter", () => {
         it("returns only operations with number < (block=22202938, tx=14)", function() {
             this.timeout(35000);
-            return new SteemJsAccountHistorySupplier(new steem.api.Steem({ url: wiseConf.config.steem.defaultApiUrl }), "guest123")
+            return new SteemJsAccountHistorySupplier(steem, "guest123")
             .branch((historySupplier) => {
                 historySupplier
                 .chain(new OperationNumberFilter("<_solveOpInTrxBug", new SteemOperationNumber(22202938, 14, 1)))

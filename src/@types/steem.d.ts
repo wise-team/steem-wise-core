@@ -341,11 +341,12 @@ declare module 'steem' {
             getCommentDiscussionsByPayout: any;
             getCommentDiscussionsByPayoutAsync: any;
             getCommentDiscussionsByPayoutWith: any;
-            getCommentDiscussionsByPayoutWithAsync: any;
-            getConfig: any;
-            getConfigAsync: any;
-            getConfigWith: any;
-            getConfigWithAsync: any;*/
+            getCommentDiscussionsByPayoutWithAsync: any;*/
+
+            // getConfig: any;
+            getConfigAsync(): Promise<{ [s: string]: string; }>;
+            // getConfigWith: any;
+            // getConfigWithAsync: any;
 
             // getContent: any;
             getContentAsync(author: string, permlink: string): SteemPost;

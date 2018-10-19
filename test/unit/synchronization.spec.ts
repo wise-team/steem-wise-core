@@ -4,12 +4,12 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import { expect, assert } from "chai";
 import * as _ from "lodash";
+import * as steem from "steem";
 import "mocha";
 import { Log } from "../../src/util/log";
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, Ruleset } from "../../src/wise";
-import { SteemPost } from "../../src/blockchain/SteemPost";
 import { FakeApi } from "../../src/api/FakeApi";
 import { Util } from "../../src/util/util";
 import { Synchronizer } from "../../src/Synchronizer";
@@ -54,7 +54,7 @@ describe("test/unit/synchronization.spec.ts", () => {
         });
 
         it("rejects voteorder sent before rules", async () => {
-            const post: SteemPost = Util.definedOrThrow(_.sample(fakeDataset.posts), new Error("post is undefined"));
+            const post: steem.SteemPost = Util.definedOrThrow(_.sample(fakeDataset.posts), new Error("post is undefined"));
             const vo: SendVoteorder = {
                 rulesetName: "RulesetOneChangesContent",
                 author: post.author,
@@ -63,7 +63,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             };
 
             const skipValidation = true;
-            const moment = await voterWise.sendVoteorder(delegator, vo, undefined, () => {}, skipValidation);
+            const moment = await voterWise.sendVoteorder(delegator, vo, () => {}, skipValidation);
             expect(moment.blockNum).to.be.greaterThan(0);
             await BluebirdPromise.delay(80);
 
@@ -142,7 +142,7 @@ describe("test/unit/synchronization.spec.ts", () => {
 
         invalidVoteorders1.forEach((voteorder: SendVoteorder) => it("Voter sends invalid voteorder (ruleset=" + voteorder.rulesetName + ") and delegator rejects them", async () => {
             const skipValidation = true;
-            const moment = await voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation);
+            const moment = await voterWise.sendVoteorder(delegator, voteorder, () => {}, skipValidation);
             expect(moment.blockNum).to.be.greaterThan(0);
             await BluebirdPromise.delay(100);
             const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
@@ -174,7 +174,7 @@ describe("test/unit/synchronization.spec.ts", () => {
         const previouslyValidNowInvalidVoteorders = validVoteorders1;
         previouslyValidNowInvalidVoteorders.forEach((voteorder: SendVoteorder) => it("Voter sends previously valid (but now invalid) voteorder (ruleset= " + voteorder.rulesetName + ") and delegator rejects them", async () => {
             const skipValidation = true;
-            const moment = await voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation);
+            const moment = await voterWise.sendVoteorder(delegator, voteorder, () => {}, skipValidation);
             expect(moment.blockNum).to.be.greaterThan(0);
             await BluebirdPromise.delay(100);
 
@@ -214,7 +214,7 @@ describe("test/unit/synchronization.spec.ts", () => {
 
             try {
                 const skipValidation = true;
-                const moment = await voterWise.sendVoteorder(delegator, voteorder, undefined, () => {}, skipValidation);
+                const moment = await voterWise.sendVoteorder(delegator, voteorder, () => {}, skipValidation);
                 expect(moment.blockNum).to.be.greaterThan(0);
                 await BluebirdPromise.delay(120);
 
