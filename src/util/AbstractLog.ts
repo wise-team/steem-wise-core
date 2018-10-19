@@ -133,6 +133,14 @@ export abstract class AbstractLog {
         this.getLogger().silly(msg);
     }
 
+    /**
+     * Calls generator fn only if logging level is reached.
+     */
+    public efficient(level: string, msgGeneratorFn: () => string): void {
+        const logger = this.getLogger();
+        if (logger.levels[logger.level] >= logger.levels[level]) logger.log(level, msgGeneratorFn());
+    }
+
     public exception(level: string, error: Error): void {
         const logger = this.getLogger();
         logger.log(level, error.name + ": " + error.message
@@ -145,8 +153,10 @@ export abstract class AbstractLog {
     }
 
     private getLogger(): winston.Logger {
-        if (!this.logger) this.init([]);
-        if (!this.logger) throw new Error("Could not initialize logger");
+        if (!this.logger) {
+            this.init([]);
+            if (!this.logger) throw new Error("Could not initialize logger");
+        }
         return this.logger;
     }
 }
