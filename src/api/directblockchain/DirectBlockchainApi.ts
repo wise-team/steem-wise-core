@@ -106,7 +106,7 @@ export class DirectBlockchainApi extends Api {
                         moment: item.moment
                     };
                     loadedRulesets.push(esr);
-                    return false;
+                    return true;
                 }))
                 .catch((error: Error) => false); // if we return false on error, the Promise will be rejected
             }
