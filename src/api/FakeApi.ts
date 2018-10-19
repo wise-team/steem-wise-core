@@ -124,9 +124,9 @@ export class FakeApi extends Api {
                     const effSo = handleResult[j];
                     if (SetRules.isSetRules(effSo.command)) {
                         if (
-                            (forWhom.delegator && forWhom.voter && effSo.delegator === forWhom.delegator && effSo.voter === forWhom.voter) ||
-                            (forWhom.delegator && effSo.delegator === forWhom.delegator) ||
-                            (forWhom.voter && effSo.voter === forWhom.voter)
+                            ( forWhom.delegator &&  forWhom.voter && effSo.delegator === forWhom.delegator && effSo.voter === forWhom.voter) ||
+                            ( forWhom.delegator && !forWhom.voter && effSo.delegator === forWhom.delegator) ||
+                            (!forWhom.delegator &&  forWhom.voter && effSo.voter === forWhom.voter)
                         ) {
                             if (at.isGreaterOrEqual(effSo.moment)) {
                                 const effSetRules: EffectuatedSetRules = {
