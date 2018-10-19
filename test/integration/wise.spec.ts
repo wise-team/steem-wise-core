@@ -83,7 +83,7 @@ describe("test/integration/wise.spec.ts", () => {
     describe("Wise", function() {
         this.timeout(50 * 1000);
 
-        const wise = new Wise(config.username, new DirectBlockchainApi(config.postingWif));
+        const wise = new Wise(config.username, new DirectBlockchainApi(Wise.constructDefaultProtocol(), config.postingWif));
 
         describe("#constructor", () => {
             it ("Wise object has two protocol handlers", () => {

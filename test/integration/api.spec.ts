@@ -35,9 +35,9 @@ describe("test/integration/api.spec.ts", function () {
     this.timeout(60000);
 
     const apis: Api [] = [
-        new DirectBlockchainApi(postingWif),
+        new DirectBlockchainApi(Wise.constructDefaultProtocol(), postingWif),
         FakeWiseFactory.buildFakeApi(),
-        new WiseSQLApi(wiseSqlEndpoint, Wise.constructDefaultProtocol(), new DirectBlockchainApi(postingWif))
+        new WiseSQLApi(wiseSqlEndpoint, Wise.constructDefaultProtocol(), new DirectBlockchainApi(Wise.constructDefaultProtocol(), postingWif))
     ];
 
     apis.forEach((api: Api) => describe("api " + api.name(), () => {
@@ -71,14 +71,14 @@ describe("test/integration/api.spec.ts", function () {
         /**
          * Test loading rulesets
          */
-        describe("#loadRulesets", () => {
+        describe("#loadRulesets (for delegator and voter)", () => {
             it("returns empty list if no rulesets are set (does not fall silently)", async () => {
                 const delegator = "steemprojects2";
                 const voter = "steemprojects1";
                 const moment = new SteemOperationNumber(22144254, 42, 0); // before this moment @steemprojects2 has no rules for anyone
 
-                const r: SetRules = await api.loadRulesets(delegator, voter, moment, wise.getProtocol());
-                expect(r.rulesets).to.be.an("array").that.has.length(0);
+                const r = await api.loadRulesets({ delegator: delegator, voter: voter }, moment);
+                expect(r).to.be.an("array").that.has.length(0);
             });
 
             it("loads proper rules (v1)", async () => {
@@ -86,7 +86,9 @@ describe("test/integration/api.spec.ts", function () {
                 const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
 
-                const r: SetRules = await api.loadRulesets(delegator, voter, moment, wise.getProtocol());
+                const esrArray = await api.loadRulesets({ delegator: delegator, voter: voter }, moment);
+                expect(esrArray).to.be.an("array").with.length(1);
+                const r: SetRules = esrArray[0];
                 expect(r.rulesets, "rulesets").to.be.an("array").with.length(v1TestingSequence.stage1_0_Rulesets.rulesets.length);
                 for (let i = 0; i < v1TestingSequence.stage1_0_Rulesets.rulesets.length; i++) {
                     const expectedRuleset = v1TestingSequence.stage1_0_Rulesets.rulesets[i];
@@ -106,8 +108,8 @@ describe("test/integration/api.spec.ts", function () {
                 const voter = v1TestingSequence.stage1_0_Rulesets.rulesets[0].voter;
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
 
-                const r: SetRules = await api.loadRulesets(delegator, voter, moment, wise.getProtocol());
-                expect(r.rulesets).to.be.an("array").with.length(0);
+                const r = await api.loadRulesets({ delegator: delegator, voter: voter }, moment);
+                expect(r).to.be.an("array").with.length(0);
             });
 
             it("returns no rules for non existing voter", async () => {
@@ -115,8 +117,8 @@ describe("test/integration/api.spec.ts", function () {
                 const voter = "nonexistent-" + Date.now();
                 const moment = v1TestingSequence.stage1_2_SyncConfirmationMoment;
 
-                const r: SetRules = await api.loadRulesets(delegator, voter, moment, wise.getProtocol());
-                expect(r.rulesets).to.be.an("array").with.length(0);
+                const r = await api.loadRulesets({ delegator: delegator, voter: voter }, moment);
+                expect(r).to.be.an("array").with.length(0);
             });
         });
 
@@ -135,13 +137,13 @@ describe("test/integration/api.spec.ts", function () {
 
         describe("#getLastConfirmationMoment", () => {
             it("Returns correct last confirmation moment of steemprojects3", async () => {
-                const son = await api.getLastConfirmationMoment("steemprojects3", wise.getProtocol());
+                const son = await api.getLastConfirmationMoment("steemprojects3");
 
                 expect(son.blockNum).to.be.gte(22485801);
             });
         });
 
-        describe("#loadAllRulesets", () => {
+        describe.only("#loadRulesets (for delegator and all voters)", () => {
             it("Loads properly all rulesets from protocol-v1-testing-sequence", async () => {
                 const requiredRulesets: { ruleset: v1TestingSequence.RulesetsAtMoment, found: boolean } [] = [
                     // { ruleset: v1TestingSequence.stage1_0_Rulesets, found: false },
@@ -149,7 +151,7 @@ describe("test/integration/api.spec.ts", function () {
                     // { ruleset: v1TestingSequence.stage3_0_Rulesets, found: false } // this is an v1 reseting set_rules. There is no easy way to port it to V2.
                 ];
 
-                const result: EffectuatedSetRules [] = await api.loadAllRulesets(v1TestingSequence.delegator, v1TestingSequence.stage3_1_SyncConfirmationMoment, wise.getProtocol());
+                const result: EffectuatedSetRules [] = await api.loadRulesets({ delegator: v1TestingSequence.delegator }, v1TestingSequence.stage3_1_SyncConfirmationMoment);
                 for (const sr of result) {
                     for (let i = 0; i < requiredRulesets.length; i++) {
                         if (sr.moment.isEqual_solveOpInTrxBug(requiredRulesets[i].ruleset.opNum)) {
@@ -164,7 +166,7 @@ describe("test/integration/api.spec.ts", function () {
             });
 
             it("Does load properly rulesets that were current for noisy at b23589679", async () => {
-                const result: EffectuatedSetRules [] = await api.loadAllRulesets("noisy", new SteemOperationNumber(23589679, 0, 0), Wise.constructDefaultProtocol());
+                const result: EffectuatedSetRules [] = await api.loadRulesets({ delegator: "noisy" }, new SteemOperationNumber(23589679, 0, 0));
                 result.forEach(esr => {
                     if (esr.voter === "innuendo") { // returns only tyhe most current rulesey for innuendo
                         expect (esr.moment.blockNum).to.be.equal(25286929);
@@ -175,12 +177,12 @@ describe("test/integration/api.spec.ts", function () {
             });
 
             it("Does not load any rulesets if user did not have any at the moment", async () => {
-                const result: EffectuatedSetRules [] = await api.loadAllRulesets("innuendo", new SteemOperationNumber(24389679, 0, 0), Wise.constructDefaultProtocol());
+                const result: EffectuatedSetRules [] = await api.loadRulesets({ delegator: "innuendo" }, new SteemOperationNumber(24389679, 0, 0));
                 expect(result).to.be.an("array").with.length(0);
             });
 
             it("Loads all new rulesets when moment is SteemOperationNumber.FUTURE and does not load the old ones", async () => {
-                const result: EffectuatedSetRules [] = await api.loadAllRulesets("noisy", SteemOperationNumber.FUTURE, Wise.constructDefaultProtocol());
+                const result: EffectuatedSetRules [] = await api.loadRulesets({ delegator: "noisy" }, SteemOperationNumber.FUTURE);
                 expect(result).to.be.an("array").with.length.gt(0);
                 result.forEach(esr => {
                     if (esr.voter === "kolorowa.wedzma") { // this it good for testing because @noisy made a typo in account name and did not upload this mistaken ruleset anymore
@@ -194,7 +196,7 @@ describe("test/integration/api.spec.ts", function () {
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {
             it("Loads only wise operation from single block", async () => {
                 const blockNum = 23487915;
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum);
                 expect(ops).to.be.an("array").with.length(1);
                 expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
                 expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(blockNum);
@@ -203,13 +205,13 @@ describe("test/integration/api.spec.ts", function () {
 
             it("Returns empty array if no operations are present", async () => {
                 const blockNum = 1;
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects3", blockNum);
                 expect(ops).to.be.an("array").with.length(0);
             });
 
             it("Loads wise operations sent by voter but refering to delegator", async () => {
                 const blockNum = 23944920; // steemprojects1 sent voteorder to delegatorsteemprojects2 in tx 48d7fa0b75c2bfaebce12571d86c57d53b8c7620
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects2", blockNum, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("steemprojects2", blockNum);
                 expect(ops).to.be.an("array").with.length(1);
                 expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(blockNum);
                 expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects2");
@@ -217,7 +219,7 @@ describe("test/integration/api.spec.ts", function () {
             });
 
             it("Does not load operations sent as a voter", async () => {
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", 22484096, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", 22484096);
                 expect(ops).to.be.an("array").with.length(0);
             });
 
@@ -229,16 +231,16 @@ describe("test/integration/api.spec.ts", function () {
 
                 const dgp: steem.DynamicGlobalProperties = await api.getDynamicGlobalProperties();
                 blockNum = dgp.head_block_number;
-                await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum, wise.getProtocol());
+                await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum);
                 blockNum++;
-                await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum, wise.getProtocol());
+                await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum);
                 blockNum++;
-                await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum, wise.getProtocol());
+                await api.getWiseOperationsRelatedToDelegatorInBlock("guest123", blockNum);
             });
 
             it("returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", async () => {
                 const blockNum = 24352800;
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("noisy", blockNum, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperationsRelatedToDelegatorInBlock("noisy", blockNum);
                 expect(ops).to.be.an("array").with.length(1);
                 expect(ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(ops[0].command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
                 const expectedVoteOp: steem.VoteOperation = {
@@ -295,7 +297,7 @@ describe("test/integration/api.spec.ts", function () {
             it("Loads only wise operation that are newer than until", async () => {
                 const until = new Date("2018-06-05T12:00:00Z");
                 const username = "guest123";
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperations(username, until, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperations(username, until);
                 expect(ops).to.be.an("array").with.length.gte(1);
                 ops.forEach(op => expect(op.timestamp.getTime()).to.be.greaterThan(until.getTime()));
                 expect(ops[0].delegator === username || ops[0].voter === username).to.be.true;
@@ -305,13 +307,13 @@ describe("test/integration/api.spec.ts", function () {
             it("Returns empty array if no operations are present", async () => {
                 const until = new Date(Date.now() + 24 * 3600); // today, plus one day
                 const username = "guest123";
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperations(username, until, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperations(username, until);
                 expect(ops).to.be.an("array").with.length(0);
             });
 
             it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote (when accepted = true)", async () => {
                 const until = new Date(Date.now() - 1000 * 3600 * 24 * 14); // last 14 days
-                const ops: EffectuatedWiseOperation [] = await api.getWiseOperations("noisy", until, wise.getProtocol());
+                const ops: EffectuatedWiseOperation [] = await api.getWiseOperations("noisy", until);
                 expect(ops).to.be.an("array").with.length.greaterThan(0);
                 ops.forEach(op => {
                     if (ConfirmVote.isConfirmVote(op.command)) {
@@ -358,12 +360,14 @@ describe("test/integration/api.spec.ts", function () {
 
     describe("Temporarily test here v2 rules loading", () => {
         it("loads proper rules (v2)", async () => {
-            const api = new DirectBlockchainApi("");
+            const api = new DirectBlockchainApi(Wise.constructDefaultProtocol());
             const wise = new Wise("guest123", api);
             const delegator = "guest123";
             const voter = "guest123";
             const moment = new SteemOperationNumber(22806999, 38, 0);
-            const r: SetRules = await api.loadRulesets(delegator, voter, moment, wise.getProtocol());
+            const esrArray = await api.loadRulesets({ delegator: delegator, voter: voter }, moment);
+            expect(esrArray).to.be.an("array").with.length(1);
+            const r: SetRules = esrArray[0];
             expect(r.rulesets).to.be.an("array").with.length(1);
             expect(r.rulesets[0].name).to.equal("test_purpose_ruleset");
         });
