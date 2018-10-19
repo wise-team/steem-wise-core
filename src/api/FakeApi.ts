@@ -111,7 +111,7 @@ export class FakeApi extends Api {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
 
-        const result: EffectuatedSetRules [] = [];
+        const allRules: EffectuatedSetRules [] = [];
         for (let i = 0; i < this.transactions.length; i++) {
             const trx = this.transactions[i];
             const handleResult = protocol.handleOrReject(trx);
@@ -126,13 +126,20 @@ export class FakeApi extends Api {
                                 voter: effSo.voter,
                                 moment: effSo.moment
                             };
-                            result.push(effSetRules);
+                            allRules.push(effSetRules);
                         }
                     }
                 }
             }
         }
-        return result;
+
+        const allRulesGrouppedByVoter: { [voter: string]: EffectuatedSetRules [] } = _.groupBy(allRules, "voter");
+
+        const out: EffectuatedSetRules [] = [];
+        _.forOwn(allRulesGrouppedByVoter, (esr: EffectuatedSetRules [], voter: string) => {
+            out.push(esr.sort((a, b) => SteemOperationNumber.compare(a.moment, b.moment)).reverse()[0]);
+        });
+        return out;
     }
 
     public async getLastConfirmationMoment(delegator: string, protocol: Protocol): Promise<SteemOperationNumber> {
