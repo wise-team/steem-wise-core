@@ -11,8 +11,6 @@ export class Log extends AbstractLog {
         super.init([
             process.env.WISE_CORE_LOG_LEVEL,
             process.env.WISE_LOG_LEVEL,
-            (window as any).WISE_CORE_LOG_LEVEL,
-            (window as any).WISE_LOG_LEVEL,
             "info"
         ]);
     }
