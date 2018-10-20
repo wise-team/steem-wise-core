@@ -3,6 +3,7 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
 import * as steem from "steem";
+import { data as wiseConf } from "./wise-config.gen";
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { Protocol } from "./protocol/Protocol";
@@ -19,12 +20,7 @@ import { Log } from "./log/log";
 import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
-
-
-/**
- * Setup logging
- */
-Log.log().init();
+import { AbstractLog } from "./log/Abstractlog";
 
 /**
  * Wise is a vote delegation system for steem blockchain. Wise allows you to securely grant other steemians your voting
@@ -61,15 +57,6 @@ export class Wise {
             this.protocol = Wise.constructDefaultProtocol();
         }
     }
-
-
-    public static constructDefaultProtocol(): Protocol {
-        return new Protocol([ // a default protocol which handles both V2 and V1 messages on blockchain.
-            new V2Handler(),
-            new V1Handler()
-        ]);
-    }
-
 
     /**
      * Uploads rulesets for this voter to the blockchain.
@@ -314,6 +301,27 @@ export class Wise {
     public getProtocol = (): Protocol => {
         return this.protocol;
     }
+
+    public static constructDefaultProtocol(): Protocol {
+        return new Protocol([ // a default protocol which handles both V2 and V1 messages on blockchain.
+            new V2Handler(),
+            new V1Handler()
+        ]);
+    }
+
+    public static getVersion(): string {
+        return wiseConf.config.wise.version;
+    }
+
+    /**
+     * Returns instance of Log singleton that is used inside steem-wise-core. This may look insane as Log is a singleton.
+     * In fact. This is an antipattern in Typescript, although a very useful one. Static class members has a scope in
+     * typescript. The scope is limited to a single node project. If we want to configure wise core log in another project
+     * we have to get the singleton instance from inside of steem-wise-core package.
+     */
+    public static getLog(): AbstractLog {
+        return Log.log();
+    }
 }
 
 /**
@@ -375,6 +383,7 @@ export { ValidationContext } from "./validation/ValidationContext";
 export { NotFoundException } from "./util/NotFoundException";
 
 export { Synchronizer } from "./Synchronizer";
+
 export { AbstractLog } from "./log/Abstractlog";
 
 export * from "./protocol/versions/v2/wise-schema";
