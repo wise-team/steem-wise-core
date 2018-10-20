@@ -1,3 +1,19 @@
+<a name="2.2.2"></a>
+## [2.2.2](https://github.com/wise-team/steem-wise-core/compare/v2.2.1...v2.2.2) (2018-10-20)
+
+
+### Bug Fixes
+
+* **log:** fix multiple instances of Log singleton and ensure scopes ([2cd08aa](https://github.com/wise-team/steem-wise-core/commit/2cd08aa))
+* **log:** remove unnecessary reference to window (ts-node bug) ([f427aee](https://github.com/wise-team/steem-wise-core/commit/f427aee))
+
+
+### Features
+
+* **abstract log:** split msgs by level to console .log and .error ([dcc1d9d](https://github.com/wise-team/steem-wise-core/commit/dcc1d9d))
+
+
+
 <a name="2.2.1"></a>
 ## [2.2.1](https://github.com/wise-team/steem-wise-core/compare/v2.2.0...v2.2.1) (2018-10-19)
 
