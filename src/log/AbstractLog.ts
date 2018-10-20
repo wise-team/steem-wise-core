@@ -22,7 +22,7 @@ export abstract class AbstractLog {
         const availableLevelNames = _.keys(chosenLevels);
         definedLevels.forEach(level => {
             if (availableLevelNames.indexOf(level) === -1)
-                throw new Error("Log.conffigureLogger fed with improper log level. "
+                throw new Error("Log.init fed with improper log level. "
                     + "Available levels: [ " + availableLevelNames.join(",") + " ]");
         });
         const mostVerboseLevel = definedLevels
@@ -35,6 +35,7 @@ export abstract class AbstractLog {
             level: mostVerboseLevel,
             transports: [
                 new winston.transports.Console({
+                    stderrLevels: _.keys(chosenLevels).filter(level => chosenLevels[level] <= chosenLevels.warn),
                     format: winston.format.combine(
                         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
                         winston.format.printf(info => {
@@ -52,9 +53,8 @@ export abstract class AbstractLog {
             ]
         });
 
-        if (this.logger.levels[this.logger.level] >= this.logger.levels[AbstractLog.level.verbose]) {
-                console.log("log.level[\"" + this.name + "\"]=\"" + this.logger.level +  "\"");
-                console.error("log.level[\"" + this.name + "\"]=\"" + this.logger.level +  "\"");
+        if (this.logger.levels[this.logger.level] >= this.logger.levels[AbstractLog.level.http]) {
+            console.log("log.level[\"" + this.name + "\"]=\"" + this.getLogger().level +  "\"");
         }
     }
 
@@ -138,7 +138,9 @@ export abstract class AbstractLog {
      */
     public efficient(level: string, msgGeneratorFn: () => string): void {
         const logger = this.getLogger();
-        if (logger.levels[logger.level] >= logger.levels[level]) logger.log(level, msgGeneratorFn());
+        if (logger.levels[logger.level] >= logger.levels[level]) {
+            logger.log(level, msgGeneratorFn());
+        }
     }
 
     public exception(level: string, error: Error): void {
