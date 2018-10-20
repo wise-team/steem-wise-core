@@ -30,9 +30,6 @@ export const data = {
 }, {
   "url": "https://rpc.steemliberator.com",
   "get_block": true,
-}, {
-  "url": "https://steemd.privex.io",
-  "get_block": true,
 } ],
     },
     "witness": {
