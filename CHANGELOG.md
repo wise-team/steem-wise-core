@@ -1,3 +1,13 @@
+<a name="2.2.4"></a>
+## [2.2.4](https://github.com/wise-team/steem-wise-core/compare/v2.2.3...v2.2.4) (2018-10-25)
+
+
+### Bug Fixes
+
+* move steem-js types from dev to normal dependencies ([09ec7ec](https://github.com/wise-team/steem-wise-core/commit/09ec7ec))
+
+
+
 <a name="2.2.3"></a>
 ## [2.2.3](https://github.com/wise-team/steem-wise-core/compare/v2.2.2...v2.2.3) (2018-10-25)
 
