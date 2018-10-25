@@ -29,7 +29,7 @@ import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 /* CONFIG */
 const username = "guest123";
 const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
-const wiseSqlEndpoint = "https://sql.wise.vote"; //  #§< 'const wiseSqlEndpoint = "' + d(data.config.sql.endpoint.schema) + '://' + d(data.config.sql.endpoint.host) + '"; // '
+const wiseSqlEndpoint = /*§ §*/ "https://sql.wise.vote/" /*§ ' "' + d(data.config.sql.url.production) + '" ' §.*/;
 
 describe("test/integration/api.spec.ts", function () {
     this.timeout(60000);
