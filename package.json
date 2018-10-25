@@ -1,6 +1,6 @@
 {
   "name": "steem-wise-core",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Node/web library for Wise: a vote delegation system for STEEM blockchain",
   "main": "dist/wise.js",
   "types": "dist/wise.d.ts",
@@ -15,7 +15,7 @@
     "lodash": "^4.17.11",
     "steem": "^0.7.2",
     "winston": "^3.1.0",
-    "@types/steem-js-alpha": "git+https://github.com/wise-team/types-for-steem-js.git"
+    "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-latest.tgz"
   },
   "devDependencies": {
     "@commitlint/cli": "^7.2.1",
