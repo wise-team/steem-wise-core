@@ -1,3 +1,13 @@
+<a name="2.2.5"></a>
+## [2.2.5](https://github.com/wise-team/steem-wise-core/compare/v2.2.4...v2.2.5) (2018-10-25)
+
+
+### Features
+
+* include steem-js types as tgz to allow build in non-git envs ([e7b6f0f](https://github.com/wise-team/steem-wise-core/commit/e7b6f0f))
+
+
+
 <a name="2.2.4"></a>
 ## [2.2.4](https://github.com/wise-team/steem-wise-core/compare/v2.2.3...v2.2.4) (2018-10-25)
 
