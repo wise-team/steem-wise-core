@@ -1,3 +1,13 @@
+<a name="2.2.3"></a>
+## [2.2.3](https://github.com/wise-team/steem-wise-core/compare/v2.2.2...v2.2.3) (2018-10-25)
+
+
+### Features
+
+* use our publicly available type definitions for steem-js ([262eeae](https://github.com/wise-team/steem-wise-core/commit/262eeae))
+
+
+
 <a name="2.2.2"></a>
 ## [2.2.2](https://github.com/wise-team/steem-wise-core/compare/v2.2.1...v2.2.2) (2018-10-20)
 
