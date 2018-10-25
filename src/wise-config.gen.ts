@@ -49,10 +49,12 @@ export const data = {
       "production": {
         "host": "wise.vote",
         "protocol": "https",
+        "deployBranch": "master",
       },
       "staging": {
         "host": "dev.wise.vote",
         "protocol": "http",
+        "deployBranch": "staging",
       },
     },
     "npm": {
