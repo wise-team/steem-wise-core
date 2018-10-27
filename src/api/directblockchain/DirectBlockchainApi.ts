@@ -187,11 +187,14 @@ export class DirectBlockchainApi extends Api {
         return result;
     }
 
-    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number, skipDelegatorCheck: boolean = false): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperationsRelatedToDelegatorInBlock(
+            delegator: string, blockNum: number, skipDelegatorCheck: boolean = false,
+            delayOnNoBlockMs: number = /*§ data.config.steem.waitForNextHeadBlockDelayMs §*/3100/*§ §.*/
+        ): Promise<EffectuatedWiseOperation []> {
         const block: steem.GetBlock.Block = await this.steem.getBlockAsync(blockNum);
 
         if (!block) {
-            return BluebirdPromise.delay(1500)
+            return BluebirdPromise.delay(delayOnNoBlockMs)
             .then(() => this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, skipDelegatorCheck));
         }
         else {
