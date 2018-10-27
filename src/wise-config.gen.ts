@@ -22,15 +22,10 @@ export const data = {
   "url": "https://api.steemit.com",
   "get_block": true,
 }, {
-  "url": "https://steemd.minnowsupportproject.org",
-  "get_block": true,
-}, {
   "url": "https://rpc.buildteam.io",
   "get_block": true,
-}, {
-  "url": "https://rpc.steemliberator.com",
-  "get_block": true,
 } ],
+      "waitForNextHeadBlockDelayMs": 3100,
     },
     "witness": {
       "account": "wise-team",
@@ -52,8 +47,8 @@ export const data = {
         "deployBranch": "master",
       },
       "staging": {
-        "host": "dev.wise.vote",
-        "protocol": "http",
+        "host": "dev.wise.jblew.pl",
+        "protocol": "https",
         "deployBranch": "staging",
       },
     },
@@ -134,6 +129,12 @@ export const data = {
           "isNpm": true,
           "nodePath": "",
         },
+        "typesForSteemJs": {
+          "name": "types-for-steem-js",
+          "isNode": false,
+          "isNpm": true,
+          "nodePath": "",
+        },
       },
     },
     "communitation": {
@@ -145,7 +146,7 @@ export const data = {
     "sql": {
       "url": {
         "production": "https://sql.wise.vote/",
-        "staging": "http://sql.dev.wise.vote/",
+        "staging": "https://sql.dev.wise.jblew.pl/",
       },
       "protocol": {
         "version": "1.0",
@@ -154,6 +155,7 @@ export const data = {
       "pusher": {
         "requestConcurrencyPerNode": 3,
         "blockProcessingTimeoutMs": 9000,
+        "nextBlockDelayMs": 3100,
       },
       "docker": {
         "services": {
@@ -185,7 +187,7 @@ export const data = {
     "manual": {
       "url": {
         "production": "https://wise.vote/introduction",
-        "staging": "http://dev.wise.vote/introduction",
+        "staging": "https://dev.wise.jblew.pl/introduction",
       },
       "docker": {
         "services": {
@@ -200,8 +202,8 @@ export const data = {
     },
     "votingPage": {
       "url": {
-        "production": "https://wise.vote/voting-page",
-        "staging": "http://dev.wise.vote/voting-page",
+        "production": "https://wise.vote/voting-page/",
+        "staging": "https://dev.wise.jblew.pl/voting-page/",
       },
       "docker": {
         "services": {
@@ -217,7 +219,7 @@ export const data = {
     "hub": {
       "url": {
         "production": "https://hub.wise.vote/",
-        "staging": "http://hub.dev.wise.vote/",
+        "staging": "https://hub.dev.wise.jblew.pl/",
       },
       "visual": {
         "read": {
@@ -246,7 +248,7 @@ export const data = {
         "hostedLogs": {
           "url": {
             "production": "https://test.wise.vote/",
-            "staging": "http://test.dev.wise.vote/",
+            "staging": "https://test.dev.wise.jblew.pl/",
           },
         },
         "docker": {
@@ -322,7 +324,7 @@ export const data = {
         "id": 493,
         "client_id": "wisevote.app",
         "owner": "wise.vote",
-        "redirect_uris": [ "https://wise.vote/voting-page", "https://hub.wise.vote/", "http://localhost:8080/" ],
+        "redirect_uris": [ "https://wise.vote/voting-page/", "https://hub.wise.vote/", "http://localhost:8080/" ],
         "name": "WISE",
         "description": "Vote delegation system for STEEM blockchain: https://wise.vote/",
         "icon": "https://wise.vote/assets/wise-full-color-icon-128.png",
