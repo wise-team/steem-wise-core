@@ -309,7 +309,7 @@ export class Wise {
     }
 
     public static getVersion(): string {
-        return /*§ §*/ "2.3.0" /*§ ' "' + data.config.wise.version + '" ' §.*/;
+        return /*§ §*/ "2.3.1" /*§ ' "' + data.config.wise.version + '" ' §.*/;
     }
 
     /**
@@ -375,6 +375,7 @@ export { VotesCountRule } from "./rules/VotesCountRule";
 export { WeightForPeriodRule } from "./rules/WeightForPeriodRule";
 export { ExpirationDateRule } from "./rules/ExpirationDateRule";
 export { RulePrototyper } from "./rules/RulePrototyper";
+export { RulesUpdater } from "./RulesUpdater";
 
 export { ValidationException } from "./validation/ValidationException";
 export { ValidationContext } from "./validation/ValidationContext";
