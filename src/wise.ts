@@ -3,7 +3,6 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
 import * as steem from "steem";
-import { data as wiseConf } from "./wise-config.gen";
 
 import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
 import { Protocol } from "./protocol/Protocol";
@@ -310,7 +309,7 @@ export class Wise {
     }
 
     public static getVersion(): string {
-        return wiseConf.config.wise.version;
+        return /*§ §*/ "2.3.0" /*§ ' "' + data.config.wise.version + '" ' §.*/;
     }
 
     /**
