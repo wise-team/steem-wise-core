@@ -309,7 +309,7 @@ export class Wise {
     }
 
     public static getVersion(): string {
-        return /*§ §*/ "2.2.5" /*§ ' "' + data.config.wise.version + '" ' §.*/;
+        return /*§ §*/ "2.3.0" /*§ ' "' + data.config.wise.version + '" ' §.*/;
     }
 
     /**
