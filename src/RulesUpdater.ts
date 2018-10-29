@@ -17,10 +17,9 @@ import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 
 export class RulesUpdater {
-    public static async uploadRulesetsForVoter(
-        api: Api, protocol: Protocol, delegator: string, voter: string, rulesets_: Ruleset [],
-        proggressCallback?: ProggressCallback
-    ): Promise<SteemOperationNumber> {
+    public static getUploadRulesetsForVoterOps(
+        protocol: Protocol, delegator: string, voter: string, rulesets_: Ruleset [],
+    ): steem.OperationWithDescriptor [] {
         if (!voter || !voter.length)
             throw new Error("Voter cannot be undefined or empty");
         if (!rulesets_)
@@ -48,6 +47,15 @@ export class RulesUpdater {
         };
         const steemOps: steem.OperationWithDescriptor[] = protocol.serializeToBlockchain(wiseOp);
         if (steemOps.length !== 1) throw new Error("SetRules should be a single blockchain operation");
+        if (!protocol.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
+        return steemOps;
+    }
+
+    public static async uploadRulesetsForVoter(
+        api: Api, protocol: Protocol, delegator: string, voter: string, rulesets_: Ruleset [],
+        proggressCallback?: ProggressCallback
+    ): Promise<SteemOperationNumber> {
+        const steemOps: steem.OperationWithDescriptor[] = RulesUpdater.getUploadRulesetsForVoterOps(protocol, delegator, voter, rulesets_);
         if (!protocol.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
         if (proggressCallback) proggressCallback("Sending rules to blockchain...", 0.0);
 
