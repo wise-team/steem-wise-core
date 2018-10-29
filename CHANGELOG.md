@@ -1,3 +1,14 @@
+<a name="2.3.0"></a>
+# [2.3.0](https://github.com/wise-team/steem-wise-core/compare/v2.2.5...v2.3.0) (2018-10-29)
+
+
+### Features
+
+* **direct blockchain api:** make get...InBlock more polite ([c9fc063](https://github.com/wise-team/steem-wise-core/commit/c9fc063))
+* **rules updater:** add getUploadRulesetsForVoterOps method ([17989d6](https://github.com/wise-team/steem-wise-core/commit/17989d6))
+
+
+
 <a name="2.2.5"></a>
 ## [2.2.5](https://github.com/wise-team/steem-wise-core/compare/v2.2.4...v2.2.5) (2018-10-25)
 
