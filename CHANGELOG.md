@@ -1,3 +1,13 @@
+<a name="2.3.1"></a>
+## [2.3.1](https://github.com/wise-team/steem-wise-core/compare/v2.3.0...v2.3.1) (2018-10-29)
+
+
+### Features
+
+* **main class:** export RulesUpdater ([de08f03](https://github.com/wise-team/steem-wise-core/commit/de08f03))
+
+
+
 <a name="2.3.0"></a>
 # [2.3.0](https://github.com/wise-team/steem-wise-core/compare/v2.2.5...v2.3.0) (2018-10-29)
 
