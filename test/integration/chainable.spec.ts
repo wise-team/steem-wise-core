@@ -5,7 +5,6 @@ import * as BluebirdPromise from "bluebird";
 import { expect } from "chai";
 import "mocha";
 import * as steemJs from "steem";
-import { data as wiseConf } from "../../src/wise-config.gen";
 import { Log } from "../../src/log/log";
 
 // wise imports
@@ -19,7 +18,8 @@ import { ChainableLimiter } from "../../src/chainable/limiters/ChainableLimiter"
 
 
 describe("test/integration/chainable.spec.ts", () => {
-    const steem = new steemJs.api.Steem({ url: wiseConf.config.steem.defaultApiUrl });
+    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
+    const steem = new steemJs.api.Steem({ url: DEFAULT_STEEM_API_ENDPOINT_URL });
     describe("SteemJsAccountHistorySupplier", () => {
 
         describe("SteemJsAccountHistorySupplier [username = steemprojects1]", () => {

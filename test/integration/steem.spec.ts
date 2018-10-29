@@ -2,7 +2,6 @@
 import { expect } from "chai";
 import "mocha";
 import * as steemJs from "steem";
-import { data as wise } from "../../src/wise-config.gen";
 import { Log } from "../../src/log/log";
 
 // wise imports
@@ -10,9 +9,11 @@ import { BlockchainConfig } from "../../src/blockchain/BlockchainConfig";
 
 
 describe("test/integration/steem.spec.ts", () => {
+    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
+
     describe("account_history_api.get_account_history", function () {
         this.timeout(15000);
-        const steem: steemJs.api.Steem = new steemJs.api.Steem({ url: wise.config.steem.defaultApiUrl });
+        const steem: steemJs.api.Steem = new steemJs.api.Steem({ url: DEFAULT_STEEM_API_ENDPOINT_URL });
 
         it("Returns incorrect op_in_trx", async () => {
             const result: steemJs.AccountHistory.Operation [] = await steem.getAccountHistoryAsync("steemprojects1", 40, 0);
@@ -39,7 +40,7 @@ describe("test/integration/steem.spec.ts", () => {
 
     describe("BlockchainConfig", () => {
         it("contains correct values", async () => {
-            const steem: steemJs.api.Steem = new steemJs.api.Steem({ url: wise.config.steem.defaultApiUrl });
+            const steem: steemJs.api.Steem = new steemJs.api.Steem({ url: DEFAULT_STEEM_API_ENDPOINT_URL });
             const result = await steem.getConfigAsync();
 
             for (const v_ of BlockchainConfig.configValueAssertionArray as [string, any][]) {

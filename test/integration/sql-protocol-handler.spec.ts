@@ -1,7 +1,6 @@
 import "mocha";
 import * as _ from "lodash";
 import { expect } from "chai";
-import { data as wise } from "../../src/wise-config.gen";
 import { d } from "../../src/util/util";
 
 import { Log } from "../../src/log/log";
@@ -13,7 +12,7 @@ import { WiseSQLProtocol } from "../../src/wise";
 
 describe("test/integration/sql-protocol-handler.spec.ts", () => {
     describe("WiseSQLProtocol", () => {
-        const endpointUrl = d(wise.config.sql.endpoint.schema) + "://" + d(wise.config.sql.endpoint.host);
+        const endpointUrl = /*§ §*/ "https://sql.wise.vote/" /*§ ' "' + data.config.sql.url.production + '" ' §.*/;
 
         describe(".Handler.Query", function () {
             this.timeout(50000);

@@ -3,7 +3,6 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as steem from "steem";
 import * as _ from "lodash";
-import { data as wise } from "../../wise-config.gen";
 
 import { SetRules } from "../../protocol/SetRules";
 import { EffectuatedSetRules } from "../../protocol/EffectuatedSetRules";
@@ -26,6 +25,7 @@ import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransactio
 import Wise from "../../wise";
 
 export class DirectBlockchainApi extends Api {
+    private static DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
     private steem: steem.api.Steem;
     private postingWif: string | undefined;
     private sendEnabled: boolean = true;
@@ -41,7 +41,7 @@ export class DirectBlockchainApi extends Api {
             this.steem = new steem.api.Steem(steemOptions);
         }
         else this.steem = new steem.api.Steem({
-            url: wise.config.steem.defaultApiUrl,
+            url: DirectBlockchainApi.DEFAULT_STEEM_API_ENDPOINT_URL,
             logger: (...args: any []) => {
                 Log.log().efficient(Log.level.silly, () => JSON.stringify(args));
             }
