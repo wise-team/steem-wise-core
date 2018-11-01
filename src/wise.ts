@@ -289,7 +289,11 @@ export class Wise {
     public startDaemon = (
         since: SteemOperationNumber, notifierCallback: SingleDaemon.NotifierCallback
     ): SingleDaemon => {
-        return new SingleDaemon(this.api, this.protocol, this.account, notifierCallback).start(since);
+        const daemon = new SingleDaemon(this.api, this.protocol, this.account, notifierCallback);
+        (async () => {
+            await daemon.start(since);
+        })();
+        return daemon;
     }
 
 

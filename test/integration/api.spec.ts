@@ -195,6 +195,52 @@ describe("test/integration/api.spec.ts", function () {
             });
         });
 
+        describe("#getAllWiseOperationsInBlock", () => {
+            it("Loads only wise operation from single block", async () => {
+                const blockNum = 23487915;
+                const ops: EffectuatedWiseOperation [] = await api.getAllWiseOperationsInBlock(blockNum);
+                expect(ops).to.be.an("array").with.length(1);
+                expect(ops[0].delegator, "ops[0].delegator").to.equal("steemprojects3");
+                expect(ops[0].moment.blockNum, "ops[0] block_num").to.equal(blockNum);
+                expect(ops[0].moment.transactionNum, "ops[0] transaction_num").to.equal(18);
+            });
+
+            it("Returns empty array if no operations are present", async () => {
+                const blockNum = 1;
+                const ops: EffectuatedWiseOperation [] = await api.getAllWiseOperationsInBlock(blockNum);
+                expect(ops).to.be.an("array").with.length(0);
+            });
+
+            it("Waits for future block", async function () {
+                this.timeout(40000);
+
+                let blockNum: number;
+                for (const api of apis) if (api.name() === "FakeApi") _.times(2, (num) => setTimeout(() => (api as any as FakeApi).pushFakeBlock(), 200 * num));
+
+                const dgp: steem.DynamicGlobalProperties = await api.getDynamicGlobalProperties();
+                blockNum = dgp.head_block_number;
+                await api.getAllWiseOperationsInBlock(blockNum);
+                blockNum++;
+                await api.getAllWiseOperationsInBlock(blockNum);
+                blockNum++;
+                await api.getAllWiseOperationsInBlock(blockNum);
+            });
+
+            it("returns ConfirmVoteBoundWithVote instead of pure ConfirmVote", async () => {
+                const blockNum = 24352800;
+                const ops: EffectuatedWiseOperation [] = await api.getAllWiseOperationsInBlock(blockNum);
+                expect(ops).to.be.an("array").with.length(1);
+                expect(ConfirmVoteBoundWithVote.isConfirmVoteBoundWithVote(ops[0].command), "isConfirmVoteBoundWithVote(.cmd)").to.be.true;
+                const expectedVoteOp: steem.VoteOperation = {
+                    voter: "noisy",
+                    author: "tkow",
+                    permlink: "reklama-projektu-na-facebook-1",
+                    weight: 1000
+                };
+                expect((<ConfirmVoteBoundWithVote>ops[0].command).vote, ".cmd.vote").to.deep.equal(expectedVoteOp);
+            });
+        });
+
         describe("#getWiseOperationsRelatedToDelegatorInBlock", () => {
             it("Loads only wise operation from single block", async () => {
                 const blockNum = 23487915;
