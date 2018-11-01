@@ -97,11 +97,14 @@ export class WiseSQLApi extends Api {
         return ops[0].moment;
     }
 
-    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
-        const ops: EffectuatedWiseOperation [] = await WiseSQLProtocol.Handler.query(
-            { endpointUrl: this.endpointUrl, path: "/operations", method: "get", limit: 9999,
-            params: { delegator: "eq." + delegator, order: "moment.desc", block_num: "eq." + blockNum } }
-        );
+    public async getAllWiseOperationsInBlock(blockNum: number, delegatorFilter?: string): Promise<EffectuatedWiseOperation []> {
+        const params: any = { order: "moment.desc", block_num: "eq." + blockNum };
+        if (delegatorFilter) params.delegator = "eq." + delegatorFilter;
+
+        const ops: EffectuatedWiseOperation [] = await WiseSQLProtocol.Handler.query({
+            endpointUrl: this.endpointUrl, path: "/operations", method: "get", limit: 9999,
+            params: params
+        });
 
         return ops.map((op: EffectuatedWiseOperation) => {
             if (SetRules.isSetRules(op.command)) {
@@ -109,6 +112,10 @@ export class WiseSQLApi extends Api {
             }
             return op;
         });
+    }
+
+    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
+        return this.getAllWiseOperationsInBlock(blockNum, delegator);
     }
 
     public async getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
