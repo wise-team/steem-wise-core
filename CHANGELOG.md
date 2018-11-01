@@ -1,3 +1,29 @@
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/wise-team/steem-wise-core/compare/v2.3.1...v3.0.0) (2018-11-01)
+
+
+### Bug Fixes
+
+* **universal synchronizer:** fix next block loading ([3a3436b](https://github.com/wise-team/steem-wise-core/commit/3a3436b))
+
+
+### Features
+
+* **api:** add getAllWiseOperationsInBlock method ([735165d](https://github.com/wise-team/steem-wise-core/commit/735165d))
+* **fake api:** implement getAllWiseOperationsInBlock ([129e671](https://github.com/wise-team/steem-wise-core/commit/129e671))
+* **sql api:** implement getAllWiseOperationsInBlock ([4dc74e4](https://github.com/wise-team/steem-wise-core/commit/4dc74e4))
+* **steem operation number:** add clone method ([235d37d](https://github.com/wise-team/steem-wise-core/commit/235d37d))
+* **synchronizer:** create UniversalSynchronizer ([b95cd1d](https://github.com/wise-team/steem-wise-core/commit/b95cd1d))
+* create SingleDaemon instead of Synchronizer ([a32fe73](https://github.com/wise-team/steem-wise-core/commit/a32fe73))
+* implement getAllWiseOperationsInBlock in DisabledApi ([19eeeba](https://github.com/wise-team/steem-wise-core/commit/19eeeba))
+
+
+### BREAKING CHANGES
+
+* create SingleDaemon instead of Synchronized and rename Synchronizer to LegacySynchronizer
+
+
+
 <a name="2.3.1"></a>
 ## [2.3.1](https://github.com/wise-team/steem-wise-core/compare/v2.3.0...v2.3.1) (2018-10-29)
 
