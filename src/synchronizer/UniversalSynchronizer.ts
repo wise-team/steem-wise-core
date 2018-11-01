@@ -35,7 +35,7 @@ export class UniversalSynchronizer {
     }
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
-    public start(since: SteemOperationNumber): UniversalSynchronizer {
+    public start(since: SteemOperationNumber) {
         Log.log().debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({since: since}));
         this.lastProcessedOperationNum = since;
 
@@ -80,6 +80,8 @@ export class UniversalSynchronizer {
                 await this.processOperation(op as EffectuatedWiseOperation);
             }
             this.safeCall(() => this.callbacks.onBlockProcessingFinished ? this.callbacks.onBlockProcessingFinished(blockNum) : undefined);
+
+            await this.processBlock(blockNum + 1);
         }
         catch (error) {
             this.safeCall(() => this.callbacks.onError ? this.callbacks.onError(error, true) : undefined);

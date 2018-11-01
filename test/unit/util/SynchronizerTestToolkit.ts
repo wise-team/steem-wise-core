@@ -1,10 +1,10 @@
 import * as BluebirdPromise from "bluebird";
-import { Wise, Synchronizer, SteemOperationNumber } from "../../../src/wise";
+import { Wise, SingleDaemon, SteemOperationNumber } from "../../../src/wise";
 import { Log } from "../../../src/log/log";
 import { Util } from "../../../src/util/util";
 
 export class SynchronizerTestToolkit {
-    public synchronizer: Synchronizer | undefined;
+    public synchronizer: SingleDaemon | undefined;
     public synchronizerPromise: BluebirdPromise<void> | undefined;
     private wise: Wise;
 
@@ -16,8 +16,8 @@ export class SynchronizerTestToolkit {
         this.synchronizerPromise = new BluebirdPromise<void>((resolve, reject) => {
             Log.log().verbose("Starting synchronizer");
             this.synchronizer = this.wise.startDaemon(new SteemOperationNumber(blockNum, 0, 0),
-            (error: Error | undefined, event: Synchronizer.Event): void => {
-                if (event.type === Synchronizer.EventType.SynchronizationStop) {
+            (error: Error | undefined, event: SingleDaemon.Event): void => {
+                if (event.type === SingleDaemon.EventType.SynchronizationStop) {
                     Log.log().debug("Synchronizer stopper");
                     resolve();
                 }
@@ -29,12 +29,11 @@ export class SynchronizerTestToolkit {
                     reject(error);
                 }
             });
-            this.getSynchronizer().setTimeout(800);
         });
         (async () => await Util.definedOrThrow(this.synchronizerPromise).then(() => {}))();
     }
 
-    public getSynchronizer(): Synchronizer {
+    public getSynchronizer(): SingleDaemon {
         if (!this.synchronizer) throw new Error("Synchronizer not created");
         return this.synchronizer;
     }

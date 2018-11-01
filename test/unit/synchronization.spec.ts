@@ -12,7 +12,6 @@ import { Log } from "../../src/log/log";
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, Ruleset } from "../../src/wise";
 import { FakeApi } from "../../src/api/FakeApi";
 import { Util } from "../../src/util/util";
-import { Synchronizer } from "../../src/Synchronizer";
 import { ConfirmVote } from "../../src/protocol/ConfirmVote";
 
 

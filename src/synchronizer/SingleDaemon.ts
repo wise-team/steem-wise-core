@@ -1,4 +1,3 @@
-import * as BluebirdPromise from "bluebird";
 import * as _ from "lodash";
 import * as steem from "steem";
 
@@ -30,13 +29,13 @@ export class SingleDaemon {
         this.api = api;
         this.protocol = protocol;
         this.universalSynchronizer = new UniversalSynchronizer(api, protocol, {
-            onSetRules: this.onSetRules,
-            onVoteorder: this.onVoteorder,
-            onStart: this.onStart,
-            onError: this.onError,
-            onFinished: this.onFinished,
-            onBlockProcessingStart: this.onBlockProcessingStart,
-            onBlockProcessingFinished: this.onBlockProcessingFinished
+            onSetRules: (setRules, wiseOp) => this.onSetRules(setRules, wiseOp),
+            onVoteorder: (voteorder, wiseOp) => this.onVoteorder(voteorder, wiseOp),
+            onStart: () => this.onStart(),
+            onError:  (error: Error, proceeding: boolean) => this.onError(error, proceeding),
+            onFinished: () => this.onFinished(),
+            onBlockProcessingStart: (blockNum) => this.onBlockProcessingStart(blockNum),
+            onBlockProcessingFinished: (blockNum) => this.onBlockProcessingFinished(blockNum)
         });
         this.delegator = delegator;
         this.notifier = notifier;
@@ -44,7 +43,14 @@ export class SingleDaemon {
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
     public start(since: SteemOperationNumber): SingleDaemon {
-        this.universalSynchronizer.start(since);
+
+        (async () => {
+            const rules: EffectuatedSetRules [] = await this.api.loadRulesets({ delegator: this.delegator }, since);
+            Log.log().debug("SYNCHRONIZER_INITIAL_RULESETS_LOADED=" + JSON.stringify(rules));
+            this.rules = rules;
+
+            this.universalSynchronizer.start(since);
+        })();
 
         return this;
     }
@@ -212,10 +218,12 @@ export class SingleDaemon {
         });
     }
 
-    private async notify(error: Error | undefined, event: SingleDaemon.Event) {
-        (async () => this.notifier(error, event))();
-        if (error) Log.log().error(JSON.stringify(error));
-        Log.log().cheapInfo(() => "SYNCHRONIZER_EVENT=" + JSON.stringify(event));
+    private notify(error: Error | undefined, event: SingleDaemon.Event) {
+        (async () => {
+            this.notifier(error, event);
+            if (error) Log.log().error(JSON.stringify(error));
+            Log.log().cheapInfo(() => "SYNCHRONIZER_EVENT=" + JSON.stringify(event));
+        })();
     }
 }
 

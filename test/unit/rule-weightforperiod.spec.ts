@@ -8,7 +8,7 @@ import * as _ from "lodash";
 import * as steem from "steem";
 
 // wise imports
-import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, Synchronizer, SetRules, ValidationException, EffectuatedWiseOperation, Ruleset } from "../../src/wise";
+import { SendVoteorder, Wise, WeightRule, Api, SteemOperationNumber, SetRules, ValidationException, EffectuatedWiseOperation, Ruleset } from "../../src/wise";
 import { ValidationContext } from "../../src/validation/ValidationContext";
 import { FakeWiseFactory } from "../util/FakeWiseFactory";
 import { WeightForPeriodRule } from "../../src/rules/WeightForPeriodRule";

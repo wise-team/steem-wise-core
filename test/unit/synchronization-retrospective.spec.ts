@@ -8,9 +8,8 @@ import "mocha";
 import { Log } from "../../src/log/log";
 
 // wise imports
-import { Wise, SteemOperationNumber, Api } from "../../src/wise";
+import { Wise, SteemOperationNumber, Api, SingleDaemon } from "../../src/wise";
 import { FakeApi } from "../../src/api/FakeApi";
-import { Synchronizer } from "../../src/Synchronizer";
 
 
 /* PREPARE TESTING DATASETS */
@@ -34,7 +33,7 @@ const delegatorWise = new Wise(delegator, fakeApi as object as Api);
 /**
  * Run!
  */
-let synchronizer: Synchronizer;
+let synchronizer: SingleDaemon;
 
 describe("test/unit/synchronization-retrospective.spec.ts", () => {
     const cases: { voteorderTx: string; shouldAccept: boolean; } [] = [
@@ -51,17 +50,17 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
         it("Starts synchronization without error", () => {
             const synchronizationPromiseReturner = async () => await new BluebirdPromise<void>((resolve, reject) => {
                 synchronizer = delegatorWise.startDaemon(new SteemOperationNumber(fromBlock, 0, 0),
-                    (error: Error | undefined, event: Synchronizer.Event): void => {
-                    if (event.type === Synchronizer.EventType.SynchronizationStop) {
+                    (error: Error | undefined, event: SingleDaemon.Event): void => {
+                    if (event.type === SingleDaemon.EventType.SynchronizationStop) {
                         resolve();
                     }
-                    else if (event.type === Synchronizer.EventType.VoteorderPassed) {
+                    else if (event.type === SingleDaemon.EventType.VoteorderPassed) {
                         confirmations.push({ voteorderTx: event.voteorderTxId, accepted: true });
                     }
-                    else if (event.type === Synchronizer.EventType.VoteorderRejected) {
+                    else if (event.type === SingleDaemon.EventType.VoteorderRejected) {
                         confirmations.push({ voteorderTx: event.voteorderTxId, accepted: false });
                     }
-                    else if (event.type === Synchronizer.EventType.EndBlockProcessing) {
+                    else if (event.type === SingleDaemon.EventType.EndBlockProcessing) {
                         if (event.blockNum % 5000 === 0) Log.log().json(Log.level.info, event);
                         if (event.blockNum === toBlock) {
                             Log.log().info("Last block. Stopping synchronization");
@@ -71,15 +70,14 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
                             }).then(() => {});
                         }
                     }
-                    if (event.type !== Synchronizer.EventType.StartBlockProcessing
-                    && event.type !== Synchronizer.EventType.EndBlockProcessing) Log.log().json(Log.level.info, event);
+                    if (event.type !== SingleDaemon.EventType.StartBlockProcessing
+                    && event.type !== SingleDaemon.EventType.EndBlockProcessing) Log.log().json(Log.level.info, event);
 
                     if (error) {
                         reject(error);
                         synchronizer.stop();
                     }
                 });
-                synchronizer.setTimeout(200);
             });
             return synchronizationPromise = synchronizationPromiseReturner();
         });

@@ -1,9 +1,7 @@
 import * as steem from "steem";
-import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
 import { Api } from "./Api";
-import { Protocol } from "../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 
 export class DisabledApi extends Api {
