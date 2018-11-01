@@ -168,7 +168,7 @@ export class FakeApi extends Api {
             }, V1Handler.INTRODUCTION_OF_WISE_MOMENT);
     }
 
-    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
+    public async getAllWiseOperationsInBlock(blockNum: number, delegatorFilter?: string): Promise<EffectuatedWiseOperation []> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         if (blockNum > this.currentBlock + 1) throw new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)");
@@ -183,9 +183,13 @@ export class FakeApi extends Api {
                 .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => !!handledOrRejected)
                 .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
                 .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps), [])
-                .filter((effSop: EffectuatedWiseOperation) => effSop.delegator === delegator);
+                .filter((effSop: EffectuatedWiseOperation) => delegatorFilter ? effSop.delegator === delegatorFilter : true);
         }
         else return [];
+    }
+
+    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
+        return this.getAllWiseOperationsInBlock(blockNum, delegator);
     }
 
     public async getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties> {
