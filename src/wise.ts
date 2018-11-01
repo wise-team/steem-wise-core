@@ -314,7 +314,7 @@ export class Wise {
     }
 
     public static getVersion(): string {
-        return /*§ §*/ "3.0.0" /*§ ' "' + data.config.wise.version + '" ' §.*/;
+        return /*§ §*/ "3.0.1" /*§ ' "' + data.config.wise.version + '" ' §.*/;
     }
 
     /**
