@@ -31,6 +31,10 @@ export class DisabledApi extends Api {
         throw new Error("This api is disabled");
     }
 
+    public async getAllWiseOperationsInBlock(blockNum: number): Promise<EffectuatedWiseOperation []> {
+        throw new Error("This api is disabled");
+    }
+
     public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
         throw new Error("This api is disabled");
     }
