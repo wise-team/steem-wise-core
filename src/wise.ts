@@ -12,7 +12,7 @@ import { SendVoteorder } from "./protocol/SendVoteorder";
 import { WiseOperation } from "./protocol/WiseOperation";
 import { ValidationException } from "./validation/ValidationException";
 import { Validator } from "./validation/Validator";
-import { Synchronizer } from "./Synchronizer";
+import { LegacySynchronizer } from "./synchronizer/LegacySynchronizer";
 import { V2Handler } from "./protocol/versions/v2/V2Handler";
 import { RulesUpdater } from "./RulesUpdater";
 import { Log } from "./log/log";
@@ -20,6 +20,7 @@ import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
 import { AbstractLog } from "./log/Abstractlog";
+import { SingleDaemon } from "./synchronizer/SingleDaemon";
 
 /**
  * Wise is a vote delegation system for steem blockchain. Wise allows you to securely grant other steemians your voting
@@ -280,15 +281,15 @@ export class Wise {
      * false.
      *
      * @param {SteemOperationNumber} since - moment in the blockchain to start synchronization from
-     * @param {Synchronizer.NotifierCallback} notifierCallback - a callback which is notified every time an event
+     * @param {SingleDaemon.NotifierCallback} notifierCallback - a callback which is notified every time an event
      *      occurs. It should return true to continue synchronization, or false if to stop it.
      *
      * @returns - this method returns the Synchronizer object.
      */
     public startDaemon = (
-        since: SteemOperationNumber, notifierCallback: Synchronizer.NotifierCallback
-    ): Synchronizer => {
-        return new Synchronizer(this.api, this.protocol, this.account, notifierCallback).start(since);
+        since: SteemOperationNumber, notifierCallback: SingleDaemon.NotifierCallback
+    ): SingleDaemon => {
+        return new SingleDaemon(this.api, this.protocol, this.account, notifierCallback).start(since);
     }
 
 
@@ -382,7 +383,10 @@ export { ValidationContext } from "./validation/ValidationContext";
 
 export { NotFoundException } from "./util/NotFoundException";
 
-export { Synchronizer } from "./Synchronizer";
+export { SingleDaemon } from "./synchronizer/SingleDaemon";
+export { LegacySynchronizer } from "./synchronizer/LegacySynchronizer";
+export { UniversalSynchronizer } from "./synchronizer/UniversalSynchronizer";
+export { SynchronizerCallbacks } from "./synchronizer/SynchronizerCallbacks";
 
 export { AbstractLog } from "./log/Abstractlog";
 

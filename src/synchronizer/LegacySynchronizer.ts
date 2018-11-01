@@ -1,24 +1,22 @@
-/* PROMISE_DEF */
 import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 import * as steem from "steem";
 
-import { Log } from "./log/log";
+import { Log } from "../log/log";
 
-import { Api } from "./api/Api";
-import { Protocol } from "./protocol/Protocol";
-import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
-import { SetRules } from "./protocol/SetRules";
-import { EffectuatedWiseOperation } from "./protocol/EffectuatedWiseOperation";
-import { ConfirmVote } from "./protocol/ConfirmVote";
-import { SendVoteorder } from "./protocol/SendVoteorder";
-import { Validator } from "./validation/Validator";
-import { ValidationException } from "./validation/ValidationException";
-import { WiseOperation } from "./protocol/WiseOperation";
-import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
+import { Api } from "../api/Api";
+import { Protocol } from "../protocol/Protocol";
+import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SetRules } from "../protocol/SetRules";
+import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
+import { ConfirmVote } from "../protocol/ConfirmVote";
+import { SendVoteorder } from "../protocol/SendVoteorder";
+import { Validator } from "../validation/Validator";
+import { ValidationException } from "../validation/ValidationException";
+import { WiseOperation } from "../protocol/WiseOperation";
+import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 
-export class Synchronizer {
+export class LegacySynchronizer {
     private timeoutMs = 12000;
     private protocol: Protocol;
     private api: Api;
@@ -41,7 +39,7 @@ export class Synchronizer {
     }
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
-    public start(since: SteemOperationNumber): Synchronizer {
+    public start(since: SteemOperationNumber): LegacySynchronizer {
         Log.log().debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({since: since}));
         this.lastProcessedOperationNum = since;
 
