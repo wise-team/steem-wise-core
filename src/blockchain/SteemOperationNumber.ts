@@ -93,4 +93,8 @@ export class SteemOperationNumber {
         else
             return sonA.blockNum - sonB.blockNum;
     }
+
+    public clone(): SteemOperationNumber {
+        return new SteemOperationNumber(this.blockNum, this.transactionNum, this.operationNum);
+    }
 }
