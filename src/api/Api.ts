@@ -18,6 +18,7 @@ export abstract class Api {
     public abstract sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber>;
     public abstract getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber>;
     public abstract getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []>;
+    public abstract getAllWiseOperationsInBlock(blockNum: number): Promise<EffectuatedWiseOperation []>;
     public abstract getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties>;
     public abstract getAccountInfo(username: string): Promise<steem.AccountInfo>; // throws NotFoundException
 
