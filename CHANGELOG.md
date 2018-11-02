@@ -1,3 +1,13 @@
+<a name="3.0.2"></a>
+## [3.0.2](https://github.com/wise-team/steem-wise-core/compare/v3.0.1...v3.0.2) (2018-11-02)
+
+
+### Features
+
+* **wise main class:** export Validator ([2919be8](https://github.com/wise-team/steem-wise-core/commit/2919be8))
+
+
+
 <a name="3.0.1"></a>
 ## [3.0.1](https://github.com/wise-team/steem-wise-core/compare/v3.0.0...v3.0.1) (2018-11-01)
 
