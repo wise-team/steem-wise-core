@@ -44,7 +44,8 @@ export namespace WiseSQLProtocol {
     export namespace Handler {
         export interface QueryParams {
             endpointUrl: string;
-            path: string; method: "get" | "post";
+            path: string;
+            method: "get" | "post";
             params?: object;
             data?: object;
             limit: number;

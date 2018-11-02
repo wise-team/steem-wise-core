@@ -382,6 +382,7 @@ export { ExpirationDateRule } from "./rules/ExpirationDateRule";
 export { RulePrototyper } from "./rules/RulePrototyper";
 export { RulesUpdater } from "./RulesUpdater";
 
+export { Validator } from "./validation/Validator";
 export { ValidationException } from "./validation/ValidationException";
 export { ValidationContext } from "./validation/ValidationContext";
 
