@@ -98,7 +98,14 @@ export class UniversalSynchronizer {
                 const sendVoteorder: SendVoteorder = op.command;
                 this.safeCall(() => this.callbacks.onVoteorder(sendVoteorder, op));
             }
-            // confirmVote does not need to be processed
+            else if (ConfirmVote.isConfirmVote(op.command)) {
+                    const confirmVote: ConfirmVote = op.command;
+                    this.safeCall(() => {
+                        if (this.callbacks.onConfirmVote) {
+                            this.callbacks.onConfirmVote(confirmVote, op);
+                        }
+                    });
+            }
         }
         this.lastProcessedOperationNum = op.moment;
     }
