@@ -1,3 +1,13 @@
+<a name="3.0.3"></a>
+## [3.0.3](https://github.com/wise-team/steem-wise-core/compare/v3.0.2...v3.0.3) (2018-11-07)
+
+
+### Features
+
+* **universal synchronizer:** add onConfirmVote callback ([e6d3b1b](https://github.com/wise-team/steem-wise-core/commit/e6d3b1b))
+
+
+
 <a name="3.0.2"></a>
 ## [3.0.2](https://github.com/wise-team/steem-wise-core/compare/v3.0.1...v3.0.2) (2018-11-02)
 
