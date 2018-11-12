@@ -194,11 +194,11 @@ export class DirectBlockchainApi extends Api {
         const block: steem.GetBlock.Block = await this.steem.getBlockAsync(blockNum);
 
         if (!block) {
-            return BluebirdPromise.delay(delayOnNoBlockMs)
-            .then(() => this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, skipDelegatorCheck));
+            await BluebirdPromise.delay(delayOnNoBlockMs);
+            return await this.getWiseOperationsRelatedToDelegatorInBlock(delegator, blockNum, skipDelegatorCheck);
         }
         else {
-            return this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, skipDelegatorCheck);
+            return await this.getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator, blockNum, block, skipDelegatorCheck);
         }
     }
 
@@ -248,12 +248,12 @@ export class DirectBlockchainApi extends Api {
      * @param blockNum - number of the block.
      * @param protocol - Protocol object.
      */
-    public getAllWiseOperationsInBlock(blockNum: number): Promise<EffectuatedWiseOperation []> {
-        return this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, true /* skip delegator check */);
+    public async getAllWiseOperationsInBlock(blockNum: number): Promise<EffectuatedWiseOperation []> {
+        return await this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, true /* skip delegator check */);
     }
 
     public async getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties> {
-        return this.steem.getDynamicGlobalPropertiesAsync();
+        return await this.steem.getDynamicGlobalPropertiesAsync();
     }
 
     public async getAccountInfo(username: string): Promise<steem.AccountInfo> {
@@ -264,7 +264,7 @@ export class DirectBlockchainApi extends Api {
         else throw new NotFoundException("Account " + username + " does not exist");
     }
 
-    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []> {
-        return this.steem.getBlogEntriesAsync(username, startFrom, limit);
+    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []> {
+        return await this.steem.getBlogEntriesAsync(username, startFrom, limit);
     }
 }
