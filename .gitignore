@@ -12,6 +12,9 @@
 # VS Code
 /.vscode
 
+# Istambul
+/.nyc_output
+
 ## Node
 /dist
 /node_modules

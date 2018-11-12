@@ -8,5 +8,6 @@
 /report
 /scripts
 /.github
+/.nyc_output
 
 /dist/browser/statistics.html
