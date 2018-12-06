@@ -33,7 +33,7 @@ const wiseSqlEndpoint = /*§ §*/ "https://sql.wise.vote/" /*§ ' "' + d(data.co
 
 describe("test/integration/api.spec.ts", function () {
     this.timeout(60000);
-    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
+    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
 
     const apis: Api [] = [
         new DirectBlockchainApi(Wise.constructDefaultProtocol(), postingWif, { url: DEFAULT_STEEM_API_ENDPOINT_URL }),

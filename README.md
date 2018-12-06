@@ -105,7 +105,7 @@ voterWise.sendVoteorderAsync(delegator, voteorder)
 ## Where to get help?
 
 - Feel free to talk with us on our chat: [https://discordapp.com/invite/CwxQDbG](https://discordapp.com/invite/CwxQDbG) .
-- You can read [The Wise Manual](https://wise.vote/introduction)
+- You can read [The Wise Manual](https://docs.wise.vote)
 - You can also contact Jędrzej at jedrzejblew@gmail.com (if you think that you found a security issue, please contact me quickly).
 
 You can also ask questions as issues in appropriate repository: See [issues for this repository](https://github.com/wise-team/steem-wise-core/issues).

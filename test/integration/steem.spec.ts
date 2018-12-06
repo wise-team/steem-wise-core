@@ -9,7 +9,7 @@ import { BlockchainConfig } from "../../src/blockchain/BlockchainConfig";
 
 
 describe("test/integration/steem.spec.ts", () => {
-    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
+    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
 
     describe("account_history_api.get_account_history", function () {
         this.timeout(15000);
