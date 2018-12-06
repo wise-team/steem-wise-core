@@ -32,11 +32,13 @@ describe("test/unit/synchronization.spec.ts", () => {
         this.timeout(2000);
 
         const voter = "voter123";
+        const otherVoter = "voter123";
         const delegator = "delegator456";
         let fakeDataset: FakeApi.Dataset;
         let fakeApi: FakeApi;
         let delegatorWise: Wise;
         let voterWise: Wise;
+        let otherVoterWise: Wise;
         let synchronizerToolkit: SynchronizerTestToolkit;
         const nowTime = new Date(Date.now());
 
@@ -45,6 +47,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             fakeApi = FakeApi.fromDataset(Wise.constructDefaultProtocol(), fakeDataset);
             delegatorWise = new Wise(delegator, fakeApi as object as Api);
             voterWise = new Wise(voter, fakeApi as object as Api);
+            otherVoterWise = new Wise(otherVoter, fakeApi as object as Api);
             synchronizerToolkit = new SynchronizerTestToolkit(delegatorWise);
         });
 
@@ -222,6 +225,31 @@ describe("test/unit/synchronization.spec.ts", () => {
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(ConfirmVote.isConfirmVote(lastHandledOp.command)).to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
+            }
+            catch (e) {
+                if ((e as ValidationException).validationException) throw new Error("Should not throw ValidationException, but pass it");
+                else throw e;
+            }
+        });
+
+        it("Delegator skips voteorder send by different voter", async () => {
+            const voteorder: SendVoteorder = {
+                rulesetName: "RulesetOneChangesContent",
+                author: "perduta",
+                permlink: "nonexistentPost-" + Date.now(),
+                weight: 5
+            };
+
+            try {
+                const skipValidation = true;
+                const moment = await otherVoterWise.sendVoteorder(delegator, voteorder, () => {}, skipValidation);
+                expect(moment.blockNum).to.be.greaterThan(0);
+                await BluebirdPromise.delay(120);
+
+                const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
+                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+                expect(lastHandledOp.voter).to.not.be.equal(otherVoter);
             }
             catch (e) {
                 if ((e as ValidationException).validationException) throw new Error("Should not throw ValidationException, but pass it");

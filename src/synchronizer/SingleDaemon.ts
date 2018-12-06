@@ -117,7 +117,9 @@ export class SingleDaemon {
         }
     }
 
-    private onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation): Promise<void> {
+    private async onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation): Promise<void> {
+        if (op.delegator !== this.delegator) return;
+
         Log.log().cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
 
         const rules = this.determineRules(op, cmd);
