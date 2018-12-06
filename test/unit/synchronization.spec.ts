@@ -32,13 +32,11 @@ describe("test/unit/synchronization.spec.ts", () => {
         this.timeout(2000);
 
         const voter = "voter123";
-        const otherVoter = "voter123";
         const delegator = "delegator456";
         let fakeDataset: FakeApi.Dataset;
         let fakeApi: FakeApi;
         let delegatorWise: Wise;
         let voterWise: Wise;
-        let otherVoterWise: Wise;
         let synchronizerToolkit: SynchronizerTestToolkit;
         const nowTime = new Date(Date.now());
 
@@ -47,7 +45,6 @@ describe("test/unit/synchronization.spec.ts", () => {
             fakeApi = FakeApi.fromDataset(Wise.constructDefaultProtocol(), fakeDataset);
             delegatorWise = new Wise(delegator, fakeApi as object as Api);
             voterWise = new Wise(voter, fakeApi as object as Api);
-            otherVoterWise = new Wise(otherVoter, fakeApi as object as Api);
             synchronizerToolkit = new SynchronizerTestToolkit(delegatorWise);
         });
 
@@ -232,7 +229,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             }
         });
 
-        it("Delegator skips voteorder send by different voter", async () => {
+        it("Delegator skips voteorder send to other delegator", async () => {
             const voteorder: SendVoteorder = {
                 rulesetName: "RulesetOneChangesContent",
                 author: "perduta",
@@ -242,14 +239,14 @@ describe("test/unit/synchronization.spec.ts", () => {
 
             try {
                 const skipValidation = true;
-                const moment = await otherVoterWise.sendVoteorder(delegator, voteorder, () => {}, skipValidation);
+                const moment = await voterWise.sendVoteorder("other-delegator", voteorder, () => {}, skipValidation);
                 expect(moment.blockNum).to.be.greaterThan(0);
                 await BluebirdPromise.delay(120);
 
                 const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
                 const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
-                expect(lastHandledOp.voter).to.not.be.equal(otherVoter);
+                expect(SendVoteorder.isSendVoteorder(lastHandledOp.command)).to.be.true;
             }
             catch (e) {
                 if ((e as ValidationException).validationException) throw new Error("Should not throw ValidationException, but pass it");
