@@ -55,14 +55,14 @@ Small contributions such as fixing spelling errors, where the content is small e
 
 ### Security issues
 
-**Important**! If you find a security vulnerability, do NOT open an issue. Please email jedrzejblew@gmail.com.
+**Important**! If you find a security vulnerability, do NOT open an issue. Please email contact@wiseteam.io.
 
 To determine whether you are dealing with a security issue, ask yourself these two questions:
 
 - Can I access something that's not mine, or something I shouldn't have access to?
 - Can I disable something for other people?
 
-If the answer to either of those two questions is "yes", then you're probably dealing with a security issue. Note that even if you answer "no" to both questions, you may still be dealing with a security issue, so if you're unsure, send an email to jedrzejblew@gmail.com.
+If the answer to either of those two questions is "yes", then you're probably dealing with a security issue. Note that even if you answer "no" to both questions, you may still be dealing with a security issue, so if you're unsure, send an email to contact@wiseteam.io.
 
 
 
@@ -97,7 +97,7 @@ Add an issue in issues panel on GitHub, and describe what feature would you like
 ## Community
 
 Feel free to talk with us on our #wise channel on steem.chat: https://steem.chat/channel/wise .
-You can also contact Jędrzej at jedrzejblew@gmail.com.
+You can also contact us at contact@wiseteam.io.
 
 
 
