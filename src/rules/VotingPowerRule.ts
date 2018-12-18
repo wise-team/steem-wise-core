@@ -28,15 +28,24 @@ export class VotingPowerRule extends Rule {
 
         if (this.mode == VotingPowerRule.Mode.EQUAL) {
             if (delegatorAccount.voting_power !== this.value)
-                throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") does not equal " + this.value);
+                throw new ValidationException(
+                    "Delegator voting power (" + this.votingpowerToPercent(delegatorAccount.voting_power) + ") does not equal "
+                     + this.votingpowerToPercent(this.value)
+                );
         }
         else if (this.mode == VotingPowerRule.Mode.MORE_THAN) {
             if (delegatorAccount.voting_power <= this.value)
-            throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") is not more than " + this.value);
+                throw new ValidationException(
+                    "Delegator voting power (" + this.votingpowerToPercent(delegatorAccount.voting_power) + ") is not more than "
+                    + this.votingpowerToPercent(this.value)
+                );
         }
         else if (this.mode == VotingPowerRule.Mode.LESS_THAN) {
             if (delegatorAccount.voting_power >= this.value)
-            throw new ValidationException("Delegator voting power (" + delegatorAccount.voting_power + ") is not less than " + this.value);
+                throw new ValidationException(
+                    "Delegator voting power (" + this.votingpowerToPercent(delegatorAccount.voting_power) + ") is not less than "
+                    + this.votingpowerToPercent(this.value)
+                );
         }
         else {
             throw new Error("Unknown mode of voting power rule: " + this.mode);
@@ -60,9 +69,13 @@ export class VotingPowerRule extends Rule {
             case VotingPowerRule.Mode.EQUAL: out += "exactly"; break;
             default: out += this.mode;
         }
-        out += " " + this.value + " voting power";
+        out += " " + this.votingpowerToPercent(this.value) + " voting power";
 
         return out;
+    }
+
+    private votingpowerToPercent(vp: number): string {
+        return (vp / 100).toFixed(2) + "%";
     }
 }
 
