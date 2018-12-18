@@ -52,7 +52,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             synchronizerToolkit.start((fakeApi as any as FakeApi).getCurrentBlockNum());
         });
 
-        it("rejects voteorder sent before rules", async () => {
+        it("does nothing on voteorder sent before rules", async () => {
             const post: steem.SteemPost = Util.definedOrThrow(_.sample(fakeDataset.posts), new Error("post is undefined"));
             const vo: SendVoteorder = {
                 rulesetName: "RulesetOneChangesContent",
@@ -69,8 +69,8 @@ describe("test/unit/synchronization.spec.ts", () => {
             const lastTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
             const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastTrx));
             expect(handleResult).to.be.an("array").with.length(1);
-            expect(ConfirmVote.isConfirmVote(handleResult[0].command)).to.be.true;
-            expect((handleResult[0].command as ConfirmVote).accepted).to.be.false;
+            expect(SendVoteorder.isSendVoteorder(handleResult[0].command)).to.be.true;
+            expect((handleResult[0].command as SendVoteorder).rulesetName).to.be.equal(vo.rulesetName);
         });
 
         it("Delegator sets rules for voter", async () => {

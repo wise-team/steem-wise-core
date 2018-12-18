@@ -125,7 +125,11 @@ export class LegacySynchronizer {
         const rules = this.determineRules(op, cmd);
         Log.log().cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
 
-        if (!rules) return this.rejectVoteorder(op, cmd, "There is no ruleset for you");
+        if (!rules) {
+            Log.log().info("@" + op.voter + " tried to vote with ruleset "
+                + "\"" + cmd.rulesetName + "\", but there are no rulesets for him.");
+            return Promise.resolve();
+        }
 
         const v = new Validator(this.api);
         // provide already loaded rulesets (there is no need to call blockchain for them every single voteorder)
