@@ -55,9 +55,9 @@ export class VotingPowerRule extends Rule {
         let out = "The delegator has ";
 
         switch (this.mode) {
-            case VotingPowerRule.Mode.MORE_THAN: out += "more than";
-            case VotingPowerRule.Mode.LESS_THAN: out += "less than";
-            case VotingPowerRule.Mode.EQUAL: out += "exactly";
+            case VotingPowerRule.Mode.MORE_THAN: out += "more than"; break;
+            case VotingPowerRule.Mode.LESS_THAN: out += "less than"; break;
+            case VotingPowerRule.Mode.EQUAL: out += "exactly"; break;
             default: out += this.mode;
         }
         out += " " + this.value + " voting power";

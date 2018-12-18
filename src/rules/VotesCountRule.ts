@@ -63,9 +63,9 @@ export class VotesCountRule extends Rule {
         let out = "The post has ";
 
         switch (this.mode) {
-            case VotesCountRule.Mode.MORE_THAN: out += "more than";
-            case VotesCountRule.Mode.LESS_THAN: out += "less than";
-            case VotesCountRule.Mode.EQUAL: out += "";
+            case VotesCountRule.Mode.MORE_THAN: out += "more than"; break;
+            case VotesCountRule.Mode.LESS_THAN: out += "less than"; break;
+            case VotesCountRule.Mode.EQUAL: out += ""; break;
             default: out += this.mode;
         }
         out += " " + this.value + " votes";

@@ -72,9 +72,9 @@ export class PayoutRule extends Rule {
         let out = "Payout of the post ";
 
         switch (this.mode) {
-            case PayoutRule.Mode.MORE_THAN: out += "is more than";
-            case PayoutRule.Mode.LESS_THAN: out += "is less than";
-            case PayoutRule.Mode.EQUAL: out += "equals";
+            case PayoutRule.Mode.MORE_THAN: out += "is more than"; break;
+            case PayoutRule.Mode.LESS_THAN: out += "is less than"; break;
+            case PayoutRule.Mode.EQUAL: out += "equals"; break;
             default: out += this.mode;
         }
         out += " " + this.value + " SBD";
