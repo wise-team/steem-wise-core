@@ -146,7 +146,7 @@ export abstract class AbstractLog {
     public exception(level: string, error: Error): void {
         const logger = this.getLogger();
         logger.log(level, error.name + ": " + error.message
-            + (logger.levels[logger.level] >= logger.levels["info"] && error.stack ? "\n" + error.stack : ""));
+            + (error.stack ? "\n" + error.stack : ""));
     }
 
     public json(level: string, object: object, pretty: boolean = false): void {
