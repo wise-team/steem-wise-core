@@ -28,8 +28,12 @@ export class WeightRule extends Rule {
     public async validate (voteorder: SendVoteorder, context: ValidationContext) {
         this.validateRuleObject(this);
 
-        if (voteorder.weight < this.min) throw new ValidationException("Weight is too low (" + voteorder.weight + " < " + this.min + ")");
-        else if (voteorder.weight > this.max) throw new ValidationException("Weight is too high (" + voteorder.weight + " > " + this.max + ")");
+        if (voteorder.weight < this.min) throw new ValidationException(
+            "Weight of vote (" + this.weightToPercent(voteorder.weight) + ") is lower than  " + this.weightToPercent(this.min)
+        );
+        else if (voteorder.weight > this.max) throw new ValidationException(
+            "Weight of vote (" + this.weightToPercent(voteorder.weight) + ") is higher than (" + this.weightToPercent(this.max)
+        );
     }
 
     public validateRuleObject(unprototypedObj: any) {
@@ -43,14 +47,18 @@ export class WeightRule extends Rule {
     }
 
     public getDescription(): string {
-        return (this.min < 0 ? "Flag: "
+        return (this.min < 0 ? "Can flag: "
             + Math.abs(Math.min(0, this.max)) / 100 + " - " + Math.abs(this.min) / 100 + " %"
-            : "(no flag)")
+            : "(cannot flag)")
 
             + "; " + // separator
 
-            (this.max > 0 ? "Upvote: "
+            (this.max > 0 ? "Can upvote: "
             + Math.max(0, this.min) / 100 + " - " +  this.max / 100 + " %"
-            : "(no upvote)");
+            : "(cannot upvote)");
+    }
+
+    private weightToPercent(weight: number): string {
+        return (weight / 100).toFixed(2) + "%";
     }
 }
