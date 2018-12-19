@@ -1,3 +1,19 @@
+<a name="3.1.0-rc.1"></a>
+# [3.1.0-rc.1](https://github.com/wise-team/steem-wise-core/compare/v3.0.5...v3.1.0-rc.1) (2018-12-19)
+
+
+### Bug Fixes
+
+* **AbstractLog:** allow stack trace logging on every level ([aa1de71](https://github.com/wise-team/steem-wise-core/commit/aa1de71))
+* **Daemon:** enhance Daemon log ([6683218](https://github.com/wise-team/steem-wise-core/commit/6683218))
+* **single daemon:** add voter discrimination ([81e377e](https://github.com/wise-team/steem-wise-core/commit/81e377e))
+* **VotingPower rule:** fix wise-team/steem-wise-voter-page[#42](https://github.com/wise-team/steem-wise-core/issues/42) ([98eb3f1](https://github.com/wise-team/steem-wise-core/commit/98eb3f1))
+* **VotingPower rule:** fix wise-team/steem-wise-voter-page[#43](https://github.com/wise-team/steem-wise-core/issues/43) ([5a676a7](https://github.com/wise-team/steem-wise-core/commit/5a676a7))
+* **WeightForPeriod rule:** more convenient description ([c07af4c](https://github.com/wise-team/steem-wise-core/commit/c07af4c))
+* **WeightRule:** format weight as percent ([8a6940d](https://github.com/wise-team/steem-wise-core/commit/8a6940d))
+
+
+
 <a name="3.0.5"></a>
 ## [3.0.5](https://github.com/wise-team/steem-wise-core/compare/v3.0.4...v3.0.5) (2018-12-06)
 
