@@ -78,7 +78,7 @@ export class WeightForPeriodRule extends Rule {
 
     public getDescription(): string {
         return "You can use at most "
-            + parseFloat((this.weight / 10000) + "").toFixed(3) + " votes of this delegator over the last " + this.period + " " + this.unit + "s";
+            + parseFloat((this.weight / 10000) + "").toFixed(3) + " full votes (or more partial votes) of this delegator over the period of " + this.period + " " + this.unit + "s";
     }
 }
 
