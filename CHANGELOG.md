@@ -1,3 +1,8 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/wise-team/steem-wise-core/compare/v3.1.0-rc.1...v3.1.0) (2018-12-20)
+
+
+
 <a name="3.1.0-rc.1"></a>
 # [3.1.0-rc.1](https://github.com/wise-team/steem-wise-core/compare/v3.0.5...v3.1.0-rc.1) (2018-12-19)
 
