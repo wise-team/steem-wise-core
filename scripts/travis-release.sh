@@ -123,7 +123,7 @@ push_to_github() {
     PUSH_TO_REMOTE="github-by-token"
 
     git commit -m "chore(release): semver ${NEW_VERSION}"
-    git tag -a "v${VERSION}" -m "Steem WISE core library version ${NEW_VERSION}"
+    git tag -a "v${NEW_VERSION}" -m "Steem WISE core library version ${NEW_VERSION}"
 
     # Push all changes
     git remote add "${PUSH_TO_REMOTE}" https://${GH_TOKEN}@github.com/${REPOSITORY}.git > /dev/null 2>&1
