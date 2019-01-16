@@ -34,7 +34,7 @@ setup_git() {
 select_deploy_tag() {
     echo "Determining tag"
 
-    BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+    BRANCH="${TRAVIS_BRANCH}"
     echo "Branch: ${BRANCH}"
     if [ "${BRANCH}" == "master" ]; then
         TAG="latest"
@@ -46,7 +46,7 @@ select_deploy_tag() {
         TAG=""
     fi
 
-    echo "Determining tag done"
+    echo "Tag determined: ${TAG}"
 }
 
 select_version() {
@@ -153,20 +153,19 @@ verify_node_version
 setup_git
 select_deploy_tag
 
-if [ ! -z "$TAG" ]
-then
-    select_version
-    update_version_in_packagejson
-fi
-
-build
-run_tests
-
 if [ -z "$TAG" ]
 then
-    echo "Not on deployment branch"
-    exit 0
+    echo "Not on deployment branch. Build and test only"
+    
+    build
+    run_tests
 else
+    select_version
+    update_version_in_packagejson
+
+    build
+    run_tests
+
     generate_changelog
     push_to_github
     publish_to_npm
