@@ -29,6 +29,11 @@ setup_git() {
     git config --global user.email "travis@travis-ci.org"
     git config --global user.name "Travis CI"
     git checkout "${TRAVIS_BRANCH}"
+    # Create special remote
+    PUSH_TO_REMOTE="github-by-token"
+    #§ 'REPOSITORY="' + data.config.repository.github.organization + "/" + data.repository.name + '"'
+    REPOSITORY="wise-team/steem-wise-core"
+    git remote add "${PUSH_TO_REMOTE}" https://${GH_TOKEN}@github.com/${REPOSITORY}.git > /dev/null 2>&1
     echo "Configuring git done"
 }
 
@@ -117,20 +122,17 @@ generate_changelog() {
 
 push_to_github() {
     echo "Pushing to github"
-
-    #§ 'REPOSITORY="' + data.config.repository.github.organization + "/" + data.repository.name + '"'
-    REPOSITORY="wise-team/steem-wise-core"
-    PUSH_TO_REMOTE="github-by-token"
-
     git commit -m "chore(release): semver ${NEW_VERSION} (-skipci)"
-    git tag -a "v${NEW_VERSION}" -m "Steem WISE core library version ${NEW_VERSION}"
-
-    # Push all changes
-    git remote add "${PUSH_TO_REMOTE}" https://${GH_TOKEN}@github.com/${REPOSITORY}.git > /dev/null 2>&1
     git push --quiet --set-upstream "${PUSH_TO_REMOTE}"
-    git push --quiet --tags --set-upstream "${PUSH_TO_REMOTE}"
-
     echo "Pushing to github done"
+}
+
+tag_on_github() {
+    echo "Pushing new tag to github"
+    TAGNAME="v${NEW_VERSION}"
+    git tag -a "${TAGNAME}" -m "Steem WISE core library version ${NEW_VERSION}"
+    git push --quiet --set-upstream "${PUSH_TO_REMOTE}" "${TAGNAME}"
+    echo "Pushing tag done"
 }
 
 
@@ -167,11 +169,16 @@ else
     build
     run_tests
 
-    generate_changelog
-    push_to_github
-    publish_to_npm
     if [ "${TAG}" == "latest" ]; then
+        generate_changelog
+        push_to_github
+        tag_on_github
+        publish_to_npm
         release_on_github
+    else
+        generate_changelog
+        tag_on_github
+        publish_to_npm
     fi
 fi
 
