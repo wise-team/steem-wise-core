@@ -122,7 +122,7 @@ push_to_github() {
     REPOSITORY="wise-team/steem-wise-core"
     PUSH_TO_REMOTE="github-by-token"
 
-    git commit -m "chore(release): semver ${NEW_VERSION}"
+    git commit -m "chore(release): semver ${NEW_VERSION} (-skipci)"
     git tag -a "v${NEW_VERSION}" -m "Steem WISE core library version ${NEW_VERSION}"
 
     # Push all changes

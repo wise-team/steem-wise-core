@@ -7,7 +7,7 @@ node_js:
 jobs:
     include:
         - stage: compile
-          if: type = push
+          if: type = push AND commit_message !~ /(-skipci)/
           script: ./scripts/travis-release.sh
         - stage: compile
           if: type = pull_request
