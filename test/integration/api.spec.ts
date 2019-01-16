@@ -3,7 +3,7 @@ import { assert, expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
 import * as steem from "steem";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { Wise, EffectuatedSetRules } from "../../src/wise";

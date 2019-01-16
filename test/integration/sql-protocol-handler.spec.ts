@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import { expect } from "chai";
 import { d } from "../../src/util/util";
 
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";

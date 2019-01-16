@@ -1,7 +1,7 @@
 // 3rd party imports
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { SendVoteorder, Wise, WeightRule, Api } from "../../src/wise";

@@ -2,7 +2,7 @@
 import { expect } from "chai";
 import "mocha";
 import * as steemJs from "steem";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { BlockchainConfig } from "../../src/blockchain/BlockchainConfig";

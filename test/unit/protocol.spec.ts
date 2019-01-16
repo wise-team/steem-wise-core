@@ -2,7 +2,7 @@
 import { expect } from "chai";
 import "mocha";
 import * as steem from "steem";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { Wise, UnifiedSteemTransaction } from "../../src/wise";
