@@ -57,7 +57,7 @@ select_version() {
     CURRENT_SEMVER_IN_NPM_REPO=$(npm show ${NPM_NAME} dist-tags.${TAG})
 
     if [ "${TAG}" == "latest" ]; then
-        NEW_VERSION=${CURRENT_SEMVER_IN_PACKAGEJSON}
+        NEW_VERSION="$(semver ${CURRENT_SEMVER_IN_PACKAGEJSON} -i)"
     elif [ "${TAG}" == "beta" ]; then
         NEW_VERSION="$(semver ${CURRENT_SEMVER_IN_PACKAGEJSON} --preid beta -i prerelease)"
     elif [ "${TAG}" == "alpha" ]; then
