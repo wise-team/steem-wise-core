@@ -1,5 +1,5 @@
-<a name="3.1.2-beta.0"></a>
-## [3.1.2-beta.0](https://github.com/wise-team/steem-wise-core/compare/v3.1.0-rc.1...v3.1.2-beta.0) (2019-01-16)
+<a name="3.1.2-beta.1"></a>
+## [3.1.2-beta.1](https://github.com/wise-team/steem-wise-core/compare/v3.1.0-rc.1...v3.1.2-beta.1) (2019-01-16)
 
 
 ### Bug Fixes
@@ -70,7 +70,7 @@
 
 
 <a name="3.0.0"></a>
-# [3.0.0](https://github.com/wise-team/steem-wise-core/compare/v2.3.1...v3.0.0) (2018-11-01)
+# [3.0.0](https://github.com/wise-team/steem-wise-core/compare/735165d...v3.0.0) (2018-11-01)
 
 
 ### Bug Fixes
@@ -92,11 +92,6 @@
 ### BREAKING CHANGES
 
 * create SingleDaemon instead of Synchronized and rename Synchronizer to LegacySynchronizer
-
-
-
-<a name="2.3.1"></a>
-## 2.3.1 (2018-10-29)
 
 
 
