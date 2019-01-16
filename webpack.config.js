@@ -19,13 +19,16 @@ module.exports = {
         library: "wise",
         libraryTarget: "umd"
     },
-    devtool: (DEFAULTS.isDevelopment ?  'cheap-eval-source-map' : 'source-map'),
+    devtool: (DEFAULTS.isDevelopment ? 'cheap-eval-source-map' : 'source-map'),
     target: "web",
     module: {
         rules: []
     },
     optimization: {
         minimize: (DEFAULTS.isDevelopment ? false : true)
+    },
+    performance: {
+        hints: false
     },
     resolve: {
         extensions: [".js", ".json"]
