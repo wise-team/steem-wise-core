@@ -2,7 +2,7 @@ dist: xenial
 language: node_js
 node_js:
     #§ '- "' + data.config.npm.node.version + '"'
-    - "10.12"
+    - "10.15"
 
 jobs:
     include:
