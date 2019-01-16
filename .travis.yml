@@ -1,0 +1,8 @@
+dist: xenial
+language: node_js
+node_js:
+  #§ '- "' + data.config.npm.node.version + '"'
+  - "10.12"
+
+script:
+  - ./scripts/travis-release.sh

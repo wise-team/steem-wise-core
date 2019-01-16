@@ -52,8 +52,7 @@ export class Wise {
         this.api = api;
         if (protocol) {
             this.protocol = protocol;
-        }
-        else {
+        } else {
             this.protocol = Wise.constructDefaultProtocol();
         }
     }
@@ -70,14 +69,19 @@ export class Wise {
      *      the blockchain moment of this wiseoperation.
      */
     public uploadRulesetsForVoter = (
-        voter: string, rulesets: Ruleset [],
-        proggressCallback: ProggressCallback  = () => {}
+        voter: string,
+        rulesets: Ruleset[],
+        proggressCallback: ProggressCallback = () => {}
     ): Promise<SteemOperationNumber> => {
         return RulesUpdater.uploadRulesetsForVoter(
-            this.api, this.protocol, this.account, voter, rulesets, proggressCallback
+            this.api,
+            this.protocol,
+            this.account,
+            voter,
+            rulesets,
+            proggressCallback
         );
-    }
-
+    };
 
     /**
      * Download rulesets set by the delegator for a specified voter.
@@ -91,14 +95,14 @@ export class Wise {
      *      or now.
      */
     public downloadRulesetsForVoter = async (
-        delegator: string, voter: string,
+        delegator: string,
+        voter: string,
         atMoment: SteemOperationNumber = SteemOperationNumber.NOW
-    ): Promise<Ruleset []> => {
+    ): Promise<Ruleset[]> => {
         const setRules = await this.api.loadRulesets({ delegator: delegator, voter: voter }, atMoment);
         if (setRules.length > 0) return setRules[0].rulesets;
         else return [];
-    }
-
+    };
 
     /**
      * Uploads all rulesets for this delegator account for all voters. First it reads the account history and looks
@@ -121,12 +125,11 @@ export class Wise {
      *      operation. True indicates that rules were already up to date and no operations were sent to blockchain.
      */
     public uploadAllRulesets = (
-        rules: SetRulesForVoter [],
+        rules: SetRulesForVoter[],
         proggressCallback: ProggressCallback = () => {}
     ): Promise<SteemOperationNumber | true> => {
         return RulesUpdater.uploadAllRulesets(this.api, this.protocol, this.account, rules, proggressCallback);
-    }
-
+    };
 
     /**
      * Downloads from blockchain all rules set by specified delegator (default is provided accound) at specified moment
@@ -147,13 +150,12 @@ export class Wise {
         delegator: string = this.account,
         atMoment: SteemOperationNumber = SteemOperationNumber.NOW,
         proggressCallback: ProggressCallback = () => {}
-    ): Promise<EffectuatedSetRules []> => {
+    ): Promise<EffectuatedSetRules[]> => {
         proggressCallback("Downloading all rulesets set by " + delegator, 0.0);
-        const result =  RulesUpdater.downloadAllRulesets(this.api, delegator, atMoment);
+        const result = RulesUpdater.downloadAllRulesets(this.api, delegator, atMoment);
         proggressCallback("Downloaded all rulesets set by " + delegator, 1.0);
         return result;
-    }
-
+    };
 
     /**
      * This method generates an array of steem operations that have to be sent to emit a Wise voteorder. This method
@@ -172,15 +174,18 @@ export class Wise {
      * or steemconnect.
      */
     public generateVoteorderOperations = async (
-        delegator: string, voter: string, voteorder: SendVoteorder,
+        delegator: string,
+        voter: string,
+        voteorder: SendVoteorder,
         proggressCallback: ProggressCallback = () => {},
-        skipValidation: boolean = false): Promise<steem.OperationWithDescriptor[]> => {
+        skipValidation: boolean = false
+    ): Promise<steem.OperationWithDescriptor[]> => {
         proggressCallback("Validating voteorder...", 0.0);
 
         const smOp: WiseOperation = {
             voter: voter,
             delegator: delegator,
-            command: voteorder
+            command: voteorder,
         };
         const steemOps = this.protocol.serializeToBlockchain(smOp);
         if (steemOps.length !== 1) throw new Error("A voteorder should be a single blockchain operation");
@@ -189,16 +194,17 @@ export class Wise {
 
         if (!skipValidation) {
             const validationResult: ValidationException | true = await this.validateVoteorder(
-                delegator, voter, voteorder, SteemOperationNumber.FUTURE,
+                delegator,
+                voter,
+                voteorder,
+                SteemOperationNumber.FUTURE,
                 proggressCallback
             );
             if (validationResult !== true) throw new Error("Validation error: " + validationResult.message);
             proggressCallback("Voteorder validation done", 1.0);
-
         }
         return steemOps;
-    }
-
+    };
 
     /**
      * Sends a voteorder to the blockchain.
@@ -214,18 +220,23 @@ export class Wise {
      *      is sent successfully.
      */
     public sendVoteorder = async (
-        delegator: string, voteorder: SendVoteorder,
+        delegator: string,
+        voteorder: SendVoteorder,
         proggressCallback: ProggressCallback = () => {},
         skipValidation: boolean = false
     ): Promise<SteemOperationNumber> => {
-
-        const steemOps = await this.generateVoteorderOperations(delegator, this.account, voteorder, proggressCallback, skipValidation);
+        const steemOps = await this.generateVoteorderOperations(
+            delegator,
+            this.account,
+            voteorder,
+            proggressCallback,
+            skipValidation
+        );
         proggressCallback("Sending voteorder...", 0.5);
         const sentMoment = await this.api.sendToBlockchain(steemOps);
         proggressCallback("Sending voteorder done", 1.0);
         return sentMoment;
-    }
-
+    };
 
     /**
      * Validates a voteorder. Both structure and rules.
@@ -245,16 +256,17 @@ export class Wise {
      *      are thrown/rejected.
      */
     public validateVoteorder = (
-        delegator: string, voter: string, voteorder: SendVoteorder, atMoment: SteemOperationNumber,
+        delegator: string,
+        voter: string,
+        voteorder: SendVoteorder,
+        atMoment: SteemOperationNumber,
         proggressCallback: ProggressCallback = () => {}
     ): Promise<ValidationException | true> => {
-
         const v = new Validator(this.api);
         if (proggressCallback) v.withProggressCallback(proggressCallback);
 
         return v.validate(delegator, voter, voteorder, atMoment);
-    }
-
+    };
 
     /**
      * Returns the moment in the blockchain of the newest confirmation of a specified delegator.
@@ -270,8 +282,7 @@ export class Wise {
      */
     public getLastConfirmationMoment = (delegator: string): Promise<undefined | SteemOperationNumber> => {
         return this.api.getLastConfirmationMoment(delegator);
-    }
-
+    };
 
     /**
      * Starts the Wise daemon. It reads blockchain transactions looking for Wise operations. When a new voteorder
@@ -287,15 +298,15 @@ export class Wise {
      * @returns - this method returns the Synchronizer object.
      */
     public startDaemon = (
-        since: SteemOperationNumber, notifierCallback: SingleDaemon.NotifierCallback
+        since: SteemOperationNumber,
+        notifierCallback: SingleDaemon.NotifierCallback
     ): SingleDaemon => {
         const daemon = new SingleDaemon(this.api, this.protocol, this.account, notifierCallback);
         (async () => {
             await daemon.start(since);
         })();
         return daemon;
-    }
-
+    };
 
     /**
      * Returns current protocol of this Wise object.
@@ -304,17 +315,18 @@ export class Wise {
      */
     public getProtocol = (): Protocol => {
         return this.protocol;
-    }
+    };
 
     public static constructDefaultProtocol(): Protocol {
-        return new Protocol([ // a default protocol which handles both V2 and V1 messages on blockchain.
+        return new Protocol([
+            // a default protocol which handles both V2 and V1 messages on blockchain.
             new V2Handler(),
-            new V1Handler()
+            new V1Handler(),
         ]);
     }
 
     public static getVersion(): string {
-        return /*§ §*/ "3.1.0-rc.1" /*§ ' "' + data.config.wise.version + '" ' §.*/;
+        return /*§ §*/ "3.1.1" /*§ ' "' + data.config.wise.version + '" ' §.*/;
     }
 
     /**
@@ -334,8 +346,6 @@ export class Wise {
  * the proggress.
  */
 export type ProggressCallback = (msg: string, proggress: number) => void;
-
-
 
 /**
  * Prayer:
