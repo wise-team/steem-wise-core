@@ -92,7 +92,7 @@ update_version_in_packagejson() {
 
 build() {
     echo "Building..."
-    npm install
+    NODE_ENV=production npm install
     git add package-lock.json
     echo "Build successful"
 }
@@ -170,6 +170,8 @@ else
     generate_changelog
     push_to_github
     publish_to_npm
-    release_on_github
+    if [ "${TAG}" == "latest" ]; then
+        release_on_github
+    fi
 fi
 
