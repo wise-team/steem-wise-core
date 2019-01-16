@@ -58,9 +58,9 @@ select_version() {
     if [ "${TAG}" == "latest" ]; then
         NEW_VERSION=${CURRENT_SEMVER_IN_PACKAGEJSON}
     elif [ "${TAG}" == "beta" ]; then
-        NEW_VERSION="semver ${CURRENT_SEMVER_IN_PACKAGEJSON} --preid beta -i prerelease"
+        NEW_VERSION="$(semver ${CURRENT_SEMVER_IN_PACKAGEJSON} --preid beta -i prerelease)"
     elif [ "${TAG}" == "alpha" ]; then
-        NEW_VERSION="semver ${CURRENT_SEMVER_IN_PACKAGEJSON} --preid alpha  -i prerelease"
+        NEW_VERSION="$(semver ${CURRENT_SEMVER_IN_PACKAGEJSON} --preid alpha  -i prerelease)"
     else
         echo "Error: Unknown tag ${TAG}"
         exit 1
@@ -71,7 +71,7 @@ select_version() {
         exit 1
     fi
 
-    echo "Determining version done"
+    echo "Determining version done. New version is '${NEW_VERSION}'"
 }
 
 update_version_in_packagejson() {
