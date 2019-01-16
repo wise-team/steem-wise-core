@@ -20,7 +20,7 @@ import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
 import { VoterFilter } from "./VoterFilter";
 import { NotFoundException } from "../../util/NotFoundException";
 import { DateLimiter } from "./DateLimiter";
-import { Log } from "../../log/log";
+import { Log } from "../../log/Log";
 import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
 import Wise from "../../wise";
 

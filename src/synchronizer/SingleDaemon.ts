@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import * as steem from "steem";
 
-import { Log } from "../log/log";
+import { Log } from "../log/Log";
 
 import { Api } from "../api/Api";
 import { Protocol } from "../protocol/Protocol";

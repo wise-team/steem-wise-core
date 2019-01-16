@@ -15,11 +15,11 @@ import { Validator } from "./validation/Validator";
 import { LegacySynchronizer } from "./synchronizer/LegacySynchronizer";
 import { V2Handler } from "./protocol/versions/v2/V2Handler";
 import { RulesUpdater } from "./RulesUpdater";
-import { Log } from "./log/log";
+import { Log } from "./log/Log";
 import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
-import { AbstractLog } from "./log/Abstractlog";
+import { AbstractLog } from "./log/AbstractLog";
 import { SingleDaemon } from "./synchronizer/SingleDaemon";
 
 /**
@@ -403,7 +403,7 @@ export { LegacySynchronizer } from "./synchronizer/LegacySynchronizer";
 export { UniversalSynchronizer } from "./synchronizer/UniversalSynchronizer";
 export { SynchronizerCallbacks } from "./synchronizer/SynchronizerCallbacks";
 
-export { AbstractLog } from "./log/Abstractlog";
+export { AbstractLog } from "./log/AbstractLog";
 
 export * from "./protocol/versions/v2/wise-schema";
 
