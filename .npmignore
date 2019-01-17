@@ -10,4 +10,7 @@
 /.github
 /.nyc_output
 
+*.test.ts
+_test
+
 /dist/browser/statistics.html
