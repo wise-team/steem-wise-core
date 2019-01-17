@@ -1,0 +1,19 @@
+dist: xenial
+language: node_js
+node_js:
+    #§ '- "' + data.config.npm.node.version + '"'
+    - "10.15"
+
+jobs:
+    include:
+        - stage: compile
+          if: type = push AND commit_message !~ /(-skipci)/
+          script: ./scripts/travis-release.sh
+        - stage: compile
+          if: type = pull_request
+          script:
+              - npm install
+              - npm run test
+              - npm run verify
+
+script:

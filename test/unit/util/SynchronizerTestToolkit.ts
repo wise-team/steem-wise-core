@@ -1,6 +1,6 @@
 import * as BluebirdPromise from "bluebird";
 import { Wise, SingleDaemon, SteemOperationNumber } from "../../../src/wise";
-import { Log } from "../../../src/log/log";
+import { Log } from "../../../src/log/Log";
 import { Util } from "../../../src/util/util";
 
 export class SynchronizerTestToolkit {

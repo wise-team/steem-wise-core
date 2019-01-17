@@ -6,7 +6,7 @@ import { expect, assert } from "chai";
 import * as _ from "lodash";
 import * as steem from "steem";
 import "mocha";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { Wise, SteemOperationNumber, SendVoteorder, SetRules, AuthorsRule, WeightRule, TagsRule, ValidationException, Api, Ruleset } from "../../src/wise";
@@ -52,7 +52,7 @@ describe("test/unit/synchronization.spec.ts", () => {
             synchronizerToolkit.start((fakeApi as any as FakeApi).getCurrentBlockNum());
         });
 
-        it("rejects voteorder sent before rules", async () => {
+        it("does nothing on voteorder sent before rules", async () => {
             const post: steem.SteemPost = Util.definedOrThrow(_.sample(fakeDataset.posts), new Error("post is undefined"));
             const vo: SendVoteorder = {
                 rulesetName: "RulesetOneChangesContent",
@@ -69,8 +69,8 @@ describe("test/unit/synchronization.spec.ts", () => {
             const lastTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
             const handleResult = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastTrx));
             expect(handleResult).to.be.an("array").with.length(1);
-            expect(ConfirmVote.isConfirmVote(handleResult[0].command)).to.be.true;
-            expect((handleResult[0].command as ConfirmVote).accepted).to.be.false;
+            expect(SendVoteorder.isSendVoteorder(handleResult[0].command)).to.be.true;
+            expect((handleResult[0].command as SendVoteorder).rulesetName).to.be.equal(vo.rulesetName);
         });
 
         it("Delegator sets rules for voter", async () => {
@@ -222,6 +222,31 @@ describe("test/unit/synchronization.spec.ts", () => {
                 const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
                 expect(ConfirmVote.isConfirmVote(lastHandledOp.command)).to.be.true;
                 expect((lastHandledOp.command as ConfirmVote).accepted).to.be.false;
+            }
+            catch (e) {
+                if ((e as ValidationException).validationException) throw new Error("Should not throw ValidationException, but pass it");
+                else throw e;
+            }
+        });
+
+        it("Delegator skips voteorder send to other delegator", async () => {
+            const voteorder: SendVoteorder = {
+                rulesetName: "RulesetOneChangesContent",
+                author: "perduta",
+                permlink: "nonexistentPost-" + Date.now(),
+                weight: 5
+            };
+
+            try {
+                const skipValidation = true;
+                const moment = await voterWise.sendVoteorder("other-delegator", voteorder, () => {}, skipValidation);
+                expect(moment.blockNum).to.be.greaterThan(0);
+                await BluebirdPromise.delay(120);
+
+                const lastPushedTrx = Util.definedOrThrow(_.last(fakeApi.getPushedTransactions()));
+                const handledOps: EffectuatedWiseOperation [] = Util.definedOrThrow(delegatorWise.getProtocol().handleOrReject(lastPushedTrx));
+                const lastHandledOp = Util.definedOrThrow(_.last(handledOps));
+                expect(SendVoteorder.isSendVoteorder(lastHandledOp.command)).to.be.true;
             }
             catch (e) {
                 if ((e as ValidationException).validationException) throw new Error("Should not throw ValidationException, but pass it");

@@ -5,7 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import { expect, assert } from "chai";
 import * as _ from "lodash";
 import "mocha";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { Wise, SteemOperationNumber, Api, SingleDaemon } from "../../src/wise";

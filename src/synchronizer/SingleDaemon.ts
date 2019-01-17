@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import * as steem from "steem";
 
-import { Log } from "../log/log";
+import { Log } from "../log/Log";
 
 import { Api } from "../api/Api";
 import { Protocol } from "../protocol/Protocol";
@@ -117,31 +117,36 @@ export class SingleDaemon {
         }
     }
 
-    private onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation): Promise<void> {
+    private async onVoteorder(cmd: SendVoteorder, op: EffectuatedWiseOperation): Promise<void> {
+        if (op.delegator !== this.delegator) return;
+
         Log.log().cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
 
         const rules = this.determineRules(op, cmd);
         Log.log().cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
 
-        if (!rules) return this.rejectVoteorder(op, cmd, "There is no ruleset for you");
+        if (!rules) {
+            Log.log().warn("@" + op.voter + " tried to vote with ruleset "
+                + "\"" + cmd.rulesetName + "\", but there are no rulesets for him.");
+            return;
+        }
 
         const v = new Validator(this.api);
         // provide already loaded rulesets (there is no need to call blockchain for them every single voteorder)
         v.provideRulesets(rules);
 
-        return v.validate(this.delegator, op.voter, cmd, op.moment)
-        .then((result: ValidationException | true) => {
-            if (result === true) {
-                return this.voteAndConfirm(op, cmd);
+        try { // errors inside this try will be published to the blockchain! (be cautious)
+            const validationResult = await v.validate(this.delegator, op.voter, cmd, op.moment);
+            if (validationResult === true) {
+                await this.voteAndConfirm(op, cmd);
             }
             else {
-                return this.rejectVoteorder(op, cmd, (result as ValidationException).message);
+                await this.rejectVoteorder(op, cmd, (validationResult as ValidationException).message);
             }
-        })
-        .catch((error: Error) => {
+        } catch (error) {
             if (error.name === "FetchError") throw error;
-            else this.rejectVoteorder(op, cmd, error.message);
-        });
+            else await this.rejectVoteorder(op, cmd, error.message);
+        }
     }
 
     private determineRules(op: EffectuatedWiseOperation, cmd: SendVoteorder): EffectuatedSetRules | undefined {

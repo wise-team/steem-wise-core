@@ -20,12 +20,12 @@ import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
 import { VoterFilter } from "./VoterFilter";
 import { NotFoundException } from "../../util/NotFoundException";
 import { DateLimiter } from "./DateLimiter";
-import { Log } from "../../log/log";
+import { Log } from "../../log/Log";
 import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
 import Wise from "../../wise";
 
 export class DirectBlockchainApi extends Api {
-    private static DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
+    private static DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
     private steem: steem.api.Steem;
     private postingWif: string | undefined;
     private sendEnabled: boolean = true;

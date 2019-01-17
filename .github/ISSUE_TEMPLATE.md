@@ -1,4 +1,4 @@
-!!! Warning: if this is a security issue, please DO NOT POST IT HERE. Instead, send it to jedrzejblew@gmail.com. You saved the life of the innocent ones.
+!!! Warning: if this is a security issue, please DO NOT POST IT HERE. Instead, send it to contact@wiseteam.io. You saved the life of the innocent ones.
 
 # For enhancements (remove if irrelevant)
 

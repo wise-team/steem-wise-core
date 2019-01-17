@@ -1,7 +1,7 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { FirstPostRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";

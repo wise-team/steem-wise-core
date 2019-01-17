@@ -3,7 +3,7 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import "mocha";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { OneTimePromise } from "../../src/util/OneTimePromise";

@@ -1,4 +1,4 @@
-import { AbstractLog } from "./Abstractlog";
+import { AbstractLog } from "./AbstractLog";
 
 export class Log extends AbstractLog {
     private static INSTANCE: Log;
@@ -8,11 +8,7 @@ export class Log extends AbstractLog {
     }
 
     public init() {
-        super.init([
-            process.env.WISE_CORE_LOG_LEVEL,
-            process.env.WISE_LOG_LEVEL,
-            "info"
-        ]);
+        super.init([process.env.WISE_CORE_LOG_LEVEL, process.env.WISE_LOG_LEVEL, "info"]);
     }
 
     public static log(): Log {

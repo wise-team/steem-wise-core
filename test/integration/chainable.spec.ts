@@ -5,7 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import { expect } from "chai";
 import "mocha";
 import * as steemJs from "steem";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { SimpleTaker } from "../../src/chainable/Chainable";
@@ -18,7 +18,7 @@ import { ChainableLimiter } from "../../src/chainable/limiters/ChainableLimiter"
 
 
 describe("test/integration/chainable.spec.ts", () => {
-    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://api.steemit.com" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
+    const DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
     const steem = new steemJs.api.Steem({ url: DEFAULT_STEEM_API_ENDPOINT_URL });
     describe("SteemJsAccountHistorySupplier", () => {
 

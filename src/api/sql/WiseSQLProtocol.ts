@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import * as url from "url";
 import * as _ from "lodash";
-import { Log } from "../../log/log";
+import { Log } from "../../log/Log";
 import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
 import { WiseCommand } from "../../protocol/WiseCommand";
 import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";

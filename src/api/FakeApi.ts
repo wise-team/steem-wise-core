@@ -4,7 +4,7 @@ import * as BluebirdPromise from "bluebird";
 import * as _ from "lodash";
 import * as steem from "steem";
 
-import { Log } from "../log/log";
+import { Log } from "../log/Log";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";

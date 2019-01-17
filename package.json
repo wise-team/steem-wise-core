@@ -1,12 +1,12 @@
 {
   "name": "steem-wise-core",
-  "version": "3.0.2",
+  "version": "3.1.2-beta.1",
   "description": "Node/web library for Wise: a vote delegation system for STEEM blockchain",
   "main": "dist/wise.js",
   "types": "dist/wise.d.ts",
   "directories": {},
   "engines": {
-    "node": ">=10.12"
+    "node": ">=10.15"
   },
   "dependencies": {
     "ajv": "^6.5.4",
@@ -65,7 +65,15 @@
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
-    ]
+    ],
+    "rules": {
+      "header-max-length": [
+        0
+      ],
+      "scope-case": [
+        0
+      ]
+    }
   },
   "nyc": {
     "extension": [

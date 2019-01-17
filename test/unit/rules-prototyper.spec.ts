@@ -5,7 +5,7 @@ import * as BluebirdPromise from "bluebird";
 import { expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
-import { Log } from "../../src/log/log";
+import { Log } from "../../src/log/Log";
 
 // wise imports
 import { AuthorsRule, SendVoteorder, TagsRule, WeightRule, CustomRPCRule, VotingPowerRule, ExpirationDateRule } from "../../src/wise";
