@@ -1,17 +1,17 @@
 // 3rd party imports
 import { expect } from "chai";
 import "mocha";
-import { Log } from "../../src/log/log";
+import { Log } from "../log/log";
 
 // wise imports
-import { AgeOfPostRule, SendVoteorder, ValidationException, Wise } from "../../src/wise";
-import { ValidationContext } from "../../src/validation/ValidationContext";
-import { FakeWiseFactory } from "../util/FakeWiseFactory";
+import { AgeOfPostRule, SendVoteorder, ValidationException, Wise } from "../wise";
+import { ValidationContext } from "../validation/ValidationContext";
+import { FakeWiseFactory } from "../_test/util/FakeWiseFactory";
 import {
     wise_rule_age_of_post_encode,
     wise_rule_age_of_post_decode,
     wise_rule_age_of_post,
-} from "../../src/protocol/versions/v2/rules/rule-age-of-post-schema";
+} from "../protocol/versions/v2/rules/rule-age-of-post-schema";
 
 /* CONFIG */
 const voter = "nonexistentvoter";

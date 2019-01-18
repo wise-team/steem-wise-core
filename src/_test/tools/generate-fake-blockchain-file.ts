@@ -4,12 +4,12 @@ import * as BluebirdPromise from "bluebird";
 import * as steem from "steem";
 import * as fs from "fs";
 
-import { DirectBlockchainApi, UnifiedSteemTransaction, Wise } from "../../src/wise";
-import { SteemJsAccountHistorySupplier } from "../../src/api/directblockchain/SteemJsAccountHistorySupplier";
-import { OperationNumberFilter } from "../../src/chainable/filters/OperationNumberFilter";
-import { V1Handler } from "../../src/protocol/versions/v1/V1Handler";
-import { SimpleTaker } from "../../src/chainable/Chainable";
-import { FakeApi } from "../../src/api/FakeApi";
+import { DirectBlockchainApi, UnifiedSteemTransaction, Wise } from "../../wise";
+import { SteemJsAccountHistorySupplier } from "../../api/directblockchain/SteemJsAccountHistorySupplier";
+import { OperationNumberFilter } from "../../chainable/filters/OperationNumberFilter";
+import { V1Handler } from "../../protocol/versions/v1/V1Handler";
+import { SimpleTaker } from "../../chainable/Chainable";
+import { FakeApi } from "../../api/FakeApi";
 
 const outFilePath = __dirname + "/../data/fake-blockchain.json";
 

@@ -1,11 +1,12 @@
 import * as _ from "lodash";
 import clone = require("fast-clone");
 
-import { Wise, Api } from "../../src/wise";
-import { FakeApi } from "../../src/api/FakeApi";
-
 import * as fakeDataset_ from "../data/fake-blockchain.json";
-const fakeDataset = fakeDataset_ as object as FakeApi.Dataset;
+const fakeDataset = (fakeDataset_ as object) as FakeApi.Dataset;
+
+import Wise from "../../wise";
+import { FakeApi } from "../../api/FakeApi";
+import { Api } from "../../api/Api";
 
 export class FakeWiseFactory {
     public static loadDataset(): FakeApi.Dataset {

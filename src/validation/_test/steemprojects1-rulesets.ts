@@ -1,4 +1,4 @@
-import { smartvotes_ruleset } from "../../src/steem-smartvotes";
+import { smartvotes_ruleset } from "../../protocol/versions/v1/rules.schema";
 
 /**
  * These are rulesets used for rule validation unit tests. They are uploaded to @steemprojects1
@@ -7,7 +7,7 @@ import { smartvotes_ruleset } from "../../src/steem-smartvotes";
  * It was already done by authors of the project, so it it unlikely that you have to do it. You should
  * be able to just run the tests which uses these rulesets (they were already uploaded to steem blockchain).
  */
-export const rulesets: smartvotes_ruleset [] = [];
+export const rulesets: smartvotes_ruleset[] = [];
 
 export const upvoteRequireTagSteemprojects: smartvotes_ruleset = {
     name: "Upvote, require tag #steemprojects",
@@ -18,13 +18,11 @@ export const upvoteRequireTagSteemprojects: smartvotes_ruleset = {
         {
             type: "tags",
             mode: "require",
-            tags: ["steemprojects"]
-        }
-    ]
+            tags: ["steemprojects"],
+        },
+    ],
 };
 rulesets.push(upvoteRequireTagSteemprojects);
-
-
 
 export const flagRequireTagSteemprojects: smartvotes_ruleset = {
     name: "Flag, require tag #steemprojects",
@@ -35,13 +33,11 @@ export const flagRequireTagSteemprojects: smartvotes_ruleset = {
         {
             type: "tags",
             mode: "require",
-            tags: ["steemprojects"]
-        }
-    ]
+            tags: ["steemprojects"],
+        },
+    ],
 };
 rulesets.push(flagRequireTagSteemprojects);
-
-
 
 export const upvoteAndFlagRequireTagSteemprojects: smartvotes_ruleset = {
     name: "Upvote and flag, require tag #steemprojects",
@@ -52,13 +48,11 @@ export const upvoteAndFlagRequireTagSteemprojects: smartvotes_ruleset = {
         {
             type: "tags",
             mode: "require",
-            tags: ["steemprojects"]
-        }
-    ]
+            tags: ["steemprojects"],
+        },
+    ],
 };
 rulesets.push(upvoteAndFlagRequireTagSteemprojects);
-
-
 
 // this is for validation of https://steemit.com/steemprojects/@cryptoctopus/steemprojects-com-a-project-we-should-all-care-about-suggestions
 export const upvoteAllowTags: smartvotes_ruleset = {
@@ -70,13 +64,11 @@ export const upvoteAllowTags: smartvotes_ruleset = {
         {
             type: "tags",
             mode: "allow",
-            tags: ["steemprojects", "steemdev", "suggestion", "input", "busy", "esteem", "nonexistenttag"]
-        }
-    ]
+            tags: ["steemprojects", "steemdev", "suggestion", "input", "busy", "esteem", "nonexistenttag"],
+        },
+    ],
 };
 rulesets.push(upvoteAllowTags);
-
-
 
 export const upvoteDenyTagSteemprojects: smartvotes_ruleset = {
     name: "Upvote, deny tag #steemprojects",
@@ -87,12 +79,11 @@ export const upvoteDenyTagSteemprojects: smartvotes_ruleset = {
         {
             type: "tags",
             mode: "deny",
-            tags: ["steemprojects"]
-        }
-    ]
+            tags: ["steemprojects"],
+        },
+    ],
 };
 rulesets.push(upvoteDenyTagSteemprojects);
-
 
 export const upvoteRequireTagSteemprojectsAndReview: smartvotes_ruleset = {
     name: "Upvote, require tags #steemprojects and #review",
@@ -103,12 +94,11 @@ export const upvoteRequireTagSteemprojectsAndReview: smartvotes_ruleset = {
         {
             type: "tags",
             mode: "require",
-            tags: ["steemprojects", "review"]
-        }
-    ]
+            tags: ["steemprojects", "review"],
+        },
+    ],
 };
 rulesets.push(upvoteRequireTagSteemprojectsAndReview);
-
 
 export const upvoteAnyOfTags: smartvotes_ruleset = {
     name: "Upvote, any of the tags: #steemprojects, #review",
@@ -119,13 +109,11 @@ export const upvoteAnyOfTags: smartvotes_ruleset = {
         {
             type: "tags",
             mode: "any",
-            tags: ["steemprojects", "review"]
-        }
-    ]
+            tags: ["steemprojects", "review"],
+        },
+    ],
 };
 rulesets.push(upvoteAnyOfTags);
-
-
 
 export const upvoteAllowAuthorNoisy: smartvotes_ruleset = {
     name: "Upvote, allow author @noisy",
@@ -136,13 +124,11 @@ export const upvoteAllowAuthorNoisy: smartvotes_ruleset = {
         {
             type: "authors",
             mode: "allow",
-            authors: ["noisy"]
-        }
-    ]
+            authors: ["noisy"],
+        },
+    ],
 };
 rulesets.push(upvoteAllowAuthorNoisy);
-
-
 
 export const upvoteAllowAuthorsNoisyAndPerduta: smartvotes_ruleset = {
     name: "Upvote, allow authors @noisy and @perduta",
@@ -153,13 +139,11 @@ export const upvoteAllowAuthorsNoisyAndPerduta: smartvotes_ruleset = {
         {
             type: "authors",
             mode: "allow",
-            authors: ["noisy", "perduta"]
-        }
-    ]
+            authors: ["noisy", "perduta"],
+        },
+    ],
 };
 rulesets.push(upvoteAllowAuthorsNoisyAndPerduta);
-
-
 
 export const upvoteDenyAuthorNoisy: smartvotes_ruleset = {
     name: "Upvote, deny author @noisy",
@@ -170,24 +154,20 @@ export const upvoteDenyAuthorNoisy: smartvotes_ruleset = {
         {
             type: "authors",
             mode: "deny",
-            authors: ["noisy"]
-        }
-    ]
+            authors: ["noisy"],
+        },
+    ],
 };
 rulesets.push(upvoteDenyAuthorNoisy);
-
-
 
 export const upvoteNoRulesMaxWeight2: smartvotes_ruleset = {
     name: "Upvote, no rules, max total weight 2",
     voter: "guest123",
     total_weight: 2,
     action: "upvote",
-    rules: []
+    rules: [],
 };
 rulesets.push(upvoteNoRulesMaxWeight2);
-
-
 
 export const upvoteTwoRulesJoined: smartvotes_ruleset = {
     name: "Upvote, two rules joined",
@@ -198,13 +178,13 @@ export const upvoteTwoRulesJoined: smartvotes_ruleset = {
         {
             type: "authors",
             mode: "allow",
-            authors: ["noisy"]
+            authors: ["noisy"],
         },
         {
             type: "tags",
             mode: "require",
-            tags: ["steemprojects"]
-        }
-    ]
+            tags: ["steemprojects"],
+        },
+    ],
 };
 rulesets.push(upvoteTwoRulesJoined);

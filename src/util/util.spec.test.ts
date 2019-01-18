@@ -3,15 +3,14 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import "mocha";
-import { Log } from "../../src/log/Log";
+import { Log } from "../log/Log";
 
 // wise imports
-import { OneTimePromise } from "../../src/util/OneTimePromise";
-
+import { OneTimePromise } from "../util/OneTimePromise";
 
 describe("test/unit/util.spec.ts", () => {
     describe("OneTimePromise", function() {
-        it("runs the promise exactly once", (done) => {
+        it("runs the promise exactly once", done => {
             let calls = 0;
             const promiseReturner = async () => {
                 return await new BluebirdPromise<number>((resolve, reject) => {
@@ -25,11 +24,12 @@ describe("test/unit/util.spec.ts", () => {
             const loader = new OneTimePromise<number>(100);
 
             const checkerFn = () => {
-                loader.execute(promiseReturner)
-                .then((numOfCalls: number) => {
-                    if (numOfCalls !== 1) done(new Error("Num of calls does not equal 1"));
-                })
-                .catch((error: Error) => done(error));
+                loader
+                    .execute(promiseReturner)
+                    .then((numOfCalls: number) => {
+                        if (numOfCalls !== 1) done(new Error("Num of calls does not equal 1"));
+                    })
+                    .catch((error: Error) => done(error));
             };
 
             checkerFn();
@@ -44,7 +44,7 @@ describe("test/unit/util.spec.ts", () => {
             }, 25);
         });
 
-        it("rejects on explicit rejections", (done) => {
+        it("rejects on explicit rejections", done => {
             let numOfRejects = 0;
             let numOfResolves = 0;
             let numOfCalls = 0;
@@ -60,13 +60,17 @@ describe("test/unit/util.spec.ts", () => {
             const loader = new OneTimePromise<number>(100);
 
             const checkerFn = () => {
-                loader.execute(promiseReturner)
-                .then((numOfCalls: number) => {
-                    numOfResolves++;
-                    done(new Error("Resolves without error"));
-                }, e => {
-                    { numOfRejects++; }
-                });
+                loader.execute(promiseReturner).then(
+                    (numOfCalls: number) => {
+                        numOfResolves++;
+                        done(new Error("Resolves without error"));
+                    },
+                    e => {
+                        {
+                            numOfRejects++;
+                        }
+                    }
+                );
             };
 
             checkerFn();
@@ -76,11 +80,22 @@ describe("test/unit/util.spec.ts", () => {
 
             setTimeout(() => {
                 if (numOfRejects == 4 && numOfResolves == 0 && numOfCalls == 1) done();
-                else done(new Error("Not all promises were rejected (rejects=" + numOfRejects + ", resolves=" + numOfResolves + ", calls=" + numOfCalls + ")"));
+                else
+                    done(
+                        new Error(
+                            "Not all promises were rejected (rejects=" +
+                                numOfRejects +
+                                ", resolves=" +
+                                numOfResolves +
+                                ", calls=" +
+                                numOfCalls +
+                                ")"
+                        )
+                    );
             }, 45);
         });
 
-        it("rejects on thrown errors", (done) => {
+        it("rejects on thrown errors", done => {
             let numOfRejects = 0;
             const promiseReturner = async () => {
                 return await new BluebirdPromise<number>((resolve, reject) => {
@@ -91,11 +106,14 @@ describe("test/unit/util.spec.ts", () => {
             const loader = new OneTimePromise<number>(100);
 
             const checkerFn = () => {
-                loader.execute(promiseReturner)
-                .then((numOfCalls: number) => {
-                    done(new Error("Resolves without error"));
-                })
-                .catch((error: Error) => { numOfRejects++; });
+                loader
+                    .execute(promiseReturner)
+                    .then((numOfCalls: number) => {
+                        done(new Error("Resolves without error"));
+                    })
+                    .catch((error: Error) => {
+                        numOfRejects++;
+                    });
             };
 
             checkerFn();
