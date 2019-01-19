@@ -3,27 +3,27 @@ import { assert, expect } from "chai";
 import "mocha";
 import * as _ from "lodash";
 import * as steem from "steem";
-import { Log } from "../../src/log/Log";
+import { Log } from "../log/Log";
 
 // wise imports
-import { Wise, EffectuatedSetRules } from "../../src/wise";
-import { Api } from "../../src/api/Api";
-import { DirectBlockchainApi } from "../../src/api/directblockchain/DirectBlockchainApi";
-import { WiseSQLApi } from "../../src/api/sql/WiseSQLApi";
-import { FakeApi } from "../../src/api/FakeApi";
-import { SteemOperationNumber } from "../../src/blockchain/SteemOperationNumber";
-import { SetRules } from "../../src/protocol/SetRules";
-import { WeightRule } from "../../src/rules/WeightRule";
-import { Rule } from "../../src/rules/Rule";
-import { EffectuatedWiseOperation } from "../../src/protocol/EffectuatedWiseOperation";
-import { NotFoundException } from "../../src/util/NotFoundException";
+import { Wise, EffectuatedSetRules } from "../wise";
+import { Api } from "../api/Api";
+import { DirectBlockchainApi } from "../api/directblockchain/DirectBlockchainApi";
+import { WiseSQLApi } from "../api/sql/WiseSQLApi";
+import { FakeApi } from "../api/FakeApi";
+import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SetRules } from "../protocol/SetRules";
+import { WeightRule } from "../rules/WeightRule";
+import { Rule } from "../rules/Rule";
+import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
+import { NotFoundException } from "../util/NotFoundException";
 
 /* PREPARE TESTING DATASETS */
-import * as v1TestingSequence from "../data/protocol-v1-testing-sequence";
-import { FakeWiseFactory } from "../util/FakeWiseFactory";
-import { VoteOperation } from "../../src/blockchain/VoteOperation";
-import { ConfirmVoteBoundWithVote } from "../../src/protocol/ConfirmVoteBoundWithVote";
-import { ConfirmVote } from "../../src/protocol/ConfirmVote";
+import * as v1TestingSequence from "./_test/protocol-v1-testing-sequence";
+import { FakeWiseFactory } from "../_test/util/FakeWiseFactory";
+import { VoteOperation } from "../blockchain/VoteOperation";
+import { ConfirmVoteBoundWithVote } from "../protocol/ConfirmVoteBoundWithVote";
+import { ConfirmVote } from "../protocol/ConfirmVote";
 
 /* CONFIG */
 const username = "guest123";
@@ -469,7 +469,7 @@ describe("test/integration/api.spec.ts", function() {
                         .with.length(0);
                 });
 
-                it.only("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote (when accepted = true)", async () => {
+                it("Returns ConfirmVoteBoundWithVote instead of pure ConfirmVote (when accepted = true)", async () => {
                     const until = new Date(Date.now() - 1000 * 3600 * 24 * 100); // last 14 days
                     const ops: EffectuatedWiseOperation[] = await api.getWiseOperations("noisy", until);
                     expect(ops)
