@@ -1,3 +1,18 @@
+<a name="3.1.1"></a>
+## [3.1.1](https://github.com/wise-team/steem-wise-core/compare/v3.1.0...v3.1.1) (2019-01-31)
+
+
+### Bug Fixes
+
+* make DirectBlockchainApi.sendToBlockchain use specified options ([7b34a40](https://github.com/wise-team/steem-wise-core/commit/7b34a40))
+
+
+### Features
+
+* update nodeJS to 10.15 ([c244249](https://github.com/wise-team/steem-wise-core/commit/c244249))
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/wise-team/steem-wise-core/compare/v3.1.0-rc.1...v3.1.0) (2018-12-20)
 
