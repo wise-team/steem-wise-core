@@ -1,7 +1,7 @@
 /* PROMISE_DEF */
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
-import * as steem from "steem";
+import * as steemJs from "steem";
 import * as _ from "lodash";
 
 import { SetRules } from "../../protocol/SetRules";
@@ -26,26 +26,30 @@ import Wise from "../../wise";
 
 export class DirectBlockchainApi extends Api {
     private static DEFAULT_STEEM_API_ENDPOINT_URL = /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
-    private steem: steem.api.Steem;
+    private steem: steemJs.api.Steem;
+    private steemJsOptions: steemJs.SteemJsOptions;
     private postingWif: string | undefined;
     private sendEnabled: boolean = true;
     private protocol: Protocol;
 
-    public constructor(protocol: Protocol, postingWif?: string, steemOptions?: steem.SteemJsOptions) {
+    public constructor(protocol: Protocol, postingWif?: string, steemOptions?: steemJs.SteemJsOptions) {
         super();
 
         this.protocol = protocol;
         if (postingWif) this.postingWif = postingWif;
 
         if (steemOptions) {
-            this.steem = new steem.api.Steem(steemOptions);
+            this.steemJsOptions = steemOptions;
         }
-        else this.steem = new steem.api.Steem({
-            url: DirectBlockchainApi.DEFAULT_STEEM_API_ENDPOINT_URL,
-            logger: (...args: any []) => {
-                Log.log().efficient(Log.level.silly, () => JSON.stringify(args));
-            }
-        });
+        else {
+            this.steemJsOptions = {
+                url: DirectBlockchainApi.DEFAULT_STEEM_API_ENDPOINT_URL,
+                logger: (...args: any []) => {
+                    Log.log().efficient(Log.level.silly, () => JSON.stringify(args));
+                }
+            };
+        }
+        this.steem = new steemJs.api.Steem(this.steemJsOptions);
     }
 
     public name(): string {
@@ -58,7 +62,7 @@ export class DirectBlockchainApi extends Api {
         this.sendEnabled = enabled;
     }
 
-    public async loadPost(author: string, permlink: string): Promise<steem.SteemPost> {
+    public async loadPost(author: string, permlink: string): Promise<steemJs.SteemPost> {
         Log.log().cheapDebug(
             () => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink })
         );
@@ -66,7 +70,7 @@ export class DirectBlockchainApi extends Api {
         const result: any = await this.steem.getContentAsync(author, permlink);
         if (result.author.length === 0)
                 throw new NotFoundException("The post (@" + author + "/" + permlink + ") does not exist");
-        return result as steem.SteemPost;
+        return result as steemJs.SteemPost;
     }
 
     public async loadRulesets(
@@ -123,15 +127,23 @@ export class DirectBlockchainApi extends Api {
         return out;
     }
 
-    public async sendToBlockchain(operations: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
+    public async sendToBlockchain(operations: steemJs.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
         if (!this.sendEnabled) {
             Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_DISABLED=" + JSON.stringify(operations));
             return SteemOperationNumber.NEVER;
         }
 
         Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
+
+        try {
+            (steemJs.api as any).setOptions(this.steemJsOptions);
+        }
+        catch (error) {
+            Log.log().warn("Could not change api settings for DirectBlockchainApi.sendToBlockchain, error: " + error);
+        }
+
         const result: { id: string, block_num: number, trx_num: number }
-        = await steem.broadcast.sendAsync(
+        = await steemJs.broadcast.sendAsync(
             { extensions: [], operations: operations },
             { posting: this.postingWif },
         );
@@ -191,7 +203,7 @@ export class DirectBlockchainApi extends Api {
             delegator: string, blockNum: number, skipDelegatorCheck: boolean = false,
             delayOnNoBlockMs: number = /*§ data.config.steem.waitForNextHeadBlockDelayMs §*/3100/*§ §.*/
         ): Promise<EffectuatedWiseOperation []> {
-        const block: steem.GetBlock.Block = await this.steem.getBlockAsync(blockNum);
+        const block: steemJs.GetBlock.Block = await this.steem.getBlockAsync(blockNum);
 
         if (!block) {
             return BluebirdPromise.delay(delayOnNoBlockMs)
@@ -202,7 +214,7 @@ export class DirectBlockchainApi extends Api {
         }
     }
 
-    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: steem.GetBlock.Block, skipDelegatorCheck: boolean): EffectuatedWiseOperation [] {
+    private getWiseOperationsRelatedToDelegatorInBlock_processBlock(delegator: string, blockNum: number, block: steemJs.GetBlock.Block, skipDelegatorCheck: boolean): EffectuatedWiseOperation [] {
         let out: EffectuatedWiseOperation [] = [];
 
         const block_num = blockNum;
@@ -220,7 +232,7 @@ export class DirectBlockchainApi extends Api {
     }
 
     private getWiseOperationsRelatedToDelegatorInBlock_processTransaction(
-        delegator: string, blockNum: number, transactionNum: number, transaction: steem.GetBlock.Transaction,
+        delegator: string, blockNum: number, transactionNum: number, transaction: steemJs.GetBlock.Transaction,
         timestamp: Date, skipDelegatorCheck: boolean
     ): EffectuatedWiseOperation [] {
         const out: EffectuatedWiseOperation [] = [];
@@ -252,19 +264,19 @@ export class DirectBlockchainApi extends Api {
         return this.getWiseOperationsRelatedToDelegatorInBlock("", blockNum, true /* skip delegator check */);
     }
 
-    public async getDynamicGlobalProperties(): Promise<steem.DynamicGlobalProperties> {
+    public async getDynamicGlobalProperties(): Promise<steemJs.DynamicGlobalProperties> {
         return this.steem.getDynamicGlobalPropertiesAsync();
     }
 
-    public async getAccountInfo(username: string): Promise<steem.AccountInfo> {
-        const result: steem.AccountInfo [] = await this.steem.getAccountsAsync([username]);
+    public async getAccountInfo(username: string): Promise<steemJs.AccountInfo> {
+        const result: steemJs.AccountInfo [] = await this.steem.getAccountsAsync([username]);
         if (result.length > 0) {
             return result[0];
         }
         else throw new NotFoundException("Account " + username + " does not exist");
     }
 
-    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []> {
+    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<steemJs.BlogEntry []> {
         return this.steem.getBlogEntriesAsync(username, startFrom, limit);
     }
 }
