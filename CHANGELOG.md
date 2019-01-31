@@ -1,16 +1,18 @@
 <a name="3.1.2-beta.1"></a>
 ## [3.1.2-beta.1](https://github.com/wise-team/steem-wise-core/compare/v3.1.0-rc.1...v3.1.2-beta.1) (2019-01-16)
 
-
 ### Bug Fixes
 
 * fix letter-case typo in Log and AbstractLog ([25833f3](https://github.com/wise-team/steem-wise-core/commit/25833f3))
+
+* make DirectBlockchainApi.sendToBlockchain use specified options ([7b34a40](https://github.com/wise-team/steem-wise-core/commit/7b34a40))
 
 
 ### Features
 
 * update nodeJS version to 10.15 ([5ef10be](https://github.com/wise-team/steem-wise-core/commit/5ef10be))
 
+* update nodeJS to 10.15 ([c244249](https://github.com/wise-team/steem-wise-core/commit/c244249))
 
 
 <a name="3.1.0-rc.1"></a>
