@@ -1,4 +1,4 @@
-import { ChainableFilter } from "../Chainable";
+import { ChainableFilter } from "steem-efficient-stream";
 import { WiseOperation } from "../../protocol/WiseOperation";
 import { SetRules } from "../../protocol/SetRules";
 import { SendVoteorder } from "../../protocol/SendVoteorder";
@@ -7,7 +7,10 @@ import { ConfirmVote } from "../../protocol/ConfirmVote";
 /**
  * Filters steem blockchain operations by type.
  */
-export class WiseOperationTypeFilter<T extends WiseOperation> extends ChainableFilter<WiseOperation, WiseOperationTypeFilter<T>> {
+export class WiseOperationTypeFilter<T extends WiseOperation> extends ChainableFilter<
+    WiseOperation,
+    WiseOperationTypeFilter<T>
+> {
     private type: WiseOperationTypeFilter.OperationType;
 
     constructor(type: WiseOperationTypeFilter.OperationType) {
@@ -24,14 +27,11 @@ export class WiseOperationTypeFilter<T extends WiseOperation> extends ChainableF
 
         if (this.type === WiseOperationTypeFilter.OperationType.SetRules) {
             if (SetRules.isSetRules(op.command)) return this.give(undefined, op as T);
-        }
-        else if (this.type === WiseOperationTypeFilter.OperationType.SendVoteorder) {
+        } else if (this.type === WiseOperationTypeFilter.OperationType.SendVoteorder) {
             if (SendVoteorder.isSendVoteorder(op.command)) return this.give(undefined, op as T);
-        }
-        else if (this.type === WiseOperationTypeFilter.OperationType.ConfirmVote) {
+        } else if (this.type === WiseOperationTypeFilter.OperationType.ConfirmVote) {
             if (ConfirmVote.isConfirmVote(op.command)) return this.give(undefined, op as T);
-        }
-        else throw new Error("Illegal type of filter");
+        } else throw new Error("Illegal type of filter");
 
         return true;
     }
@@ -41,6 +41,6 @@ export namespace WiseOperationTypeFilter {
     export enum OperationType {
         SetRules,
         SendVoteorder,
-        ConfirmVote
+        ConfirmVote,
     }
 }

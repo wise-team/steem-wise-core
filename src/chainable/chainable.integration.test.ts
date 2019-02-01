@@ -8,13 +8,14 @@ import * as steemJs from "steem";
 import { Log } from "../log/Log";
 
 // wise imports
-import { SimpleTaker } from "../chainable/Chainable";
-import { SteemOperationNumber, Wise, UnifiedSteemTransaction } from "../wise";
+import { SimpleTaker } from "steem-efficient-stream";
+import { SteemOperationNumber, UnifiedSteemTransaction } from "steem-efficient-stream";
+import { Wise } from "../wise";
 import { SteemJsAccountHistorySupplier } from "../api/directblockchain/SteemJsAccountHistorySupplier";
-import { OperationNumberFilter } from "../chainable/filters/OperationNumberFilter";
+import { OperationNumberFilter } from "steem-efficient-stream";
 import { ToWiseOperationTransformer } from "../chainable/transformers/ToWiseOperationTransformer";
 import { DisabledApi } from "../api/DisabledApi";
-import { ChainableLimiter } from "../chainable/limiters/ChainableLimiter";
+import { ChainableLimiter } from "steem-efficient-stream";
 
 describe("test/integration/chainable.spec.ts", () => {
     const DEFAULT_STEEM_API_ENDPOINT_URL =

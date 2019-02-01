@@ -10,10 +10,9 @@ import { TagsRule } from "../../../rules/TagsRule";
 import { AuthorsRule } from "../../../rules/AuthorsRule";
 import { CustomRPCRule } from "../../../rules/CustomRPCRule";
 import { EffectuatedWiseOperation } from "../../EffectuatedWiseOperation";
-import { SteemOperationNumber } from "../../../blockchain/SteemOperationNumber";
+import { SteemOperationNumber, UnifiedSteemTransaction } from "steem-efficient-stream";
 import { ConfirmVote } from "../../ConfirmVote";
 import { WeightRule } from "../../../rules/WeightRule";
-import { UnifiedSteemTransaction } from "../../../blockchain/UnifiedSteemTransaction";
 import { CustomJsonOperation, OperationWithDescriptor } from "steem";
 
 const aajv: ajv.Ajv = new ajv();

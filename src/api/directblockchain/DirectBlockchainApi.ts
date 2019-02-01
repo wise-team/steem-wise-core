@@ -6,23 +6,18 @@ import * as _ from "lodash";
 
 import { SetRules } from "../../protocol/SetRules";
 import { EffectuatedSetRules } from "../../protocol/EffectuatedSetRules";
-import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
-import { SimpleTaker, Chainable } from "../../chainable/Chainable";
+import { SteemOperationNumber, UnifiedSteemTransaction, SimpleTaker, Chainable, OperationNumberFilter, ChainableLimiter } from "steem-efficient-stream";
 import { Api } from "../Api";
 import { Protocol } from "../../protocol/Protocol";
 import { V1Handler } from "../../protocol/versions/v1/V1Handler";
 import { SteemJsAccountHistorySupplier } from "./SteemJsAccountHistorySupplier";
 import { WiseOperationTypeFilter } from "../../chainable/filters/WiseOperationTypeFilter";
 import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
-import { OperationNumberFilter } from "../../chainable/filters/OperationNumberFilter";
 import { ToWiseOperationTransformer } from "../../chainable/transformers/ToWiseOperationTransformer";
-import { ChainableLimiter } from "../../chainable/limiters/ChainableLimiter";
 import { VoterFilter } from "./VoterFilter";
 import { NotFoundException } from "../../util/NotFoundException";
 import { DateLimiter } from "./DateLimiter";
 import { Log } from "../../log/Log";
-import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
-import Wise from "../../wise";
 
 export class DirectBlockchainApi extends Api {
     private static DEFAULT_STEEM_API_ENDPOINT_URL =

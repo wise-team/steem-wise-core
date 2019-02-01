@@ -5,7 +5,7 @@ import { Log } from "../log/Log";
 
 import { Api } from "../api/Api";
 import { Protocol } from "../protocol/Protocol";
-import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { ConfirmVote } from "../protocol/ConfirmVote";
@@ -23,7 +23,7 @@ export class SingleDaemon {
     private delegator: string;
     private notifier: SingleDaemon.NotifierCallback;
 
-    private rules: EffectuatedSetRules [] = [];
+    private rules: EffectuatedSetRules[] = [];
 
     public constructor(api: Api, protocol: Protocol, delegator: string, notifier: SingleDaemon.NotifierCallback) {
         this.api = api;
@@ -32,10 +32,10 @@ export class SingleDaemon {
             onSetRules: (setRules, wiseOp) => this.onSetRules(setRules, wiseOp),
             onVoteorder: (voteorder, wiseOp) => this.onVoteorder(voteorder, wiseOp),
             onStart: () => this.onStart(),
-            onError:  (error: Error, proceeding: boolean) => this.onError(error, proceeding),
+            onError: (error: Error, proceeding: boolean) => this.onError(error, proceeding),
             onFinished: () => this.onFinished(),
-            onBlockProcessingStart: (blockNum) => this.onBlockProcessingStart(blockNum),
-            onBlockProcessingFinished: (blockNum) => this.onBlockProcessingFinished(blockNum)
+            onBlockProcessingStart: blockNum => this.onBlockProcessingStart(blockNum),
+            onBlockProcessingFinished: blockNum => this.onBlockProcessingFinished(blockNum),
         });
         this.delegator = delegator;
         this.notifier = notifier;
@@ -43,9 +43,8 @@ export class SingleDaemon {
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
     public start(since: SteemOperationNumber): SingleDaemon {
-
         (async () => {
-            const rules: EffectuatedSetRules [] = await this.api.loadRulesets({ delegator: this.delegator }, since);
+            const rules: EffectuatedSetRules[] = await this.api.loadRulesets({ delegator: this.delegator }, since);
             Log.log().debug("SYNCHRONIZER_INITIAL_RULESETS_LOADED=" + JSON.stringify(rules));
             this.rules = rules;
 
@@ -59,28 +58,29 @@ export class SingleDaemon {
         this.universalSynchronizer.stop();
     }
 
-    private onStart() {
-    }
+    private onStart() {}
 
     private onFinished() {
         this.notify(undefined, {
             type: SingleDaemon.EventType.SynchronizationStop,
             moment: this.universalSynchronizer.getLastProcessedOperation(),
-            message: "Synchronization stop"
+            message: "Synchronization stop",
         });
     }
 
     private onBlockProcessingStart(blockNum: number) {
         this.notify(undefined, {
-            type: SingleDaemon.EventType.StartBlockProcessing, blockNum: blockNum,
-            message: "Start processing block " + blockNum
+            type: SingleDaemon.EventType.StartBlockProcessing,
+            blockNum: blockNum,
+            message: "Start processing block " + blockNum,
         });
     }
 
     private onBlockProcessingFinished(blockNum: number) {
         this.notify(undefined, {
-            type: SingleDaemon.EventType.EndBlockProcessing, blockNum: blockNum,
-            message: "End processing block " + blockNum
+            type: SingleDaemon.EventType.EndBlockProcessing,
+            blockNum: blockNum,
+            message: "End processing block " + blockNum,
         });
     }
 
@@ -88,15 +88,16 @@ export class SingleDaemon {
         if (proceeding) {
             this.notify(undefined, {
                 type: SingleDaemon.EventType.ReversibleError,
-                error: error, moment: this.universalSynchronizer.getLastProcessedOperation(),
-                message: " Reversible error: " + error.message + ". Retrying in 3 seconds..."
+                error: error,
+                moment: this.universalSynchronizer.getLastProcessedOperation(),
+                message: " Reversible error: " + error.message + ". Retrying in 3 seconds...",
             });
-        }
-        else {
+        } else {
             this.notify(undefined, {
                 type: SingleDaemon.EventType.UnhandledError,
-                error: error, moment: this.universalSynchronizer.getLastProcessedOperation(),
-                message: " Reversible error: " + error.message + ". Retrying in 3 seconds..."
+                error: error,
+                moment: this.universalSynchronizer.getLastProcessedOperation(),
+                message: " Reversible error: " + error.message + ". Retrying in 3 seconds...",
             });
         }
     }
@@ -108,12 +109,15 @@ export class SingleDaemon {
                 moment: op.moment,
                 voter: op.voter,
                 delegator: op.delegator,
-                rulesets: setRules.rulesets
+                rulesets: setRules.rulesets,
             };
             this.rules.push(es);
             Log.log().debug("SYNCHRONIZER_UPDATED_RULES=" + JSON.stringify(setRules.rulesets));
-            this.notify(undefined, { type: SingleDaemon.EventType.RulesUpdated, moment: op.moment,
-                message: "Change of rules on blockchain. Local rules were updated." });
+            this.notify(undefined, {
+                type: SingleDaemon.EventType.RulesUpdated,
+                moment: op.moment,
+                message: "Change of rules on blockchain. Local rules were updated.",
+            });
         }
     }
 
@@ -126,8 +130,14 @@ export class SingleDaemon {
         Log.log().cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
 
         if (!rules) {
-            Log.log().warn("@" + op.voter + " tried to vote with ruleset "
-                + "\"" + cmd.rulesetName + "\", but there are no rulesets for him.");
+            Log.log().warn(
+                "@" +
+                    op.voter +
+                    " tried to vote with ruleset " +
+                    '"' +
+                    cmd.rulesetName +
+                    '", but there are no rulesets for him.'
+            );
             return;
         }
 
@@ -135,12 +145,12 @@ export class SingleDaemon {
         // provide already loaded rulesets (there is no need to call blockchain for them every single voteorder)
         v.provideRulesets(rules);
 
-        try { // errors inside this try will be published to the blockchain! (be cautious)
+        try {
+            // errors inside this try will be published to the blockchain! (be cautious)
             const validationResult = await v.validate(this.delegator, op.voter, cmd, op.moment);
             if (validationResult === true) {
                 await this.voteAndConfirm(op, cmd);
-            }
-            else {
+            } else {
                 await this.rejectVoteorder(op, cmd, (validationResult as ValidationException).message);
             }
         } catch (error) {
@@ -167,7 +177,7 @@ export class SingleDaemon {
     }
 
     private voteAndConfirm(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
-        Log.log().cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd}));
+        Log.log().cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({ op: op, voteorder: cmd }));
 
         const opsToSend: steem.OperationWithDescriptor[] = [];
 
@@ -179,7 +189,7 @@ export class SingleDaemon {
         const wiseOp: WiseOperation = {
             voter: op.voter,
             delegator: this.delegator,
-            command: confirmCmd
+            command: confirmCmd,
         };
         opsToSend.push(...this.protocol.serializeToBlockchain(wiseOp));
 
@@ -187,21 +197,34 @@ export class SingleDaemon {
             voter: this.delegator,
             author: cmd.author,
             permlink: cmd.permlink,
-            weight: cmd.weight
+            weight: cmd.weight,
         };
 
         opsToSend.push(["vote", voteOp]);
 
-        this.notify(undefined, { type: SingleDaemon.EventType.VoteorderPassed, voteorder: cmd, voteorderTxId: op.transaction_id, moment: op.moment, voter: op.voter, message: "Voteorder passed" });
+        this.notify(undefined, {
+            type: SingleDaemon.EventType.VoteorderPassed,
+            voteorder: cmd,
+            voteorderTxId: op.transaction_id,
+            moment: op.moment,
+            voter: op.voter,
+            message: "Voteorder passed",
+        });
 
         return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
-            this.notify(undefined, { type: SingleDaemon.EventType.OperarionsPushed,
-            operations: opsToSend, moment: moment, message: "Sent operations to blockchain: " + _.join(opsToSend.map(op => op[0]), ",")});
+            this.notify(undefined, {
+                type: SingleDaemon.EventType.OperarionsPushed,
+                operations: opsToSend,
+                moment: moment,
+                message: "Sent operations to blockchain: " + _.join(opsToSend.map(op => op[0]), ","),
+            });
         });
     }
 
     private rejectVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder, msg: string): Promise<void> {
-        Log.log().cheapDebug(() => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({op: op, voteorder: cmd, msg: msg}));
+        Log.log().cheapDebug(
+            () => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({ op: op, voteorder: cmd, msg: msg })
+        );
 
         const confirmCmd: ConfirmVote = {
             voteorderTxId: op.transaction_id,
@@ -211,15 +234,27 @@ export class SingleDaemon {
         const wiseOp: WiseOperation = {
             voter: op.voter,
             delegator: this.delegator,
-            command: confirmCmd
+            command: confirmCmd,
         };
         const opsToSend: steem.OperationWithDescriptor[] = this.protocol.serializeToBlockchain(wiseOp);
 
-        this.notify(undefined, { type: SingleDaemon.EventType.VoteorderRejected, voteorder: cmd, voteorderTxId: op.transaction_id, moment: op.moment, voter: op.voter, message: "Voteorder rejected: " + msg, validationException: undefined });
+        this.notify(undefined, {
+            type: SingleDaemon.EventType.VoteorderRejected,
+            voteorder: cmd,
+            voteorderTxId: op.transaction_id,
+            moment: op.moment,
+            voter: op.voter,
+            message: "Voteorder rejected: " + msg,
+            validationException: undefined,
+        });
 
         return this.api.sendToBlockchain(opsToSend).then((moment: SteemOperationNumber) => {
-            this.notify(undefined, { type: SingleDaemon.EventType.OperarionsPushed,
-            operations: opsToSend, moment: moment, message: "Sent operations to blockchain: " + _.join(opsToSend.map(op => op[0]), ",")});
+            this.notify(undefined, {
+                type: SingleDaemon.EventType.OperarionsPushed,
+                operations: opsToSend,
+                moment: moment,
+                message: "Sent operations to blockchain: " + _.join(opsToSend.map(op => op[0]), ","),
+            });
         });
     }
 
@@ -246,20 +281,19 @@ export namespace SingleDaemon {
         ReversibleError = "reversible-error",
         UnhandledError = "unhandled-error",
         SynchronizationStop = "synchronization-stop",
-        RulesUpdated = "rules-updated"
-
+        RulesUpdated = "rules-updated",
     }
 
-    export type Event = StartBlockProcessingEvent
-                      | EndBlockProcessingEvent
-                      | OperarionsPushedEvent
-                      | VoteorderRejected
-                      | VoteorderPassed
-                      | RulesUpdatedEvent
-                      | ReversibleErrorEvent
-                      | UnhandledErrorEvent
-                      | SynchronizationStopEvent
-                      ;
+    export type Event =
+        | StartBlockProcessingEvent
+        | EndBlockProcessingEvent
+        | OperarionsPushedEvent
+        | VoteorderRejected
+        | VoteorderPassed
+        | RulesUpdatedEvent
+        | ReversibleErrorEvent
+        | UnhandledErrorEvent
+        | SynchronizationStopEvent;
 
     export interface StartBlockProcessingEvent {
         type: EventType.StartBlockProcessing;

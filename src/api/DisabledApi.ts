@@ -1,6 +1,6 @@
 import * as steem from "steem";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
-import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { Api } from "./Api";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 

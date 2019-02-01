@@ -6,7 +6,7 @@ import { d } from "../../util/util";
 import { Log } from "../../log/Log";
 
 // wise imports
-import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { WiseSQLProtocol } from "../../wise";
 
 describe("test/integration/sql-protocol-handler.spec.ts", () => {

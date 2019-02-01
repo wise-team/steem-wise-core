@@ -1,4 +1,4 @@
-import { SteemAdapter } from "./SteemAdapter";
+import { SteemAdapter } from "steem-efficient-stream";
 
 export class SteemApiConfig {
     public static DEFAULT_STEEM_API_ENDPOINT_URL =

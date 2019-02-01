@@ -29,7 +29,7 @@ export class RulePrototyper {
     public static prototypeRuleset(unprototypedRuleset: Ruleset): Ruleset {
         const out: Ruleset = {
             name: unprototypedRuleset.name,
-            rules: unprototypedRuleset.rules.map(rule => RulePrototyper.fromUnprototypedRule(rule))
+            rules: unprototypedRuleset.rules.map(rule => RulePrototyper.fromUnprototypedRule(rule)),
         };
         return out;
     }
@@ -37,44 +37,37 @@ export class RulePrototyper {
     public static fromUnprototypedRule(unprototyped: Rule): Rule {
         /* if rule implements validate, it means that it already had prototype */
         if (unprototyped.validate) return unprototyped;
-        /* otherwise we have to append a prototype */
-        else if (unprototyped.rule === Rule.Type.Tags) {
+        /* otherwise we have to append a prototype */ else if (unprototyped.rule === Rule.Type.Tags) {
             return RulePrototyper.prototypeRule(new TagsRule(TagsRule.Mode.ALLOW, []), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.Authors) {
+        } else if (unprototyped.rule === Rule.Type.Authors) {
             return RulePrototyper.prototypeRule(new AuthorsRule(AuthorsRule.Mode.ALLOW, []), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.Weight) {
+        } else if (unprototyped.rule === Rule.Type.Weight) {
             return RulePrototyper.prototypeRule(new WeightRule(0, 0), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.VotingPower) {
+        } else if (unprototyped.rule === Rule.Type.VotingPower) {
             return RulePrototyper.prototypeRule(new VotingPowerRule(VotingPowerRule.Mode.MORE_THAN, 0), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.WeightForPeriod) {
-            return RulePrototyper.prototypeRule(new WeightForPeriodRule(0, WeightForPeriodRule.PeriodUnit.SECOND, 0), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.CustomRPC) {
+        } else if (unprototyped.rule === Rule.Type.WeightForPeriod) {
+            return RulePrototyper.prototypeRule(
+                new WeightForPeriodRule(0, WeightForPeriodRule.PeriodUnit.SECOND, 0),
+                unprototyped
+            );
+        } else if (unprototyped.rule === Rule.Type.CustomRPC) {
             return RulePrototyper.prototypeRule(new CustomRPCRule("", 0, "", ""), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.AgeOfPost) {
-            return RulePrototyper.prototypeRule(new AgeOfPostRule(AgeOfPostRule.Mode.OLDER_THAN, 0, AgeOfPostRule.TimeUnit.SECOND), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.FirstPost) {
+        } else if (unprototyped.rule === Rule.Type.AgeOfPost) {
+            return RulePrototyper.prototypeRule(
+                new AgeOfPostRule(AgeOfPostRule.Mode.OLDER_THAN, 0, AgeOfPostRule.TimeUnit.SECOND),
+                unprototyped
+            );
+        } else if (unprototyped.rule === Rule.Type.FirstPost) {
             return RulePrototyper.prototypeRule(new FirstPostRule(), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.Payout) {
+        } else if (unprototyped.rule === Rule.Type.Payout) {
             return RulePrototyper.prototypeRule(new PayoutRule(PayoutRule.Mode.EQUAL, 0), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.VotesCount) {
+        } else if (unprototyped.rule === Rule.Type.VotesCount) {
             return RulePrototyper.prototypeRule(new VotesCountRule(VotesCountRule.Mode.MORE_THAN, 0), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.Voters) {
+        } else if (unprototyped.rule === Rule.Type.Voters) {
             return RulePrototyper.prototypeRule(new VotersRule(VotersRule.Mode.NONE, []), unprototyped);
-        }
-        else if (unprototyped.rule === Rule.Type.ExpirationDate) {
+        } else if (unprototyped.rule === Rule.Type.ExpirationDate) {
             return RulePrototyper.prototypeRule(new ExpirationDateRule(new Date().toISOString()), unprototyped);
-        }
-        else throw new ValidationException("There is no rule with this type (rule=" + unprototyped.rule + ")");
+        } else throw new ValidationException("There is no rule with this type (rule=" + unprototyped.rule + ")");
     }
 
     private static prototypeRule<T extends Rule>(prototyperRule: T, unprototypedObj: object): T {

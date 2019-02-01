@@ -8,7 +8,7 @@ import { Log } from "../log/Log";
 
 import { Api } from "../api/Api";
 import { Protocol } from "../protocol/Protocol";
-import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { ConfirmVote } from "../protocol/ConfirmVote";
@@ -36,16 +36,16 @@ export class UniversalSynchronizer {
 
     // this function only starts the loop via processBlock, which then calls processBlock(blockNum+1)
     public async start(since: SteemOperationNumber) {
-        Log.log().debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({since: since}));
+        Log.log().debug("SYNCHRONIZER_RUN_LOOP=" + JSON.stringify({ since: since }));
         this.lastProcessedOperationNum = since;
 
-        this.safeCall(() => this.callbacks.onStart ? this.callbacks.onStart() : undefined);
+        this.safeCall(() => (this.callbacks.onStart ? this.callbacks.onStart() : undefined));
         try {
             await this.processBlock(since.blockNum); // the loop is started
         } catch (error) {
-            this.safeCall(() => this.callbacks.onError ? this.callbacks.onError(error, false) : undefined);
+            this.safeCall(() => (this.callbacks.onError ? this.callbacks.onError(error, false) : undefined));
         }
-        this.safeCall(() => this.callbacks.onFinished ? this.callbacks.onFinished() : undefined);
+        this.safeCall(() => (this.callbacks.onFinished ? this.callbacks.onFinished() : undefined));
     }
 
     public stop(): void {
@@ -66,21 +66,30 @@ export class UniversalSynchronizer {
             return;
         }
 
-        this.safeCall(() => this.callbacks.onBlockProcessingStart ? this.callbacks.onBlockProcessingStart(blockNum) : undefined);
+        this.safeCall(() =>
+            this.callbacks.onBlockProcessingStart ? this.callbacks.onBlockProcessingStart(blockNum) : undefined
+        );
         try {
-            const ops: EffectuatedWiseOperation [] = await this.api.getAllWiseOperationsInBlock(blockNum);
-            this.safeCall(() => this.callbacks.onBlockOperationsLoaded ? this.callbacks.onBlockOperationsLoaded(blockNum, ops) : undefined);
+            const ops: EffectuatedWiseOperation[] = await this.api.getAllWiseOperationsInBlock(blockNum);
+            this.safeCall(() =>
+                this.callbacks.onBlockOperationsLoaded
+                    ? this.callbacks.onBlockOperationsLoaded(blockNum, ops)
+                    : undefined
+            );
 
             for (let i = 0; i < ops.length; i++) {
                 const op = ops[i];
                 await this.processOperation(op as EffectuatedWiseOperation);
             }
-            this.safeCall(() => this.callbacks.onBlockProcessingFinished ? this.callbacks.onBlockProcessingFinished(blockNum) : undefined);
+            this.safeCall(() =>
+                this.callbacks.onBlockProcessingFinished
+                    ? this.callbacks.onBlockProcessingFinished(blockNum)
+                    : undefined
+            );
 
             await this.processBlock(blockNum + 1);
-        }
-        catch (error) {
-            this.safeCall(() => this.callbacks.onError ? this.callbacks.onError(error, true) : undefined);
+        } catch (error) {
+            this.safeCall(() => (this.callbacks.onError ? this.callbacks.onError(error, true) : undefined));
             await BluebirdPromise.delay(UniversalSynchronizer.WAIT_ON_ERROR_MS);
             await this.processBlock(blockNum);
         }
@@ -88,23 +97,21 @@ export class UniversalSynchronizer {
 
     private async processOperation(op: EffectuatedWiseOperation): Promise<void> {
         const currentOpNum = op.moment;
-         // retry continues from last trx. There is no need to process transactions from the beginning of the block second time.
+        // retry continues from last trx. There is no need to process transactions from the beginning of the block second time.
         if (currentOpNum.isGreaterThan(this.lastProcessedOperationNum)) {
             if (SetRules.isSetRules(op.command)) {
                 const setRules: SetRules = op.command;
                 this.safeCall(() => this.callbacks.onSetRules(setRules, op));
-            }
-            else if (SendVoteorder.isSendVoteorder(op.command)) {
+            } else if (SendVoteorder.isSendVoteorder(op.command)) {
                 const sendVoteorder: SendVoteorder = op.command;
                 this.safeCall(() => this.callbacks.onVoteorder(sendVoteorder, op));
-            }
-            else if (ConfirmVote.isConfirmVote(op.command)) {
-                    const confirmVote: ConfirmVote = op.command;
-                    this.safeCall(() => {
-                        if (this.callbacks.onConfirmVote) {
-                            this.callbacks.onConfirmVote(confirmVote, op);
-                        }
-                    });
+            } else if (ConfirmVote.isConfirmVote(op.command)) {
+                const confirmVote: ConfirmVote = op.command;
+                this.safeCall(() => {
+                    if (this.callbacks.onConfirmVote) {
+                        this.callbacks.onConfirmVote(confirmVote, op);
+                    }
+                });
             }
         }
         this.lastProcessedOperationNum = op.moment;
@@ -115,8 +122,7 @@ export class UniversalSynchronizer {
         (async () => {
             try {
                 await fn();
-            }
-            catch (error) {
+            } catch (error) {
                 Log.log().error("Unhandled error in UniversalSynchronizer callback: " + error);
                 Log.log().exception(Log.level.error, error);
             }

@@ -7,14 +7,13 @@ import * as steem from "steem";
 import { Log } from "../log/Log";
 import { SetRules } from "../protocol/SetRules";
 import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
-import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SteemOperationNumber, UnifiedSteemTransaction } from "steem-efficient-stream";
 import { Api } from "../api/Api";
 import { Protocol } from "../protocol/Protocol";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { V1Handler } from "../protocol/versions/v1/V1Handler";
 import { NotFoundException } from "../util/NotFoundException";
 import { ConfirmVote } from "../protocol/ConfirmVote";
-import { UnifiedSteemTransaction } from "../blockchain/UnifiedSteemTransaction";
 
 export class FakeApi extends Api {
     private protocol: Protocol;

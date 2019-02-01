@@ -4,7 +4,7 @@ import * as steem from "steem";
 
 import { SetRules } from "../../protocol/SetRules";
 import { EffectuatedSetRules } from "../../protocol/EffectuatedSetRules";
-import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { Api } from "../Api";
 import { Protocol } from "../../protocol/Protocol";
 import { DirectBlockchainApi } from "../directblockchain/DirectBlockchainApi";

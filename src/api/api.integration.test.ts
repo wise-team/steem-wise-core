@@ -11,7 +11,7 @@ import { Api } from "../api/Api";
 import { DirectBlockchainApi } from "../api/directblockchain/DirectBlockchainApi";
 import { WiseSQLApi } from "../api/sql/WiseSQLApi";
 import { FakeApi } from "../api/FakeApi";
-import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { SetRules } from "../protocol/SetRules";
 import { WeightRule } from "../rules/WeightRule";
 import { Rule } from "../rules/Rule";

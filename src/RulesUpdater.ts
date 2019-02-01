@@ -1,16 +1,12 @@
-/* PROMISE_DEF */
-import * as BluebirdPromise from "bluebird";
-/* END_PROMISE_DEF */
 import * as _ from "lodash";
 import * as steem from "steem";
 
 import { Api } from "./api/Api";
-import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { SetRules } from "./protocol/SetRules";
 import { Protocol } from "./protocol/Protocol";
 import { WiseOperation } from "./protocol/WiseOperation";
 import { ProggressCallback } from "./wise";
-import { Util } from "./util/util";
 import { RulePrototyper } from "./rules/RulePrototyper";
 import { Ruleset } from "./protocol/Ruleset";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
@@ -18,17 +14,19 @@ import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 
 export class RulesUpdater {
     public static getUploadRulesetsForVoterOps(
-        protocol: Protocol, delegator: string, voter: string, rulesets_: Ruleset [],
-    ): steem.OperationWithDescriptor [] {
-        if (!voter || !voter.length)
-            throw new Error("Voter cannot be undefined or empty");
-        if (!rulesets_)
-            throw new Error("Rulesets cannot be undefined");
-        if (!Array.isArray(rulesets_))
-            throw new Error("Rulesets must be an array");
+        protocol: Protocol,
+        delegator: string,
+        voter: string,
+        rulesets_: Ruleset[]
+    ): steem.OperationWithDescriptor[] {
+        if (!voter || !voter.length) throw new Error("Voter cannot be undefined or empty");
+        if (!rulesets_) throw new Error("Rulesets cannot be undefined");
+        if (!Array.isArray(rulesets_)) throw new Error("Rulesets must be an array");
         if (rulesets_.filter(ruleset => !Ruleset.validateRuleset(ruleset)).length > 0)
-            throw new Error("Rulesets must contain valid rulesets. Invalid rulesets: "
-            + JSON.stringify(rulesets_.filter(ruleset => !Ruleset.validateRuleset(ruleset))));
+            throw new Error(
+                "Rulesets must contain valid rulesets. Invalid rulesets: " +
+                    JSON.stringify(rulesets_.filter(ruleset => !Ruleset.validateRuleset(ruleset)))
+            );
 
         /**
          * Prototype
@@ -43,7 +41,7 @@ export class RulesUpdater {
         const wiseOp: WiseOperation = {
             voter: voter,
             delegator: delegator,
-            command: { rulesets: rulesets } as SetRules
+            command: { rulesets: rulesets } as SetRules,
         };
         const steemOps: steem.OperationWithDescriptor[] = protocol.serializeToBlockchain(wiseOp);
         if (steemOps.length !== 1) throw new Error("SetRules should be a single blockchain operation");
@@ -52,10 +50,19 @@ export class RulesUpdater {
     }
 
     public static async uploadRulesetsForVoter(
-        api: Api, protocol: Protocol, delegator: string, voter: string, rulesets_: Ruleset [],
+        api: Api,
+        protocol: Protocol,
+        delegator: string,
+        voter: string,
+        rulesets_: Ruleset[],
         proggressCallback?: ProggressCallback
     ): Promise<SteemOperationNumber> {
-        const steemOps: steem.OperationWithDescriptor[] = RulesUpdater.getUploadRulesetsForVoterOps(protocol, delegator, voter, rulesets_);
+        const steemOps: steem.OperationWithDescriptor[] = RulesUpdater.getUploadRulesetsForVoterOps(
+            protocol,
+            delegator,
+            voter,
+            rulesets_
+        );
         if (!protocol.validateOperation(steemOps[0])) throw new Error("Operation object has invalid structure");
         if (proggressCallback) proggressCallback("Sending rules to blockchain...", 0.0);
 
@@ -64,13 +71,19 @@ export class RulesUpdater {
         return resultSon;
     }
 
-    public static async downloadAllRulesets(api: Api, delegator: string, moment: SteemOperationNumber = SteemOperationNumber.FUTURE): Promise<EffectuatedSetRules []> {
+    public static async downloadAllRulesets(
+        api: Api,
+        delegator: string,
+        moment: SteemOperationNumber = SteemOperationNumber.FUTURE
+    ): Promise<EffectuatedSetRules[]> {
         const currentRulesets = await api.loadRulesets({ delegator: delegator }, moment);
         if (currentRulesets.length == 0) return [];
 
-        const rulesByVoter: [string, EffectuatedSetRules []][] = _.toPairs(_.groupBy(currentRulesets, (r: EffectuatedSetRules) => r.voter));
+        const rulesByVoter: [string, EffectuatedSetRules[]][] = _.toPairs(
+            _.groupBy(currentRulesets, (r: EffectuatedSetRules) => r.voter)
+        );
 
-        const rules = rulesByVoter.map((votersRuleHistory: [string, EffectuatedSetRules []]) => {
+        const rules = rulesByVoter.map((votersRuleHistory: [string, EffectuatedSetRules[]]) => {
             return votersRuleHistory[1].reduce((newestRules: EffectuatedSetRules, testedRules: EffectuatedSetRules) => {
                 if (testedRules.moment.isGreaterThan(newestRules.moment)) return testedRules;
                 else return newestRules;
@@ -80,8 +93,12 @@ export class RulesUpdater {
         return _.filter(rules, rulesForSingleVoter => rulesForSingleVoter.rulesets.length > 0);
     }
 
-    public static async uploadAllRulesets(api: Api, protocol: Protocol, delegator: string,
-            newRules: SetRulesForVoter [], proggressCallback: ProggressCallback
+    public static async uploadAllRulesets(
+        api: Api,
+        protocol: Protocol,
+        delegator: string,
+        newRules: SetRulesForVoter[],
+        proggressCallback: ProggressCallback
     ): Promise<SteemOperationNumber | true> {
         /**
          * Validate input
@@ -97,39 +114,48 @@ export class RulesUpdater {
             if (!SetRulesForVoter.validateSetRulesForVoter(rulesetsForVoter))
                 throw new Error("Invalid ruleset: " + JSON.stringify(rulesetsForVoter));
 
-            rulesetsForVoter.rulesets.forEach(ruleset => ruleset.rules.forEach(
-                rule => {
+            rulesetsForVoter.rulesets.forEach(ruleset =>
+                ruleset.rules.forEach(rule => {
                     const prototypedRule = RulePrototyper.fromUnprototypedRule(rule);
                     try {
                         prototypedRule.validateRuleObject(rule);
+                    } catch (error) {
+                        throw new Error(
+                            "Invalid rule " +
+                                JSON.stringify(rule) +
+                                ' in ruleset "' +
+                                ruleset.name +
+                                '" for voter ' +
+                                rulesetsForVoter.voter +
+                                ": " +
+                                error.message
+                        );
                     }
-                    catch (error) {
-                        throw new Error("Invalid rule " + JSON.stringify(rule) + " in ruleset \"" + ruleset.name
-                                + "\" for voter " + rulesetsForVoter.voter + ": " + error.message);
-                    }
-                }
-            ));
+                })
+            );
         });
 
         /**
          * Download current rules
          */
-        const currentRules: EffectuatedSetRules [] = await RulesUpdater.downloadAllRulesets(api, delegator);
+        const currentRules: EffectuatedSetRules[] = await RulesUpdater.downloadAllRulesets(api, delegator);
 
         /**
          * Decide which rules to send
          */
         // decide what operations are needed to be sent
         // map all rules to format: { [voter: string]: { current: ? : updated: ? } }
-        type RulesByVoterValue = { current: SetRules|undefined, updated: SetRules|undefined }; // { voter: string, rulesets: SetRules, updated: boolean };
+        type RulesByVoterValue = { current: SetRules | undefined; updated: SetRules | undefined }; // { voter: string, rulesets: SetRules, updated: boolean };
         type RulesByVoter = { [voter: string]: RulesByVoterValue };
 
         // ensure each Rule has prototype in newRules
-        newRules.forEach((srfv: SetRulesForVoter) => srfv.rulesets.forEach(
-            rulesInRuleset => rulesInRuleset.rules.forEach(
-                (rule, index) => rulesInRuleset.rules[index] = RulePrototyper.fromUnprototypedRule(rule)
+        newRules.forEach((srfv: SetRulesForVoter) =>
+            srfv.rulesets.forEach(rulesInRuleset =>
+                rulesInRuleset.rules.forEach(
+                    (rule, index) => (rulesInRuleset.rules[index] = RulePrototyper.fromUnprototypedRule(rule))
+                )
             )
-        ));
+        );
 
         const rulesByVoter: RulesByVoter = _.concat(
             currentRules.map(r => [r.voter, { current: r, updated: undefined }] as [string, RulesByVoterValue]),
@@ -146,23 +172,38 @@ export class RulesUpdater {
         /**
          * Create a list of operations to perform
          */
-        const operationsToPerform: WiseOperation [] = [];
+        const operationsToPerform: WiseOperation[] = [];
         _.forOwn(rulesByVoter, (situation: RulesByVoterValue, voter: string, object: RulesByVoter) => {
-            if (situation.current && !situation.updated && situation.current.rulesets.length > 0 /* if length == 0 it means that the rules were voided */) {
+            if (
+                situation.current &&
+                !situation.updated &&
+                situation.current.rulesets.length > 0 /* if length == 0 it means that the rules were voided */
+            ) {
                 // delete rules
                 proggressCallback("Planning updating rules: rules for " + voter + " will be voided.", 0);
                 operationsToPerform.push(RulesUpdater.sendRules(voter, delegator, { rulesets: [] }));
-            }
-            else if (!situation.current && situation.updated) {
+            } else if (!situation.current && situation.updated) {
                 // create rules
-                proggressCallback("Planning updating rules: rules for " + voter + " will be created: " + JSON.stringify(situation.updated), 0);
+                proggressCallback(
+                    "Planning updating rules: rules for " +
+                        voter +
+                        " will be created: " +
+                        JSON.stringify(situation.updated),
+                    0
+                );
                 operationsToPerform.push(RulesUpdater.sendRules(voter, delegator, situation.updated));
-            }
-            else if (situation.current && situation.updated) {
+            } else if (situation.current && situation.updated) {
                 // compare rules, send if differ
                 if (RulesUpdater.diffRules(situation.current, situation.updated)) {
-                    proggressCallback("Planning updating rules: rules for " + voter + " will be updated: current="
-                            + JSON.stringify(situation.current) + ", new=" + JSON.stringify(situation.updated), 0);
+                    proggressCallback(
+                        "Planning updating rules: rules for " +
+                            voter +
+                            " will be updated: current=" +
+                            JSON.stringify(situation.current) +
+                            ", new=" +
+                            JSON.stringify(situation.updated),
+                        0
+                    );
                     operationsToPerform.push(RulesUpdater.sendRules(voter, delegator, situation.updated));
                 }
             }
@@ -177,12 +218,17 @@ export class RulesUpdater {
             for (let i = 0; i < operationsToPerform.length; i++) {
                 const op: WiseOperation = operationsToPerform[i];
                 const num = i + 1;
-                proggressCallback("Updating rules: Sending operation " + num + "/" + operationsToPerform.length + "...", (num / operationsToPerform.length));
+                proggressCallback(
+                    "Updating rules: Sending operation " + num + "/" + operationsToPerform.length + "...",
+                    num / operationsToPerform.length
+                );
 
                 moment = await api.sendToBlockchain(protocol.serializeToBlockchain(op));
 
-                proggressCallback("Updating rules: Sent operation " + num + "/" + operationsToPerform.length
-                    + " (" + moment + ")", ((num + 1) / operationsToPerform.length));
+                proggressCallback(
+                    "Updating rules: Sent operation " + num + "/" + operationsToPerform.length + " (" + moment + ")",
+                    (num + 1) / operationsToPerform.length
+                );
             }
 
             proggressCallback("Done updating rules.", 1);
@@ -194,7 +240,7 @@ export class RulesUpdater {
         return {
             voter: voter,
             delegator: delegator,
-            command: rulesCmd
+            command: rulesCmd,
         };
     }
 

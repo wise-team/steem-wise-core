@@ -1,4 +1,4 @@
-import { ChainableFilter } from "../../chainable/Chainable";
+import { ChainableFilter } from "steem-efficient-stream";
 import { WiseOperation } from "../../protocol/WiseOperation";
 
 export class VoterFilter extends ChainableFilter<WiseOperation, VoterFilter> {

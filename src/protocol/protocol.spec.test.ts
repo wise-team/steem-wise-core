@@ -2,7 +2,6 @@
 import { expect } from "chai";
 import "mocha";
 import * as steem from "steem";
-import { Log } from "../log/Log";
 
 // wise imports
 import { Wise, UnifiedSteemTransaction } from "../wise";

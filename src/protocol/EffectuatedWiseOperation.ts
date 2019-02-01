@@ -1,5 +1,5 @@
 import { WiseOperation } from "./WiseOperation";
-import { SteemOperationNumber } from "../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 
 export interface EffectuatedWiseOperation extends WiseOperation {
     moment: SteemOperationNumber;

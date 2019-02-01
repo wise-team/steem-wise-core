@@ -1,5 +1,4 @@
-import { ChainableFilter } from "../../chainable/Chainable";
-import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
+import { ChainableFilter, UnifiedSteemTransaction } from "steem-efficient-stream";
 
 export class DateLimiter extends ChainableFilter<UnifiedSteemTransaction, DateLimiter> {
     private until: Date;

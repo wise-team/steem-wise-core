@@ -4,7 +4,7 @@ import * as BluebirdPromise from "bluebird";
 import * as _ from "lodash";
 import * as steem from "steem";
 
-import { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 import { Protocol } from "./protocol/Protocol";
 import { V1Handler } from "./protocol/versions/v1/V1Handler";
 import { Api } from "./api/Api";
@@ -361,8 +361,8 @@ export { WiseSQLApi } from "./api/sql/WiseSQLApi";
 export { WiseSQLProtocol } from "./api/sql/WiseSQLProtocol";
 export { DisabledApi } from "./api/DisabledApi";
 
-export { UnifiedSteemTransaction } from "./blockchain/UnifiedSteemTransaction";
-export { SteemOperationNumber } from "./blockchain/SteemOperationNumber";
+export { UnifiedSteemTransaction } from "steem-efficient-stream";
+export { SteemOperationNumber } from "steem-efficient-stream";
 
 export { Protocol } from "./protocol/Protocol";
 export { ConfirmVote } from "./protocol/ConfirmVote";
