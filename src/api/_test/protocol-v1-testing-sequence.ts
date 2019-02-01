@@ -1,5 +1,5 @@
 import { smartvotes_ruleset, smartvotes_voteorder } from "../../protocol/versions/v1/smartvotes.schema";
-import { SteemOperationNumber } from "../../blockchain/SteemOperationNumber";
+import { SteemOperationNumber } from "steem-efficient-stream";
 
 /**
  * These are rulesets used for synchronization unit tests. They are uploaded to @steemprojects2
