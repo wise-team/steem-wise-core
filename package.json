@@ -6,7 +6,7 @@
   "types": "dist/wise.d.ts",
   "directories": {},
   "engines": {
-    "node": ">=10.12"
+    "node": ">=10.15"
   },
   "dependencies": {
     "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-3.1.2.tgz",
