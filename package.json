@@ -9,15 +9,14 @@
     "node": ">=10.15"
   },
   "dependencies": {
-    "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-latest.tgz",
     "ajv": "^6.5.4",
     "axios": "^0.18.0",
     "bluebird": "^3.5.2",
     "lodash": "^4.17.11",
     "ow": "^0.10.0",
     "steem": "^0.7.2",
-    "ts-custom-error": "^2.2.2",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-3.1.2.tgz"
   },
   "devDependencies": {
     "@commitlint/cli": "^7.2.1",
