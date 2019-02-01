@@ -1,8 +1,14 @@
 dist: xenial
 language: node_js
-node_js:
-    #§ '- "' + data.config.npm.node.version + '"'
-    - "10.15"
+# node_js: # node version is specified in .nvmrc
+
+install:
+  - npm ci
+
+script:
+  - npm run build
+  - npm run test
+  - npm run verify
 
 jobs:
     include:
