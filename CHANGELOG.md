@@ -1,5 +1,23 @@
-<a name="3.1.2-beta.1"></a>
-## [3.1.2-beta.1](https://github.com/wise-team/steem-wise-core/compare/v3.1.0-rc.1...v3.1.2-beta.1) (2019-01-16)
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/wise-team/steem-wise-core/compare/v3.1.1...v4.0.0) (2019-02-01)
+
+
+### Features
+
+* 🎸 remove AbstractLog export BREAKING CHANGE ([0bb62e5](https://github.com/wise-team/steem-wise-core/commit/0bb62e5))
+* update nodeJS to v10.15 ([d720b31](https://github.com/wise-team/steem-wise-core/commit/d720b31))
+
+
+### BREAKING CHANGES
+
+* remove AbstractLog. Abstract log is replaced with AbstractUniverseLog
+from "universe-log" package
+
+
+
+<a name="3.1.1"></a>
+## [3.1.1](https://github.com/wise-team/steem-wise-core/compare/v3.1.0...v3.1.1) (2019-01-31)
+
 
 ### Bug Fixes
 

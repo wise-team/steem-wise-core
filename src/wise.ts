@@ -19,7 +19,6 @@ import { Log } from "./log/Log";
 import { Ruleset } from "./protocol/Ruleset";
 import { SetRulesForVoter } from "./protocol/SetRulesForVoter";
 import { EffectuatedSetRules } from "./protocol/EffectuatedSetRules";
-import { AbstractLog } from "./log/AbstractLog";
 import { SingleDaemon } from "./synchronizer/SingleDaemon";
 
 /**
@@ -326,7 +325,7 @@ export class Wise {
     }
 
     public static getVersion(): string {
-        return /*§ §*/ "3.1.1" /*§ ' "' + data.config.wise.version + '" ' §.*/;
+        return "4.0.0";
     }
 
     /**
@@ -335,7 +334,7 @@ export class Wise {
      * typescript. The scope is limited to a single node project. If we want to configure wise core log in another project
      * we have to get the singleton instance from inside of steem-wise-core package.
      */
-    public static getLog(): AbstractLog {
+    public static getLog(): Log {
         return Log.log();
     }
 }
@@ -402,8 +401,6 @@ export { SingleDaemon } from "./synchronizer/SingleDaemon";
 export { LegacySynchronizer } from "./synchronizer/LegacySynchronizer";
 export { UniversalSynchronizer } from "./synchronizer/UniversalSynchronizer";
 export { SynchronizerCallbacks } from "./synchronizer/SynchronizerCallbacks";
-
-export { AbstractLog } from "./log/AbstractLog";
 
 export * from "./protocol/versions/v2/wise-schema";
 

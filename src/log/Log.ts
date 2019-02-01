@@ -1,6 +1,6 @@
-import { AbstractLog } from "./AbstractLog";
+import { AbstractUniverseLog } from "universe-log";
 
-export class Log extends AbstractLog {
+export class Log extends AbstractUniverseLog {
     private static INSTANCE: Log;
 
     private constructor() {
@@ -12,11 +12,6 @@ export class Log extends AbstractLog {
     }
 
     public static log(): Log {
-        /**
-         * It is very important not to call constructon in the field scope. Calling it with the following if
-         * is the only way in typescript to achive true singleton scoped to a single project (steem-wise-core
-         * package here.)
-         */
         if (!Log.INSTANCE) {
             Log.INSTANCE = new Log();
             Log.INSTANCE.init();
