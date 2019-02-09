@@ -3,27 +3,31 @@ import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
 import * as steem from "steem";
+import ow from "ow";
 
 import { Log } from "../../log/Log";
 
-import { ChainableSupplier } from "../../chainable/Chainable";
-import { UnifiedSteemTransaction } from "../../blockchain/UnifiedSteemTransaction";
+import { ChainableSupplier, SteemAdapter, UnifiedSteemTransaction } from "steem-efficient-stream";
 
 export class SteemJsAccountHistorySupplier extends ChainableSupplier<
     UnifiedSteemTransaction,
     SteemJsAccountHistorySupplier
 > {
-    private steem: steem.api.Steem;
+    private steemAdapter: SteemAdapter;
     private username: string;
-    private batchSize: number = 1000;
+    private batchSize: number;
     private onFinishCallback: ((error: Error | undefined) => void) = () => {};
 
-    constructor(steem: steem.api.Steem, username: string) {
+    constructor(steemAdapter: SteemAdapter, username: string, batchSize = 1000) {
         super();
-        this.steem = steem;
-        this.username = username;
 
-        if (!this.steem) throw new Error("Supplied steem object is null");
+        ow(steemAdapter, "steemAdapter", ow.object.is(o => SteemAdapter.isSteemAdapter(o)));
+        ow(username, "username", ow.string.minLength(3));
+        ow(batchSize, "batchSize", ow.number.integer.finite);
+
+        this.steemAdapter = steemAdapter;
+        this.username = username;
+        this.batchSize = batchSize;
     }
 
     protected me(): SteemJsAccountHistorySupplier {
@@ -56,8 +60,10 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<
             "STEEMJSACCOUNTHISTORYSUPPLIER_GET_ACCOUNT_HISTORY_ASYNC=" +
                 JSON.stringify({ username: this.username, from: from, batchLimit: batchLimit })
         );
-        this.steem.getAccountHistoryAsync(this.username, from, batchLimit).then(
+        this.steemAdapter.getAccountHistoryAsync(this.username, from, batchLimit).then(
             (result: steem.AccountHistory.Operation[]) => {
+                console.log("----------------------------=======");
+                console.log(`getAccountHistoryAsync(${this.username}, ${from}, ${batchLimit}) => [${result.length}]`);
                 if (result.length == 0) {
                     this.onFinishCallback(undefined);
                 } else {
@@ -98,6 +104,7 @@ export class SteemJsAccountHistorySupplier extends ChainableSupplier<
         if (ops[ops.length - 1][1].op[0] === "custom_json") {
             const lastOp = ops.pop();
             this.previousBatchLeftoverCustomJson = lastOp;
+            console.log(">>> leftover: ", this.previousBatchLeftoverCustomJson);
         }
 
         const opsGroupedByTransactionNum: { [key: number]: steem.AccountHistory.Operation[] } = _.groupBy(
