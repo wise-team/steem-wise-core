@@ -20,8 +20,6 @@ import { NotFoundException } from "../util/NotFoundException";
 
 /* PREPARE TESTING DATASETS */
 import * as v1TestingSequence from "./_test/protocol-v1-testing-sequence";
-import { FakeWiseFactory } from "../_test/util/FakeWiseFactory";
-import { VoteOperation } from "../blockchain/VoteOperation";
 import { ConfirmVoteBoundWithVote } from "../protocol/ConfirmVoteBoundWithVote";
 import { ConfirmVote } from "../protocol/ConfirmVote";
 
@@ -30,13 +28,15 @@ const username = "guest123";
 const postingWif = "5JRaypasxMx1L97ZUX7YuC5Psb5EAbF821kkAGtBj7xCJFQcbLg";
 const wiseSqlEndpoint = /*§ §*/ "https://sql.wise.vote/" /*§ ' "' + d(data.config.sql.url.production) + '" ' §.*/;
 
-describe("test/integration/api.spec.ts", function() {
+describe("api.integration.test.ts", function() {
     this.timeout(60000);
     const DEFAULT_STEEM_API_ENDPOINT_URL =
             /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
 
     const apis: Api[] = [
-        new DirectBlockchainApi(Wise.constructDefaultProtocol(), postingWif, { url: DEFAULT_STEEM_API_ENDPOINT_URL }),
+        new DirectBlockchainApi(Wise.constructDefaultProtocol(), postingWif, {
+            apiUrl: DEFAULT_STEEM_API_ENDPOINT_URL,
+        }),
         /*FakeWiseFactory.buildFakeApi(),
         new WiseSQLApi(
             wiseSqlEndpoint,

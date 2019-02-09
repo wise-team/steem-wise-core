@@ -2,7 +2,6 @@
 import * as BluebirdPromise from "bluebird";
 /* END_PROMISE_DEF */
 import * as _ from "lodash";
-import * as steem from "steem";
 
 import { Log } from "../log/Log";
 
@@ -13,10 +12,6 @@ import { SetRules } from "../protocol/SetRules";
 import { EffectuatedWiseOperation } from "../protocol/EffectuatedWiseOperation";
 import { ConfirmVote } from "../protocol/ConfirmVote";
 import { SendVoteorder } from "../protocol/SendVoteorder";
-import { Validator } from "../validation/Validator";
-import { ValidationException } from "../validation/ValidationException";
-import { WiseOperation } from "../protocol/WiseOperation";
-import { EffectuatedSetRules } from "../protocol/EffectuatedSetRules";
 import { SynchronizerCallbacks } from "./SynchronizerCallbacks";
 
 export class UniversalSynchronizer {
@@ -123,8 +118,7 @@ export class UniversalSynchronizer {
             try {
                 await fn();
             } catch (error) {
-                Log.log().error("Unhandled error in UniversalSynchronizer callback: " + error);
-                Log.log().exception(Log.level.error, error);
+                Log.log().error("Unhandled error in UniversalSynchronizer callback: ", error);
             }
         })();
     }

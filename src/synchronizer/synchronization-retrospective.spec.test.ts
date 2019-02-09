@@ -57,7 +57,7 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
                             } else if (event.type === SingleDaemon.EventType.VoteorderRejected) {
                                 confirmations.push({ voteorderTx: event.voteorderTxId, accepted: false });
                             } else if (event.type === SingleDaemon.EventType.EndBlockProcessing) {
-                                if (event.blockNum % 5000 === 0) Log.log().json(Log.level.info, event);
+                                if (event.blockNum % 5000 === 0) Log.log().info(event);
                                 if (event.blockNum === toBlock) {
                                     Log.log().info("Last block. Stopping synchronization");
                                     synchronizer.stop();
@@ -73,7 +73,7 @@ describe("test/unit/synchronization-retrospective.spec.ts", () => {
                                 event.type !== SingleDaemon.EventType.StartBlockProcessing &&
                                 event.type !== SingleDaemon.EventType.EndBlockProcessing
                             )
-                                Log.log().json(Log.level.info, event);
+                                Log.log().info(event);
 
                             if (error) {
                                 reject(error);

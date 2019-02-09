@@ -142,10 +142,10 @@ export class LegacySynchronizer {
     }
 
     private processVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
-        Log.log().cheapDebug(() => "SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op));
+        Log.log().debugGen(() => ["SYNCHRONIZER_START_PROCESSING_VOTEORDER= " + JSON.stringify(op)]);
 
         const rules = this.determineRules(op, cmd);
-        Log.log().cheapDebug(() => "SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules));
+        Log.log().debugGen(() => ["SYNCHRONIZER_DETERMINED_RULES=" + JSON.stringify(rules)]);
 
         if (!rules) {
             Log.log().info(
@@ -196,7 +196,7 @@ export class LegacySynchronizer {
     }
 
     private voteAndConfirm(op: EffectuatedWiseOperation, cmd: SendVoteorder): Promise<void> {
-        Log.log().cheapDebug(() => "SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({ op: op, voteorder: cmd }));
+        Log.log().debugGen(() => ["SYNCHRONIZER_ACCEPT_VOTEORDER= " + JSON.stringify({ op: op, voteorder: cmd })]);
 
         const opsToSend: steem.OperationWithDescriptor[] = [];
 
@@ -241,9 +241,9 @@ export class LegacySynchronizer {
     }
 
     private rejectVoteorder(op: EffectuatedWiseOperation, cmd: SendVoteorder, msg: string): Promise<void> {
-        Log.log().cheapDebug(
-            () => "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({ op: op, voteorder: cmd, msg: msg })
-        );
+        Log.log().debugGen(() => [
+            "SYNCHRONIZER_REJECT_VOTEORDER= " + JSON.stringify({ op: op, voteorder: cmd, msg: msg }),
+        ]);
 
         const confirmCmd: ConfirmVote = {
             voteorderTxId: op.transaction_id,
@@ -280,7 +280,7 @@ export class LegacySynchronizer {
     private async notify(error: Error | undefined, event: Synchronizer.Event) {
         (async () => this.notifier(error, event))();
         if (error) Log.log().error(JSON.stringify(error));
-        Log.log().cheapInfo(() => "SYNCHRONIZER_EVENT=" + JSON.stringify(event));
+        Log.log().infoGen(() => ["SYNCHRONIZER_EVENT=" + JSON.stringify(event)]);
     }
 
     private continueIfRunning(fn: () => void) {

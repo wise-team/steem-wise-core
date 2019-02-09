@@ -21,7 +21,14 @@ export class ValidationContext {
         this.voter = voter;
         this.voteorder = voteorder;
 
-        Log.log().cheapDebug(() => "ValidationContext.construct(delegator=" + delegator + ", voter=" + voter + ", voteorder=" + JSON.stringify(voteorder, undefined, 2));
+        Log.log().debugGen(() => [
+            "ValidationContext.construct(delegator=" +
+                delegator +
+                ", voter=" +
+                voter +
+                ", voteorder=" +
+                JSON.stringify(voteorder, undefined, 2),
+        ]);
     }
 
     public getPost(): Promise<steem.SteemPost> {
@@ -57,7 +64,7 @@ export class ValidationContext {
      * @param username - steem username
      * @param until - the oldest date to search for operations.
      */
-    public getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
+    public getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation[]> {
         return this.api.getWiseOperations(username, until);
     }
 
@@ -69,7 +76,7 @@ export class ValidationContext {
      *      (startFrom=0 will return the newest entry)
      * @param limit - limit the number of returned entries (maximal limit is 500).
      */
-    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []> {
+    public getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry[]> {
         return this.api.getBlogEntries(username, startFrom, limit);
     }
 }

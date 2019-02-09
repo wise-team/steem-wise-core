@@ -6,11 +6,20 @@ import * as _ from "lodash";
 
 import { SetRules } from "../../protocol/SetRules";
 import { EffectuatedSetRules } from "../../protocol/EffectuatedSetRules";
-import { SteemOperationNumber, UnifiedSteemTransaction, SimpleTaker, Chainable, OperationNumberFilter, ChainableLimiter } from "steem-efficient-stream";
+import {
+    SteemOperationNumber,
+    UnifiedSteemTransaction,
+    SimpleTaker,
+    Chainable,
+    OperationNumberFilter,
+    ChainableLimiter,
+    SteemAdapter,
+    SteemAdapterFactory,
+} from "steem-efficient-stream";
 import { Api } from "../Api";
 import { Protocol } from "../../protocol/Protocol";
 import { V1Handler } from "../../protocol/versions/v1/V1Handler";
-import { SteemJsAccountHistorySupplier } from "./SteemJsAccountHistorySupplier";
+import { AccountHistorySupplierFactory } from "steem-efficient-stream";
 import { WiseOperationTypeFilter } from "../../chainable/filters/WiseOperationTypeFilter";
 import { EffectuatedWiseOperation } from "../../protocol/EffectuatedWiseOperation";
 import { ToWiseOperationTransformer } from "../../chainable/transformers/ToWiseOperationTransformer";
@@ -20,30 +29,36 @@ import { DateLimiter } from "./DateLimiter";
 import { Log } from "../../log/Log";
 
 export class DirectBlockchainApi extends Api {
-    private static DEFAULT_STEEM_API_ENDPOINT_URL =
-        /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
+    private steemAdapter: SteemAdapter;
+    private options: DirectBlockchainApi.Options;
     private steem: steemJs.api.Steem;
     private steemJsOptions: steemJs.SteemJsOptions;
     private postingWif: string | undefined;
     private sendEnabled: boolean = true;
     private protocol: Protocol;
 
-    public constructor(protocol: Protocol, postingWif?: string, steemOptions?: steemJs.SteemJsOptions) {
+    public constructor(
+        protocol: Protocol,
+        postingWif?: string,
+        options: DirectBlockchainApi.Options = DirectBlockchainApi.DEFAULT_OPTIONS
+    ) {
         super();
 
         this.protocol = protocol;
         if (postingWif) this.postingWif = postingWif;
 
-        if (steemOptions) {
-            this.steemJsOptions = steemOptions;
-        } else {
-            this.steemJsOptions = {
-                url: DirectBlockchainApi.DEFAULT_STEEM_API_ENDPOINT_URL,
-                logger: (...args: any[]) => {
-                    Log.log().efficient(Log.level.silly, () => JSON.stringify(args));
-                },
-            };
-        }
+        this.options = options;
+
+        this.steemAdapter = SteemAdapterFactory.withOptions({
+            url: options.apiUrl,
+        });
+
+        this.steemJsOptions = {
+            url: options.apiUrl,
+            logger: (...args: any[]) => {
+                Log.log().sillyGen(() => [JSON.stringify(args)]);
+            },
+        };
         this.steem = new steemJs.api.Steem(this.steemJsOptions);
     }
 
@@ -52,15 +67,15 @@ export class DirectBlockchainApi extends Api {
     }
 
     public setSendEnabled(enabled: boolean) {
-        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_SET_SEND_ENABLED=" + enabled);
+        Log.log().debugGen(() => ["DIRECT_BLOCKCHAIN_SET_SEND_ENABLED=" + enabled]);
 
         this.sendEnabled = enabled;
     }
 
     public async loadPost(author: string, permlink: string): Promise<steemJs.SteemPost> {
-        Log.log().cheapDebug(
-            () => "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink })
-        );
+        Log.log().debugGen(() => [
+            "DIRECT_BLOCKCHAIN_API_LOAD_POST=" + JSON.stringify({ author: author, permlink: permlink }),
+        ]);
 
         const result: any = await this.steem.getContentAsync(author, permlink);
         if (result.author.length === 0)
@@ -72,9 +87,9 @@ export class DirectBlockchainApi extends Api {
         forWhom: { delegator?: string; voter?: string },
         atMoment: SteemOperationNumber
     ): Promise<EffectuatedSetRules[]> {
-        Log.log().cheapDebug(
-            () => "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS=" + JSON.stringify({ forWhom: forWhom, atMoment: atMoment })
-        );
+        Log.log().debugGen(() => [
+            "DIRECT_BLOCKCHAIN_API_LOAD_RULESETS=" + JSON.stringify({ forWhom: forWhom, atMoment: atMoment }),
+        ]);
 
         if (!forWhom.delegator)
             throw new Error(
@@ -83,39 +98,43 @@ export class DirectBlockchainApi extends Api {
             );
 
         const loadedRulesets: EffectuatedSetRules[] = [];
-        const supplier = new SteemJsAccountHistorySupplier(this.steem, forWhom.delegator).branch(historySupplier => {
-            let chain: Chainable<any, any, any> = historySupplier
-                .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
-                // this is limiter (restricts lookup to the period of wise presence):
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter())
-                .chain(new ToWiseOperationTransformer(this.protocol));
+        const supplier = new AccountHistorySupplierFactory(this.steemAdapter, forWhom.delegator)
+            .buildChainableSupplier()
+            .branch(historySupplier => {
+                let chain: Chainable<any, any, any> = historySupplier
+                    .chain(new OperationNumberFilter("<_solveOpInTrxBug", atMoment))
+                    // this is limiter (restricts lookup to the period of wise presence):
+                    .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter())
+                    .chain(new ToWiseOperationTransformer(this.protocol));
 
-            if (forWhom.voter) chain = chain.chain(new VoterFilter(forWhom.voter));
+                if (forWhom.voter) chain = chain.chain(new VoterFilter(forWhom.voter));
 
-            chain = chain.chain(
-                new WiseOperationTypeFilter<EffectuatedWiseOperation>(WiseOperationTypeFilter.OperationType.SetRules)
-            );
-
-            if (forWhom.voter) chain = chain.chain(new ChainableLimiter(1));
-
-            chain
-                .chain(
-                    new SimpleTaker(
-                        (item: EffectuatedWiseOperation): boolean => {
-                            const setRules = item.command as SetRules;
-                            const esr: EffectuatedSetRules = {
-                                rulesets: setRules.rulesets,
-                                voter: item.voter,
-                                delegator: item.delegator,
-                                moment: item.moment,
-                            };
-                            loadedRulesets.push(esr);
-                            return true;
-                        }
+                chain = chain.chain(
+                    new WiseOperationTypeFilter<EffectuatedWiseOperation>(
+                        WiseOperationTypeFilter.OperationType.SetRules
                     )
-                )
-                .catch((error: Error) => false); // if we return false on error, the Promise will be rejected
-        });
+                );
+
+                if (forWhom.voter) chain = chain.chain(new ChainableLimiter(1));
+
+                chain
+                    .chain(
+                        new SimpleTaker(
+                            (item: EffectuatedWiseOperation): boolean => {
+                                const setRules = item.command as SetRules;
+                                const esr: EffectuatedSetRules = {
+                                    rulesets: setRules.rulesets,
+                                    voter: item.voter,
+                                    delegator: item.delegator,
+                                    moment: item.moment,
+                                };
+                                loadedRulesets.push(esr);
+                                return true;
+                            }
+                        )
+                    )
+                    .catch((error: Error) => false); // if we return false on error, the Promise will be rejected
+            });
 
         await supplier.start();
 
@@ -130,13 +149,13 @@ export class DirectBlockchainApi extends Api {
 
     public async sendToBlockchain(operations: steemJs.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
         if (!this.sendEnabled) {
-            Log.log().cheapDebug(
-                () => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_DISABLED=" + JSON.stringify(operations)
-            );
+            Log.log().debugGen(() => [
+                "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_DISABLED=" + JSON.stringify(operations),
+            ]);
             return SteemOperationNumber.NEVER;
         }
 
-        Log.log().cheapDebug(() => "DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations));
+        Log.log().debugGen(() => ["DIRECT_BLOCKCHAIN_API_SEND_TO_BLOCKCHAIN_PENDING=" + JSON.stringify(operations)]);
 
         try {
             (steemJs.api as any).setOptions(this.steemJsOptions);
@@ -153,34 +172,36 @@ export class DirectBlockchainApi extends Api {
     }
 
     public async getLastConfirmationMoment(delegator: string): Promise<SteemOperationNumber> {
-        Log.log().cheapDebug(
-            () => "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator })
-        );
+        Log.log().debugGen(() => [
+            "DIRECT_BLOCKCHAIN_API_GET_LAST_CONFIRMATION_MOMENT=" + JSON.stringify({ delegator: delegator }),
+        ]);
 
         if (typeof delegator === "undefined" || delegator.length == 0) throw new Error("Delegator must not be empty");
 
         let result: SteemOperationNumber = V1Handler.INTRODUCTION_OF_WISE_MOMENT;
 
-        const supplier = new SteemJsAccountHistorySupplier(this.steem, delegator).branch(historySupplier => {
-            historySupplier
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
-                .chain(new ToWiseOperationTransformer(this.protocol))
-                .chain(
-                    new WiseOperationTypeFilter<EffectuatedWiseOperation>(
-                        WiseOperationTypeFilter.OperationType.ConfirmVote
+        const supplier = new AccountHistorySupplierFactory(this.steemAdapter, delegator)
+            .buildChainableSupplier()
+            .branch(historySupplier => {
+                historySupplier
+                    .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
+                    .chain(new ToWiseOperationTransformer(this.protocol))
+                    .chain(
+                        new WiseOperationTypeFilter<EffectuatedWiseOperation>(
+                            WiseOperationTypeFilter.OperationType.ConfirmVote
+                        )
                     )
-                )
-                .chain(new ChainableLimiter(1))
-                .chain(
-                    new SimpleTaker(
-                        (item: EffectuatedWiseOperation): boolean => {
-                            result = item.moment;
-                            return false;
-                        }
+                    .chain(new ChainableLimiter(1))
+                    .chain(
+                        new SimpleTaker(
+                            (item: EffectuatedWiseOperation): boolean => {
+                                result = item.moment;
+                                return false;
+                            }
+                        )
                     )
-                )
-                .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
-        });
+                    .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
+            });
         await supplier.start();
         return result;
     }
@@ -190,21 +211,23 @@ export class DirectBlockchainApi extends Api {
 
         const result: EffectuatedWiseOperation[] = [];
 
-        const supplier = new SteemJsAccountHistorySupplier(this.steem, account).branch(historySupplier => {
-            historySupplier
-                .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
-                .chain(new DateLimiter(until))
-                .chain(new ToWiseOperationTransformer(this.protocol))
-                .chain(
-                    new SimpleTaker(
-                        (item: EffectuatedWiseOperation): boolean => {
-                            result.push(item);
-                            return true;
-                        }
+        const supplier = new AccountHistorySupplierFactory(this.steemAdapter, account)
+            .buildChainableSupplier()
+            .branch(historySupplier => {
+                historySupplier
+                    .chain(new OperationNumberFilter(">", V1Handler.INTRODUCTION_OF_WISE_MOMENT).makeLimiter()) // this is limiter (restricts lookup to the period of wise presence)
+                    .chain(new DateLimiter(until))
+                    .chain(new ToWiseOperationTransformer(this.protocol))
+                    .chain(
+                        new SimpleTaker(
+                            (item: EffectuatedWiseOperation): boolean => {
+                                result.push(item);
+                                return true;
+                            }
+                        )
                     )
-                )
-                .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
-        });
+                    .catch((error: Error) => false); // if we do not continue on error the promise will be rejected with this error
+            });
         await supplier.start();
 
         return result;
@@ -310,4 +333,14 @@ export class DirectBlockchainApi extends Api {
     public getBlogEntries(username: string, startFrom: number, limit: number): Promise<steemJs.BlogEntry[]> {
         return this.steem.getBlogEntriesAsync(username, startFrom, limit);
     }
+}
+
+export namespace DirectBlockchainApi {
+    export interface Options {
+        apiUrl: string;
+    }
+
+    export const DEFAULT_OPTIONS: Options = {
+        apiUrl: /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/,
+    };
 }

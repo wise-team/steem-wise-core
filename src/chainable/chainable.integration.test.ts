@@ -8,10 +8,9 @@ import * as steemJs from "steem";
 import { Log } from "../log/Log";
 
 // wise imports
-import { SimpleTaker } from "steem-efficient-stream";
+import { SimpleTaker, SteemAdapterFactory, AccountHistorySupplierFactory } from "steem-efficient-stream";
 import { SteemOperationNumber, UnifiedSteemTransaction } from "steem-efficient-stream";
 import { Wise } from "../wise";
-import { SteemJsAccountHistorySupplier } from "../api/directblockchain/SteemJsAccountHistorySupplier";
 import { OperationNumberFilter } from "steem-efficient-stream";
 import { ToWiseOperationTransformer } from "../chainable/transformers/ToWiseOperationTransformer";
 import { DisabledApi } from "../api/DisabledApi";
@@ -21,6 +20,7 @@ describe("test/integration/chainable.spec.ts", () => {
     const DEFAULT_STEEM_API_ENDPOINT_URL =
             /*§ §*/ "https://anyx.io" /*§ ' "' + data.config.steem.defaultApiUrl + '" ' §.*/;
     const steem = new steemJs.api.Steem({ url: DEFAULT_STEEM_API_ENDPOINT_URL });
+    const steemAdapter = SteemAdapterFactory.withOptions({ url: DEFAULT_STEEM_API_ENDPOINT_URL });
     describe("SteemJsAccountHistorySupplier", () => {
         describe("SteemJsAccountHistorySupplier [username = steemprojects1]", () => {
             const wise = new Wise("steemprojects1", new DisabledApi());
@@ -30,7 +30,8 @@ describe("test/integration/chainable.spec.ts", () => {
 
             before(function() {
                 this.timeout(15000);
-                return new SteemJsAccountHistorySupplier(steem, "steemprojects1")
+                return new AccountHistorySupplierFactory(steemAdapter, "steemprojects1")
+                    .buildChainableSupplier()
                     .branch(historySupplier => {
                         historySupplier
                             .chain(
@@ -71,7 +72,8 @@ describe("test/integration/chainable.spec.ts", () => {
 
             it("Loads both real and virtual operations", function() {
                 this.timeout(25000);
-                return new SteemJsAccountHistorySupplier(steem, "guest123")
+                return new AccountHistorySupplierFactory(steemAdapter, "guest123")
+                    .buildChainableSupplier()
                     .branch(historySupplier => {
                         historySupplier
                             .chain(
@@ -120,7 +122,8 @@ describe("test/integration/chainable.spec.ts", () => {
 
             it("Loads operations in correct order: from the newest to the oldest", function() {
                 this.timeout(25000);
-                return new SteemJsAccountHistorySupplier(steem, "guest123")
+                return new AccountHistorySupplierFactory(steemAdapter, "guest123")
+                    .buildChainableSupplier()
                     .branch(historySupplier => {
                         historySupplier
                             .chain(new OperationNumberFilter("<", new SteemOperationNumber(22202938, 14, 1))) // ensure no one will be able to manipulate test results by voting
@@ -143,7 +146,7 @@ describe("test/integration/chainable.spec.ts", () => {
                                                                 ", sholudReceive: " +
                                                                 randomVoteOperationsInDescendingTimeOrder[0]
                                                         );
-                                                        Log.log().exception(Log.level.error, error);
+                                                        Log.log().error(error);
                                                         throw error;
                                                         continueLoading = false;
                                                     } else {
@@ -177,7 +180,8 @@ describe("test/integration/chainable.spec.ts", () => {
     describe("OperationNumberFilter", () => {
         it("returns only operations with number < (block=22202938, tx=14)", function() {
             this.timeout(35000);
-            return new SteemJsAccountHistorySupplier(steem, "guest123")
+            return new AccountHistorySupplierFactory(steemAdapter, "guest123")
+                .buildChainableSupplier()
                 .branch(historySupplier => {
                     historySupplier
                         .chain(

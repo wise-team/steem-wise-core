@@ -1,22 +1,25 @@
 import { AbstractUniverseLog } from "universe-log";
 
 export class Log extends AbstractUniverseLog {
-    private static INSTANCE: Log;
+    public static log(): Log {
+        return Log.INSTANCE;
+    }
+    private static INSTANCE: Log = new Log();
 
     private constructor() {
-        super("steem-wise-core");
+        super({
+            levelEnvs: ["WISE_CORE_LOG_LEVEL", "WISE_LOG_LEVEL"],
+            metadata: {
+                library: "steem-wise-core",
+            },
+        });
+    }
+
+    public initialize() {
+        super.init();
     }
 
     public init() {
-        super.init([process.env.WISE_CORE_LOG_LEVEL, process.env.WISE_LOG_LEVEL, "info"]);
-    }
-
-    public static log(): Log {
-        if (!Log.INSTANCE) {
-            Log.INSTANCE = new Log();
-            Log.INSTANCE.init();
-        }
-
-        return Log.INSTANCE;
+        throw new Error("Instead of #init() please call #initialize(debug, verbose) which indirectly overrides init");
     }
 }

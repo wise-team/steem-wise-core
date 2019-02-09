@@ -17,18 +17,25 @@ import { ConfirmVote } from "../protocol/ConfirmVote";
 
 export class FakeApi extends Api {
     private protocol: Protocol;
-    private posts: steem.SteemPost [];
-    private transactions: UnifiedSteemTransaction [];
+    private posts: steem.SteemPost[];
+    private transactions: UnifiedSteemTransaction[];
     private dynamicGlobalProperties: steem.DynamicGlobalProperties;
-    private accounts: steem.AccountInfo [];
-    private blogEntries: steem.BlogEntry [];
+    private accounts: steem.AccountInfo[];
+    private blogEntries: steem.BlogEntry[];
     private currentBlock = 0;
-    private pushedOperations: UnifiedSteemTransaction [] = [];
+    private pushedOperations: UnifiedSteemTransaction[] = [];
     private fakeTime: Date | undefined = undefined;
     private fakeDelayMs: number = 5;
-    private transactionsByBlock: { [key: string]: UnifiedSteemTransaction [] } = {};
+    private transactionsByBlock: { [key: string]: UnifiedSteemTransaction[] } = {};
 
-    public constructor(protocol: Protocol, posts: steem.SteemPost [], dynamicGlobalProperties: steem.DynamicGlobalProperties, accounts: steem.AccountInfo [], transactions: UnifiedSteemTransaction [], blogEntries: steem.BlogEntry []) {
+    public constructor(
+        protocol: Protocol,
+        posts: steem.SteemPost[],
+        dynamicGlobalProperties: steem.DynamicGlobalProperties,
+        accounts: steem.AccountInfo[],
+        transactions: UnifiedSteemTransaction[],
+        blogEntries: steem.BlogEntry[]
+    ) {
         super();
 
         this.protocol = protocol;
@@ -44,20 +51,28 @@ export class FakeApi extends Api {
             this.transactions.map(trx => trx.block_num).reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0),
             this.dynamicGlobalProperties.head_block_number
         );*/
-        this.currentBlock = this.transactions.map(trx => trx.block_num)
-            .reduce((maxBlockNum, thisBlockNum) => maxBlockNum = Math.max(maxBlockNum, thisBlockNum), 0) + 1;
+        this.currentBlock =
+            this.transactions
+                .map(trx => trx.block_num)
+                .reduce((maxBlockNum, thisBlockNum) => (maxBlockNum = Math.max(maxBlockNum, thisBlockNum)), 0) + 1;
         this.blogEntries = blogEntries;
 
         this.transactions.forEach(trx => {
             if (this.transactionsByBlock.hasOwnProperty(trx.block_num + "")) {
                 this.transactionsByBlock[trx.block_num + ""].push(trx);
-            }
-            else this.transactionsByBlock[trx.block_num + ""] = [trx];
+            } else this.transactionsByBlock[trx.block_num + ""] = [trx];
         });
     }
 
     public static fromDataset(protocol: Protocol, dataset: FakeApi.Dataset): FakeApi {
-        return new FakeApi(protocol, dataset.posts, dataset.dynamicGlobalProperties, dataset.accounts, dataset.transactions, dataset.blogEntries);
+        return new FakeApi(
+            protocol,
+            dataset.posts,
+            dataset.dynamicGlobalProperties,
+            dataset.accounts,
+            dataset.transactions,
+            dataset.blogEntries
+        );
     }
 
     public name(): string {
@@ -88,33 +103,38 @@ export class FakeApi extends Api {
         });
     }*/
 
-    public async sendToBlockchain(operationsInTransaction: steem.OperationWithDescriptor[]): Promise<SteemOperationNumber> {
+    public async sendToBlockchain(
+        operationsInTransaction: steem.OperationWithDescriptor[]
+    ): Promise<SteemOperationNumber> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
-            const blockNum = this.currentBlock + 1;
-            const steemTrx: UnifiedSteemTransaction = {
-                block_num: blockNum,
-                transaction_num: 0,
-                transaction_id: "",
-                timestamp: (this.fakeTime ? this.fakeTime : new Date()),
-                ops: _.reverse(operationsInTransaction)
-            };
-            this.transactions.push(steemTrx);
-            this.pushedOperations.push(steemTrx);
-            this.transactionsByBlock[blockNum + ""] = [steemTrx];
-            this.currentBlock = blockNum;
+        const blockNum = this.currentBlock + 1;
+        const steemTrx: UnifiedSteemTransaction = {
+            block_num: blockNum,
+            transaction_num: 0,
+            transaction_id: "",
+            timestamp: this.fakeTime ? this.fakeTime : new Date(),
+            ops: _.reverse(operationsInTransaction),
+        };
+        this.transactions.push(steemTrx);
+        this.pushedOperations.push(steemTrx);
+        this.transactionsByBlock[blockNum + ""] = [steemTrx];
+        this.currentBlock = blockNum;
 
-            Log.log().cheapDebug(() => "FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx));
-            return new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1);
+        Log.log().debugGen(() => ["FAKE_API_PUSHED_TRX=" + JSON.stringify(steemTrx)]);
+        return new SteemOperationNumber(blockNum, 0, operationsInTransaction.length - 1);
     }
 
-    public async loadRulesets(forWhom: { voter: string; delegator: string; }, at: SteemOperationNumber): Promise<EffectuatedSetRules []> {
+    public async loadRulesets(
+        forWhom: { voter: string; delegator: string },
+        at: SteemOperationNumber
+    ): Promise<EffectuatedSetRules[]> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
-        if (!forWhom.voter && ! forWhom.delegator)
+        if (!forWhom.voter && !forWhom.delegator)
             throw new Error("You have to specify either a voter, a delegator or both of them.");
 
-        const allRules: EffectuatedSetRules [] = [];
+        const allRules: EffectuatedSetRules[] = [];
         for (let i = 0; i < this.transactions.length; i++) {
             const trx = this.transactions[i];
             const handleResult = this.protocol.handleOrReject(trx);
@@ -123,16 +143,19 @@ export class FakeApi extends Api {
                     const effSo = handleResult[j];
                     if (SetRules.isSetRules(effSo.command)) {
                         if (
-                            ( forWhom.delegator &&  forWhom.voter && effSo.delegator === forWhom.delegator && effSo.voter === forWhom.voter) ||
-                            ( forWhom.delegator && !forWhom.voter && effSo.delegator === forWhom.delegator) ||
-                            (!forWhom.delegator &&  forWhom.voter && effSo.voter === forWhom.voter)
+                            (forWhom.delegator &&
+                                forWhom.voter &&
+                                effSo.delegator === forWhom.delegator &&
+                                effSo.voter === forWhom.voter) ||
+                            (forWhom.delegator && !forWhom.voter && effSo.delegator === forWhom.delegator) ||
+                            (!forWhom.delegator && forWhom.voter && effSo.voter === forWhom.voter)
                         ) {
                             if (at.isGreaterOrEqual(effSo.moment)) {
                                 const effSetRules: EffectuatedSetRules = {
                                     rulesets: effSo.command.rulesets,
                                     voter: effSo.voter,
                                     delegator: effSo.delegator,
-                                    moment: effSo.moment
+                                    moment: effSo.moment,
                                 };
                                 allRules.push(effSetRules);
                             }
@@ -142,10 +165,10 @@ export class FakeApi extends Api {
             }
         }
 
-        const allRulesGrouppedByVoter: { [voter: string]: EffectuatedSetRules [] } = _.groupBy(allRules, "voter");
+        const allRulesGrouppedByVoter: { [voter: string]: EffectuatedSetRules[] } = _.groupBy(allRules, "voter");
 
-        const out: EffectuatedSetRules [] = [];
-        _.forOwn(allRulesGrouppedByVoter, (esr: EffectuatedSetRules [], voter: string) => {
+        const out: EffectuatedSetRules[] = [];
+        _.forOwn(allRulesGrouppedByVoter, (esr: EffectuatedSetRules[], voter: string) => {
             out.push(esr.sort((a, b) => SteemOperationNumber.compare(a.moment, b.moment)).reverse()[0]);
         });
         return out;
@@ -156,9 +179,9 @@ export class FakeApi extends Api {
 
         return this.transactions
             .map((trx: UnifiedSteemTransaction) => this.protocol.handleOrReject(trx))
-            .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => (!!handledOrRejected))
-            .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
-            .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps))
+            .filter((handledOrRejected: EffectuatedWiseOperation[] | undefined) => !!handledOrRejected)
+            .map((handled: EffectuatedWiseOperation[] | undefined) => handled as EffectuatedWiseOperation[])
+            .reduce((allOps: EffectuatedWiseOperation[], nextOps: EffectuatedWiseOperation[]) => allOps.concat(nextOps))
             .filter((effSop: EffectuatedWiseOperation) => ConfirmVote.isConfirmVote(effSop.command))
             .map((effSop: EffectuatedWiseOperation) => effSop.moment)
             .reduce((newest: SteemOperationNumber, current: SteemOperationNumber) => {
@@ -167,27 +190,44 @@ export class FakeApi extends Api {
             }, V1Handler.INTRODUCTION_OF_WISE_MOMENT);
     }
 
-    public async getAllWiseOperationsInBlock(blockNum: number, delegatorFilter?: string): Promise<EffectuatedWiseOperation []> {
+    public async getAllWiseOperationsInBlock(
+        blockNum: number,
+        delegatorFilter?: string
+    ): Promise<EffectuatedWiseOperation[]> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
-        if (blockNum > this.currentBlock + 1) throw new Error("Cannot get block that has number (" + blockNum + ") greater than next block (" + (this.currentBlock + 1) + ") (blockNum must be <= this.currentBlockNum+1)");
+        if (blockNum > this.currentBlock + 1)
+            throw new Error(
+                "Cannot get block that has number (" +
+                    blockNum +
+                    ") greater than next block (" +
+                    (this.currentBlock + 1) +
+                    ") (blockNum must be <= this.currentBlockNum+1)"
+            );
 
         while (blockNum > this.currentBlock) await BluebirdPromise.delay(this.fakeDelayMs);
         await BluebirdPromise.delay(this.fakeDelayMs);
 
         if (this.transactionsByBlock.hasOwnProperty(blockNum + "")) {
             return this.transactionsByBlock[blockNum + ""]
-                .filter ((trx: UnifiedSteemTransaction) => trx.block_num === blockNum)
+                .filter((trx: UnifiedSteemTransaction) => trx.block_num === blockNum)
                 .map((trx: UnifiedSteemTransaction) => this.protocol.handleOrReject(trx))
-                .filter((handledOrRejected: EffectuatedWiseOperation [] | undefined) => !!handledOrRejected)
-                .map((handled: EffectuatedWiseOperation [] | undefined) => handled as EffectuatedWiseOperation [])
-                .reduce((allOps: EffectuatedWiseOperation [], nextOps: EffectuatedWiseOperation []) => allOps.concat(nextOps), [])
-                .filter((effSop: EffectuatedWiseOperation) => delegatorFilter ? effSop.delegator === delegatorFilter : true);
-        }
-        else return [];
+                .filter((handledOrRejected: EffectuatedWiseOperation[] | undefined) => !!handledOrRejected)
+                .map((handled: EffectuatedWiseOperation[] | undefined) => handled as EffectuatedWiseOperation[])
+                .reduce(
+                    (allOps: EffectuatedWiseOperation[], nextOps: EffectuatedWiseOperation[]) => allOps.concat(nextOps),
+                    []
+                )
+                .filter((effSop: EffectuatedWiseOperation) =>
+                    delegatorFilter ? effSop.delegator === delegatorFilter : true
+                );
+        } else return [];
     }
 
-    public async getWiseOperationsRelatedToDelegatorInBlock(delegator: string, blockNum: number): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperationsRelatedToDelegatorInBlock(
+        delegator: string,
+        blockNum: number
+    ): Promise<EffectuatedWiseOperation[]> {
         return this.getAllWiseOperationsInBlock(blockNum, delegator);
     }
 
@@ -207,19 +247,21 @@ export class FakeApi extends Api {
         else return result[0];
     }
 
-    public async getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation []> {
+    public async getWiseOperations(username: string, until: Date): Promise<EffectuatedWiseOperation[]> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
-        const result: EffectuatedWiseOperation [] = [];
+        const result: EffectuatedWiseOperation[] = [];
         for (let i = 0; i < this.transactions.length; i++) {
             const op = this.transactions[i];
             const handleResult = this.protocol.handleOrReject(op);
             if (handleResult) {
                 for (let j = 0; j < handleResult.length; j++) {
                     const effSo = handleResult[j];
-                    if ((effSo.delegator === username && ConfirmVote.isConfirmVote(effSo.command))
-                        || (effSo.voter === username)) {
-                        // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.log().cheapDebug(() => JSON.stringify(effSo));
+                    if (
+                        (effSo.delegator === username && ConfirmVote.isConfirmVote(effSo.command)) ||
+                        effSo.voter === username
+                    ) {
+                        // if (isConfirmVote(effSo.command) && effSo.command.accepted && !isConfirmVoteBoundWithVote(effSo.command)) Log.log().debugGen(() => [JSON.stringify(effSo)]);
                         // (up) fake blockchain does not provide
                         // information on who pushed the operation to blockchain,
                         // so this hacky way is the only way to get this information.
@@ -234,20 +276,19 @@ export class FakeApi extends Api {
         return result;
     }
 
-    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry []> {
+    public async getBlogEntries(username: string, startFrom: number, limit: number): Promise<steem.BlogEntry[]> {
         await BluebirdPromise.delay(this.fakeDelayMs);
 
-        const result: steem.BlogEntry [] = [];
+        const result: steem.BlogEntry[] = [];
         let userI = 0;
         for (let i = 0; i < this.blogEntries.length; i++) {
             const entry = this.blogEntries[i];
             if (entry.blog == username) {
-                if (userI >= startFrom && userI < startFrom + limit)
-                    result.push(entry);
+                if (userI >= startFrom && userI < startFrom + limit) result.push(entry);
                 userI++;
             }
         }
-            return result;
+        return result;
     }
 
     public getCurrentBlockNum(): number {
@@ -262,7 +303,7 @@ export class FakeApi extends Api {
     /**
      * Returns all operations that were pushed using #sentToBlockchain() after initialization of FakeApi.
      */
-    public getPushedTransactions(): UnifiedSteemTransaction [] {
+    public getPushedTransactions(): UnifiedSteemTransaction[] {
         return this.pushedOperations;
     }
 
@@ -277,10 +318,10 @@ export class FakeApi extends Api {
 
 export namespace FakeApi {
     export interface Dataset {
-        posts: steem.SteemPost [];
+        posts: steem.SteemPost[];
         dynamicGlobalProperties: steem.DynamicGlobalProperties;
-        accounts: steem.AccountInfo [];
-        transactions: UnifiedSteemTransaction [];
-        blogEntries: steem.BlogEntry [];
+        accounts: steem.AccountInfo[];
+        transactions: UnifiedSteemTransaction[];
+        blogEntries: steem.BlogEntry[];
     }
 }
