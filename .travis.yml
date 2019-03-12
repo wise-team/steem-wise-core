@@ -1,0 +1,19 @@
+dist: xenial
+language: node_js
+
+install:
+  - npm ci
+
+script:
+  - npm run build
+  - npm run test
+  - echo "sleep random number of seconds 1-10 to prevent blockchain collisions" && sleep "$(( ( RANDOM % 10 )  + 1 ))"
+  - npm run verify
+
+deploy:
+  - provider: script
+    script: npx semantic-release
+    skip_cleanup: true
+    on:
+      tags: false
+      all_branches: true
