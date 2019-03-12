@@ -16,7 +16,7 @@
     "lodash": "^4.17.11",
     "ow": "^0.10.0",
     "steem": "^0.7.2",
-    "steem-efficient-stream": "^0.2.1",
+    "steem-efficient-stream": "^1.0.0",
     "universe-log": "^1.3.0"
   },
   "devDependencies": {
