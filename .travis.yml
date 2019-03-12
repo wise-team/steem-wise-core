@@ -7,7 +7,8 @@ install:
 script:
   - npm run build
   - npm run test
-  - echo "sleep random number of seconds 1-10 to prevent blockchain collisions" && sleep "$(( ( RANDOM % 10 )  + 1 ))"
+  - echo "sleep random number of seconds 1-10 to prevent blockchain collisions" && sleep
+    "$(( ( RANDOM % 10 )  + 1 ))"
   - npm run verify
 
 deploy:
@@ -15,5 +16,10 @@ deploy:
     script: npx semantic-release
     skip_cleanup: true
     on:
-      tags: false
-      all_branches: true
+        tags: false
+        all_branches: true
+
+env:
+  global:
+      - secure: cHSzVCT9HZPkzNm7eonG+v3Cp9Cg1IwErMlcwxi95n5ESY2ZuS2gFex2x60SMG1bm7L4bqLt1zfVHMeMWbhzqcoaHf4ae1s5OciQQujNz7H6bGbZ5nUzfnd0GGxvkCyANZEvXWoWQOyRP/6QWiE4J+XfW2Y1JDJOAFavlzcDlBKyhudk1wHe8RHaPyDcjQEiRK/MOGz+ArwMWKrPXKCmgh8sSrkUYkjauuexcgMzDCqjFxNrTzHAuaH30x/pXqR0jq075FjMpgO8MezVnKUDp9PAD72zWnV71N/wUQrwe3wknZCPBdTAFC6kV+/wqvDeH0C16u9z4UqzhPCDx3oyBFskz2WiSJNsOfq2eybKEYlbsWHClztuVnygO+1hUFjWGVUIzmy9NJDUoSVt0vvZje18D3dqwKnPmcZH/6Nu+CKo9S+cYOy7DCteabvGV3VCdJOxwYCvvlOR3z5bAfFu7/ybvReIT1U1ylkFVxOCvqfQOZ4W/MkQ5C4qlrlQ+Ns6zZ2anhT2ofLKWY4Ol0940xHRk/MAZBh7mmysMb5G9VHmetE89dV6YKiWktu16JmCtRKQG6r7NjlHSOeQ1Spf6BeroAh3KOt4BDiUiFONT7EL4H1nWB06eWl89+zkePsxsTd2QMfRIA8JPq+DMOjxAy+AXTfjklnVPoAtg5W6OQA=
+      - secure: TkeUmZagEGiCSFhB/biwstz8vtZKsjfPHEeIDTD0lybMatl3wXzvVxE/2CAHg9lcSfsB68DX/1U65VFzBlaZGgaGzl+053/EXM4rOnxErT2tZPrIGsrSxzSV6zg4QN7uEqGRMWT3VwL9Oik/0EH3o8ckDWK6FzaPNLxvU73TU59UdEzMXtslkhv3N5xmOaTl/E3YG5ceK4SbTIbTVzlxppePhr7iJPWuIyDIsvVVaIvu3qwOKD5/4d/kFapU5Noj+BkEbUBK3fWjrtQ2a5CL/9jlqYc4xhyZtXYHrKNqF6OQNWqLwBzztiq3Zc6d1V8tTfu+2FrJikfF+ClgP3LMlCiIVMQKsUCkNMRfmcO2sgGt2MH8LWiZ27nFPmGDDs3e5u77Krygg9X0MQFx2o5Y7+8T+7fnPv4FlaYyZJgSWrrsTn0ULMU5azPQ0D7CmFVzYz0zcBx0B0ueQzDC31DGS4RXgZ5aotK3iwOxO/cpYcNkfpURAcDltf/DlKuL5wSuz5FDp/307Gzu5iS3RvxZ/RYavUmwiOtH8vVUVfEFM0aG+2S42Q/gj4mOpouFH3AlBf88idSSD/mJzLpN1EvRUA4puH/uKqCdEVdlxENZ5gQkTyk7hhA79l7zAihc/se/wiMlrXzcnht1VveVcmsVcbwWM55l4zibJ/T4tngoj6E=
