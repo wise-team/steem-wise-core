@@ -1,6 +1,5 @@
 dist: xenial
 language: node_js
-# node_js: # node version is specified in .nvmrc
 
 install:
   - npm ci
@@ -8,18 +7,13 @@ install:
 script:
   - npm run build
   - npm run test
+  - echo "sleep random number of seconds 1-10 to prevent blockchain collisions" && sleep "$(( ( RANDOM % 10 )  + 1 ))"
   - npm run verify
 
-jobs:
-    include:
-        - stage: compile
-          if: type = push AND commit_message !~ /(-skipci)/
-          script: ./scripts/travis-release.sh
-        - stage: compile
-          if: type = pull_request
-          script:
-              - npm install
-              - npm run test
-              - npm run verify
-
-script:
+deploy:
+  - provider: script
+    script: npx semantic-release
+    skip_cleanup: true
+    on:
+      tags: false
+      all_branches: true
