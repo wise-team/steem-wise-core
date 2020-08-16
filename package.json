@@ -13,7 +13,7 @@
     "ajv": "^6.5.4",
     "axios": "^0.18.0",
     "bluebird": "^3.5.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.20",
     "ow": "^0.10.0",
     "steem": "^0.7.2",
     "steem-efficient-stream": "^0.2.1",
