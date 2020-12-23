@@ -11,7 +11,7 @@
   "dependencies": {
     "@types/steem-js-alpha": "https://github.com/wise-team/types-for-steem-js/raw/master/bin/types-steem-js-alpha-3.1.2.tgz",
     "ajv": "^6.5.4",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bluebird": "^3.5.2",
     "lodash": "^4.17.11",
     "ow": "^0.10.0",
